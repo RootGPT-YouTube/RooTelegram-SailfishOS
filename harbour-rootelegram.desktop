@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=generic
+Icon=harbour-rootelegram
+Exec=harbour-rootelegram
+Name=RooTelegram
+X-Share-Methods=rootelegram_share;
+
+[X-Share Method rootelegram_share]
+Description=Send to RooTelegram...
+Description[it]=Invia a RooTelegram...
+Capabilities=*
+SupportsMultipleFiles=yes
+
+[X-Sailjail]
+Permissions=Audio;Contacts;Documents;Downloads;Internet;Location;MediaIndexing;Microphone;Music;Pictures;Privileged;PublicDir;RemovableMedia;UserDirs;Videos
+OrganizationName=com.github.RootGPT_YouTube
+ApplicationName=rootelegram
+ExecDBus=harbour-rootelegram --daemon

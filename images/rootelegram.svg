@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <!-- Sfondo: gradiente radiale scuro, quasi nero con centro blu notte -->
+    <radialGradient id="bg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%"   stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#020810"/>
+    </radialGradient>
+
+    <!-- Alone esterno del cerchio: glow ciano -->
+    <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="75%"  stop-color="#00e5ff" stop-opacity="0"/>
+      <stop offset="90%"  stop-color="#00e5ff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Gradiente corpo aereo: ciano elettrico → bianco freddo -->
+    <linearGradient id="planeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#e0faff"/>
+      <stop offset="40%"  stop-color="#7de8ff"/>
+      <stop offset="100%" stop-color="#00b4d8"/>
+    </linearGradient>
+
+    <!-- Gradiente ombra sotto l'aereo -->
+    <linearGradient id="shadowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#003d59" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#003d59" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Glow filtro per linee circuito -->
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Glow forte per il piano -->
+    <filter id="planeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Maschera cerchio per clip -->
+    <clipPath id="circleClip">
+      <circle cx="128" cy="128" r="118"/>
+    </clipPath>
+  </defs>
+
+  <!-- ── Sfondo cerchio principale ── -->
+  <circle cx="128" cy="128" r="122" fill="url(#bg)"/>
+
+  <!-- ── Alone glow esterno ── -->
+  <circle cx="128" cy="128" r="125" fill="url(#ringGlow)"/>
+
+  <!-- ── Bordo cerchio: doppio anello ciano con effetto energia ── -->
+  <circle cx="128" cy="128" r="118"
+          fill="none" stroke="#00e5ff" stroke-width="1.2" opacity="0.9"
+          filter="url(#neonGlow)"/>
+  <circle cx="128" cy="128" r="121"
+          fill="none" stroke="#00b4d8" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- ── Circuiti di sfondo (dentro il cerchio) ── -->
+  <g clip-path="url(#circleClip)" opacity="0.22" filter="url(#neonGlow)" stroke="#00e5ff" stroke-width="0.8" fill="none">
+    <!-- Orizzontali -->
+    <line x1="20"  y1="80"  x2="236" y2="80"/>
+    <line x1="20"  y1="176" x2="236" y2="176"/>
+    <!-- Verticali -->
+    <line x1="80"  y1="20"  x2="80"  y2="236"/>
+    <line x1="176" y1="20"  x2="176" y2="236"/>
+    <!-- Angolari tratteggiati (effetto hex-grid) -->
+    <line x1="20"  y1="128" x2="128" y2="20"  stroke-dasharray="4,6"/>
+    <line x1="128" y1="236" x2="236" y2="128" stroke-dasharray="4,6"/>
+    <!-- Piccoli nodi alle intersezioni -->
+    <circle cx="80"  cy="80"  r="3" fill="#00e5ff"/>
+    <circle cx="176" cy="80"  r="3" fill="#00e5ff"/>
+    <circle cx="80"  cy="176" r="3" fill="#00e5ff"/>
+    <circle cx="176" cy="176" r="3" fill="#00e5ff"/>
+    <circle cx="128" cy="80"  r="2" fill="#00b4d8"/>
+    <circle cx="128" cy="176" r="2" fill="#00b4d8"/>
+    <circle cx="80"  cy="128" r="2" fill="#00b4d8"/>
+    <circle cx="176" cy="128" r="2" fill="#00b4d8"/>
+  </g>
+
+  <!-- ── Scanner line olografica (striscia luminosa centrale) ── -->
+  <rect x="10" y="122" width="236" height="12" rx="1"
+        fill="url(#shadowGrad)" clip-path="url(#circleClip)" opacity="0.35"/>
+
+  <!-- ── Aereo (forma Telegram, scalato e centrato) ── -->
+  <!--
+    Forma originale Telegram: triangolo con rientranza nella coda.
+    Rotazione -30° per dare dinamismo. Centro 128,128.
+  -->
+  <g transform="translate(128,128) rotate(-30) translate(-128,-128)"
+     filter="url(#planeGlow)">
+
+    <!-- Ombra morbida sotto -->
+    <polygon
+      points="52,148  178,88  155,170  122,150"
+      fill="#001a2e" opacity="0.5"
+      transform="translate(4,6)"/>
+
+    <!-- Corpo principale: aeroplanino Telegram -->
+    <polygon
+      points="52,148  178,88  155,170  122,150"
+      fill="url(#planeGrad)"/>
+
+    <!-- Ala inferiore / coda tagliata (rientranza Telegram) -->
+    <polygon
+      points="122,150  134,175  155,170"
+      fill="#005f8a"/>
+
+    <!-- Linea di bordo superiore luminosa -->
+    <polyline
+      points="52,148  178,88  155,170"
+      fill="none" stroke="#e0faff" stroke-width="1.5" stroke-linejoin="round" opacity="0.8"/>
+
+    <!-- Riflesso olografico sull'ala -->
+    <polygon
+      points="90,140  155,105  148,148"
+      fill="white" opacity="0.12"/>
+
+    <!-- Punto brillante all'apice di coda -->
+    <circle cx="134" cy="175" r="3.5" fill="#7de8ff" opacity="0.9"/>
+    <circle cx="134" cy="175" r="1.5" fill="white"/>
+  </g>
+
+  <!-- ── Pixel/spark decorativi angolo basso-destra ── -->
+  <g filter="url(#neonGlow)" opacity="0.7">
+    <rect x="185" y="175" width="4" height="4" rx="0.5" fill="#00e5ff"/>
+    <rect x="193" y="168" width="3" height="3" rx="0.5" fill="#00b4d8"/>
+    <rect x="190" y="180" width="2" height="2" rx="0.5" fill="#7de8ff"/>
+    <rect x="178" y="183" width="3" height="3" rx="0.5" fill="#00e5ff"/>
+  </g>
+
+  <!-- ── Spark angolo alto-sinistra ── -->
+  <g filter="url(#neonGlow)" opacity="0.5">
+    <rect x="66"  y="68"  width="3" height="3" rx="0.5" fill="#00e5ff"/>
+    <rect x="72"  y="62"  width="2" height="2" rx="0.5" fill="#7de8ff"/>
+    <rect x="60"  y="74"  width="2" height="2" rx="0.5" fill="#00b4d8"/>
+  </g>
+
+  <!-- ── Arco energia in basso (accent viola→ciano) ── -->
+  <path d="M 58,195 Q 128,228 198,195"
+        fill="none" stroke="#5e35b1" stroke-width="1.5" opacity="0.5"
+        filter="url(#neonGlow)"/>
+  <path d="M 72,202 Q 128,230 184,202"
+        fill="none" stroke="#00e5ff" stroke-width="0.8" opacity="0.35"/>
+
+  <!-- ── Bordo finale: micro-dash tratteggiato futuristico ── -->
+  <circle cx="128" cy="128" r="115"
+          fill="none" stroke="#00e5ff" stroke-width="0.6"
+          stroke-dasharray="3,18" opacity="0.3"/>
+</svg>

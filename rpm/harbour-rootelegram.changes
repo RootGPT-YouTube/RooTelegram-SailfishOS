@@ -1,0 +1,352 @@
+# Rename this file as harbour-rootelegram.changes to include changelog
+# entries in your RPM file.
+#
+# Add new changelog entries following the format below.
+# Add newest entries to the top of the list.
+# Separate entries from eachother with a blank line.
+#
+# Alternatively, if your changelog is automatically generated (e.g. with
+# the git-change-log command provided with Sailfish OS SDK), create a
+# harbour-rootelegram.changes.run script to let mb2 run the required commands for you.
+
+# * date Author's Name <author's email> version-release
+# - Summary of changes
+* Mon May 18 2026 RootGPT <tutorialxinformatici@gmail.com> 1.7
+- Jolla Harbour Store intake compliance: `License:` corretta da `LICENSE` a `GPL-3.0` (era una stringa segnaposto non valida); rimosso `nemo-qml-plugin-contacts-qt5` da `Requires:` (non nella whitelist Harbour); `URL:` del pacchetto cambiata da `http://werkwolf.eu/` (dominio dell'autore di Fernschreiber) a `https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS`.
+- Tutti gli SVG asset in `qml/js/emoji/` ora installati con permessi 644 invece di 755: `chmod 644` aggiunto in `%install post` dello spec. Harbour vietava i file dati eseguibili.
+- Scriptlet RPM `%pre` e `%preun` con `pkill -9 -f /usr/bin/harbour-rootelegram` ora effettivamente inclusi nell'RPM finale (in 1.6 il yaml non li dichiarava e spectacle rigenerava lo spec senza). Aggiunti come campi `PreInstall:` / `PreUnInstall:` nel `harbour-rootelegram.yaml`.
+
+* Sun May 17 2026 RootGPT <tutorialxinformatici@gmail.com> 1.6
+- Fix richieste di accesso al gruppo: dopo "Nega", la riga sparisce dalla lista e il banner nella ChatPage si aggiorna correttamente (prima rimaneva visibile perché TDLib non emette updateChatPendingJoinRequests sui reject — ora il wrapper C++ aggiorna la cache locale e rilancia il segnale).
+- Pin/Unpin disponibile anche nelle chat private: al pin un dialog "Fissa per entrambi / Solo io" (only_for_self di TDLib). Nei gruppi/canali il pin resta per tutti come prima.
+- Traduzioni: voci "Fissa messaggio" / "Rimuovi fissaggio" (IT), "Pin Message" / "Unpin Message" (EN). "Messaggio fissato" sostituisce "Messaggio in evidenza".
+- Nuovo dialog "Promuovi ad Admin": permette di scegliere il custom title (max 16 caratteri) e i singoli privilegi (manage chat, change info, delete messages, ban users, invite users, pin, manage topics, manage video chats, add new admins, anonymous; per i canali anche post/edit messages e stories). Default conservati uguali a prima.
+- Aggiunta voce "Rimuovi Admin" nel menu contestuale dei membri admin: visibile solo al Creator del gruppo, riporta l'utente a membro normale (chatMemberStatusMember).
+- Etichetta "Admin" sempre con la A maiuscola nei menu e nelle notifiche relative a promozione/demozione.
+- Versione dell'app ora single source: si bumpa solo `VERSION = X.Y` in `harbour-rootelegram.pro`; AboutPage la legge dal context property `appVersion` (esposto via `APP_VERSION` da main.cpp), e `build-rpm.sh` sincronizza automaticamente `rpm/*.spec` e `rpm/*.yaml`.
+- Impostazioni → Privacy: rinominata la voce "Allow chat invites" in "Consenti di aggiungermi a gruppi e canali" (EN: "Allow adding me to groups and channels"), con descrizione coerente.
+- Menu principale snellito: rimosse le voci "Ricerca Chat" (già accessibile dall'icona lente in basso a sinistra) e "Informazioni su RooTelegram"; "Nuova Chat" ora è nella stessa sezione di "Nuovo Gruppo" e "Nuovo Canale" senza separatore.
+- "About RooTelegram" spostato in Impostazioni come ultima scheda accordion sotto "Memoria"; etichetta non tradotta (rimane "About RooTelegram" in tutte le lingue). La AboutPage resta accessibile dalla pagina di login.
+- Sticker/custom emoji: fix classificazione errata. `getInstalledStickerSets` ora passa esplicitamente `sticker_type: stickerTypeRegular` (richiesto da TDLib 1.8.62) e tagga la request via @extra ("stickerType:Regular" / ":CustomEmoji"). Il StickerManager ricostruisce SOLO la lista del tipo ricevuto, evitando che le custom emoji finiscano nella sezione sticker o viceversa.
+- Sticker: fix crash al "Elimina set di sticker". `changeStickerSet` ora propaga il `sticker_type` nell'@extra ("removeStickerSet:<Type>:<setId>"), il picker rifetcha la lista giusta (regular o custom emoji), e l'aggiornamento del model è debounced di 80ms in un Timer per evitare race con il dismiss del Remorse sul delegate appena rimosso. Le custom emoji vengono ora pre-caricate dall'avvio in OverviewPage.
+- Custom emoji: rimosso il limite di prefetch a 4 set in `handleStickerSets` (causava la sezione "Emoji pro" parziale con solo i primi 4 set). Ora il wrapper fetcha i dettagli di TUTTI i set custom emoji nella risposta filtrata. Cleanup cross-list aggiunto in `StickerManager::handleStickerSetsReceived`: gli ID nel response sono autoritativi del tipo richiesto, quindi vengono rimossi dall'altra lista (e dall'altra mappa) per ripulire eventuali mis-classificazioni storiche.
+- Fork isolation: `application_version` passata a TDLib ora è "RooTelegram 1.6" invece della stringa ereditata "0.17" (identica a Fernschreiber): sessione lato Telegram server distinta, niente più rischio di confusione fra i due client.
+- Fork isolation: `removeRecursively()` al logout limitato alla sola sotto-cartella `tdlib/` invece di nukare l'intera AppDataLocation di RooTelegram. Niente più cancellazione di settings/cache propri al logout.
+- Fork isolation: `initializeOpenWith()` non rimuove più `sailfish-browser.desktop` né `open-url.desktop` da `~/.local/share/applications/`: erano file di sistema/altre app, non di RooTelegram. La feature OpenWith continua a registrare solo il proprio `harbour-rootelegram-open-url.desktop` e il proprio D-Bus service `com.github.RootGPT_YouTube.rootelegram`.
+- Sticker/custom emoji: classificazione Regular/CustomEmoji riscritta con priorità autoritativa al tipo della request TDLib (filtrata server-side), fallback a `sticker_type` del set, poi ispezione di `stickers/covers`, infine cache. Rescue cross-list su ogni risposta: i set scivolati per errore nella lista sbagliata vengono ora recuperati automaticamente alla prima refresh. `updateInstalledStickerSets` senza `sticker_type` non sovrascrive più la lista regular (caso TDLib legacy/non tipizzato).
+- RPM scriptlet: nuovi `%pre` e `%preun` che killano via `pkill -9 -f /usr/bin/harbour-rootelegram` ogni processo RooTelegram prima dell'upgrade o della rimozione. Risolve il caso in cui il daemon in esecuzione manteneva aperti i file `td.binlog` / `db.sqlite` anche dopo `pkcon remove` (POSIX deleted-but-open).
+- Upgrade dalla 1.0: la 1.0 salvava i dati TDLib in `~/.local/share/de.ygriega/rootelegram/` (organizationName `de.ygriega`, ereditato da Fernschreiber). Dalla 1.6 il path è `~/.local/share/com.github.RootGPT_YouTube/rootelegram/` (organization propria). L'upgrade non migra automaticamente la sessione: dopo l'aggiornamento da 1.0 → 1.6 l'utente deve rifare login (numero + codice). I dati legacy in `de.ygriega/rootelegram/` restano sul filesystem, possono essere rimossi manualmente.
+
+* Fri May 15 2026 RootGPT <tutorialxinformatici@gmail.com> 1.5
+- GIF (messageAnimation) ora rese come gli sticker animati: autoplay in loop infinito, nessun chrome (niente play/fullscreen/slider/timer), tap mette in pausa/riprende. Nuovo componente MessageAnimation.qml standalone (prima era un alias di MessageVideo che ereditava tutti i controlli video). Loop gestito nativamente da MediaPlayer.loops=Infinite (no seek+play, niente scatto fra fine e riavvio). Placeholder via TDLibThumbnail per gestire correttamente i thumbnail thumbnailFormatMpeg4 (frequenti per le animation, causavano "Unsupported image format" su QML Image).
+- Nuova voce di context menu "Elimina album" sui messaggi che fanno parte di un album multimediale (media_album_id != "0"): cancella in un colpo solo tutti i messaggi dello stesso album invece di doverli selezionare uno per uno. La voce "Cancella messaggio" rimane invariata e cancella solo il singolo messaggio.
+
+* Fri May 15 2026 RootGPT <tutorialxinformatici@gmail.com> 1.4
+- Fix apertura chat dalle notifiche quando l'utente è in una cartella diversa da "Tutte" o riceve notifiche di gruppi/canali non presenti nella cartella attiva: ChatListModel::getById ora cerca anche tra le chat filtrate dalla cartella (folderFilteredChats) e tra le hiddenChats invece di restituire una mappa vuota; OverviewPage.openChat fa fallback su tdLibWrapper.getChat() se la chat non è ancora nel modello. Risolve TypeError "@type of undefined" in ChatPage.qml, errore TDLib "Can't parse as an integer string \"\"" e freeze su chat aperte da notifica.
+
+* Wed May 13 2026 RootGPT <tutorialxinformatici@gmail.com> 1.3
+- Aggiunta ricerca contatti nella pagina di inoltro (ChatSelectionPage).
+- Fix overflow del testo nei messaggi: monospace/code ora va a capo (WrapAtWordBoundaryOrAnywhere).
+- Fix overflow nelle risposte citate (in-reply): width esplicita al Loader, clip attivo, elide corretto con StyledText.
+- Fix sovrapposizione del nome del topic con il nome del gruppo nell'header della ChatPage.
+- Bubble dei messaggi spostati verso i bordi (3px) per maggiore spazio utile.
+- Rinominato l'application ID D-Bus/settings da `de.ygriega` a `com.github.RootGPT_YouTube` (autore del fork).
+- Pre-install %pre scriptlet: durante l'upgrade da RooTelegram 1.0–1.2, ferma eventuali processi RooTelegram e cancella tutte le directory di stato (config, data, cache) sia legacy `de.ygriega` sia attuali `com.github.RootGPT_YouTube`, oltre ai file .service D-Bus residui. L'app riparte come fresh-install, l'utente deve rifare il login Telegram (OTP) — per design, garantisce uno stato pulito e consistente al primo avvio della nuova versione.
+- Post-install %posttrans scriptlet: riavvia automaticamente `lipstick` (Sailfish Home) nella sessione utente per invalidare la cache in-memory del launcher che altrimenti continuerebbe a chiamare il vecchio bus name `de.ygriega.rootelegram` al tap dell'icona. Reload Home di 1-2 secondi, nessuna perdita di applicazioni in background.
+
+* Wed May 06 2026 RootGPT <rootgpt@local> 0.17.1
+- Fix: Restore chat page delegate loading by importing WerkWolf.RooTelegram 1.0 in MessageListViewItem.qml, resolving "NamedAction is not a type" and "MessageListViewItem unavailable" runtime errors.
+
+* Sun Dec 03 2023 Sebastian J. Wolf <sebastian@ygriega.de> 0.17
+- Update to TDLib 1.8.21, expect some hiccups ;)
+- Added contacts sync (OpenRepos builds only)
+- Tweaks to reaction handling (opens now on double click or click + star)
+- Option to jump to quoted message
+- Option to highlight unread conversations
+- Option to suppress notification previews
+- Option to append last message content to notifications
+- Added "unread mention" indicator to chat list
+- Improve message when search yields no results
+- New unread info for chats with high amount of unread messages
+- Setting for session inactivity timeout
+- UI improvements in landscape mode
+- Fix: Restore video functionality on SFOS 4.5
+- Fix: Chat list timestamp now updated more reliably
+- Fix: Faster reconnect after network changes
+- Fix: Some URLs couldn't be opened
+- Updated translations for several languages
+- Thanks to monich, nephros, arustg, jgibbon, carlosgonz0, okruhliak, dscheinah, pherjung and mbarashkov for your contributions
+
+* Sun Jun 12 2022 Sebastian J. Wolf <sebastian@ygriega.de> 0.16
+- Support message reactions
+- Support t.me/+... links
+- Update to TDLib 1.8.3 - let's see if everything still works ;)
+- Fix: Much stricter chat list handling, should avoid ghost chats
+- Fix: Add RemovableMedia permission to allow uploads from SD card again
+- Fix: Context menu in settings/sessions should now always stay in screen area, thanks to monich
+
+* Wed Apr 27 2022 Sebastian J. Wolf <sebastian@ygriega.de> 0.15
+- Use geo: URL handler to open locations (direct call to Pure Maps is no longer working on SFOS 4.4)
+- Use generic file handler to open downloaded files (xdg-open is no longer working on SFOS 4.4)
+- Fix: Race condition on initial login caused malfunction of chats and settings page
+- Fix: Bring notifications back to lock screen of SFOS 4.4
+
+* Sun Apr 24 2022 Sebastian J. Wolf <sebastian@ygriega.de> 0.14
+- Adjustments to SFOS 4.4: Setup application profile, migrate configuration, fix notification sound (bug #486)
+- Support for Emoji 14.0
+- Support striked-through text - thanks to monich
+- Fix: Clean up correctly after creating voice notes (bug #481)
+- Fix: Mark sponsored messages as read correctly - thanks to monich
+- Updated translations for French, Slovak, Spanish - thanks to pherjung, okruhliak, carlosgonz0
+
+* Thu Jan 13 2022 Sebastian J. Wolf <sebastian@ygriega.de> 0.13
+- Update to TDLib 1.8 - let's see if everything still works ;)
+- Fix: Forward message to channels - thanks to monich
+- Fix: Message reference issues in repplies - thanks to monich
+- Fix: Don't load message with zero IDs - thanks to monich
+- Fix: Avoid repeated sticker set loading
+- Updated translations for French, Polish, Russian, Swedish - thanks to all contributors
+
+* Sun Dec 19 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.12
+- Add option to delete private chat
+- Improve chat search performance - thanks to monich
+- Improve message forwarding - thanks to monich
+- Handle external links better for individual messages
+- Full support for sponsored messages (yes, that's required before January 1, 2022)
+- Move session and logout options from about to settings page - thanks to nephros
+- Remove short texts for stickers and animated emojis - thanks to monich
+- Fix: Display chat members correctly again after TDLib update
+- Fix: Long tap on reply-to headers finally opens context menu - thanks to monich
+- Fix: Apply "show stickers as images" setting to animated emojis - thanks to monich
+- Fix: Don't save draft for chats with deleted users
+- Fix: Hide appearance settings that are not applicable - thanks to monich
+- Fix: Less memory consumption for stickers after TDLib upgrade - thanks to monich
+- Updated translations for Polish, Spanish, Swedish - thanks to atlochowski, carlosgonz0, eson57
+
+* Sun Dec 05 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.11
+- Update to TDLib 1.7.9 - bring RooTelegram back to life
+- Support for animated emoji
+- Preliminary support for sponsored messages - mandatory after January 1, 2022
+- Use larger font for settings section headers - thanks to monich
+- Hide "Extra options..." context menu item if it's not needed - thanks to monich
+- Updated translation for Spanish - thanks to carlosgonz0
+
+* Tue Nov 09 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.10.1
+- Fix: Startup wasn't possible on fresh SFOS installation (thanks to Jolla Harbour QA!)
+- Fix: New open-with handling created duplicate browser shortcuts
+- Open-with support on SFOS 4.2 is (again) a workaround. SFOS 4.3 seems to behave much better...
+- Updated translations for Polish - thanks to atlochowski
+
+* Sun Nov 07 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.10
+- Support for SFOS 4.3 on armv7hl and i486
+- New settings accordion - thanks to jgibbon and monich
+- Fix open-with issues with browser and RooTelegram on SFOS 4.2 and later
+- Fix: No 'Recently used' section if there are no stickers
+- Use generic app booster, fixes some crashes related to animated stickers - thanks to monich
+- New translation to French - thanks to pherjung and nbourdais
+- Updated translations for Polish, Russian, Slovak, Swedish - thanks to all contributors
+
+* Sun May 30 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.9
+- Enhanced information for location attachments (accuracy, nearest location as plain text using OSM Nominatim)
+- Sticker picker performance optimizations - thanks to jgibbon
+- Updated rlottie library (for animated stickers)
+- Add option to focus text input when entering a chat - thanks to santoshmanikandan
+- Add option to display stickers as emojis
+- Fix: Correct message sent/read indicator after messages were sent, see https://github.com/Wunderfitz/harbour-rootelegram/issues/407
+- Fix: Disable auto-scroll when app is in background, see https://github.com/Wunderfitz/harbour-rootelegram/issues/410
+- Fix: Adjust scroll position when keyboard is hidden, see https://github.com/Wunderfitz/harbour-rootelegram/issues/418
+- Fix: Chat of recently joined contact now shows up properly
+- Fix: Opening RooTelegram from a notification should no longer result in an error message, see https://github.com/Wunderfitz/harbour-rootelegram/issues/412
+- Fix: Improve handling for additional options drawer - thanks to monich
+- Fix: Avoid newline in text input when using send by enter - thanks to santoshmanikandan
+
+
+* Tue Mar 02 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.8.2
+- Prepare aarch64 build
+- Updated Polish translation - thanks to atlochowski
+
+* Mon Mar 01 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.8.1
+- Fix: Show active sessions button only when authenticated - thanks to monich
+- Fix: Show newly registered contact as simple message
+- Updated translations for Finnish, Polish, Russian, Spanish - thanks to all contributors
+
+* Mon Feb 22 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.8
+- Tap on a sticker to show overlay with the corresponding sticker set
+- Sticker set overlay allows to uninstall it
+- Redesign sticker picker, improve loading time
+- Additional context menu to prevent the normal one from becoming too big, see https://github.com/Wunderfitz/harbour-rootelegram/issues/216
+- Manage all Telegram sessions for current user (see About -> Active Sessions)
+- Forward message now directly available in (additional) context menu
+- Use different background colors for muted chats - thanks to monich
+- Enable storage optimizer per default
+- [SFOS 4] Disable contacts sync as no longer possible, see https://forum.sailfishos.org/t/4-0-1-45-non-jailed-contacts-sqlite-database-no-longer-updated/4724
+- Fix: Found private chats no longer appear automatically in the chat list
+- Fix: Stickers can now be sent as replies
+- Fix: Message sticker highlight and click behavior now aligned with other message types - thanks to monich
+- Fix: Don't auto-scroll if context menu is opened, see https://github.com/Wunderfitz/harbour-rootelegram/issues/139
+- Fix: Deleted in-reply-to messages are now shown with a placeholder, see https://github.com/Wunderfitz/harbour-rootelegram/issues/374
+- Fix: Sort text replacements better to avoid overlaps in case of special characters, see https://github.com/Wunderfitz/harbour-rootelegram/issues/334
+- Fix: Trigger mark-as-read (almost) immediately after opening chat (plus configurable delay)
+- Fix: [SFOS 4] Documents app can no longer access all directories, always download before calling it
+- Fix: [SFOS 4] Forwarding a message no longer causes the page stack to become invalid (navigating back was no longer working)
+- Several translations updated - thanks to all contributors
+
+* Fri Feb 5 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.7
+- Massively extended bot support - thanks to jgibbon
+- Option to change first name, last name, username
+- Add and delete profile pictures
+- Set personal privacy options
+- Pin/unpin chat
+- Option for online-only mode
+- Option to logout - thanks to santoshmanikandan
+- Option to override notification sound settings - thanks to monich
+- Option to disable delay for marking messages as read
+- Show channel members if authorized - thanks to monich
+- New UX for audios, voice notes and documents - thanks to jgibbon
+- Updated RooTelegram logo - thanks to monich
+- Better loading/preview image - thanks to jgibbon
+- New pinned chat icon - thanks to jgibbon
+- Add explanations to quiz - thanks to jgibbon
+- Real estate optimizations for chat list - thanks to jgibbon
+- Nice landscape layout for settings page - thanks to monich
+- Full width for channel messages - thanks to jgibbon
+- Architecture changes and improvements to message type handling - thanks to jgibbon
+- Update channel message count in real time - thanks to monich
+- Fix: Get sound back for notifications
+- Fix: Chat muted icon always visible in list
+- Fix: Mark older messages as read once a reply has been sent
+- Fix: No longer display own messages as unread
+- Fix: Initial scroll position now normally on the first unread message
+- Fix: Improve sent/read indicator handling
+- Fix: Don't let context menu be wider than its combo box - thanks to monich
+- Fix: Images couldn't be clicked at the complete width - thanks to jgibbon
+- Fix: Don't retry downloading files too often - thanks to monich
+- A lot more fixes - thanks to monich and jgibbon
+- New Slovak translation - thanks to okruhliak
+- Several translations updated - thanks to all contributors
+
+* Wed Jan 6 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.6.1
+- Show indicator for pinned chats
+- Use highlightBackgroundColor and align size for all chat attributes (unread messages, secret chat, pinned chat)
+- Fix: Chat list order of sequence was wrong in some circumstances
+- Fix: Make video (fullscreen) page work again
+- Fix: Add build requirements for Qt Multimedia and Qt Positioning
+- Updated translations for Finnish and Swedish - thanks to jorm1s and eson57
+
+* Tue Jan 5 2021 Sebastian J. Wolf <sebastian@ygriega.de> 0.6
+- Filter chat list (tap on title bar to open search field) - thanks to the entire dev team for the great discussion and contributions to the layout :)
+- Search for public chats (see pulley menu on overview page)
+- Search for chat messages (see pulley menu on chat page)
+- Support sending voice notes
+- Support sending locations
+- Add message draft support - thanks to jgibbon
+- Basic bot messages support (reply markup) - thanks to jgibbon
+- Add 'Mark chat as read/unread' option
+- Add download option to audio messages (voice notes, music...)
+- Introduce proper text if other people added/removed a person from a chat
+- Tweaks to poll layout - thanks to monich
+- New option to keep message input focused after message was sent - thanks to jgibbon
+- Send message button now removed if Send-message-by-enter option is enabled (and no attachment is set) - thanks to santhoshmanikandan
+- Performance and code optimizations (architecture, startup, JS components) - thanks to monich and jgibbon
+- Improve readability in light ambiences
+- Upgrade to TDLib 1.7
+- Fix: Only show reply to option for messages that can be replied to - thanks to monich
+- Fix: Emoji positioning in multi-line texts - thanks to monich
+- Fix: Left-over @-mention notifications when all messages in chat are read
+- Fix: Occasional crashes on opening poll context menu - thanks to monich
+- Fix: Don't display in-reply-to section if message wasn't found
+- Several translations updated - thanks to all contributors
+
+* Fri Dec 4 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.5.1
+- Add verification badge to verified chats - thanks to monich
+- Improve preview of wide images - thanks to monich
+- Fix: Editing functionality (was broken with newlines and didn't update correctly)
+- Fix: Show single message in a chat if on receiving side
+- Allow any screen orientation for picker dialogs - thanks to monich
+- Fix: Long tap on image preview items - thanks to monich and jgibbon
+- Press effect for image preview items - thanks to monich
+- Fix: Chat Page flickable misplaced under some circumstances
+- Fix: Short text for 'myself' short messages of channels in chat list
+- Several translations updated - thanks to all contributors
+
+* Mon Nov 30 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.5
+- Support secret chats
+- Support Telegram contacts & synchronization with local contacts DB on request
+- Initiate private & secret chats from contact
+- Support pinned messages
+- Always position chat at last read state, even if unread message count is >50
+- Support message forwarding - thanks to jgibbon
+- Support multiple message selection - thanks to jgibbon
+- Support @-mentioning in message input field - simply type '@' followed by the name to properly mention somebody
+- Support video notes
+- Better notification handling - thanks to monich
+- Better chat permission handling - thanks to jgibbon
+- Chat information attached to chat page - thanks to jgibbon
+- Display message sent/received indicator in chat list
+- Display pinned/in-reply-to message on tap as overlay
+- Support for TDLib storage optimizer - thanks to monich
+- Switch from elide truncation mode to fade out
+- Switch to generic file picker for documents
+- Localization improvements (e.g. plural handling) - thanks to jgibbon
+- Logging/debugging improvements - thanks to monich and jgibbon
+- Several performance improvements - thanks to monich and jgibbon
+- Make emojis a little bigger and change alignment to address display issues (only a workaround as it seems to be a QML bug, but we need to use what we have...)
+- Fix: Wrong space allocation for some web page previews
+- Fix: Display correct chat photo - thanks to monich
+- Fix: Message pending indicator though message was sent successfully
+- Fix: Mute chats that have never been muted before
+- Fix: Truncate username correctly if it's very long
+- Several translations updated - thanks to all contributors
+
+* Thu Nov 12 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.4.1
+- Several translations updated - thanks to all contributors
+
+* Wed Nov 11 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.4
+- Support for animated stickers - thanks to monich
+- Chat information page (members, picture(s), settings...) - thanks to jgibbon
+- Support for polls - thanks to jgibbon
+- Code & performance optimizations - thanks to monich and jgibbon
+- Improve chat scroll position on open - thanks to jgibbon
+- Start chats from @-mention or name
+- Integration in Sailfish OS open with menu
+- Join and leave chats
+- Fixes and improvements to notifications - thanks to monich
+- Differentiate between simple and normal messages in chats - thanks to jgibbon
+- Switch to SVG icons - thanks to jgibbon
+- Mark all messages as read - thanks to jgibbon
+- Copy message to clipboard - thanks to chstem
+- New sticker icon - thanks to jgibbon
+- Fixes to link and HTML entity handling
+- Switch message sent date display on tap (... ago <-> Monday, ...)
+- Many translations updated - thanks to all contributors
+- Swedish translation - thanks to eson57
+
+* Sun Oct 18 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.3
+- Support for sending stickers
+- Search for emojis from message input field, use :<keyword> to start searching
+- New icon/logo - thanks to iamnomeutente
+- Option to customize non-graphical notification feedback - thanks to monich
+- Add user registration - thanks to jgibbon
+- Don't show irrelevant groups - thanks to monich
+- Display information about forwarded messages
+- Option to avoid displaying stickers like images - thanks to monich
+- Fix: Don't reset edit/in-reply-to mode after focus change
+- Fix: Display caption for documents
+- Fix: Reserve some space for lazy loaded elements
+- Fix: Don't display error message in case of repeated download of the same file
+- New translations (Finnish, Italian, Russian), thanks to jorm1s, iamnomeutente, arustg and monich
+- That was quite a lot - I hope I didn't forget anything. If I did, big sorry and please let me know!
+
+* Wed Sep 30 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.2
+- Support sending images, videos and documents
+- Support receiving locations and venues - thanks to jgibbon
+- Performance improvements for chat list, new sorting algorithm and much more - thanks to monich
+- Performance improvements for chat, lazy loading for most UI elements
+- Cover page improvements - thanks to jgibbon
+- Fix handling of "<>" in messages
+- Differentiate text between other people and current user ("You have..." vs. "Somebody has...")
+- Support for the Jolla Tablet
+- New translations (Chinese, Hungarian, Polish, Spanish) - thanks to dashinfantry, edp17, atlochowski, GNUuser
+
+* Sun Sep 20 2020 Sebastian J. Wolf <sebastian@ygriega.de> 0.1
+- Initial release

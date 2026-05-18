@@ -1,0 +1,70 @@
+Name: harbour-rootelegram
+Summary: RooTelegram is a Telegram client for Sailfish OS
+Version: 1.7
+Release: 1
+# The contents of the Group field should be one of the groups listed here:
+# https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
+Group: Qt/Qt
+URL: https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS
+License: GPL-3.0
+# This must be generated before uploading a package to a remote build service.
+# Usually this line does not need to be modified.
+Sources:
+- '%{name}-%{version}.tar.bz2'
+Description: |
+  RooTelegram is a Telegram client for Sailfish OS
+Configure: none
+Builder: qmake5
+
+# This section specifies build dependencies that are resolved using pkgconfig.
+# This is the preferred way of specifying build dependencies for your package.
+PkgConfigBR:
+  - sailfishapp >= 1.0.2
+  - Qt5Core
+  - Qt5Qml
+  - Qt5Quick
+  - Qt5DBus
+  - Qt5Sql
+  - Qt5Multimedia
+  - Qt5Positioning
+  - nemonotifications-qt5
+  - openssl
+  - zlib
+  - glib-2.0
+
+# NB: spectacle has a bug where it will remove custom "#<< macros" lines, so define them here:
+Macros:
+  - '__provides_exclude_from;^%{_datadir}/.*$'
+  - '__requires_exclude;^libtdjson.*$'
+  - '_binary_payload;w6.xzdio'
+
+# Build dependencies without a pkgconfig setup can be listed here
+PkgBR:
+   - gperf
+
+# Runtime dependencies which are not automatically detected
+# nemo-qml-plugin-contacts-qt5 rimosso: non e' nella whitelist di Jolla Harbour.
+Requires:
+  - sailfishsilica-qt5 >= 0.10.9
+
+PreInstall: |
+  # Killa qualsiasi processo RooTelegram (daemon/UI/firejail/invoker) prima
+  # dell'upgrade cosi' il nuovo binario entra in vigore subito.
+  pkill -9 -f /usr/bin/harbour-rootelegram >/dev/null 2>&1 || true
+  exit 0
+
+PreUnInstall: |
+  # Stesso pkill in rimozione: evita processi orfani che tengono aperti
+  # file gia' cancellati.
+  pkill -9 -f /usr/bin/harbour-rootelegram >/dev/null 2>&1 || true
+  exit 0
+
+# All installed files
+Files:
+  - '%{_bindir}/%{name}'
+  - '%{_datadir}/%{name}'
+  - '%{_datadir}/applications/%{name}.desktop'
+  - '%{_datadir}/icons/hicolor/*/apps/%{name}.png'
+
+# For more information about yaml and what's supported in Sailfish OS
+# build system, please see https://wiki.merproject.org/wiki/Spectacle

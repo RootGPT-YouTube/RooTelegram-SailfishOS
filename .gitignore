@@ -1,0 +1,80 @@
+# C++ objects and libs
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.so.*
+*.dll
+*.dylib
+
+# Qt
+object_script.*.Release
+object_script.*.Debug
+*_plugin_import.cpp
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.qmlc
+*.jsc
+Makefile*
+*-build-*/
+*.qm
+*.prl
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+*.qmlproject.user
+*.qmlproject.user.*
+CMakeLists.txt.user*
+compile_commands.json
+*creator.user*
+
+# TDLib API secrets (api_id / api_hash personali, NON committare)
+tdlibsecrets.h
+
+# Build/SDK runtime trees (clone esterni o build artifact)
+/vendor/
+/rlottie/
+/.sfdk/
+/log.txt
+
+# TDLib: solo gli headers /tdlib/include/ vengono versionati;
+# le librerie binarie per ogni arch sono pesanti e vanno scaricate via build-rpm.sh
+/tdlib/*
+!/tdlib/include/
+!/tdlib/include/**
+
+# Output build RPM
+/RPMS/
+/rpm/*.tar.bz2
+/harbour-rootelegram
+debugfiles.list
+debugsourcefiles.list
+debugsources.list
+debuglinks.list
+elfbins.list
+documentation.list
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Privati: configurazione locale, note personali
+/CLAUDE.md
+/.claude/

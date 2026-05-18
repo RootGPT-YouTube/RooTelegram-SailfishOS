@@ -1,0 +1,170 @@
+/*
+    Copyright (C) 2020 Sebastian J. Wolf and other contributors
+
+    This file is part of RooTelegram.
+
+    RooTelegram is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    RooTelegram is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with RooTelegram. If not, see <http://www.gnu.org/licenses/>.
+*/
+import QtQuick 2.6
+import Sailfish.Silica 1.0
+import WerkWolf.RooTelegram 1.0
+import "../components"
+import "../js/functions.js" as Functions
+import "../js/debug.js" as Debug
+
+Page {
+    id: imagePage
+    allowedOrientations: Orientation.All
+    backNavigation: !imageOnly
+
+    property var photoData;
+
+    property int imageWidth;
+    property int imageHeight;
+
+    property real imageSizeFactor : imageWidth / imageHeight;
+    property real screenSizeFactor: imagePage.width / imagePage.height;
+    property real sizingFactor    : imageSizeFactor >= screenSizeFactor ? imagePage.width / imageWidth : imagePage.height / imageHeight;
+
+    property real previousScale : 1;
+    property real centerX;
+    property real centerY;
+    property real oldCenterX;
+    property real oldCenterY;
+
+    property bool imageOnly
+
+    Component.onCompleted: {
+        if (photoData) {
+            var biggestIndex = -1
+            for (var i = 0; i < photoData.sizes.length; i++) {
+                if (biggestIndex === -1 || photoData.sizes[i].width > photoData.sizes[biggestIndex].width) {
+                    biggestIndex = i;
+                }
+            }
+            if (biggestIndex > -1) {
+                imagePage.imageWidth = photoData.sizes[biggestIndex].width;
+                imagePage.imageHeight = photoData.sizes[biggestIndex].height;
+                singleImage.fileInformation = photoData.sizes[biggestIndex].photo
+            }
+        }
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onCopyToDownloadsSuccessful: {
+            appNotification.show(qsTr("Download of %1 successful.").arg(fileName), filePath);
+        }
+
+        onCopyToDownloadsError: {
+            appNotification.show(qsTr("Download failed."));
+        }
+    }
+
+    SilicaFlickable {
+        anchors.fill: parent
+        flickableDirection: Flickable.VerticalFlick
+        interactive: !imageOnly
+
+        PullDownMenu {
+            visible: !imageOnly && singleImage.file.isDownloadingCompleted
+            MenuItem {
+                text: qsTr("Download Picture")
+                onClicked: {
+                    tdLibWrapper.copyFileToDownloads(singleImage.file.path);
+                }
+            }
+        }
+
+        SilicaFlickable {
+            id: imageFlickable
+            anchors.fill: parent
+            clip: true
+            contentWidth: imagePinchArea.width
+            contentHeight: imagePinchArea.height
+            flickableDirection: Flickable.HorizontalAndVerticalFlick
+            quickScrollEnabled: false
+
+            PinchArea {
+                id: imagePinchArea
+                width:  Math.max( singleImage.width * singleImage.scale, imageFlickable.width )
+                height: Math.max( singleImage.height * singleImage.scale, imageFlickable.height )
+
+                enabled: singleImage.status === Image.Ready
+                pinch {
+                    target: singleImage
+                    minimumScale: 1
+                    maximumScale: 4
+                }
+
+                onPinchUpdated: {
+                    imagePage.centerX = pinch.center.x
+                    imagePage.centerY = pinch.center.y
+                    imageFlickable.returnToBounds()
+                }
+
+                TDLibImage {
+                    id: singleImage
+                    width: imagePage.imageWidth * imagePage.sizingFactor
+                    height: imagePage.imageHeight * imagePage.sizingFactor
+                    anchors.centerIn: parent
+
+                    fillMode: Image.PreserveAspectFit
+                    asynchronous: true
+
+                    visible: opacity > 0
+                    opacity: status === Image.Ready ? 1 : 0
+                    Behavior on opacity { FadeAnimation {} }
+                    onScaleChanged: {
+                        var newWidth = singleImage.width * singleImage.scale;
+                        var newHeight = singleImage.height * singleImage.scale;
+                        var oldWidth = singleImage.width * imagePage.previousScale;
+                        var oldHeight = singleImage.height * imagePage.previousScale;
+                        var widthDifference = newWidth - oldWidth;
+                        var heightDifference = newHeight - oldHeight;
+
+                        if (oldWidth > imageFlickable.width || newWidth > imageFlickable.width) {
+                            var xRatioNew = imagePage.centerX / newWidth;
+                            var xRatioOld = imagePage.centerX / oldHeight;
+                            imageFlickable.contentX = imageFlickable.contentX + ( xRatioNew * widthDifference );
+                        }
+                        if (oldHeight > imageFlickable.height || newHeight > imageFlickable.height) {
+                            var yRatioNew = imagePage.centerY / newHeight;
+                            var yRatioOld = imagePage.centerY / oldHeight;
+                            imageFlickable.contentY = imageFlickable.contentY + ( yRatioNew * heightDifference );
+                        }
+
+                        imagePage.previousScale = singleImage.scale;
+                        imagePage.oldCenterX = imagePage.centerX;
+                        imagePage.oldCenterY = imagePage.centerY;
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    visible: singleImage.visible
+
+                    onClicked: imageOnly = !imageOnly // Toggle "Image only" mode on tap
+                    onDoubleClicked: ; // This introduces a delay before onClicked is invoked
+                }
+            }
+
+            ScrollDecorator { flickable: imageFlickable }
+        }
+    }
+
+    BackgroundImage {
+        visible: singleImage.status !== Image.Ready
+    }
+}
