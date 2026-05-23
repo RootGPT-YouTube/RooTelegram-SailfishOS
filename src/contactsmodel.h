@@ -52,6 +52,9 @@ public:
     Q_INVOKABLE void stopImportingContacts();
     Q_INVOKABLE void importContact(const QVariantMap &singlePerson);
 
+private:
+    QString normalizePhoneNumber(const QString &raw) const;
+
 public slots:
     void handleUsersReceived(const QString &extra, const QVariantList &userIds, int totalUsers);
 

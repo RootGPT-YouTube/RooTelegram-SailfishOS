@@ -9,7 +9,7 @@ X-Share-Methods=rootelegram_share;
 [X-Share Method rootelegram_share]
 Description=Send to RooTelegram...
 Description[it]=Invia a RooTelegram...
-Capabilities=*
+Capabilities=text/x-url;text/plain;text/*;image/*;video/*;audio/*;application/*
 SupportsMultipleFiles=yes
 
 [X-Sailjail]

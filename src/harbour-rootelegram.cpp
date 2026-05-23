@@ -215,6 +215,16 @@ int main(int argc, char *argv[])
     QQuickView *view = Q_NULLPTR;
     bool replayingDbusSignal = false;
 
+    QObject::connect(appSettings, &AppSettings::daemonEnabledChanged, app.data(), [&]() {
+        const bool nowEnabled = appSettings->daemonEnabled();
+        LOG("daemonEnabled changed at runtime: " << nowEnabled);
+        app->setQuitOnLastWindowClosed(!nowEnabled);
+        if (!nowEnabled && (!view || !view->isVisible())) {
+            LOG("Daemon disabled and no visible view - quitting application");
+            app->quit();
+        }
+    });
+
     auto ensureViewLoaded = [&]() {
         if (!view) {
             view = SailfishApp::createView();
@@ -236,6 +246,13 @@ int main(int argc, char *argv[])
             context->setContextProperty("contactsModel", &contactsModel);
             context->setContextProperty("contactsProxyModel", &contactsProxyModel);
             view->setSource(SailfishApp::pathTo("qml/harbour-rootelegram.qml"));
+
+            QObject::connect(view, &QWindow::visibilityChanged, app.data(), [&](QWindow::Visibility visibility) {
+                if (visibility == QWindow::Hidden && !appSettings->daemonEnabled()) {
+                    LOG("View hidden and daemon disabled - quitting application");
+                    app->quit();
+                }
+            });
         }
     };
 

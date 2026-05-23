@@ -25,6 +25,7 @@
 #include "chatlistmodel.h"
 #include "rootelegramutils.h"
 #include <QListIterator>
+#include <QDateTime>
 
 #define DEBUG_MODULE ChatListModel
 #include "debuglog.h"
@@ -676,6 +677,32 @@ QVariantMap ChatListModel::getPrivateUnreadCounts() const
     return result;
 }
 
+QVariantList ChatListModel::getAllChatIds() const
+{
+    QVariantList ids;
+    QListIterator<ChatData*> chatIterator(this->chatList);
+    while (chatIterator.hasNext()) {
+        ids.append(QVariant(chatIterator.next()->chatId));
+    }
+    QHashIterator<qlonglong, ChatData*> hiddenIterator(this->hiddenChats);
+    while (hiddenIterator.hasNext()) {
+        hiddenIterator.next();
+        ids.append(QVariant(hiddenIterator.key()));
+    }
+    return ids;
+}
+
+QString ChatListModel::getChatTitle(qlonglong chatId) const
+{
+    if (chatIndexMap.contains(chatId)) {
+        return chatList.at(chatIndexMap.value(chatId))->title();
+    }
+    if (hiddenChats.contains(chatId)) {
+        return hiddenChats.value(chatId)->title();
+    }
+    return QString();
+}
+
 void ChatListModel::addVisibleChat(ChatData *chat)
 {
     const int n = chatList.size();
@@ -834,6 +861,17 @@ void ChatListModel::handleChatDiscovered(const QString &, const QVariantMap &cha
 
 void ChatListModel::handleChatLastMessageUpdated(const QString &id, const QString &order, const QVariantMap &lastMessage)
 {
+    // Filtro scheduled: il last_message della chat list NON deve mostrare
+    // un messaggio in coda di schedulazione (es. Saved Messages mostra
+    // "Tu: Prova" prima dell'orario previsto).
+    if (!lastMessage.value("scheduling_state").toMap().isEmpty()) {
+        return;
+    }
+    const qlonglong msgDate = lastMessage.value("date").toLongLong();
+    const qlonglong now = QDateTime::currentMSecsSinceEpoch() / 1000;
+    if (msgDate > now + 60) {
+        return;
+    }
     bool ok;
     const qlonglong chatId = id.toLongLong(&ok);
     if (ok) {
@@ -986,6 +1024,17 @@ void ChatListModel::handleChatPinnedMessageUpdated(qlonglong chatId, qlonglong p
 
 void ChatListModel::handleMessageSendSucceeded(qlonglong messageId, qlonglong oldMessageId, const QVariantMap &message)
 {
+    // Filtro scheduled: dopo invio scheduled, TDLib emette messageSendSucceeded
+    // con il messaggio ancora marcato scheduling_state. Non deve aggiornare il
+    // last_message della chat list (causa "Tu: Prova" nella preview).
+    if (!message.value("scheduling_state").toMap().isEmpty()) {
+        return;
+    }
+    const qlonglong msgDate = message.value("date").toLongLong();
+    const qlonglong now = QDateTime::currentMSecsSinceEpoch() / 1000;
+    if (msgDate > now + 60) {
+        return;
+    }
     bool ok;
     const qlonglong chatId(message.value(CHAT_ID).toLongLong(&ok));
     if (ok) {

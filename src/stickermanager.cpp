@@ -24,9 +24,20 @@
 
 #include "stickermanager.h"
 #include <QListIterator>
+#include <QSet>
+#include <QStringList>
+#include <QStringListIterator>
+#include <algorithm>
 
 #define DEBUG_MODULE StickerManager
 #include "debuglog.h"
+
+namespace {
+QString stickerSetTitleKey(const QVariant &item)
+{
+    return item.toMap().value("title").toString().toCaseFolded();
+}
+}
 
 StickerManager::StickerManager(TDLibWrapper *tdLibWrapper, QObject *parent) : QObject(parent)
 {
@@ -71,6 +82,26 @@ QVariantMap StickerManager::getStickerSet(const QString &stickerSetId)
 bool StickerManager::hasStickerSet(const QString &stickerSetId)
 {
     return this->stickerSets.contains(stickerSetId) || this->customEmojiStickerSets.contains(stickerSetId);
+}
+
+bool StickerManager::hasStickerSetDetails(const QString &stickerSetId) const
+{
+    // "Details" = abbiamo già il payload completo del set, con la lista
+    // stickers popolata. Le batch di getInstalledStickerSets contengono
+    // solo stickerSetInfo (cover/title), non gli stickers — quindi il
+    // set può essere in cache "leggera" ma servire comunque getStickerSet
+    // per ottenere i dettagli usabili dal picker.
+    const auto checkPayload = [](const QVariant &v) {
+        const QVariantMap m = v.toMap();
+        return !m.value("stickers").toList().isEmpty();
+    };
+    if (this->stickerSets.contains(stickerSetId) && checkPayload(this->stickerSets.value(stickerSetId))) {
+        return true;
+    }
+    if (this->customEmojiStickerSets.contains(stickerSetId) && checkPayload(this->customEmojiStickerSets.value(stickerSetId))) {
+        return true;
+    }
+    return false;
 }
 
 bool StickerManager::isStickerSetInstalled(const QString &stickerSetId)
@@ -121,17 +152,64 @@ void StickerManager::handleInstalledStickerSetsUpdated(const QVariantList &stick
 }
 void StickerManager::handleInstalledStickerSetsUpdatedByType(const QVariantList &stickerSetIds, const QString &stickerType)
 {
+    // Push update da TDLib (es. dopo changeStickerSet): aggiorniamo la
+    // lista degli ID installati e ricostruiamo subito la lista pubblica
+    // dalla cache dei dettagli già fetchata in passato. Niente refetch.
+    QVariantList *installedSetIds;
+    QVariantList *installedSets;
+    QVariantMap *cachedSets;
+    QVariantMap *indexMap;
+    void (StickerManager::*signalEmitter)();
     if (stickerType == QLatin1String("stickerTypeCustomEmoji")) {
         LOG("Receiving installed custom emoji sticker IDs...." << stickerSetIds);
-        this->installedCustomEmojiSetIds = stickerSetIds;
+        installedSetIds = &this->installedCustomEmojiSetIds;
+        installedSets = &this->installedCustomEmojiSets;
+        cachedSets = &this->customEmojiStickerSets;
+        indexMap = &this->customEmojiStickerSetMap;
+        signalEmitter = &StickerManager::customEmojiStickerSetsReceived;
     } else if (stickerType == QLatin1String("stickerTypeRegular")) {
         LOG("Receiving installed sticker IDs...." << stickerSetIds);
-        this->installedStickerSetIds = stickerSetIds;
+        installedSetIds = &this->installedStickerSetIds;
+        installedSets = &this->installedStickerSets;
+        cachedSets = &this->stickerSets;
+        indexMap = &this->stickerSetMap;
+        signalEmitter = &StickerManager::stickerSetsReceived;
     } else {
         // stickerTypeMask o tipo sconosciuto: non sovrascrivere nessuna lista,
         // non confondere Regular con CustomEmoji.
         LOG("Ignoring installed sticker IDs for type" << (stickerType.isEmpty() ? QStringLiteral("<empty>") : stickerType));
+        return;
     }
+    *installedSetIds = stickerSetIds;
+    // Pulisce dalla cache i set non più installati (es. rimosso): la
+    // mappa cresce indefinitamente se non rilasciamo gli ID che escono
+    // dalla lista. Set di ID per lookup O(1).
+    QSet<QString> installedIdSet;
+    QListIterator<QVariant> installedIt(stickerSetIds);
+    while (installedIt.hasNext()) {
+        installedIdSet.insert(installedIt.next().toString());
+    }
+    QStringList cachedKeys = cachedSets->keys();
+    QStringListIterator cachedIt(cachedKeys);
+    while (cachedIt.hasNext()) {
+        const QString cachedId = cachedIt.next();
+        if (!installedIdSet.contains(cachedId)) {
+            cachedSets->remove(cachedId);
+        }
+    }
+    // Ricostruisce la lista pubblica dalla cache rimasta, ordinata
+    // alfabeticamente. I set non ancora fetchati restano fuori finché
+    // non arriva la response individuale.
+    installedSets->clear();
+    QListIterator<QVariant> rebuildIt(stickerSetIds);
+    while (rebuildIt.hasNext()) {
+        const QString setId = rebuildIt.next().toString();
+        if (cachedSets->contains(setId)) {
+            installedSets->append(cachedSets->value(setId));
+        }
+    }
+    sortByTitleAndRebuildMap(*installedSets, *indexMap);
+    emit (this->*signalEmitter)();
 }
 
 bool StickerManager::inferCustomEmojiFromStickers(const QVariantList &stickers) const
@@ -152,6 +230,24 @@ bool StickerManager::inferCustomEmojiFromStickers(const QVariantList &stickers) 
         }
     }
     return false;
+}
+
+void StickerManager::sortByTitleAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const
+{
+    // Ordine alfabetico case-insensitive sul titolo del set. La lista
+    // installedSets diventa quella esposta a QML; indexMap (id -> indice)
+    // viene rigenerata coerentemente con il nuovo ordine.
+    std::sort(installedSets.begin(), installedSets.end(),
+              [](const QVariant &a, const QVariant &b) {
+                  return stickerSetTitleKey(a) < stickerSetTitleKey(b);
+              });
+    indexMap.clear();
+    for (int i = 0; i < installedSets.size(); ++i) {
+        const QString id = installedSets.at(i).toMap().value("id").toString();
+        if (!id.isEmpty()) {
+            indexMap.insert(id, i);
+        }
+    }
 }
 
 bool StickerManager::purgeRegularReferences(const QString &stickerSetId)
@@ -216,7 +312,7 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
     const bool requestIsRegular = stickerType == QLatin1String("stickerTypeRegular");
     const bool requestKnown = requestIsCustomEmoji || requestIsRegular;
 
-    LOG("Receiving sticker sets for type" << (stickerType.isEmpty() ? QStringLiteral("<unknown>") : stickerType));
+    LOG("Receiving sticker sets for type" << (stickerType.isEmpty() ? QStringLiteral("<unknown>") : stickerType) << "count=" << stickerSets.size());
 
     // Cleanup cross-list: gli ID dei set in QUESTA risposta sono di QUESTO
     // tipo (TDLib filtra in base alla request). Se sono finiti per sbaglio
@@ -236,6 +332,7 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
 
     bool rescuedRegular = false;
     bool rescuedCustomEmoji = false;
+    QStringList setsToFetch;
     QListIterator<QVariant> stickerSetsIterator(stickerSets);
     while (stickerSetsIterator.hasNext()) {
         QVariantMap newStickerSet = stickerSetsIterator.next().toMap();
@@ -274,6 +371,14 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
             installedSetIds->removeAll(newSetId);
         }
         allSets->insert(newSetId, newStickerSet);
+        // Fetch lazy dei dettagli: se la batch non porta gli stickers
+        // popolati (caso tipico di getInstalledStickerSets, restituisce
+        // solo stickerSetInfo), richiediamo il payload completo. Salta
+        // i set già in cache "piena", evitando i 56 round-trip sequenziali
+        // dopo una rimozione (i set rimasti hanno già i dettagli).
+        if (!hasStickerSetDetails(newSetId)) {
+            setsToFetch.append(newSetId);
+        }
     }
 
     // Ricostruisci solo la lista del tipo che ci è stato chiesto. Se il
@@ -283,32 +388,26 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
 
     if (rebuildRegular) {
         this->installedStickerSets.clear();
-        this->stickerSetMap.clear();
         QListIterator<QVariant> stickerSetIdIterator(this->installedStickerSetIds);
-        int i = 0;
         while (stickerSetIdIterator.hasNext()) {
             QString stickerSetId = stickerSetIdIterator.next().toString();
             if (this->stickerSets.contains(stickerSetId)) {
                 this->installedStickerSets.append(this->stickerSets.value(stickerSetId));
-                this->stickerSetMap.insert(stickerSetId, i);
-                i++;
             }
         }
+        sortByTitleAndRebuildMap(this->installedStickerSets, this->stickerSetMap);
         emit stickerSetsReceived();
     }
     if (rebuildCustomEmoji) {
         this->installedCustomEmojiSets.clear();
-        this->customEmojiStickerSetMap.clear();
         QListIterator<QVariant> customSetIdIterator(this->installedCustomEmojiSetIds);
-        int customIndex = 0;
         while (customSetIdIterator.hasNext()) {
             QString stickerSetId = customSetIdIterator.next().toString();
             if (this->customEmojiStickerSets.contains(stickerSetId)) {
                 this->installedCustomEmojiSets.append(this->customEmojiStickerSets.value(stickerSetId));
-                this->customEmojiStickerSetMap.insert(stickerSetId, customIndex);
-                customIndex++;
             }
         }
+        sortByTitleAndRebuildMap(this->installedCustomEmojiSets, this->customEmojiStickerSetMap);
         emit customEmojiStickerSetsReceived();
     }
     // Se un rescue ha alterato la lista non-rebuildata, segnalalo comunque.
@@ -317,6 +416,13 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
     }
     if (rescuedCustomEmoji && !rebuildCustomEmoji) {
         emit customEmojiStickerSetsReceived();
+    }
+    // Fetch deferred dei dettagli per i set ancora "leggeri".
+    const QString expectedType = requestIsCustomEmoji ? QStringLiteral("stickerTypeCustomEmoji")
+                                  : (requestIsRegular ? QStringLiteral("stickerTypeRegular") : QString());
+    QStringListIterator fetchIt(setsToFetch);
+    while (fetchIt.hasNext()) {
+        this->tdLibWrapper->getStickerSet(fetchIt.next(), expectedType);
     }
 }
 
@@ -359,10 +465,11 @@ void StickerManager::handleStickerSetReceived(const QVariantMap &stickerSet)
                 installedSets->replace(setIndex, stickerSet);
             }
         } else {
-            int setIndex = installedSets->size();
-            stickerSetIndexMap->insert(stickerSetId, setIndex);
             installedSets->append(stickerSet);
         }
+        // Ri-sortiamo dopo replace/append: il titolo potrebbe essere cambiato
+        // (replace) o il set è nuovo in coda (append), entrambi violano l'ordine.
+        sortByTitleAndRebuildMap(*installedSets, *stickerSetIndexMap);
     } else {
         LOG("Receiving new sticker set...." << stickerSetId);
     }

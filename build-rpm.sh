@@ -17,11 +17,13 @@ set -euo pipefail
 
 # ── Configurazione ────────────────────────────────────────────────────────────
 PACKAGE_NAME="harbour-rootelegram"
-# Single source of truth: la variabile VERSION nel .pro. Da qui sincronizziamo
+# Single source of truth: RT_APP_VERSION nel .pro. Da qui sincronizziamo
 # anche rpm/*.{spec,yaml}, così basta bumpare in un solo posto (il .pro).
-VERSION="$(grep -E '^VERSION[[:space:]]*=' "${PACKAGE_NAME}.pro" | head -1 | awk -F= '{print $2}' | tr -d ' "')"
+# Non usiamo VERSION perché qmake la tratta come variabile riservata e su
+# template app la riduce a major.minor quando espansa con $$VERSION.
+VERSION="$(grep -E '^RT_APP_VERSION[[:space:]]*=' "${PACKAGE_NAME}.pro" | head -1 | awk -F= '{print $2}' | tr -d ' "')"
 if [[ -z "$VERSION" ]]; then
-    echo "[ERROR] Impossibile leggere VERSION da ${PACKAGE_NAME}.pro" >&2
+    echo "[ERROR] Impossibile leggere RT_APP_VERSION da ${PACKAGE_NAME}.pro" >&2
     exit 1
 fi
 RELEASE="1"
@@ -95,9 +97,9 @@ mkdir -p "$SRCDIR/rpm/BUILD"
 SPEC_FILE="rpm/${PACKAGE_NAME}.spec"
 info "Injecting %pre/%preun scriptlets into spec"
 awk '
-    # Salta righe dei blocchi %pre/%preun esistenti fino al prossimo %tag
-    /^%(pre|preun)$/ { in_block = 1; next }
-    in_block && /^%[a-zA-Z]/ && !/^%(pre|preun)$/ { in_block = 0 }
+    # Salta righe dei blocchi %pre/%preun/%posttrans esistenti fino al prossimo %tag
+    /^%(pre|preun|posttrans)$/ { in_block = 1; next }
+    in_block && /^%[a-zA-Z]/ && !/^%(pre|preun|posttrans)$/ { in_block = 0 }
     in_block { next }
     # Inietta i nostri scriptlet prima di %prep
     /^%prep$/ && !injected {
@@ -107,6 +109,18 @@ awk '
         print ""
         print "%preun"
         print "pkill -9 harbour-rootelegram >/dev/null 2>&1 || true"
+        print "exit 0"
+        print ""
+        # Post-install: pulisci la cache QML di Qt e riavvia sailjaild.
+        # - qmlcache: i .qmlc/.jsc possono riferire a simboli del binario vecchio.
+        # - sailjaild: mantiene cache stale dei permessi sandbox dopo un rpm -U,
+        #   causando search rotta + crash al primo avvio post-update. Riavviarlo
+        #   resetta lo stato (verificato 2026-05-19).
+        print "%posttrans"
+        print "for d in /home/*/.cache/QtProject/qmlcache; do"
+        print "  [ -d \"$d\" ] && rm -f \"$d\"/*.qmlc \"$d\"/*.jsc 2>/dev/null || true"
+        print "done"
+        print "systemctl try-restart sailjaild >/dev/null 2>&1 || true"
         print "exit 0"
         print ""
         injected = 1

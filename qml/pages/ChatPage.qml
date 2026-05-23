@@ -369,20 +369,23 @@ Page {
     }
 
     function controlSendButton() {
-        if (newMessageTextField.text.length !== 0
+        var hasContent = newMessageTextField.text.length !== 0
                 || attachmentPreviewRow.isPicture
                 || attachmentPreviewRow.isDocument
                 || attachmentPreviewRow.isVideo
                 || attachmentPreviewRow.isVoiceNote
-                || attachmentPreviewRow.isLocation) {
-            newMessageSendButton.enabled = true;
-        } else {
-            newMessageSendButton.enabled = false;
-        }
+                || attachmentPreviewRow.isLocation;
+        // Manteniamo il bottone sempre enabled per intercettare il long-press
+        // (apertura ScheduleMessageDialog per gestire scheduled esistenti),
+        // ma riduciamo l'opacità a 0.4 quando vuoto come visual feedback.
+        newMessageSendButton.enabled = true;
+        newMessageSendButton.opacity = hasContent ? 1.0 : 0.4;
+        newMessageSendButton.hasContent = hasContent;
     }
 
-    function sendMessage() {
+    function sendMessage(sendDate) {
         var customEmojiEntities = getComposerCustomEmojiEntitiesForSend();
+        tdLibWrapper.setPendingScheduledSendDate(sendDate ? Math.floor(sendDate) : 0);
         if (newMessageColumn.editMessageId !== "0") {
             if (customEmojiEntities.length > 0) {
                 tdLibWrapper.editMessageTextWithCustomEmoji(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text, customEmojiEntities);
@@ -1115,15 +1118,27 @@ Page {
         case PageStatus.Active:
             // Imposta SEMPRE il messageThreadId corretto quando la pagina è attiva
             tdLibWrapper.setCurrentMessageThreadId(chatPage.messageThreadId);
+            // is_forum vero solo per supergruppi forum (topics); per i discussion thread
+            // di canale (linked supergroup non-forum) deve essere false: il send deve
+            // mettere reply_to=threadId, non topic_id forum.
+            tdLibWrapper.setCurrentChatIsForum(!!(chatGroupInformation && chatGroupInformation.is_forum));
             if (chatPage.messageThreadId > 0 && chatPage.topicLastMessageId > 0) {
                 // Mark-as-read immediato nel topic: evita dipendenza esclusiva dal timer UI
                 tdLibWrapper.viewMessage(chatInformation.id, chatPage.topicLastMessageId, true);
             }
-            if (!chatPage.isInitialized) {
+            // chatModel è un singleton C++ condiviso da tutte le ChatPage nello stack:
+            // se una pagina figlio (es. discussion chat dei commenti) lo ha riassegnato,
+            // tornando qui dobbiamo re-inizializzarlo per la nostra chat/thread.
+            var modelMismatch = chatPage.isInitialized && (
+                String(chatModel.chatId) !== String(chatInformation.id)
+                || Number(chatModel.messageThreadId || 0) !== Number(chatPage.messageThreadId || 0)
+            );
+            if (!chatPage.isInitialized || modelMismatch) {
                 chatModel.messageThreadId = chatPage.messageThreadId;
                 chatModel.topicLastMessageId = chatPage.topicLastMessageId;
                 chatModel.initialize(chatInformation);
-
+            }
+            if (!chatPage.isInitialized) {
                 pageStack.pushAttached(Qt.resolvedUrl("ChatInformationPage.qml"), { "chatInformation" : chatInformation, "privateChatUserInformation": chatPartnerInformation, "groupInformation": chatGroupInformation, "chatOnlineMemberCount": chatOnlineMemberCount});
 
                 if(doSendBotStartMessage) {
@@ -1139,6 +1154,7 @@ Page {
             if (pageStack.depth === 1) {
                 // Solo quando si torna alla overview: azzera threadId e pulisci il modello
                 tdLibWrapper.setCurrentMessageThreadId(0);
+                tdLibWrapper.setCurrentChatIsForum(false);
                 chatModel.clear();
             } else {
                 resetElements();
@@ -2290,7 +2306,10 @@ Page {
                         anchors.rightMargin: Theme.paddingMedium
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: Theme.paddingMedium
-                        visible: !chatPage.loading && chatInformation.unread_count > 0 && chatOverviewItem.visible
+                        // Nei commenti dei canali (thread mode) il contatore globale
+                        // della chat canale è fuorviante: l'utente è nel thread, non
+                        // nella history broadcast. Lo nascondiamo.
+                        visible: !chatPage.loading && chatInformation.unread_count > 0 && chatOverviewItem.visible && (!chatPage.messageThreadId || chatPage.messageThreadId === 0)
                         Rectangle {
                             id: chatUnreadMessagesCountBackground
                             color: Theme.highlightBackgroundColor
@@ -2449,17 +2468,39 @@ Page {
                     property string editMessageId: "0";
                     property bool quickEmojiPickerVisible: false;
                     property bool quickPremiumEmojiPickerVisible: false;
+                    property bool quickStickerPickerVisible: false;
+                    property var quickStickerSets: [];
+                    property int quickStickerSelectedSetIndex: -1;
+                    function refreshQuickStickerSets() {
+                        if (typeof stickerManager !== "undefined" && stickerManager) {
+                            quickStickerSets = stickerManager.getInstalledStickerSets();
+                            if (quickStickerSelectedSetIndex >= quickStickerSets.length) quickStickerSelectedSetIndex = -1;
+                        }
+                    }
+                    function selectedQuickStickerList() {
+                        if (quickStickerSelectedSetIndex < 0) {
+                            return (typeof stickerManager !== "undefined" && stickerManager) ? stickerManager.getRecentStickers() : [];
+                        }
+                        if (quickStickerSelectedSetIndex >= quickStickerSets.length) return [];
+                        var s = quickStickerSets[quickStickerSelectedSetIndex];
+                        return (s && s.stickers) ? s.stickers : [];
+                    }
+                    function stickerRemoteIdFromSticker(sticker) {
+                        if (!sticker || !sticker.sticker || !sticker.sticker.remote || !sticker.sticker.remote.id) return "";
+                        return sticker.sticker.remote.id.toString();
+                    }
                     property var customEmojiEntities: [];
                     property string previousComposerText: "";
                     property bool suspendCustomEmojiTracking: false;
                     property var installedCustomEmojiSets: stickerManager.getInstalledCustomEmojiSets();
                     property var quickPremiumEmojiSets: [];
                     property int quickPremiumSelectedSetIndex: 0;
-                    property int quickPremiumSetLimit: 8;
+                    // 0 = nessun limite: mostra tutti i set custom emoji
+                    // installati nel quick picker premium (prima era cap a 8).
+                    property int quickPremiumSetLimit: 0;
                     property int quickPremiumPerSetLimit: 120;
                     readonly property real compactAttachmentButtonSize: Math.max(Math.round(Theme.itemSizeSmall * 0.6), Theme.itemSizeExtraSmall)
                     readonly property real compactAttachmentSpacing: Math.max(Math.round(Theme.paddingSmall * 0.5), 4)
-                    readonly property var quickEmojiList: ["😀", "😂", "😍", "🥰", "😎", "🤔", "😭", "😡", "👍", "🙏", "👏", "🔥", "🎉", "❤️", "💯", "🤗"]
 
                     function customEmojiIdFromSticker(sticker) {
                         if (!sticker) {
@@ -2528,19 +2569,44 @@ Page {
                         }
                     }
 
-                    onInstalledCustomEmojiSetsChanged: {
-                        refreshQuickPremiumEmojiSets();
-                    }
+                    // NIENTE listener su onInstalledCustomEmojiSetsChanged:
+                    // l'assegnamento dentro il debounce sotto la fa "scattare"
+                    // e si crea un feedback loop che rieseguiva il refresh
+                    // ogni 80ms indefinitamente, causando lag visibile anche
+                    // sulle animazioni delle custom emoji. La sincronizzazione
+                    // viene fatta solo via signal dello StickerManager.
 
-                    Component.onCompleted: {
-                        refreshQuickPremiumEmojiSets();
-                    }
+                    // Nessun pre-warming all'apertura: iterare 80 set × 120
+                    // sticker (~9600 elementi) è sincrono e blocca la chat per
+                    // 1-2s anche con Timer deferred (la chunked-yield non
+                    // l'abbiamo). Il fallback lazy esiste già: al primo click
+                    // sul bottone "premium emoji" (vedi sotto), se
+                    // quickPremiumEmojiSets è vuoto, il refresh parte on-demand.
+                    // Il debounce su onCustomEmojiStickerSetsReceived continua
+                    // a coprire l'arrivo asincrono di nuovi set durante la
+                    // sessione.
 
+                    // Debounce: la rimozione di un set genera N response in
+                    // cascata (una per ogni set restante che TDLib ci rimanda).
+                    // Senza coalescenza, refreshQuickPremiumEmojiSets veniva
+                    // chiamata N volte di fila e bloccava la UI. Coalesciamo
+                    // a 80ms come fa StickerPicker.qml.
+                    Timer {
+                        id: refreshQuickPremiumDebounce
+                        interval: 80
+                        repeat: false
+                        onTriggered: {
+                            newMessageColumn.installedCustomEmojiSets = stickerManager.getInstalledCustomEmojiSets();
+                            newMessageColumn.refreshQuickPremiumEmojiSets();
+                        }
+                    }
                     Connections {
                         target: stickerManager
                         onCustomEmojiStickerSetsReceived: {
-                            newMessageColumn.installedCustomEmojiSets = stickerManager.getInstalledCustomEmojiSets();
-                            newMessageColumn.refreshQuickPremiumEmojiSets();
+                            refreshQuickPremiumDebounce.restart();
+                        }
+                        onStickerSetsReceived: {
+                            newMessageColumn.refreshQuickStickerSets();
                         }
                     }
 
@@ -2727,9 +2793,13 @@ Page {
                                     width: Theme.iconSizeMedium
                                     height: Theme.iconSizeMedium
                                 }
-                                highlighted: down || stickerPickerLoader.active
+                                highlighted: down || newMessageColumn.quickStickerPickerVisible
                                 onClicked: {
-                                    stickerPickerLoader.active = !stickerPickerLoader.active;
+                                    if (!newMessageColumn.quickStickerPickerVisible) {
+                                        newMessageColumn.refreshQuickStickerSets();
+                                    }
+                                    newMessageColumn.quickStickerPickerVisible = !newMessageColumn.quickStickerPickerVisible;
+                                    stickerPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
@@ -2740,7 +2810,11 @@ Page {
                                 visible: chatPage.canSendMessages
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
-                                icon.source: ""
+                                icon.source: "../../images/icon-m-emoji.svg"
+                                icon.sourceSize {
+                                    width: Theme.iconSizeMedium
+                                    height: Theme.iconSizeMedium
+                                }
                                 highlighted: down || newMessageColumn.quickPremiumEmojiPickerVisible
                                 onClicked: {
                                     if (newMessageColumn.quickPremiumEmojiSets.length === 0) {
@@ -2754,13 +2828,7 @@ Page {
                                     stickerPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
-                                }
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: Math.round(parent.width * 0.74)
-                                    height: width
-                                    source: Emoji.getEmojiPath("🤩")
-                                    fillMode: Image.PreserveAspectFit
+                                    newMessageColumn.quickStickerPickerVisible = false;
                                 }
                                 Label {
                                     anchors.right: parent.right
@@ -2775,20 +2843,18 @@ Page {
                                 visible: chatPage.canSendMessages
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
-                                icon.source: ""
+                                icon.source: "../../images/icon-m-emoji.svg"
+                                icon.sourceSize {
+                                    width: Theme.iconSizeMedium
+                                    height: Theme.iconSizeMedium
+                                }
                                 highlighted: down || newMessageColumn.quickEmojiPickerVisible
                                 onClicked: {
                                     newMessageColumn.quickEmojiPickerVisible = !newMessageColumn.quickEmojiPickerVisible;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    newMessageColumn.quickStickerPickerVisible = false;
                                     stickerPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
-                                }
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: Math.round(parent.width * 0.74)
-                                    height: width
-                                    source: Emoji.getEmojiPath("🙂")
-                                    fillMode: Image.PreserveAspectFit
                                 }
                             }
                             IconButton {
@@ -2819,51 +2885,20 @@ Page {
                         id: quickEmojiPickerContainer
                         width: parent.width
                         visible: newMessageColumn.quickEmojiPickerVisible && !inlineQuery.userNameIsValid
-                        height: visible ? quickEmojiFlickable.height : 0
+                        height: visible ? emojiPickerLoader.height : 0
                         clip: true
                         Behavior on height { SmoothedAnimation { duration: 160 } }
-                        Flickable {
-                            id: quickEmojiFlickable
+
+                        Loader {
+                            id: emojiPickerLoader
                             width: parent.width
-                            height: quickEmojiRow.height + Theme.paddingSmall
-                            contentWidth: Math.max(width, quickEmojiRow.width)
-                            contentHeight: quickEmojiRow.height
-                            clip: true
-
-                            Row {
-                                id: quickEmojiRow
-                                height: attachEmojiIconButton.height
-                                x: width <= parent.width ? ((parent.width - width) / 2) : (parent.width - width)
-                                layoutDirection: Qt.RightToLeft
-                                spacing: newMessageColumn.compactAttachmentSpacing
-                                leftPadding: Theme.paddingSmall
-                                rightPadding: Theme.paddingSmall
-
-                                Repeater {
-                                    model: newMessageColumn.quickEmojiList
-                                    Item {
-                                        id: quickEmojiButton
-                                        width: newMessageColumn.compactAttachmentButtonSize
-                                        height: width
-
-                                        Image {
-                                            anchors.centerIn: parent
-                                            width: Math.round(parent.width * 0.74)
-                                            height: width
-                                            source: Emoji.getEmojiPath(modelData)
-                                            fillMode: Image.PreserveAspectFit
-                                        }
-
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            onClicked: {
-                                                insertTextAtCursor(modelData);
-                                                attachmentOptionsFlickable.isNeeded = false;
-                                                newMessageColumn.quickEmojiPickerVisible = false;
-                                                newMessageColumn.quickPremiumEmojiPickerVisible = false;
-                                            }
-                                        }
-                                    }
+                            active: quickEmojiPickerContainer.visible
+                            sourceComponent: EmojiPicker {
+                                onEmojiPicked: {
+                                    insertTextAtCursor(emoji);
+                                    attachmentOptionsFlickable.isNeeded = false;
+                                    newMessageColumn.quickEmojiPickerVisible = false;
+                                    newMessageColumn.quickPremiumEmojiPickerVisible = false;
                                 }
                             }
                         }
@@ -2894,8 +2929,10 @@ Page {
                                 Row {
                                     id: quickPremiumSetRow
                                     height: newMessageColumn.compactAttachmentButtonSize
-                                    x: width <= parent.width ? ((parent.width - width) / 2) : (parent.width - width)
-                                    layoutDirection: Qt.RightToLeft
+                                    // LTR: il primo set (index 0, alfabeticamente "A") va a sinistra.
+                                    // Quando la Row è più stretta della Flickable la centriamo;
+                                    // quando è più larga la lasciamo allineata a sinistra (scrolla a destra).
+                                    x: width <= parent.width ? ((parent.width - width) / 2) : 0
                                     spacing: newMessageColumn.compactAttachmentSpacing
                                     leftPadding: Theme.paddingSmall
                                     rightPadding: Theme.paddingSmall
@@ -2910,6 +2947,10 @@ Page {
 
                                             onClicked: {
                                                 newMessageColumn.quickPremiumSelectedSetIndex = index;
+                                            }
+                                            onPressAndHold: {
+                                                if (!modelData || !modelData.id) return;
+                                                chatPage.requestDeleteSet(modelData.id, "stickerTypeCustomEmoji", modelData.title);
                                             }
 
                                             Rectangle {
@@ -2991,6 +3032,142 @@ Page {
                             }
                         }
                     }
+
+                    Item {
+                        id: quickStickerPickerContainer
+                        width: parent.width
+                        visible: newMessageColumn.quickStickerPickerVisible && !inlineQuery.userNameIsValid
+                        height: visible ? quickStickerPanelColumn.height : 0
+                        clip: true
+                        Behavior on height { SmoothedAnimation { duration: 160 } }
+                        Column {
+                            id: quickStickerPanelColumn
+                            width: parent.width
+                            height: childrenRect.height
+                            spacing: Theme.paddingSmall
+
+                            Flickable {
+                                id: quickStickerSetFlickable
+                                width: parent.width
+                                height: newMessageColumn.compactAttachmentButtonSize + Theme.paddingSmall
+                                contentWidth: Math.max(width, quickStickerSetRow.width)
+                                contentHeight: quickStickerSetRow.height
+                                clip: true
+
+                                Row {
+                                    id: quickStickerSetRow
+                                    height: newMessageColumn.compactAttachmentButtonSize
+                                    x: width <= parent.width ? ((parent.width - width) / 2) : 0
+                                    spacing: newMessageColumn.compactAttachmentSpacing
+                                    leftPadding: Theme.paddingSmall
+                                    rightPadding: Theme.paddingSmall
+
+                                    BackgroundItem {
+                                        id: quickStickerRecentsChip
+                                        width: Math.max(recentsChipLabel.implicitWidth + Theme.paddingMedium * 2, Theme.itemSizeMedium)
+                                        height: newMessageColumn.compactAttachmentButtonSize
+                                        readonly property bool isCurrent: newMessageColumn.quickStickerSelectedSetIndex === -1
+                                        onClicked: newMessageColumn.quickStickerSelectedSetIndex = -1
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: height / 2
+                                            color: quickStickerRecentsChip.isCurrent ? Theme.rgba(Theme.highlightColor, 0.28) : Theme.rgba(Theme.primaryColor, 0.12)
+                                        }
+                                        Label {
+                                            id: recentsChipLabel
+                                            anchors.centerIn: parent
+                                            text: qsTr("Recent")
+                                            color: quickStickerRecentsChip.isCurrent ? Theme.highlightColor : Theme.primaryColor
+                                            font.pixelSize: Theme.fontSizeExtraSmall
+                                        }
+                                    }
+
+                                    Repeater {
+                                        model: newMessageColumn.quickStickerSets
+                                        BackgroundItem {
+                                            id: quickStickerSetButton
+                                            width: Math.min(Math.max(stickerSetLabel.implicitWidth + Theme.paddingMedium * 2, Theme.itemSizeMedium), Theme.itemSizeExtraLarge * 2)
+                                            height: newMessageColumn.compactAttachmentButtonSize
+                                            readonly property bool isCurrent: index === newMessageColumn.quickStickerSelectedSetIndex
+                                            onClicked: newMessageColumn.quickStickerSelectedSetIndex = index
+                                            onPressAndHold: {
+                                                if (!modelData || !modelData.id) return;
+                                                var stype = (modelData.sticker_type && modelData.sticker_type["@type"])
+                                                            ? modelData.sticker_type["@type"] : "stickerTypeRegular";
+                                                chatPage.requestDeleteSet(modelData.id, stype, modelData.title);
+                                            }
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                radius: height / 2
+                                                color: quickStickerSetButton.isCurrent ? Theme.rgba(Theme.highlightColor, 0.28) : Theme.rgba(Theme.primaryColor, 0.12)
+                                            }
+                                            Label {
+                                                id: stickerSetLabel
+                                                anchors.centerIn: parent
+                                                width: parent.width - Theme.paddingSmall
+                                                text: modelData && modelData.title ? modelData.title : qsTr("Sticker set")
+                                                color: quickStickerSetButton.isCurrent ? Theme.highlightColor : Theme.primaryColor
+                                                font.pixelSize: Theme.fontSizeExtraSmall
+                                                maximumLineCount: 1
+                                                truncationMode: TruncationMode.Elide
+                                                horizontalAlignment: Text.AlignHCenter
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            GridView {
+                                id: quickStickerGridView
+                                width: parent.width
+                                height: (newMessageColumn.compactAttachmentButtonSize * 3) + Theme.paddingSmall
+                                cellWidth: newMessageColumn.compactAttachmentButtonSize
+                                cellHeight: newMessageColumn.compactAttachmentButtonSize
+                                clip: true
+                                model: newMessageColumn.selectedQuickStickerList()
+                                delegate: BackgroundItem {
+                                    id: quickStickerButton
+                                    width: quickStickerGridView.cellWidth
+                                    height: quickStickerGridView.cellHeight
+                                    onClicked: {
+                                        var sid = newMessageColumn.stickerRemoteIdFromSticker(modelData);
+                                        if (sid === "") return;
+                                        stickerManager.setNeedsReload(true);
+                                        tdLibWrapper.sendStickerMessage(chatInformation.id, sid, newMessageColumn.replyToMessageId);
+                                        attachmentOptionsFlickable.isNeeded = false;
+                                        newMessageInReplyToRow.inReplyToMessage = null;
+                                        newMessageColumn.editMessageId = "0";
+                                        newMessageColumn.quickStickerPickerVisible = false;
+                                    }
+                                    TDLibThumbnail {
+                                        anchors.fill: parent
+                                        thumbnail: modelData ? modelData.thumbnail : null
+                                        highlighted: quickStickerButton.highlighted
+                                    }
+                                    Label {
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        font.pixelSize: Theme.fontSizeTiny
+                                        text: modelData && modelData.emoji ? Emoji.emojify(modelData.emoji, font.pixelSize) : ""
+                                    }
+                                }
+                                VerticalScrollDecorator {}
+                            }
+
+                            Label {
+                                width: parent.width - Theme.paddingMedium * 2
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                visible: quickStickerGridView.count === 0
+                                text: newMessageColumn.quickStickerSelectedSetIndex === -1
+                                      ? qsTr("No recent stickers")
+                                      : qsTr("No stickers in this set")
+                                color: Theme.secondaryColor
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                        }
+                    }
+
                     Row {
                         id: attachmentPreviewRow
                         visible: (!!locationData || !!fileProperties || isVoiceNote) && !inlineQuery.userNameIsValid
@@ -3566,13 +3743,32 @@ Page {
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: Theme.paddingSmall
                             visible: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || attachmentPreviewRow.visible)
-                            enabled: false
+                            enabled: true
+                            opacity: 0.4
+                            property bool hasContent: false
                             onClicked: {
+                                if (!hasContent) return;
                                 sendMessage();
                                 newMessageTextField.text = "";
                                 if(!appSettings.focusTextAreaAfterSend) {
                                     newMessageTextField.focus = false;
                                 }
+                            }
+                            onPressAndHold: {
+                                var dialog = pageStack.push(Qt.resolvedUrl("ScheduleMessageDialog.qml"), {
+                                    chatIdString: chatInformation.id ? chatInformation.id.toString() : "0"
+                                });
+                                dialog.accepted.connect(function() {
+                                    var ts = Math.floor(dialog.selectedDateTime.getTime() / 1000);
+                                    sendMessage(ts);
+                                    newMessageTextField.text = "";
+                                    if(!appSettings.focusTextAreaAfterSend) {
+                                        newMessageTextField.focus = false;
+                                    }
+                                    if (typeof appNotification !== 'undefined') {
+                                        appNotification.show(qsTr("Scheduled for %1").arg(Qt.formatDateTime(dialog.selectedDateTime, "d MMM hh:mm")));
+                                    }
+                                });
                             }
                         }
 
@@ -3722,6 +3918,97 @@ Page {
         onTriggered: {
             tapHint.visible = false;
             tapHintLabel.visible = false;
+        }
+    }
+
+    property string pendingDeleteSetId: ""
+    property string pendingDeleteSetType: ""
+    property string pendingDeleteSetName: ""
+
+    function requestDeleteSet(setId, setType, setName) {
+        if (!setId) return;
+        chatPage.pendingDeleteSetId = setId;
+        chatPage.pendingDeleteSetType = setType || "stickerTypeRegular";
+        chatPage.pendingDeleteSetName = setName || "";
+    }
+
+    MouseArea {
+        id: deleteSetDismiss
+        anchors.fill: parent
+        visible: chatPage.pendingDeleteSetId !== ""
+        z: 150
+        onClicked: chatPage.pendingDeleteSetId = ""
+    }
+
+    Rectangle {
+        id: deleteSetPanel
+        z: 200
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width - 2 * Theme.horizontalPageMargin
+        color: Theme.highlightBackgroundColor
+        radius: Theme.paddingMedium
+        visible: chatPage.pendingDeleteSetId !== ""
+        height: visible ? deleteSetColumn.height + 2 * Theme.paddingLarge : 0
+
+        Column {
+            id: deleteSetColumn
+            anchors.top: parent.top
+            anchors.topMargin: Theme.paddingLarge
+            anchors.left: parent.left
+            anchors.right: parent.right
+            spacing: Theme.paddingMedium
+
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: chatPage.pendingDeleteSetName !== ""
+                      ? qsTr("Do you want to delete \"%1\"?").arg(chatPage.pendingDeleteSetName)
+                      : qsTr("Do you want to delete this set?")
+                color: Theme.primaryColor
+                font.pixelSize: Theme.fontSizeMedium
+            }
+
+            Separator {
+                width: parent.width
+                color: Theme.primaryColor
+                horizontalAlignment: Qt.AlignHCenter
+            }
+
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeSmall
+                onClicked: {
+                    var sid = chatPage.pendingDeleteSetId;
+                    var stype = chatPage.pendingDeleteSetType;
+                    var sname = chatPage.pendingDeleteSetName;
+                    chatPage.pendingDeleteSetId = "";
+                    Remorse.popupAction(chatPage,
+                        sname !== "" ? qsTr("Deleting \"%1\"").arg(sname) : qsTr("Deleting set"),
+                        function() {
+                            tdLibWrapper.changeStickerSet(sid, false, stype);
+                        });
+                }
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Yes")
+                    color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: Theme.fontSizeLarge
+                }
+            }
+
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeSmall
+                onClicked: chatPage.pendingDeleteSetId = ""
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("No")
+                    color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: Theme.fontSizeLarge
+                }
+            }
         }
     }
 

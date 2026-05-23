@@ -129,6 +129,7 @@ signals:
     void okReceived(const QString &request);
     void sessionsReceived(int inactive_session_ttl_days, const QVariantList &sessions);
     void availableReactionsReceived(qlonglong messageId, const QStringList &reactions);
+    void messageThreadInfoReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &threadInfo);
     void chatUnreadMentionCountUpdated(qlonglong chatId, int unreadMentionCount);
     void chatUnreadReactionCountUpdated(qlonglong chatId, int unreadReactionCount);
     void activeEmojiReactionsUpdated(const QStringList& emojis);
@@ -223,6 +224,7 @@ private:
     void processUpdateMessageInteractionInfo(const QVariantMap &receivedInformation);
     void processSessions(const QVariantMap &receivedInformation);
     void processAvailableReactions(const QVariantMap &receivedInformation);
+    void processMessageThreadInfo(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadMentionCount(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadReactionCount(const QVariantMap &receivedInformation);
     void processUpdateActiveEmojiReactions(const QVariantMap &receivedInformation);

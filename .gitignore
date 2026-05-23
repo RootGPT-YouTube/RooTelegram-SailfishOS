@@ -10,7 +10,7 @@
 *.dll
 *.dylib
 
-# Qt
+# Qt-es
 object_script.*.Release
 object_script.*.Debug
 *_plugin_import.cpp
@@ -28,7 +28,7 @@ ui_*.h
 *.qmlc
 *.jsc
 Makefile*
-*-build-*/
+*build-*
 *.qm
 *.prl
 
@@ -37,44 +37,26 @@ target_wrapper.*
 
 # QtCreator
 *.autosave
+
+# QtCreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+# QtCreator CMake
 CMakeLists.txt.user*
+
+# QtCreator 4.8< compilation database 
 compile_commands.json
+
+# QtCreator local machine specific files for imported projects
 *creator.user*
 
-# TDLib API secrets (api_id / api_hash personali, NON committare)
+# TDLib API Secrets
 tdlibsecrets.h
 
-# Build/SDK runtime trees (clone esterni o build artifact)
+# Build/SDK runtime trees (NON committare, sono clone esterni o build artifact)
+/tdlib/
 /vendor/
 /rlottie/
 /.sfdk/
 /log.txt
-
-# TDLib: solo gli headers /tdlib/include/ vengono versionati;
-# le librerie binarie per ogni arch sono pesanti e vanno scaricate via build-rpm.sh
-/tdlib/*
-!/tdlib/include/
-!/tdlib/include/**
-
-# Output build RPM
-/RPMS/
-/rpm/*.tar.bz2
-/harbour-rootelegram
-debugfiles.list
-debugsourcefiles.list
-debugsources.list
-debuglinks.list
-elfbins.list
-documentation.list
-
-# Editor / OS
-.DS_Store
-*.swp
-*.swo
-*~
-
-# Privati: configurazione locale, note personali
-/CLAUDE.md
-/.claude/

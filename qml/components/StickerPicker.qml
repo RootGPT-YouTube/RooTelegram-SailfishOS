@@ -230,170 +230,114 @@ Item {
         opacity: 0.7
     }
 
-    SilicaListView {
-        id: stickerPickerListView
+    property int selectedSetIndex: -1
+    function currentStickers() {
+        if (selectedSetIndex < 0) return stickerPickerOverlayItem.recentStickers || [];
+        var sets = stickerPickerOverlayItem.installedStickerSets || [];
+        if (selectedSetIndex >= sets.length) return [];
+        var s = sets[selectedSetIndex];
+        return (s && s.stickers) ? s.stickers : [];
+    }
+
+    Column {
+        id: stickerPickerLayout
         anchors.fill: parent
-        clip: true
+        anchors.topMargin: Theme.paddingSmall
+        spacing: Theme.paddingSmall
 
-        model: stickerPickerOverlayItem.installedStickerSets
-
-        header: Column {
-            spacing: Theme.paddingSmall
-            width: stickerPickerListView.width
-            height: recentStickersLabel.visible ? implicitHeight : 0
-            topPadding: Theme.paddingSmall
-            Label {
-                id: recentStickersLabel
-                font.pixelSize: Theme.fontSizeLarge
-                font.bold: true
-                width: recentStickersGridView.width
-                leftPadding: Theme.paddingMedium
-                visible: recentStickersGridView.count > 0
-                maximumLineCount: 1
-                truncationMode: TruncationMode.Elide
-                text: qsTr("Recently used")
-            }
-            SilicaGridView {
-                id: recentStickersGridView
-                width: stickerPickerListView.width
-                height: Theme.itemSizeExtraLarge + Theme.paddingSmall
-                cellWidth: Theme.itemSizeExtraLarge;
-                cellHeight: Theme.itemSizeExtraLarge;
-                visible: count > 0
-                clip: true
-                flow: GridView.FlowTopToBottom
-
-                model: stickerPickerOverlayItem.recentStickers
-                delegate: stickerComponent
-
-                HorizontalScrollDecorator {}
-
-            }
-        }
-        delegate: Column {
-            id: stickerSetColumn
-
-            property bool isExpanded: false
-            function toggleDisplaySet() {
-                stickerSetColumn.isExpanded = !stickerSetColumn.isExpanded;
-                if (stickerSetColumn.isExpanded) {
-                    stickerSetLoader.myStickerSet = modelData.stickers;
-                }
-            }
-
-            spacing: Theme.paddingSmall
+        Flickable {
+            id: stickerSetChipStrip
             width: parent.width
+            height: Theme.itemSizeSmall
+            contentWidth: Math.max(width, stickerSetChipRow.width)
+            contentHeight: stickerSetChipRow.height
+            clip: true
 
             Row {
-                id: stickerSetTitleRow
-                width: parent.width
-                height: Theme.itemSizeMedium + ( 2 * Theme.paddingSmall )
-                spacing: Theme.paddingMedium
+                id: stickerSetChipRow
+                height: Theme.itemSizeSmall
+                x: width <= parent.width ? ((parent.width - width) / 2) : 0
+                spacing: Theme.paddingSmall
+                leftPadding: Theme.paddingSmall
+                rightPadding: Theme.paddingSmall
+
                 BackgroundItem {
-                    id: stickerSetToggle
-                    width: parent.width - removeSetButton.width - Theme.paddingMedium * 2
-                    height: parent.height
-
-                    onClicked: {
-                        toggleDisplaySet();
+                    id: recentsChip
+                    width: Math.max(recentsChipLabel.implicitWidth + Theme.paddingMedium * 2, Theme.itemSizeMedium)
+                    height: Theme.itemSizeSmall
+                    readonly property bool isCurrent: stickerPickerOverlayItem.selectedSetIndex === -1
+                    onClicked: stickerPickerOverlayItem.selectedSetIndex = -1
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: height / 2
+                        color: recentsChip.isCurrent ? Theme.rgba(Theme.highlightColor, 0.28) : Theme.rgba(Theme.primaryColor, 0.12)
                     }
-                    TDLibThumbnail {
-                        id: stickerSetThumbnail
-                        thumbnail: modelData.thumbnail ? modelData.thumbnail : modelData.stickers[0].thumbnail
-                        anchors {
-                            left: parent.left
-                            verticalCenter: parent.verticalCenter
-                            leftMargin: Theme.paddingMedium
-                        }
-                        width: Theme.itemSizeMedium
-                        height: Theme.itemSizeMedium
-                        highlighted: stickerSetToggle.down
-                    }
-
                     Label {
-                        id: setTitleText
-                        font.pixelSize: Theme.fontSizeLarge
-                        font.bold: true
-
-                        anchors {
-                            left: stickerSetThumbnail.right
-                            right: expandSetButton.left
-                            verticalCenter: parent.verticalCenter
-                            margins: Theme.paddingSmall
-                        }
-                        truncationMode: TruncationMode.Fade
-                        text: modelData.title
-                    }
-
-                    Icon {
-                        id: expandSetButton
-                        source: stickerSetColumn.isExpanded ? "image://theme/icon-m-up" : "image://theme/icon-m-down"
-                        anchors {
-                            right: parent.right
-                            verticalCenter: parent.verticalCenter
-                            rightMargin: Theme.paddingMedium
-                        }
-                    }
-
-
-                }
-
-
-                IconButton {
-                    id: removeSetButton
-                    icon.source: "image://theme/icon-m-remove"
-                    anchors.verticalCenter: parent.verticalCenter
-                    onClicked: {
-                        // Cattura ID e tipo PRIMA del Remorse: dopo il commit
-                        // il delegate potrebbe già essere stato distrutto.
-                        var stickerSetId = modelData.id;
-                        var stickerType = (modelData.sticker_type && modelData.sticker_type["@type"])
-                                          ? modelData.sticker_type["@type"] : "stickerTypeRegular";
-                        Remorse.popupAction(chatPage, qsTr("Removing sticker set"), function() {
-                            tdLibWrapper.changeStickerSet(stickerSetId, false, stickerType);
-                        });
+                        id: recentsChipLabel
+                        anchors.centerIn: parent
+                        text: qsTr("Recent")
+                        color: recentsChip.isCurrent ? Theme.highlightColor : Theme.primaryColor
+                        font.pixelSize: Theme.fontSizeExtraSmall
                     }
                 }
 
+                Repeater {
+                    model: stickerPickerOverlayItem.installedStickerSets
+                    BackgroundItem {
+                        id: setChip
+                        width: Math.min(Math.max(setChipLabel.implicitWidth + Theme.paddingMedium * 2, Theme.itemSizeMedium), Theme.itemSizeExtraLarge * 2)
+                        height: Theme.itemSizeSmall
+                        readonly property bool isCurrent: index === stickerPickerOverlayItem.selectedSetIndex
+                        onClicked: stickerPickerOverlayItem.selectedSetIndex = index
+                        onPressAndHold: {
+                            var stickerType = (modelData.sticker_type && modelData.sticker_type["@type"])
+                                              ? modelData.sticker_type["@type"] : "stickerTypeRegular";
+                            chatPage.requestDeleteSet(modelData.id, stickerType, modelData.title);
+                        }
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: height / 2
+                            color: setChip.isCurrent ? Theme.rgba(Theme.highlightColor, 0.28) : Theme.rgba(Theme.primaryColor, 0.12)
+                        }
+                        Label {
+                            id: setChipLabel
+                            anchors.centerIn: parent
+                            width: parent.width - Theme.paddingSmall
+                            text: modelData && modelData.title ? modelData.title : qsTr("Sticker set")
+                            color: setChip.isCurrent ? Theme.highlightColor : Theme.primaryColor
+                            font.pixelSize: Theme.fontSizeExtraSmall
+                            maximumLineCount: 1
+                            truncationMode: TruncationMode.Elide
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                    }
+                }
             }
+        }
 
-            Loader {
-                id: stickerSetLoader
-                width: parent.width
-                active: stickerSetColumn.isExpanded || height > 0
-                height: stickerSetColumn.isExpanded ? Theme.itemSizeExtraLarge + Theme.paddingSmall : 0
-                opacity: stickerSetColumn.isExpanded ? 1.0 : 0.0
+        SilicaGridView {
+            id: stickerPickerGrid
+            width: parent.width
+            height: parent.height - stickerSetChipStrip.height - Theme.paddingSmall
+            cellWidth: Theme.itemSizeExtraLarge
+            cellHeight: Theme.itemSizeExtraLarge
+            clip: true
+            cacheBuffer: Math.round(Theme.itemSizeExtraLarge * 4)
+            model: stickerPickerOverlayItem.currentStickers()
+            delegate: stickerComponent
 
-                Behavior on height {
-                    NumberAnimation { duration: 200 }
-                }
-                Behavior on opacity {
-                    NumberAnimation { duration: 200 }
-                }
+            VerticalScrollDecorator {}
 
-                property var myStickerSet
-                onActiveChanged: {
-                    if(!active) {
-                        myStickerSet = ({});
-                    }
-                }
-
-                sourceComponent: Component {
-                    SilicaListView {
-                        id: installedStickerSetGridView
-                        width: stickerSetLoader.width
-                        height: stickerSetLoader.height
-
-                        orientation: Qt.Horizontal
-                        visible: count > 0
-
-                        model: stickerSetLoader.myStickerSet
-                        delegate: stickerComponent
-
-                        HorizontalScrollDecorator {}
-                    }
-                }
+            Label {
+                anchors.centerIn: parent
+                visible: stickerPickerGrid.count === 0
+                text: stickerPickerOverlayItem.selectedSetIndex === -1
+                      ? qsTr("No recent stickers")
+                      : qsTr("No stickers in this set")
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeExtraSmall
             }
         }
     }
+
 }

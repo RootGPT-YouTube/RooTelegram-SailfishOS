@@ -18,6 +18,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import Sailfish.Share 1.0
 import "../../../js/functions.js" as Functions
 
 
@@ -32,29 +33,56 @@ Item {
     property var message
     readonly property color gradientColor: '#bb000000'
     readonly property int gradientPadding: Theme.itemSizeMedium
-    // signal declarations
-    // JavaScript functions
-    // object properties
+
+    readonly property string mediaPath: {
+        if (!message || !message.content) return "";
+        var t = message.content['@type'];
+        if (t === 'messagePhoto' && message.content.photo && message.content.photo.sizes) {
+            var sizes = message.content.photo.sizes;
+            var best = sizes[sizes.length - 1];
+            return (best && best.photo && best.photo.local && best.photo.local.path) || "";
+        }
+        if (t === 'messageVideo' && message.content.video && message.content.video.video) {
+            return (message.content.video.video.local && message.content.video.video.local.path) || "";
+        }
+        return "";
+    }
+    readonly property string mediaMimeType: {
+        if (!message || !message.content) return "application/octet-stream";
+        var t = message.content['@type'];
+        if (t === 'messagePhoto') return "image/jpeg";
+        if (t === 'messageVideo') {
+            return (message.content.video && message.content.video.mime_type) || "video/mp4";
+        }
+        return "application/octet-stream";
+    }
+
     anchors.fill: parent
     opacity: active ? 1 : 0
     Behavior on opacity { FadeAnimator {} }
-    // large property bindings
-    // child objects
-    // states
-    // transitions
 
     onActiveChanged: {
         console.log('overlay active', active)
     }
 
-    function forwardMessage() {
-        var neededPermissions = Functions.getMessagesNeededForwardPermissions([message]);
-        pageStack.push(Qt.resolvedUrl("../../../pages/ChatSelectionPage.qml"), {
-            myUserId: tdLibWrapper.getUserInformation().id,
-            headerDescription: qsTr("Forward %Ln messages", "dialog header", 1),
-            payload: {fromChatId: message.chat_id, messageIds:[message.id], neededPermissions: neededPermissions},
-            state: "forwardMessages"
-        });
+    Connections {
+        target: tdLibWrapper
+        onCopyToDownloadsSuccessful: {
+            if (typeof appNotification !== 'undefined') {
+                appNotification.show(qsTr("Saved %1").arg(fileName), filePath);
+            }
+        }
+        onCopyToDownloadsError: {
+            if (typeof appNotification !== 'undefined') {
+                appNotification.show(qsTr("Save failed."));
+            }
+        }
+    }
+
+    ShareAction {
+        id: shareAction
+        mimeType: overlay.mediaMimeType
+        resources: overlay.mediaPath ? [overlay.mediaPath] : []
     }
 
     // "header"
@@ -232,10 +260,12 @@ Item {
 
 //         }
         IconButton {
+             enabled: overlay.mediaPath !== ""
+             opacity: enabled ? 1.0 : 0.2
              icon.source: "image://theme/icon-m-downloads?" + (pressed
                           ? Theme.highlightColor
                           : Theme.lightPrimaryColor)
-             onClicked: pageStack.pop()
+             onClicked: tdLibWrapper.copyFileToPictures(overlay.mediaPath)
          }
         Item {
             width: Theme.itemSizeSmall
@@ -243,12 +273,12 @@ Item {
         }
 
         IconButton {
-             enabled: message.can_be_forwarded
+             enabled: overlay.mediaPath !== ""
              opacity: enabled ? 1.0 : 0.2
              icon.source: "image://theme/icon-m-share?" + (pressed
                           ? Theme.highlightColor
                           : Theme.lightPrimaryColor)
-             onClicked: forwardMessage()
+             onClicked: shareAction.trigger()
          }
     }
     states: [

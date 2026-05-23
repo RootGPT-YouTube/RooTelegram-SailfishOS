@@ -14,6 +14,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QStringList>
 
 class AppSettings : public QObject {
     Q_OBJECT
@@ -131,6 +132,9 @@ public:
     bool disableVideoPreload() const;
     void setDisableVideoPreload(bool enable);
 
+    Q_INVOKABLE QStringList recentEmojis() const;
+    Q_INVOKABLE void addRecentEmoji(const QString &emoji);
+
 signals:
     void sendByEnterChanged();
     void focusTextAreaAfterSendChanged();
@@ -156,6 +160,7 @@ signals:
     void highlightUnreadConversationsChanged();
     void coverHideGroupChannelUnreadChanged();
     void disableVideoPreloadChanged();
+    void recentEmojisChanged();
 
 private:
     QSettings settings;

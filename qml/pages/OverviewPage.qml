@@ -120,6 +120,36 @@ Page {
         filterText: chatSearchField.text
     }
 
+    Timer {
+        id: serverSearchTimer
+        interval: 400
+        repeat: false
+        onTriggered: {
+            var query = chatSearchField.text;
+            if (query && query.length > 0) {
+                tdLibWrapper.searchChatsOnServer(query, 50);
+                tdLibWrapper.searchContacts(query, 100);
+                if (query.length >= 5) {
+                    tdLibWrapper.searchPublicChats(query);
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onUsersReceived: {
+            if (extra === "searchContacts" && userIds) {
+                for (var i = 0; i < userIds.length; i += 1) {
+                    var userId = userIds[i];
+                    if (userId !== undefined && userId !== null) {
+                        tdLibWrapper.createPrivateChat(userId.toString(), "searchContacts");
+                    }
+                }
+            }
+        }
+    }
+
     function openChat(chatId) {
         if(chatListCreated && chatId) {
             Debug.log("[OverviewPage] Opening Chat: ", chatId);
@@ -432,7 +462,11 @@ Page {
             }
 
             MouseArea {
-                anchors.fill: parent
+                id: searchTapArea
+                anchors.verticalCenter: pageStatus.verticalCenter
+                anchors.horizontalCenter: pageStatus.horizontalCenter
+                width: pageStatus.width + 2 * Theme.paddingLarge
+                height: pageStatus.height + 2 * Theme.paddingLarge
                 onClicked: {
                     chatSearchField.focus = true;
                     chatSearchField.opacity = 1.0;
@@ -440,6 +474,104 @@ Page {
                 }
             }
 
+            MouseArea {
+                anchors.left: searchTapArea.right
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                onClicked: titleMenuPanel.opened = !titleMenuPanel.opened
+            }
+        }
+
+        MouseArea {
+            id: titleMenuDismiss
+            anchors.fill: parent
+            visible: titleMenuPanel.opened
+            z: 50
+            onClicked: titleMenuPanel.opened = false
+        }
+
+        Rectangle {
+            id: titleMenuPanel
+            property bool opened: false
+            anchors.top: pageHeader.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            color: Theme.highlightBackgroundColor
+            z: 100
+            clip: true
+            height: opened ? titleMenuColumn.height + 2 * Theme.paddingMedium : 0
+            visible: height > 0
+            Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
+
+            Column {
+                id: titleMenuColumn
+                anchors.top: parent.top
+                anchors.topMargin: Theme.paddingMedium
+                anchors.left: parent.left
+                anchors.right: parent.right
+
+                BackgroundItem {
+                    width: parent.width
+                    height: Theme.itemSizeSmall
+                    onClicked: {
+                        titleMenuPanel.opened = false;
+                        overviewPage.markAllChatsAsRead();
+                    }
+                    Label {
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Mark all as read")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    }
+                }
+                BackgroundItem {
+                    width: parent.width
+                    height: Theme.itemSizeSmall
+                    onClicked: {
+                        titleMenuPanel.opened = false;
+                        pageStack.push(Qt.resolvedUrl("../pages/ChatFoldersPage.qml"));
+                    }
+                    Label {
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Edit folders")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    }
+                }
+                BackgroundItem {
+                    width: parent.width
+                    height: Theme.itemSizeSmall
+                    onClicked: {
+                        titleMenuPanel.opened = false;
+                        pageStack.push(Qt.resolvedUrl("../pages/ReorderPinnedChatsPage.qml"));
+                    }
+                    Label {
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Reorder Pinned Chats")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    }
+                }
+                BackgroundItem {
+                    width: parent.width
+                    height: Theme.itemSizeSmall
+                    onClicked: {
+                        titleMenuPanel.opened = false;
+                        pageStack.push(Qt.resolvedUrl("../pages/AllScheduledMessagesPage.qml"));
+                    }
+                    Label {
+                        anchors.fill: parent
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Scheduled messages")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    }
+                }
+            }
         }
 
         SearchField {
@@ -451,6 +583,8 @@ Page {
             height: pageHeader.height
             placeholderText: qsTr("Search chat...")
             canHide: text === ""
+
+            onTextChanged: serverSearchTimer.restart()
 
             onHideClicked: {
                 resetFocus();
@@ -510,6 +644,12 @@ Page {
                         text: qsTr("Reorder Pinned Chats")
                         onClicked: {
                             pageStack.push(Qt.resolvedUrl("../pages/ReorderPinnedChatsPage.qml"));
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("Scheduled messages")
+                        onClicked: {
+                            pageStack.push(Qt.resolvedUrl("../pages/AllScheduledMessagesPage.qml"));
                         }
                     }
                 }

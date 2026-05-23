@@ -159,12 +159,49 @@ void ContactsModel::importContact(const QVariantMap &singlePerson)
     QVariantList phoneNumbers = singlePerson.value("phoneNumbers").toList();
     if (!firstName.isEmpty() && !phoneNumbers.isEmpty()) {
         for (QVariant phoneNumber : phoneNumbers) {
+            QString rawNumber = phoneNumber.toString();
+            QString normalized = normalizePhoneNumber(rawNumber);
+            if (normalized.isEmpty()) {
+                continue;
+            }
             QVariantMap singleContact;
             singleContact.insert("first_name", firstName);
             singleContact.insert("last_name", singlePerson.value("lastName").toString());
-            singleContact.insert("phone_number", phoneNumber.toString());
+            singleContact.insert("phone_number", normalized);
             deviceContacts.append(singleContact);
-            LOG("Found contact" << singleContact.value("first_name").toString() << singleContact.value("last_name").toString() << singleContact.value("phone_number").toString());
+            LOG("Found contact" << singleContact.value("first_name").toString() << singleContact.value("last_name").toString() << "raw" << rawNumber << "normalized" << normalized);
         }
     }
+}
+
+QString ContactsModel::normalizePhoneNumber(const QString &raw) const
+{
+    // Rimuovi tutto eccetto cifre e '+'
+    QString cleaned;
+    for (QChar c : raw) {
+        if (c == '+' || c.isDigit()) {
+            cleaned.append(c);
+        }
+    }
+    if (cleaned.isEmpty()) {
+        return cleaned;
+    }
+    // 00xx... -> +xx...
+    if (cleaned.startsWith("00")) {
+        cleaned = "+" + cleaned.mid(2);
+    }
+    // Se manca il prefisso internazionale, prova ad inferirlo dal numero dell'utente loggato
+    if (!cleaned.startsWith("+")) {
+        const QString ownPhone = tdLibWrapper ? tdLibWrapper->getUserInformation().value("phone_number").toString() : QString();
+        if (!ownPhone.isEmpty()) {
+            // Assume country code di 2 cifre (copre Italia/EU/CN/etc, fallisce solo per US/CA=1, Kazakistan/Russia=1, alcuni 3-digit)
+            const QString cc = ownPhone.left(2);
+            // Strip eventuali 0 nazionali iniziali (es. italiani salvati come "0333...")
+            while (cleaned.startsWith("0")) {
+                cleaned = cleaned.mid(1);
+            }
+            cleaned = "+" + cc + cleaned;
+        }
+    }
+    return cleaned;
 }

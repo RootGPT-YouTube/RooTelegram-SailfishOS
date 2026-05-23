@@ -143,8 +143,13 @@ Page {
             }
 
 
-            SectionHeader {
+            Text {
                 text: qsTr("About Telegram")
+                color: Theme.highlightColor
+                font.pixelSize: Theme.fontSizeSmall
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
             }
 
             Label {
@@ -191,8 +196,13 @@ Page {
                 }
             }
 
-            SectionHeader {
+            Text {
                 text: qsTr("Credits")
+                color: Theme.highlightColor
+                font.pixelSize: Theme.fontSizeSmall
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
             }
 
             Label {
@@ -220,7 +230,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width  - ( 2 * Theme.horizontalPageMargin )
-                text: qsTr("This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!")
+                text: qsTr("This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!")
                 font.pixelSize: Theme.fontSizeExtraSmall
                 wrapMode: Text.Wrap
                 anchors {
@@ -229,14 +239,14 @@ Page {
             }
 
             Text {
-                text: "<a href=\"https://github.com/twitter/twemoji\">" + qsTr("Open twemoji on GitHub") + "</a>"
+                text: "<a href=\"https://github.com/jdecked/twemoji\">" + qsTr("Open Twemoji on GitHub") + "</a>"
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                 }
                 font.pixelSize: Theme.fontSizeSmall
                 linkColor: Theme.highlightColor
 
-                onLinkActivated: Qt.openUrlExternally("https://github.com/twitter/twemoji")
+                onLinkActivated: Qt.openUrlExternally("https://github.com/jdecked/twemoji")
             }
 
             Label {

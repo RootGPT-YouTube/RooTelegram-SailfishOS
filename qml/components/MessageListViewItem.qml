@@ -31,7 +31,7 @@ import "../js/debug.js" as Debug
 
 ListItem {
     id: messageListItem
-    contentHeight: messageBackground.height + Theme.paddingMedium + ( reactionsColumn.visible ? reactionsColumn.height : 0 )
+    contentHeight: messageBackground.height + Theme.paddingMedium + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
     Behavior on contentHeight { NumberAnimation { duration: 200 } }
     property var chatId
     property var messageId
@@ -874,7 +874,13 @@ ListItem {
 
                 Loader {
                     id: messageInReplyToLoader
-                    active: typeof myMessage.reply_to_message_id !== "undefined" && myMessage.reply_to_message_id !== 0
+                    // Nascondi il chip "in risposta a" se il reply punta al root del thread
+                    // (= il post del canale clonato nel discussion group): in modalità
+                    // commenti il reply implicito è ovvio e mostrarlo confonde.
+                    active: typeof myMessage.reply_to_message_id !== "undefined"
+                            && myMessage.reply_to_message_id !== 0
+                            && !(page.messageThreadId > 1
+                                 && Number(myMessage.reply_to_message_id) === Number(page.messageThreadId))
                     width: parent.width
                     // text height ~= 1,28*font.pixelSize
                     height: active ? precalculatedValues.messageInReplyToHeight : 0
@@ -1188,6 +1194,73 @@ ListItem {
 
         }
 
+    }
+
+    BackgroundItem {
+        id: commentsButton
+
+        readonly property var replyInfo: (myMessage && myMessage.interaction_info) ? myMessage.interaction_info.reply_info : null
+        readonly property int replyCount: replyInfo ? (replyInfo.reply_count || 0) : 0
+
+        anchors {
+            top: reactionsColumn.visible ? reactionsColumn.bottom : messageTextRow.bottom
+            topMargin: Theme.paddingSmall
+            horizontalCenter: parent.horizontalCenter
+        }
+        width: parent.width - ( 2 * Theme.horizontalPageMargin )
+        // Mostra il bottone "N comment(s)" solo se siamo in un canale broadcast
+        // E il post è davvero commentabile (TDLib popola reply_info SOLO sui
+        // canali con discussion group linkato). Attenzione: TDLib serializza il
+        // campo assente come `undefined`, non `null`, e in JS `undefined !== null`
+        // è true: serve un truthy-check, non un null-check.
+        height: (chatPage.isChannel && !!replyInfo) ? Theme.itemSizeExtraSmall : 0
+        visible: !!(chatPage.isChannel && replyInfo)
+
+        Row {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Theme.paddingSmall
+
+            Image {
+                source: "image://theme/icon-s-chat?" + (commentsButton.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                width: Theme.iconSizeSmall
+                height: Theme.iconSizeSmall
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Label {
+                text: qsTr("%n comment(s)", "", commentsButton.replyCount) + " ↑"
+                color: commentsButton.highlighted ? Theme.highlightColor : Theme.primaryColor
+                font.pixelSize: Theme.fontSizeSmall
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        onClicked: {
+            tdLibWrapper.getMessageThread(messageListItem.chatId, messageListItem.messageId);
+        }
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onMessageThreadInfoReceived: {
+            if (chatId !== messageListItem.chatId || messageId !== messageListItem.messageId) {
+                return;
+            }
+            var discussionChatId = threadInfo.chat_id;
+            var messageThreadId = threadInfo.message_thread_id;
+            if (!discussionChatId || !messageThreadId) {
+                return;
+            }
+            var discussionChat = tdLibWrapper.getChat(discussionChatId.toString());
+            if (!discussionChat || !discussionChat.id) {
+                return;
+            }
+            pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), {
+                chatInformation: discussionChat,
+                messageThreadId: messageThreadId
+            });
+        }
     }
 
     Column {

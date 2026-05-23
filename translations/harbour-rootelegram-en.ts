@@ -48,14 +48,6 @@
         <translation>TDLib version %1</translation>
     </message>
     <message>
-        <source>This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation>This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</translation>
-    </message>
-    <message>
-        <source>Open twemoji on GitHub</source>
-        <translation>Open twemoji on GitHub</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</translation>
     </message>
@@ -85,6 +77,14 @@
     </message>
     <message>
         <source>Fork by RootGPT - based on Fernschreiber by Sebastian J. Wolf and Yottagram by Michal Szczepaniak.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open Twemoji on GitHub</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -124,6 +124,80 @@
     </message>
     <message>
         <source>Member added.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AllScheduledMessagesPage</name>
+    <message>
+        <source>Photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scheduled messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n scheduled message(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No scheduled messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Long-press the send button in a chat to schedule a new message.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reschedule</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1163,6 +1237,50 @@
         <source>Telegram allows up to %1 images per album.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Scheduled for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sticker set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No recent stickers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No stickers in this set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to delete &quot;%1&quot;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to delete this set?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="unfinished">Yes</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished">No</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1463,6 +1581,21 @@ messages</numerusform>
     </message>
 </context>
 <context>
+    <name>EmojiPicker</name>
+    <message>
+        <source>Search emoji</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No results</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No emoji</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ForumTopicsPage</name>
     <message>
         <source>Topics</source>
@@ -1587,13 +1720,13 @@ messages</numerusform>
 </context>
 <context>
     <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation>
-            <numerusform>Forward %Ln message</numerusform>
-            <numerusform>Forward %Ln messages</numerusform>
-        </translation>
+    <message>
+        <source>Saved %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save failed.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1869,6 +2002,13 @@ messages</numerusform>
         <source>Reveal spoiler</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <source>%n comment(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2114,6 +2254,10 @@ messages</numerusform>
     </message>
     <message>
         <source>New Channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scheduled messages</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2778,6 +2922,81 @@ messages</numerusform>
     </message>
 </context>
 <context>
+    <name>ScheduleMessageDialog</name>
+    <message>
+        <source>Schedule</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="unfinished">Cancel</translation>
+    </message>
+    <message>
+        <source>Message will be sent at the selected time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pick a time in the future.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Already scheduled in this chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No other scheduled messages in this chat.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting scheduled message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reschedule</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SearchChatsPage</name>
     <message>
         <source>No chats found.</source>
@@ -2924,14 +3143,6 @@ messages</numerusform>
         <translation type="unfinished">Open Telegram Database Library on GitHub</translation>
     </message>
     <message>
-        <source>This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation type="unfinished">This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</translation>
-    </message>
-    <message>
-        <source>Open twemoji on GitHub</source>
-        <translation type="unfinished">Open twemoji on GitHub</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation type="unfinished">This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</translation>
     </message>
@@ -2946,6 +3157,14 @@ messages</numerusform>
     <message>
         <source>Open OSM Nominatim Wiki</source>
         <translation type="unfinished">Open OSM Nominatim Wiki</translation>
+    </message>
+    <message>
+        <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open Twemoji on GitHub</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3357,16 +3576,24 @@ messages</numerusform>
 <context>
     <name>StickerPicker</name>
     <message>
-        <source>Recently used</source>
-        <translation>Recently used</translation>
-    </message>
-    <message>
-        <source>Removing sticker set</source>
-        <translation>Removing sticker set</translation>
-    </message>
-    <message>
         <source>Sticker set successfully removed!</source>
         <translation>Sticker set successfully removed!</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sticker set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No recent stickers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No stickers in this set</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

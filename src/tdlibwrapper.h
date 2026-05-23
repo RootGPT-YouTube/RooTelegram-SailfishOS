@@ -159,6 +159,7 @@ public:
     Q_INVOKABLE QStringList getChatReactions(const QString &chatId);
     Q_INVOKABLE QString getOptionString(const QString &optionName);
     Q_INVOKABLE void copyFileToDownloads(const QString &filePath, bool openAfterCopy = false);
+    Q_INVOKABLE void copyFileToPictures(const QString &filePath);
     Q_INVOKABLE void openFileOnDevice(const QString &filePath);
     Q_INVOKABLE void controlScreenSaver(bool enabled);
     Q_INVOKABLE bool getJoinChatRequested();
@@ -216,7 +217,7 @@ public:
     Q_INVOKABLE void getRecentStickers();
     Q_INVOKABLE void getInstalledStickerSets();
     Q_INVOKABLE void getInstalledCustomEmojiSets();
-    Q_INVOKABLE void getStickerSet(const QString &setId);
+    Q_INVOKABLE void getStickerSet(const QString &setId, const QString &expectedType = QString());
     Q_INVOKABLE void getCustomEmojiStickers(const QVariantList &customEmojiIds, const QString &extra = QString());
     Q_INVOKABLE void ensureCustomEmoji(const QString &customEmojiId);
     Q_INVOKABLE QString getCustomEmojiPath(const QString &customEmojiId);
@@ -265,6 +266,8 @@ public:
     Q_INVOKABLE void searchChatMessages(qlonglong chatId, const QString &query, qlonglong fromMessageId = 0);
     Q_INVOKABLE void getPinnedMessages(qlonglong chatId, qlonglong messageThreadId = 0, qlonglong fromMessageId = 0, int limit = 50);
     Q_INVOKABLE void searchPublicChats(const QString &query);
+    Q_INVOKABLE void searchChatsOnServer(const QString &query, int limit = 50);
+    Q_INVOKABLE void searchContacts(const QString &query, int limit = 100);
     Q_INVOKABLE void readAllChatMentions(qlonglong chatId);
     Q_INVOKABLE void readAllChatReactions(qlonglong chatId);
     Q_INVOKABLE void toggleChatIsMarkedAsUnread(qlonglong chatId, bool isMarkedAsUnread);
@@ -286,6 +289,7 @@ public:
     Q_INVOKABLE void getActiveSessions();
     Q_INVOKABLE void terminateSession(const QString &sessionId);
     Q_INVOKABLE void getMessageAvailableReactions(qlonglong chatId, qlonglong messageId);
+    Q_INVOKABLE void getMessageThread(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getPageSource(const QString &address);
     Q_INVOKABLE void addMessageReaction(qlonglong chatId, qlonglong messageId, const QString &reaction);
     Q_INVOKABLE void removeMessageReaction(qlonglong chatId, qlonglong messageId, const QString &reaction);
@@ -298,7 +302,11 @@ public:
     Q_INVOKABLE void getForumTopic(qlonglong chatId, int forumTopicId);
     Q_INVOKABLE void getMessageThreadHistory(qlonglong chatId, qlonglong messageThreadId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50);
     Q_INVOKABLE void setCurrentMessageThreadId(qlonglong threadId);
+    Q_INVOKABLE void setPendingScheduledSendDate(int sendDate);
+    Q_INVOKABLE void getChatScheduledMessages(qlonglong chatId);
+    Q_INVOKABLE void editMessageSchedulingState(qlonglong chatId, qlonglong messageId, int sendDate);
     Q_INVOKABLE qlonglong getCurrentMessageThreadId() const;
+    Q_INVOKABLE void setCurrentChatIsForum(bool isForum);
     qlonglong getPendingForumTopicsChatId() const { return pendingForumTopicsChatId; }
 
     // Others (candidates for extraction ;))
@@ -399,6 +407,7 @@ signals:
     void sessionsReceived(int inactive_session_ttl_days, const QVariantList &sessions);
     void openFileExternally(const QString &filePath);
     void availableReactionsReceived(qlonglong messageId, const QStringList &reactions);
+    void messageThreadInfoReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &threadInfo);
     void forumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId);
     void forumTopicReceived(qlonglong chatId, const QVariantMap &topic);
     void chatFoldersReceived(const QVariantList &folders);
@@ -458,6 +467,7 @@ private:
     QVariantMap &fillTdlibParameters(QVariantMap &parameters);
     const Group *updateGroup(qlonglong groupId, const QVariantMap &groupInfo, QHash<qlonglong,Group*> *groups);
     QVariantMap newSendMessageRequest(qlonglong chatId, qlonglong replyToMessageId);
+    void applyPendingScheduling(QVariantMap &request);
     void initializeTDLibReceiver();
     void updateUserInformation(const QString &userId, const QVariantMap &userInformation);
     void upsertCustomEmojiFromSticker(const QVariantMap &sticker);
@@ -498,7 +508,9 @@ private:
     bool joinChatRequested;
     bool isLoggingOut;
     qlonglong currentMessageThreadId;
+    bool currentChatIsForum;
     qlonglong pendingForumTopicsChatId;
+    int pendingScheduledSendDate;
 
 };
 

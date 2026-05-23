@@ -48,14 +48,6 @@
         <translation>TDLib versione %1</translation>
     </message>
     <message>
-        <source>This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation>Questo progetto utilizza twemoji. Copyright 2018 Twitter, Inc. e altri collaboratori. Grazie per averle rese disponibili secondo la Licenza MIT (codice) e CC-BY 4.0 (grafica)!</translation>
-    </message>
-    <message>
-        <source>Open twemoji on GitHub</source>
-        <translation>Apri twemoji in GitHub</translation>
-    </message>
-    <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Questo progetto utilizza rlottie. Copyright 2020 Samsung Electronics Co., Ltd. e altri collaboratori. Grazie per averlo reso disponibile secondo la Licenza MIT!</translation>
     </message>
@@ -86,6 +78,14 @@
     <message>
         <source>Fork by RootGPT - based on Fernschreiber by Sebastian J. Wolf and Yottagram by Michal Szczepaniak.</source>
         <translation>Fork di RootGPT — basato su Fernschreiber di Sebastian J. Wolf e Yottagram di Michal Szczepaniak.</translation>
+    </message>
+    <message>
+        <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
+        <translation>Questo progetto utilizza Twemoji (fork jdecked). Copyright dei collaboratori di Twemoji. Grazie per averlo reso disponibile secondo le condizioni della Licenza MIT (codice) e CC-BY 4.0 (grafica)!</translation>
+    </message>
+    <message>
+        <source>Open Twemoji on GitHub</source>
+        <translation>Apri Twemoji su GitHub</translation>
     </message>
 </context>
 <context>
@@ -125,6 +125,80 @@
     <message>
         <source>Member added.</source>
         <translation>Membro aggiunto.</translation>
+    </message>
+</context>
+<context>
+    <name>AllScheduledMessagesPage</name>
+    <message>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation>Documento</translation>
+    </message>
+    <message>
+        <source>Voice</source>
+        <translation>Vocale</translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation>GIF</translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation>Adesivo</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Posizione</translation>
+    </message>
+    <message>
+        <source>Unknown chat</source>
+        <translation>Chat sconosciuta</translation>
+    </message>
+    <message>
+        <source>Scheduled messages</source>
+        <translation>Messaggi programmati</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n scheduled message(s)</source>
+        <translation>
+            <numerusform>%n messaggio programmato</numerusform>
+            <numerusform>%n messaggi programmati</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Loading…</source>
+        <translation>Caricamento…</translation>
+    </message>
+    <message>
+        <source>No scheduled messages</source>
+        <translation>Nessun messaggio programmato</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Aggiorna</translation>
+    </message>
+    <message>
+        <source>Long-press the send button in a chat to schedule a new message.</source>
+        <translation>Tieni premuto il pulsante invio in una chat per programmare un nuovo messaggio.</translation>
+    </message>
+    <message>
+        <source>Deleting</source>
+        <translation>Eliminazione in corso</translation>
+    </message>
+    <message>
+        <source>Reschedule</source>
+        <translation>Riprogramma</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Elimina</translation>
     </message>
 </context>
 <context>
@@ -1163,6 +1237,50 @@
         <source>Telegram allows up to %1 images per album.</source>
         <translation>Telegram consente fino a %1 immagini per album.</translation>
     </message>
+    <message>
+        <source>Scheduled for %1</source>
+        <translation>Programmato per %1</translation>
+    </message>
+    <message>
+        <source>Do you want to delete this set?</source>
+        <translation>Vuoi eliminare questo set?</translation>
+    </message>
+    <message>
+        <source>Do you want to delete &quot;%1&quot;?</source>
+        <translation>Vuoi eliminare «%1»?</translation>
+    </message>
+    <message>
+        <source>Deleting &quot;%1&quot;</source>
+        <translation>Eliminazione di «%1»</translation>
+    </message>
+    <message>
+        <source>Deleting set</source>
+        <translation>Eliminazione del set</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation type="unfinished">Recenti</translation>
+    </message>
+    <message>
+        <source>Sticker set</source>
+        <translation type="unfinished">Set di sticker</translation>
+    </message>
+    <message>
+        <source>No recent stickers</source>
+        <translation type="unfinished">Nessuno sticker recente</translation>
+    </message>
+    <message>
+        <source>No stickers in this set</source>
+        <translation type="unfinished">Nessuno sticker in questo set</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="unfinished">Si</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished">No</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1461,6 +1579,21 @@
     </message>
 </context>
 <context>
+    <name>EmojiPicker</name>
+    <message>
+        <source>Search emoji</source>
+        <translation>Cerca emoji</translation>
+    </message>
+    <message>
+        <source>No results</source>
+        <translation>Nessun risultato</translation>
+    </message>
+    <message>
+        <source>No emoji</source>
+        <translation>Nessuna emoji</translation>
+    </message>
+</context>
+<context>
     <name>ForumTopicsPage</name>
     <message>
         <source>Topics</source>
@@ -1585,13 +1718,13 @@
 </context>
 <context>
     <name>FullscreenOverlay</name>
-    <message numerus="yes">
-        <source>Forward %Ln messages</source>
-        <comment>dialog header</comment>
-        <translation>
-            <numerusform>Inoltra %Ln messaggio</numerusform>
-            <numerusform>Inoltra %Ln messaggi</numerusform>
-        </translation>
+    <message>
+        <source>Saved %1</source>
+        <translation>Salvato %1</translation>
+    </message>
+    <message>
+        <source>Save failed.</source>
+        <translation>Salvataggio non riuscito.</translation>
     </message>
 </context>
 <context>
@@ -1867,6 +2000,13 @@
         <source>Reveal spoiler</source>
         <translation>Rivela spoiler</translation>
     </message>
+    <message numerus="yes">
+        <source>%n comment(s)</source>
+        <translation>
+            <numerusform>%n commento</numerusform>
+            <numerusform>%n commenti</numerusform>
+        </translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2113,6 +2253,10 @@
     <message>
         <source>Reorder Pinned Chats</source>
         <translation>Riordina Chat Pinnate</translation>
+    </message>
+    <message>
+        <source>Scheduled messages</source>
+        <translation>Messaggi programmati</translation>
     </message>
 </context>
 <context>
@@ -2776,6 +2920,81 @@
     </message>
 </context>
 <context>
+    <name>ScheduleMessageDialog</name>
+    <message>
+        <source>Schedule</source>
+        <translation>Programma</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Annulla</translation>
+    </message>
+    <message>
+        <source>Message will be sent at the selected time.</source>
+        <translation>Il messaggio verrà inviato all&apos;orario selezionato.</translation>
+    </message>
+    <message>
+        <source>Pick a time in the future.</source>
+        <translation>Scegli un orario nel futuro.</translation>
+    </message>
+    <message>
+        <source>Date</source>
+        <translation>Data</translation>
+    </message>
+    <message>
+        <source>Time</source>
+        <translation>Ora</translation>
+    </message>
+    <message>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation>Documento</translation>
+    </message>
+    <message>
+        <source>Voice</source>
+        <translation>Vocale</translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation>GIF</translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation>Adesivo</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Posizione</translation>
+    </message>
+    <message>
+        <source>Already scheduled in this chat</source>
+        <translation>Già programmato in questa chat</translation>
+    </message>
+    <message>
+        <source>No other scheduled messages in this chat.</source>
+        <translation>Nessun altro messaggio programmato in questa chat.</translation>
+    </message>
+    <message>
+        <source>Deleting scheduled message</source>
+        <translation>Eliminazione del messaggio programmato</translation>
+    </message>
+    <message>
+        <source>Reschedule</source>
+        <translation>Riprogramma</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Elimina</translation>
+    </message>
+</context>
+<context>
     <name>SearchChatsPage</name>
     <message>
         <source>No chats found.</source>
@@ -2867,83 +3086,83 @@
     <name>SettingsAbout</name>
     <message>
         <source>A Telegram client for Sailfish OS</source>
-        <translation type="unfinished">Un client Telegram per Sailfish OS</translation>
+        <translation>Un client Telegram per Sailfish OS</translation>
     </message>
     <message>
         <source>Fork by RootGPT - based on Fernschreiber by Sebastian J. Wolf and Yottagram by Michal Szczepaniak.</source>
-        <translation type="unfinished">Fork di RootGPT — basato su Fernschreiber di Sebastian J. Wolf e Yottagram di Michal Szczepaniak.</translation>
+        <translation>Fork di RootGPT — basato su Fernschreiber di Sebastian J. Wolf e Yottagram di Michal Szczepaniak.</translation>
     </message>
     <message>
         <source>Fernschreiber</source>
-        <translation type="unfinished">Fernschreiber</translation>
+        <translation>Fernschreiber</translation>
     </message>
     <message>
         <source>Yottagram</source>
-        <translation type="unfinished">Yottagram</translation>
+        <translation>Yottagram</translation>
     </message>
     <message>
         <source>Source code on GitHub</source>
-        <translation type="unfinished">Codice sorgente su GitHub</translation>
+        <translation>Codice sorgente su GitHub</translation>
     </message>
     <message>
         <source>Licensed under GNU GPLv3</source>
-        <translation type="unfinished">Rilasciato sotto licenza GNU GPLv3</translation>
+        <translation>Rilasciato sotto licenza GNU GPLv3</translation>
     </message>
     <message>
         <source>About Telegram</source>
-        <translation type="unfinished">Informazioni su Telegram</translation>
+        <translation>Informazioni su Telegram</translation>
     </message>
     <message>
         <source>This product uses the Telegram API but is not endorsed or certified by Telegram.</source>
-        <translation type="unfinished">Questo prodotto utilizza le API di Telegram ma non è né supportato né certificato da Telegram.</translation>
+        <translation>Questo prodotto utilizza le API di Telegram ma non è né supportato né certificato da Telegram.</translation>
     </message>
     <message>
         <source>TDLib version %1</source>
-        <translation type="unfinished">TDLib versione %1</translation>
+        <translation>TDLib versione %1</translation>
     </message>
     <message>
         <source>Terms of Service</source>
-        <translation type="unfinished">Termini di servizio</translation>
+        <translation>Termini di servizio</translation>
     </message>
     <message>
         <source>Privacy Policy</source>
-        <translation type="unfinished">Norme sulla privacy</translation>
+        <translation>Norme sulla privacy</translation>
     </message>
     <message>
         <source>Credits</source>
-        <translation type="unfinished">Riconoscimenti</translation>
+        <translation>Riconoscimenti</translation>
     </message>
     <message>
         <source>This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!</source>
-        <translation type="unfinished">Questo progetto utilizza la libreria Telegram Database Library (TDLib). Grazie per averla rilasciata secondo la Boost Software License 1.0!</translation>
+        <translation>Questo progetto utilizza la libreria Telegram Database Library (TDLib). Grazie per averla rilasciata secondo la Boost Software License 1.0!</translation>
     </message>
     <message>
         <source>Open Telegram Database Library on GitHub</source>
-        <translation type="unfinished">Apri Telegram Database Library in GitHub</translation>
-    </message>
-    <message>
-        <source>This project uses twemoji. Copyright 2018 Twitter, Inc. and other contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation type="unfinished">Questo progetto utilizza twemoji. Copyright 2018 Twitter, Inc. e altri collaboratori. Grazie per averle rese disponibili secondo la Licenza MIT (codice) e CC-BY 4.0 (grafica)!</translation>
-    </message>
-    <message>
-        <source>Open twemoji on GitHub</source>
-        <translation type="unfinished">Apri twemoji in GitHub</translation>
+        <translation>Apri Telegram Database Library in GitHub</translation>
     </message>
     <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
-        <translation type="unfinished">Questo progetto utilizza rlottie. Copyright 2020 Samsung Electronics Co., Ltd. e altri collaboratori. Grazie per averlo reso disponibile secondo la Licenza MIT!</translation>
+        <translation>Questo progetto utilizza rlottie. Copyright 2020 Samsung Electronics Co., Ltd. e altri collaboratori. Grazie per averlo reso disponibile secondo la Licenza MIT!</translation>
     </message>
     <message>
         <source>Open rlottie on GitHub</source>
-        <translation type="unfinished">Apri rlottie su GitHub</translation>
+        <translation>Apri rlottie su GitHub</translation>
     </message>
     <message>
         <source>This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!</source>
-        <translation type="unfinished">Questo progetto utilizza OpenStreetMap Nominatim per il geocoding inverso degli allegati di posizione. Grazie per averlo reso disponibile come servizio web!</translation>
+        <translation>Questo progetto utilizza OpenStreetMap Nominatim per il geocoding inverso degli allegati di posizione. Grazie per averlo reso disponibile come servizio web!</translation>
     </message>
     <message>
         <source>Open OSM Nominatim Wiki</source>
-        <translation type="unfinished">Apri la wiki di OSM Nominatim</translation>
+        <translation>Apri la wiki di OSM Nominatim</translation>
+    </message>
+    <message>
+        <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
+        <translation>Questo progetto utilizza Twemoji (fork jdecked). Copyright dei collaboratori di Twemoji. Grazie per averlo reso disponibile secondo le condizioni della Licenza MIT (codice) e CC-BY 4.0 (grafica)!</translation>
+    </message>
+    <message>
+        <source>Open Twemoji on GitHub</source>
+        <translation>Apri Twemoji su GitHub</translation>
     </message>
 </context>
 <context>
@@ -3355,16 +3574,24 @@
 <context>
     <name>StickerPicker</name>
     <message>
-        <source>Recently used</source>
-        <translation>Usati di recente</translation>
-    </message>
-    <message>
-        <source>Removing sticker set</source>
-        <translation>Rimuovi il set di sticker</translation>
-    </message>
-    <message>
         <source>Sticker set successfully removed!</source>
         <translation>Il set di sticker è stato rimosso!</translation>
+    </message>
+    <message>
+        <source>Recent</source>
+        <translation>Recenti</translation>
+    </message>
+    <message>
+        <source>Sticker set</source>
+        <translation>Set di sticker</translation>
+    </message>
+    <message>
+        <source>No recent stickers</source>
+        <translation>Nessuno sticker recente</translation>
+    </message>
+    <message>
+        <source>No stickers in this set</source>
+        <translation>Nessuno sticker in questo set</translation>
     </message>
 </context>
 <context>

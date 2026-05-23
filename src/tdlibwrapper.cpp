@@ -110,7 +110,9 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     , joinChatRequested(false)
     , isLoggingOut(false)
     , currentMessageThreadId(0)
+    , currentChatIsForum(false)
     , pendingForumTopicsChatId(0)
+    , pendingScheduledSendDate(0)
 {
     LOG("Initializing TD Lib...");
 
@@ -237,6 +239,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(okReceived(QString)), this, SLOT(handleOkReceived(QString)));
     connect(this->tdLibReceiver, SIGNAL(sessionsReceived(int, QVariantList)), this, SIGNAL(sessionsReceived(int, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(availableReactionsReceived(qlonglong, QStringList)), this, SIGNAL(availableReactionsReceived(qlonglong, QStringList)));
+    connect(this->tdLibReceiver, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(activeEmojiReactionsUpdated(QStringList)), this, SLOT(handleActiveEmojiReactionsUpdated(QStringList)));
@@ -486,7 +489,10 @@ void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force
     // message_thread_id per aggiornare correttamente i contatori unread del topic.
     if (currentMessageThreadId > 0) {
         requestObject.insert("message_thread_id", currentMessageThreadId);
-        sourceObject.insert(_TYPE, "messageSourceForumTopicHistory");
+        // Forum topic vs discussion thread di canale: TDLib rifiuta
+        // messageSourceForumTopicHistory su chat non-forum ("Chat is not a forum").
+        sourceObject.insert(_TYPE, currentChatIsForum ? "messageSourceForumTopicHistory"
+                                                      : "messageSourceMessageThreadHistory");
     } else {
         sourceObject.insert(_TYPE, "messageSourceChatHistory");
     }
@@ -800,18 +806,40 @@ QVariantMap TDLibWrapper::newSendMessageRequest(qlonglong chatId, qlonglong repl
     request.insert(_TYPE, "sendMessage");
     request.insert(CHAT_ID, chatId);
     if (currentMessageThreadId && currentMessageThreadId != 1) {
-        QVariantMap topicId;
-        topicId.insert("@type", "messageTopicForum");
-        topicId.insert("forum_topic_id", (int)currentMessageThreadId);
-        request.insert("topic_id", topicId);
-            }
+        if (currentChatIsForum) {
+            QVariantMap topicId;
+            topicId.insert("@type", "messageTopicForum");
+            topicId.insert("forum_topic_id", (int)currentMessageThreadId);
+            request.insert("topic_id", topicId);
+        } else if (!replyToMessageId) {
+            // Discussion thread di canale: il commento deve essere reply al root del thread.
+            replyToMessageId = currentMessageThreadId;
+        }
+        request.insert("message_thread_id", currentMessageThreadId);
+    }
     if (replyToMessageId) {
         QVariantMap replyTo;
         replyTo.insert(_TYPE, TYPE_INPUT_MESSAGE_REPLY_TO_MESSAGE);
         replyTo.insert(MESSAGE_ID, replyToMessageId);
         request.insert(REPLY_TO, replyTo);
     }
+    applyPendingScheduling(request);
     return request;
+}
+
+void TDLibWrapper::applyPendingScheduling(QVariantMap &request)
+{
+    if (pendingScheduledSendDate <= 0) {
+        return;
+    }
+    QVariantMap schedulingState;
+    schedulingState.insert(_TYPE, "messageSchedulingStateSendAtDate");
+    schedulingState.insert("send_date", pendingScheduledSendDate);
+    QVariantMap options = request.value("options").toMap();
+    options.insert(_TYPE, "messageSendOptions");
+    options.insert("scheduling_state", schedulingState);
+    request.insert("options", options);
+    pendingScheduledSendDate = 0;
 }
 
 void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId)
@@ -865,10 +893,15 @@ void TDLibWrapper::sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths
     requestObject.insert(_TYPE, "sendMessageAlbum");
     requestObject.insert(CHAT_ID, chatId);
     if (currentMessageThreadId && currentMessageThreadId != 1) {
-        QVariantMap topicId;
-        topicId.insert(_TYPE, "messageTopicForum");
-        topicId.insert("forum_topic_id", (int)currentMessageThreadId);
-        requestObject.insert("topic_id", topicId);
+        if (currentChatIsForum) {
+            QVariantMap topicId;
+            topicId.insert(_TYPE, "messageTopicForum");
+            topicId.insert("forum_topic_id", (int)currentMessageThreadId);
+            requestObject.insert("topic_id", topicId);
+        } else if (!replyToMessageId) {
+            replyToMessageId = currentMessageThreadId;
+        }
+        requestObject.insert("message_thread_id", currentMessageThreadId);
     }
     if (replyToMessageId) {
         QVariantMap replyTo;
@@ -892,6 +925,7 @@ void TDLibWrapper::sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths
         inputMessageContents.append(content);
     }
     requestObject.insert("input_message_contents", inputMessageContents);
+    applyPendingScheduling(requestObject);
     this->sendRequest(requestObject);
 }
 
@@ -1301,12 +1335,20 @@ void TDLibWrapper::getInstalledCustomEmojiSets()
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::getStickerSet(const QString &setId)
+void TDLibWrapper::getStickerSet(const QString &setId, const QString &expectedType)
 {
     LOG("Retrieving sticker set" << setId);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "getStickerSet");
     requestObject.insert("set_id", setId);
+    // Propaghiamo il tipo via @extra ("stickerType:Regular|CustomEmoji"):
+    // il receiver lo userà per iniettare sticker_type nel payload nel caso
+    // TDLib non lo includa, evitando di lasciare classificare ad euristiche.
+    if (expectedType == QLatin1String("stickerTypeCustomEmoji")) {
+        requestObject.insert(_EXTRA, QStringLiteral("stickerType:CustomEmoji"));
+    } else if (expectedType == QLatin1String("stickerTypeRegular")) {
+        requestObject.insert(_EXTRA, QStringLiteral("stickerType:Regular"));
+    }
     this->sendRequest(requestObject);
 }
 
@@ -1863,6 +1905,28 @@ void TDLibWrapper::searchPublicChats(const QString &query)
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::searchChatsOnServer(const QString &query, int limit)
+{
+    LOG("Searching chats on server" << query << "limit" << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchChatsOnServer");
+    requestObject.insert("query", query);
+    requestObject.insert("limit", limit > 0 ? limit : 50);
+    requestObject.insert(_EXTRA, "searchChatsOnServer");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::searchContacts(const QString &query, int limit)
+{
+    LOG("Searching contacts" << query << "limit" << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchContacts");
+    requestObject.insert("query", query);
+    requestObject.insert("limit", limit > 0 ? limit : 100);
+    requestObject.insert(_EXTRA, "searchContacts");
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::readAllChatMentions(qlonglong chatId)
 {
     LOG("Read all chat mentions" << chatId);
@@ -2203,6 +2267,17 @@ void TDLibWrapper::getMessageAvailableReactions(qlonglong chatId, qlonglong mess
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::getMessageThread(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Get message thread" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getMessageThread");
+    requestObject.insert(_EXTRA, QString("getMessageThread:%1:%2").arg(chatId).arg(messageId));
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::getPageSource(const QString &address)
 {
     QUrl url = QUrl(address);
@@ -2460,6 +2535,27 @@ void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCo
             } else {
                 emit copyToDownloadsError(fileInfo.fileName(), downloadFilePath);
             }
+        }
+    } else {
+        emit copyToDownloadsError(fileInfo.fileName(), filePath);
+    }
+}
+
+void TDLibWrapper::copyFileToPictures(const QString &filePath)
+{
+    LOG("Copy file to pictures" << filePath);
+    QFileInfo fileInfo(filePath);
+    if (fileInfo.exists()) {
+        QString destDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+        if (destDir.isEmpty()) {
+            destDir = QDir::homePath() + "/Pictures";
+        }
+        QDir().mkpath(destDir);
+        QString destPath = destDir + "/" + fileInfo.fileName();
+        if (QFile::exists(destPath) || QFile::copy(filePath, destPath)) {
+            emit copyToDownloadsSuccessful(fileInfo.fileName(), destPath);
+        } else {
+            emit copyToDownloadsError(fileInfo.fileName(), destPath);
         }
     } else {
         emit copyToDownloadsError(fileInfo.fileName(), filePath);
@@ -2874,21 +2970,10 @@ void TDLibWrapper::handleSuperGroupUpdated(qlonglong groupId, const QVariantMap 
 
 void TDLibWrapper::handleStickerSets(const QVariantList &stickerSets, const QString &stickerType)
 {
-    // stickerType arriva dall'@extra della request (Regular o CustomEmoji);
-    // se vuoto fallback al campo per-item del singolo set.
-    const bool requestIsCustomEmoji = stickerType == QLatin1String("stickerTypeCustomEmoji");
-    // Niente più limite a 4: senza i dettagli di OGNI set custom emoji
-    // l'utente vede solo i primi N set nel picker premium emoji. Fetch all.
-    QListIterator<QVariant> stickerSetIterator(stickerSets);
-    while (stickerSetIterator.hasNext()) {
-        QVariantMap stickerSet = stickerSetIterator.next().toMap();
-        const QString setId = stickerSet.value(ID).toString();
-        if (setId.isEmpty()) {
-            continue;
-        }
-        Q_UNUSED(requestIsCustomEmoji);
-        this->getStickerSet(setId);
-    }
+    // Il fetch dei dettagli del singolo set è demandato a StickerManager
+    // (vedi handleStickerSetsReceived), così può saltare i set già in
+    // cache. Evita 56 round-trip TDLib sequenziali post-rimozione che
+    // bloccavano la UI.
     emit this->stickerSetsReceived(stickerSets, stickerType);
 }
 
@@ -3002,6 +3087,15 @@ void TDLibWrapper::handleErrorReceived(int code, const QString &message, const Q
         QStringList parts(extra.split(':'));
         if (parts.size() == 3 && parts.at(0) == QStringLiteral("getMessage")) {
             emit messageNotFound(parts.at(1).toLongLong(), parts.at(2).toLongLong());
+        }
+        // Bypass silenzioso degli errori per getChatScheduledMessages: la pagina
+        // "Scheduled messages" globale lo invoca su TUTTE le chat e per i canali
+        // dove non sei admin TDLib torna "Not enough rights to get scheduled
+        // messages". Emettiamo un risultato vuoto con lo stesso extra così la
+        // pagina può drenare pendingChats senza mostrare toast.
+        if (extra.startsWith(QStringLiteral("getChatScheduledMessages:"))) {
+            emit messagesReceivedWithExtra(QVariantList(), 0, extra);
+            return;
         }
     }
     emit errorReceived(code, message, extra);
@@ -3460,9 +3554,45 @@ void TDLibWrapper::setCurrentMessageThreadId(qlonglong threadId)
     this->currentMessageThreadId = threadId;
 }
 
+void TDLibWrapper::setPendingScheduledSendDate(int sendDate)
+{
+    this->pendingScheduledSendDate = sendDate > 0 ? sendDate : 0;
+}
+
+void TDLibWrapper::getChatScheduledMessages(qlonglong chatId)
+{
+    LOG("Get chat scheduled messages" << chatId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatScheduledMessages");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(_EXTRA, QString("getChatScheduledMessages:%1").arg(chatId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::editMessageSchedulingState(qlonglong chatId, qlonglong messageId, int sendDate)
+{
+    LOG("Edit message scheduling state" << chatId << messageId << "sendDate:" << sendDate);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageSchedulingState");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    if (sendDate > 0) {
+        QVariantMap state;
+        state.insert(_TYPE, "messageSchedulingStateSendAtDate");
+        state.insert("send_date", sendDate);
+        requestObject.insert("scheduling_state", state);
+    }
+    this->sendRequest(requestObject);
+}
+
 qlonglong TDLibWrapper::getCurrentMessageThreadId() const
 {
     return this->currentMessageThreadId;
+}
+
+void TDLibWrapper::setCurrentChatIsForum(bool isForum)
+{
+    this->currentChatIsForum = isForum;
 }
 
 void TDLibWrapper::handleForumTopicsReceived(qlonglong, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId)

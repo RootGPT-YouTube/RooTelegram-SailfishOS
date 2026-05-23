@@ -24,6 +24,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Share 1.0
+import Nemo.DBus 2.0
 import "pages"
 import "components"
 import "./js/functions.js" as Functions
@@ -47,28 +48,54 @@ ApplicationWindow
         var hasFileResources = false;
         for (var i = 0; i < resources.length; i += 1) {
             var resource = resources[i];
-            if (!resource || typeof resource.type === "undefined") {
+            if (!resource) {
                 continue;
             }
-            if (resource.type === ShareResource.FilePathType) {
-                var filePath = resource.filePath ? resource.filePath.toString() : "";
-                if (filePath !== "") {
+            if (typeof resource === 'string') {
+                var asString = resource.toString();
+                if (asString.indexOf("file://") === 0 || asString.indexOf("/") === 0) {
                     normalizedResources.push({
                         type: "file",
-                        filePath: filePath
+                        filePath: asString.indexOf("file://") === 0 ? asString.substring(7) : asString
                     });
                     hasFileResources = true;
-                }
-            } else if (resource.type === ShareResource.StringDataType) {
-                var resourceData = resource.data ? resource.data.toString() : "";
-                if (resourceData !== "") {
+                } else {
                     normalizedResources.push({
                         type: "text",
-                        name: resource.name ? resource.name.toString() : "",
-                        data: resourceData
+                        name: "",
+                        data: asString
                     });
                     hasTextResources = true;
                 }
+                continue;
+            }
+            var filePath = resource.filePath ? resource.filePath.toString() : "";
+            if (filePath !== "") {
+                normalizedResources.push({
+                    type: "file",
+                    filePath: filePath
+                });
+                hasFileResources = true;
+                continue;
+            }
+            var statusText = resource.status ? resource.status.toString() : "";
+            if (statusText !== "") {
+                normalizedResources.push({
+                    type: "text",
+                    name: resource.linkTitle ? resource.linkTitle.toString() : "",
+                    data: statusText
+                });
+                hasTextResources = true;
+                continue;
+            }
+            var resourceData = resource.data ? resource.data.toString() : "";
+            if (resourceData !== "") {
+                normalizedResources.push({
+                    type: "text",
+                    name: resource.name ? resource.name.toString() : "",
+                    data: resourceData
+                });
+                hasTextResources = true;
             }
         }
         if (normalizedResources.length === 0) {
@@ -110,15 +137,22 @@ ApplicationWindow
         }
     }
 
-    ShareProvider {
-        method: "rootelegram_share"
-        capabilities: ["*"]
-        onTriggered: {
+    ShareAction {
+        id: shareActionParser
+    }
+
+    DBusAdaptor {
+        service: "com.github.RootGPT_YouTube.rootelegram"
+        path: "/share/rootelegram_share"
+        iface: "org.sailfishos.share"
+
+        function share(shareConfiguration) {
+            shareActionParser.loadConfiguration(shareConfiguration);
             appWindow.activate();
             var queuedResources = [];
-            if (resources && resources.length > 0) {
-                for (var i = 0; i < resources.length; i += 1) {
-                    queuedResources.push(resources[i]);
+            if (shareActionParser.resources && shareActionParser.resources.length > 0) {
+                for (var i = 0; i < shareActionParser.resources.length; i += 1) {
+                    queuedResources.push(shareActionParser.resources[i]);
                 }
             }
             appWindow.pendingShareResources = queuedResources;
@@ -159,5 +193,18 @@ ApplicationWindow
             tdLibWrapper: tdLibWrapper,
             appNotification: appNotification
         });
+    }
+
+    Connections {
+        target: Qt.application
+        onStateChanged: {
+            // Quando l'app esce dallo stato attivo (swipe-close / minimize),
+            // riportiamo lo stack alla Home: alla prossima attivazione l'utente
+            // riparte dalla OverviewPage anziché dall'ultima pagina aperta.
+            if (Qt.application.state !== Qt.ApplicationActive
+                    && pageStack && pageStack.depth > 1) {
+                pageStack.pop(null, PageStackAction.Immediate);
+            }
+        }
     }
 }

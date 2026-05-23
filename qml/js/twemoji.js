@@ -1,6 +1,7 @@
-/*! Copyright Twitter Inc. and other contributors. Licensed under MIT */
+/*! Copyright the Twemoji contributors. Licensed under MIT (code) / CC-BY 4.0 (graphics). */
 /*
-  https://github.com/twitter/twemoji/blob/gh-pages/LICENSE
+  https://github.com/jdecked/twemoji/blob/main/LICENSE
+  https://github.com/jdecked/twemoji/blob/main/LICENSE-GRAPHICS
 
   Stripped down for usage in RooTelegram.
 */
@@ -38,15 +39,16 @@ function toCodePoint(unicodeSurrogates) {
   return r.join('-');
 }
 
+// Twemoji jdecked: i nomi file non includono mai il variation selector
+// FE0F (neanche nei ZWJ sequence). Quindi qui rimuoviamo SEMPRE FE0F dal
+// codepoint generato, sia che ci sia un U+200D sia che non ci sia.
 function getEmojiPath(str) {
-    return basePath + toCodePoint(str.indexOf(U200D) < 0 ? str.replace(UFE0Fg, '') : str) + '.svg';
+    return basePath + toCodePoint(str.replace(UFE0Fg, '')) + '.svg';
 }
 
 function emojify(str, emojiSize) {
   return String(str).replace(re, function (rawText) {
-    var iconId = toCodePoint(rawText.indexOf(U200D) < 0 ?
-        rawText.replace(UFE0Fg, '') :
-        rawText);
+    var iconId = toCodePoint(rawText.replace(UFE0Fg, ''));
     return iconId ?
       // recycle the match string replacing the emoji
       // with its image counter part
@@ -55,10 +57,10 @@ function emojify(str, emojiSize) {
         basePath,
         iconId,
         '.svg',
-        '" align="middle" width="',
-        Math.round(emojiSize * 1.15 ),
+        '" align="bottom" width="',
+        Math.round(emojiSize * 0.8 ),
         '" height="',
-        Math.round(emojiSize * 1.15 ),
+        Math.round(emojiSize * 0.8 ),
         '"/>'
       ) : rawText;
     }

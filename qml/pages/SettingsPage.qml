@@ -45,7 +45,7 @@ Page {
 
             Accordion {
                 flickable: settingsContainer
-                SettingsUserProfile { expanded: true; asynchronous: false }
+                SettingsUserProfile { asynchronous: false }
                 SettingsSession {}
                 SettingsPrivacy {}
                 SettingsBehavior {}

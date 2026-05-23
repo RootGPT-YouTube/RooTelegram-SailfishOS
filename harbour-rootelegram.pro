@@ -23,7 +23,11 @@ TARGET = harbour-rootelegram
 # Single source of truth per la versione: bumpa qui e build-rpm.sh +
 # rpm/*.{spec,yaml} vengono sincronizzati al build; AboutPage la legge
 # via il context property `appVersion` esposto da main.cpp.
-VERSION = 1.7
+# NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
+# come variabile riservata e su template app la riduce a major.minor
+# quando viene espansa con $$VERSION, troncando il patch.
+RT_APP_VERSION = 1.7.5
+VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
 
@@ -33,7 +37,7 @@ PKGCONFIG += nemonotifications-qt5 zlib openssl glib-2.0
 QT += core dbus sql multimedia positioning
 
 DEFINES += QT_STATICPLUGIN
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += APP_VERSION=\\\"$$RT_APP_VERSION\\\"
 
 SOURCES += src/harbour-rootelegram.cpp \
     src/appsettings.cpp \
@@ -83,6 +87,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/components/PressEffect.qml \
     qml/components/ProfilePictureList.qml \
     qml/components/ReplyMarkupButtons.qml \
+    qml/components/EmojiPicker.qml \
     qml/components/StickerPicker.qml \
     qml/components/PhotoTextsListItem.qml \
     qml/components/StickerSetOverlay.qml \
@@ -163,6 +168,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/pages/OverviewPage.qml \
     qml/pages/AboutPage.qml \
     qml/pages/AddChatMembersPage.qml \
+    qml/pages/AllScheduledMessagesPage.qml \
     qml/pages/BlacklistPage.qml \
     qml/pages/ReorderPinnedChatsPage.qml \
     qml/pages/ChatRecentActionsPage.qml \
@@ -172,6 +178,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/pages/PollCreationPage.qml \
     qml/pages/PromoteAdminDialog.qml \
     qml/pages/PollResultsPage.qml \
+    qml/pages/ScheduleMessageDialog.qml \
     qml/pages/SearchChatsPage.qml \
     qml/pages/SelectDiscussionGroupPage.qml \
     qml/pages/SettingsPage.qml \
@@ -187,7 +194,8 @@ DISTFILES += qml/harbour-rootelegram.qml \
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172 256x256
 
 TRANSLATIONS += translations/harbour-rootelegram-it.ts \
-                translations/harbour-rootelegram-en.ts
+                translations/harbour-rootelegram-en.ts \
+                translations/harbour-rootelegram-de.ts
 
 equals(QT_ARCH, arm) {
     message(Building ARM)

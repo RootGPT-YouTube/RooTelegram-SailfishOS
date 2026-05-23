@@ -79,6 +79,8 @@ public:
 
     Q_INVOKABLE void calculateUnreadState();
     Q_INVOKABLE QVariantMap getPrivateUnreadCounts() const;
+    Q_INVOKABLE QVariantList getAllChatIds() const;
+    Q_INVOKABLE QString getChatTitle(qlonglong chatId) const;
 
     bool showAllChats() const;
     void setShowAllChats(bool showAll);

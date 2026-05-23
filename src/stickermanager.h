@@ -43,6 +43,7 @@ public:
     Q_INVOKABLE QVariantList getInstalledCustomEmojiSets();
     Q_INVOKABLE QVariantMap getStickerSet(const QString &stickerSetId);
     Q_INVOKABLE bool hasStickerSet(const QString &stickerSetId);
+    Q_INVOKABLE bool hasStickerSetDetails(const QString &stickerSetId) const;
     Q_INVOKABLE bool isStickerSetInstalled(const QString &stickerSetId);
     Q_INVOKABLE bool needsReload();
     Q_INVOKABLE void setNeedsReload(const bool &reloadNeeded);
@@ -65,6 +66,7 @@ private:
     bool inferCustomEmojiFromStickers(const QVariantList &stickers) const;
     bool purgeRegularReferences(const QString &stickerSetId);
     bool purgeCustomEmojiReferences(const QString &stickerSetId);
+    void sortByTitleAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const;
 
     TDLibWrapper *tdLibWrapper;
 

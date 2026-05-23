@@ -193,6 +193,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateMessageInteractionInfo", &TDLibReceiver::processUpdateMessageInteractionInfo);
     handlers.insert("sessions", &TDLibReceiver::processSessions);
     handlers.insert("availableReactions", &TDLibReceiver::processAvailableReactions);
+    handlers.insert("messageThreadInfo", &TDLibReceiver::processMessageThreadInfo);
     handlers.insert("updateMessageMentionRead", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadMentionCount", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadReactionCount", &TDLibReceiver::processUpdateChatUnreadReactionCount);
@@ -656,7 +657,27 @@ void TDLibReceiver::processStickerSets(const QVariantMap &receivedInformation)
 void TDLibReceiver::processStickerSet(const QVariantMap &receivedInformation)
 {
     LOG("Received a sticker set...");
-    emit stickerSet(cleanupMap(receivedInformation));
+    QVariantMap stickerSetData = cleanupMap(receivedInformation);
+    // Se il payload non porta sticker_type (TDLib 1.8.62 a volte lo omette
+    // sulla response del singolo set), recuperiamo il tipo dall'@extra
+    // taggato dalla request originale ("stickerType:Regular|CustomEmoji").
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    if (extra.startsWith(QLatin1String("stickerType:"))) {
+        const QString existingType = stickerSetData.value("sticker_type").toMap().value(_TYPE).toString();
+        if (existingType.isEmpty()) {
+            const QString suffix = extra.mid(QStringLiteral("stickerType:").length());
+            QVariantMap typeObj;
+            if (suffix == QLatin1String("CustomEmoji")) {
+                typeObj.insert(_TYPE, QStringLiteral("stickerTypeCustomEmoji"));
+            } else if (suffix == QLatin1String("Regular")) {
+                typeObj.insert(_TYPE, QStringLiteral("stickerTypeRegular"));
+            }
+            if (!typeObj.isEmpty()) {
+                stickerSetData.insert("sticker_type", typeObj);
+            }
+        }
+    }
+    emit stickerSet(stickerSetData);
 }
 void TDLibReceiver::processChatMembers(const QVariantMap &receivedInformation)
 {
@@ -885,6 +906,22 @@ void TDLibReceiver::processAvailableReactions(const QVariantMap &receivedInforma
     if (!reactions.isEmpty()) {
         emit availableReactionsReceived(messageId, reactions);
     }
+}
+
+void TDLibReceiver::processMessageThreadInfo(const QVariantMap &receivedInformation)
+{
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    qlonglong requestChatId = 0;
+    qlonglong requestMessageId = 0;
+    if (extra.startsWith("getMessageThread:")) {
+        const QStringList parts = extra.split(":");
+        if (parts.size() >= 3) {
+            requestChatId = parts.at(1).toLongLong();
+            requestMessageId = parts.at(2).toLongLong();
+        }
+    }
+    LOG("Received message thread info" << requestChatId << requestMessageId);
+    emit messageThreadInfoReceived(requestChatId, requestMessageId, receivedInformation);
 }
 
 void TDLibReceiver::processUpdateChatUnreadMentionCount(const QVariantMap &receivedInformation)

@@ -608,7 +608,11 @@ function handleErrorMessage(code, message) {
     if (message === "File not found" || message === "FILE_DOWNLOAD_ID_INVALID"
             || message === "Wrong file id or the file is temporarily unavailable"
             || message === "Threads can't be used in General topic"
-            || message === "Invalid forum topic identifier specified") {
+            || message === "Invalid forum topic identifier specified"
+            || message === "Chat is not a forum"
+            || message === "There are no message threads in the chat"
+            || message === "Invalid value of parameter from_message_id specified"
+            || message === "Not enough rights to get scheduled messages") {
         return;
     }
     if (message === "USER_ALREADY_PARTICIPANT") {

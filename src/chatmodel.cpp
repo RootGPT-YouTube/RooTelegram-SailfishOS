@@ -453,9 +453,9 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
             qlonglong startFrom = topicLastMessageId > 0 ? topicLastMessageId : this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong();
             tdLibWrapper->getChatHistory(chatId, startFrom);
         } else {
-            // Altri topic: usa getMessageThreadHistory con last_message.id come anchor
+            // Altri topic / discussion thread canale: usa getMessageThreadHistory
             qlonglong anchorMessageId = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
-                        tdLibWrapper->getMessageThreadHistory(chatId, anchorMessageId);
+            tdLibWrapper->getMessageThreadHistory(chatId, anchorMessageId);
         }
     } else {
         tdLibWrapper->getChatHistory(chatId, this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong());
@@ -655,18 +655,20 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
             while (messagesIterator.hasNext()) {
                 const QVariantMap messageData = messagesIterator.next().toMap();
                 const qlonglong messageId = messageData.value(ID).toLongLong();
+                if (!messageData.value("scheduling_state").toMap().isEmpty()) {
+                    continue;
+                }
                 if (messageId && messageData.value(CHAT_ID).toLongLong() == chatId && !messageIndexMap.contains(messageId)) {
-                    // Filtra per topic se siamo in un forum topic
-                    if (messageThreadId) {
+                    // Per General topic (threadId == 1) usiamo getChatHistory che ritorna
+                    // TUTTO il supergruppo: dobbiamo filtrare client-side per escludere
+                    // i messaggi di altri topic. Per gli altri thread (forum topics > 1 e
+                    // discussion thread di canale) TDLib usa getMessageThreadHistory e
+                    // filtra già lui: i messaggi della risposta hanno spesso
+                    // message_thread_id/topic_id azzerati, quindi NON filtriamo client.
+                    if (messageThreadId == 1) {
                         const QVariantMap topicId = messageData.value("topic_id").toMap();
                         const qlonglong msgForumTopicId = topicId.value("forum_topic_id").toLongLong();
-                        if (messageThreadId == 1) {
-                            // General topic: mostra solo messaggi senza topic o con forum_topic_id=0 o =1
-                            if (msgForumTopicId > 1) continue;
-                        } else {
-                            // Altri topic: filtra per forum_topic_id esatto
-                            if (msgForumTopicId != messageThreadId) continue;
-                        }
+                        if (msgForumTopicId > 1) continue;
                     }
                     LOG("New message will be added:" << messageId);
                     MessageData* message = new MessageData(messageData, messageId);
@@ -736,18 +738,41 @@ void ChatModel::handleSponsoredMessageReceived(qlonglong chatId, const QVariantM
 void ChatModel::handleNewMessageReceived(qlonglong chatId, const QVariantMap &message)
 {
     const qlonglong messageId = message.value(ID).toLongLong();
+    // Filtro scheduled: TDLib emette updateNewMessage anche per messaggi messi in coda
+    // di schedulazione lato sender. Devono restare invisibili finché non vengono
+    // davvero inviati all'orario previsto.
+    if (!message.value("scheduling_state").toMap().isEmpty()) {
+        LOG("Ignoring scheduled message (scheduling_state set)" << messageId);
+        return;
+    }
+    const qlonglong msgDate = message.value("date").toLongLong();
+    const qlonglong now = QDateTime::currentMSecsSinceEpoch() / 1000;
+    if (msgDate > now + 60) {
+        LOG("Ignoring future-dated message (likely scheduled)" << messageId << "date" << msgDate);
+        return;
+    }
     if (chatId == this->chatId && !messageIndexMap.contains(messageId)) {
-        // Se siamo in un forum topic, filtra per topic_id.forum_topic_id
-        if (messageThreadId && messageThreadId != 1) {
+        // Se siamo in un forum topic / discussion thread, filtra per appartenenza
+        const bool inThread = messageThreadId && messageThreadId != 1;
+        if (inThread) {
             const QVariantMap topicId = message.value("topic_id").toMap();
             const qlonglong msgForumTopicId = topicId.value("forum_topic_id").toLongLong();
-            // Fallback: controlla anche message_thread_id per compatibilità
             const qlonglong msgThreadId = message.value("message_thread_id").toLongLong();
-            if (msgForumTopicId != messageThreadId && msgThreadId != messageThreadId) {
+            // TDLib azzera spesso questi campi sui commenti dei discussion thread di canale:
+            // se entrambi sono 0 non possiamo filtrare → accettiamo (meglio mostrare anche
+            // qualche messaggio di un altro post che perdere i propri commenti).
+            const bool msgHasThreadInfo = msgForumTopicId != 0 || msgThreadId != 0;
+            if (msgHasThreadInfo
+                    && msgForumTopicId != messageThreadId
+                    && msgThreadId != messageThreadId) {
                 return;
             }
         }
-        if (this->isMostRecentMessageLoaded() && !this->searchModeActive) {
+        // In thread mode bypassiamo isMostRecentMessageLoaded(): si basa sul
+        // last_read_inbox_message_id della chat completa, che non riflette la
+        // posizione all'interno del thread → il nuovo commento appena inviato
+        // veniva scartato finché non si usciva e rientrava.
+        if ((this->isMostRecentMessageLoaded() || inThread) && !this->searchModeActive) {
             LOG("New message received for this chat");
             QList<MessageData*> messagesToBeAdded;
             messagesToBeAdded.append(new MessageData(message, messageId));

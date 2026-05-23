@@ -82,7 +82,7 @@ Page {
             MenuItem {
                 text: qsTr("Download Picture")
                 onClicked: {
-                    tdLibWrapper.copyFileToDownloads(singleImage.file.path);
+                    tdLibWrapper.copyFileToPictures(singleImage.file.path);
                 }
             }
         }

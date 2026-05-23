@@ -38,6 +38,8 @@ namespace {
     const QString KEY_HIGHLIGHT_UNREADCONVS("highlightUnreadConversations");
     const QString KEY_COVER_HIDE_GROUP_CHANNEL_UNREAD("coverHideGroupChannelUnread");
     const QString KEY_DISABLE_VIDEO_PRELOAD("disableVideoPreload");
+    const QString KEY_RECENT_EMOJIS("recentEmojis");
+    const int RECENT_EMOJIS_MAX = 30;
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent), settings(QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/com.github.RootGPT_YouTube/rootelegram/settings.conf", QSettings::NativeFormat)
@@ -380,4 +382,24 @@ void AppSettings::setSponsoredMess(SponsoredMess sponsoredMess)
         settings.setValue(KEY_SPONSORED_MESS, sponsoredMess);
         emit sponsoredMessChanged();
     }
+}
+
+QStringList AppSettings::recentEmojis() const
+{
+    return settings.value(KEY_RECENT_EMOJIS).toStringList();
+}
+
+void AppSettings::addRecentEmoji(const QString &emoji)
+{
+    if (emoji.isEmpty()) {
+        return;
+    }
+    QStringList list = settings.value(KEY_RECENT_EMOJIS).toStringList();
+    list.removeAll(emoji);
+    list.prepend(emoji);
+    while (list.size() > RECENT_EMOJIS_MAX) {
+        list.removeLast();
+    }
+    settings.setValue(KEY_RECENT_EMOJIS, list);
+    emit recentEmojisChanged();
 }
