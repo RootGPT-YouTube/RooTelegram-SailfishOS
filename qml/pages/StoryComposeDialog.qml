@@ -45,7 +45,9 @@ Page {
     // Opzioni publish: bind iniziale ad AppSettings (sticky), modificabili in-page.
     // L'AppSettings viene aggiornato solo al momento del publish, così se l'utente
     // annulla la modifica non resta scritta.
-    property string privacyMode: appSettings.storyPrivacyMode    // "everyone" | "selected" | "customAudience"
+    // Eccezione: privacyMode NON è sticky, parte sempre da "everyone" — la scelta
+    // dell'audience per UNA storia non deve influenzare la successiva.
+    property string privacyMode: "everyone"
     property bool allowScreenshots: appSettings.storyAllowScreenshots
     property bool postToProfile: appSettings.storyPostToProfile
     // "Selected contacts" è ephemeral: lista sempre vuota all'apertura,
@@ -110,7 +112,8 @@ Page {
 
     function persistOptions() {
         // Persistenza sticky: scritta solo all'atto del publish.
-        appSettings.storyPrivacyMode = privacyMode;
+        // privacyMode NON viene persistito: torna a "everyone" alla prossima
+        // apertura della compose (vedi commento sulla property).
         appSettings.storyAllowScreenshots = allowScreenshots;
         appSettings.storyPostToProfile = postToProfile;
     }
@@ -482,11 +485,14 @@ Page {
                 }
 
                 // ---- Custom audience: gruppo persistente di destinatari ----
-                // Sempre visibile. Tap → picker (mode "custom") con i membri
+                // Visibile SOLO quando l'utente sceglie "Custom audience" come
+                // mode: simmetrico con "Choose contacts" che appare solo per
+                // "Selected contacts". Tap → picker (mode "custom") con i membri
                 // ordinati in cima. Il count si aggiorna live dopo l'editing.
                 BackgroundItem {
                     width: parent.width
-                    height: Theme.itemSizeSmall
+                    visible: composePage.privacyMode === "customAudience"
+                    height: visible ? Theme.itemSizeSmall : 0
                     onClicked: composePage.openCustomAudienceEditor()
                     Label {
                         anchors {
