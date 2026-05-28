@@ -337,8 +337,63 @@ void NotificationManager::handleChatTitleUpdated(const QString &chatId, const QS
     }
 }
 
+void NotificationManager::handleNewStory(qlonglong chatId)
+{
+    // Subordinata al master notifiche + al toggle dedicato storie.
+    if (!appSettings || !appSettings->notificationsEnabled() || !appSettings->notificationStoriesEnabled()) {
+        return;
+    }
+
+    const QVariantMap chat = tdLibWrapper->getChat(QString::number(chatId));
+    QString title = chat.value(TITLE).toString();
+    if (title.isEmpty()) {
+        const ChatInfo *info = chatMap.value(chatId);
+        if (info) title = info->title;
+    }
+    LOG("New story notification for" << chatId << title);
+
+    const QString body = tr("posted a new story");
+    const bool appActive = (qGuiApp->applicationState() == Qt::ApplicationActive);
+
+    // Fire-and-forget: la notifica pubblicata vive nel daemon di sistema, il
+    // wrapper C++ può essere distrutto subito dopo publish() senza chiuderla.
+    Notification *notification = new Notification(this);
+    applyBranding(notification);
+    notification->setTimestamp(QDateTime::currentDateTime());
+    notification->setSummary(title);
+    notification->setBody(body);
+    notification->setHintValue(HINT_IMAGE_PATH, notificationIconFile);
+
+    // Tap = porta l'app in foreground (coerente con openMessage, che pure
+    // si limita ad attivare l'app).
+    notification->setRemoteAction(Notification::remoteAction("default", "activateApp",
+        APP_ORIGIN, "/com/github/RootGPT_YouTube/rootelegram", APP_ORIGIN, "activateApp"));
+
+    if (appActive) {
+        // L'utente sta già usando l'app: notifica silenziosa, niente popup.
+        notification->setHintValue(HINT_SUPPRESS_SOUND, true);
+        notification->setHintValue(HINT_DISPLAY_ON, false);
+        notification->setHintValue(HINT_VISIBILITY, QString());
+        notification->setUrgency(Notification::Low);
+    } else {
+        notification->setPreviewSummary(title);
+        notification->setPreviewBody(body);
+        notification->setHintValue(HINT_SUPPRESS_SOUND, !appSettings->notificationSoundsEnabled());
+        notification->setHintValue(HINT_DISPLAY_ON, appSettings->notificationTurnsDisplayOn());
+        notification->setHintValue(HINT_VISIBILITY, VISIBILITY_PUBLIC);
+        notification->setUrgency(Notification::Normal);
+    }
+
+    notification->publish();
+    notification->deleteLater();
+}
+
 void NotificationManager::publishNotification(const NotificationGroup *notificationGroup, bool needFeedback)
 {
+    // Gate sulle notifiche desktop: il toggle UI dell'utente.
+    if (appSettings && !appSettings->notificationsEnabled()) {
+        return;
+    }
     QVariantMap messageMap;
     const ChatInfo *chatInformation = chatMap.value(notificationGroup->chatId);
     if (!notificationGroup->notificationOrder.isEmpty()) {

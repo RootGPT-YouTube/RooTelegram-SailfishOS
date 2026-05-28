@@ -51,6 +51,7 @@ public slots:
     void handleUpdateNotification(const QVariantMap &updatedNotification);
     void handleChatDiscovered(const QString &chatId, const QVariantMap &chatInformation);
     void handleChatTitleUpdated(const QString &chatId, const QString &title);
+    void handleNewStory(qlonglong chatId);
 
 private:
 

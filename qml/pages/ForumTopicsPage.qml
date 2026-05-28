@@ -35,6 +35,12 @@ Page {
     // TDLib 1.8.62 usa message_thread_id per tutte le operazioni sui topic
     property string topicRequestIdField: "message_thread_id"
 
+    // Topic che hanno restituito "Invalid forum topic identifier specified":
+    // sono permanentemente stali per questa sessione. Marcandoli evitiamo
+    // burst ripetuti di getForumTopic ogni volta che TDLib ci pusha
+    // updateForumTopic per quegli ID. Reset alla riapertura della pagina.
+    property var failedTopicIds: ({})
+
     function getChatId() {
         return (chatInformation && chatInformation.id !== undefined) ? Number(chatInformation.id) : 0
     }
@@ -88,6 +94,12 @@ Page {
         var chatId = getChatId()
         var numericTopicId = Number(topicId)
         if (!chatId || !numericTopicId || numericTopicId <= 0) {
+            return
+        }
+        // Skip dei topic noti come stali (vedi failedTopicIds): TDLib pusha
+        // updateForumTopic anche per topic eliminati lato server e altrimenti
+        // re-faremmo il round-trip per ricevere lo stesso errore 400.
+        if (failedTopicIds[String(numericTopicId)]) {
             return
         }
         var requestObject = {
@@ -736,10 +748,21 @@ Page {
         onErrorReceived: {
             // Log SEMPRE per vedere cosa TDLib risponde
             console.log("[ForumTopics] onErrorReceived code=" + code + " message=" + message + " extra=" + extra)
-            if (extra && extra.indexOf("getForumTopic:") === 0 && switchTopicRequestIdField(message)) {
+            if (extra && extra.indexOf("getForumTopic:") === 0) {
                 var getTopicParts = extra.split(":")
                 if (getTopicParts.length >= 3 && getTopicParts[1].toString() === getChatId().toString()) {
-                    requestForumTopicDetails(getTopicParts[2])
+                    // Switch field name (forum_topic_id vs message_thread_id) + retry
+                    // una sola volta; se il messaggio NON nomina nessuno dei due
+                    // (es. "Invalid forum topic identifier specified") il topic è
+                    // davvero stale: lo blacklistiamo per non rifare la chiamata.
+                    if (switchTopicRequestIdField(message)) {
+                        requestForumTopicDetails(getTopicParts[2])
+                        return
+                    }
+                    var failKey = String(Number(getTopicParts[2]))
+                    var failedNext = failedTopicIds
+                    failedNext[failKey] = true
+                    failedTopicIds = failedNext
                     return
                 }
             }

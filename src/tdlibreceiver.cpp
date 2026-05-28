@@ -209,6 +209,14 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("chatFolderInfo", &TDLibReceiver::processChatFolderInfo);
     handlers.insert("chatFolder", &TDLibReceiver::processChatFolderInfo);
     handlers.insert("updateChatThemes", &TDLibReceiver::processUpdateChatThemes);
+    handlers.insert("updateChatActiveStories", &TDLibReceiver::processUpdateChatActiveStories);
+    handlers.insert("updateActiveStoryList", &TDLibReceiver::processUpdateActiveStoryList);
+    handlers.insert("updateStoryListChatCount", &TDLibReceiver::processUpdateStoryListChatCount);
+    handlers.insert("updateStory", &TDLibReceiver::processUpdateStory);
+    handlers.insert("story", &TDLibReceiver::processStory);
+    handlers.insert("updateStoryDeleted", &TDLibReceiver::processUpdateStoryDeleted);
+    handlers.insert("stories", &TDLibReceiver::processStoriesList);
+    handlers.insert("storyInteractions", &TDLibReceiver::processStoryInteractions);
 }
 
 void TDLibReceiver::setActive(bool active)
@@ -1216,4 +1224,78 @@ void TDLibReceiver::processUpdateChatThemes(const QVariantMap &receivedInformati
     const QVariantList themes = receivedInformation.value("chat_themes").toList();
     LOG("Chat themes updated, count:" << themes.size());
     emit chatThemesUpdated(themes);
+}
+
+void TDLibReceiver::processUpdateChatActiveStories(const QVariantMap &receivedInformation)
+{
+    const QVariantMap activeStories = receivedInformation.value("active_stories").toMap();
+    emit chatActiveStoriesUpdated(activeStories);
+}
+
+void TDLibReceiver::processUpdateActiveStoryList(const QVariantMap &receivedInformation)
+{
+    const QString listType = receivedInformation.value("story_list").toMap().value("@type").toString()
+                                  == QStringLiteral("storyListArchive")
+                              ? QStringLiteral("archive")
+                              : QStringLiteral("main");
+    const QVariantList chats = receivedInformation.value("chats").toList();
+    emit activeStoryListReordered(listType, chats);
+}
+
+void TDLibReceiver::processUpdateStoryListChatCount(const QVariantMap &receivedInformation)
+{
+    const QString listType = receivedInformation.value("story_list").toMap().value("@type").toString()
+                                  == QStringLiteral("storyListArchive")
+                              ? QStringLiteral("archive")
+                              : QStringLiteral("main");
+    const int chatCount = receivedInformation.value("chat_count").toInt();
+    emit storyListChatCountUpdated(listType, chatCount);
+}
+
+void TDLibReceiver::processUpdateStory(const QVariantMap &receivedInformation)
+{
+    const QVariantMap story = receivedInformation.value("story").toMap();
+    emit storyReceived(story);
+}
+
+void TDLibReceiver::processStory(const QVariantMap &receivedInformation)
+{
+    emit storyReceived(receivedInformation);
+}
+
+void TDLibReceiver::processUpdateStoryDeleted(const QVariantMap &receivedInformation)
+{
+    const qlonglong senderChatId = receivedInformation.value("story_sender_chat_id").toLongLong();
+    const int storyId = receivedInformation.value("story_id").toInt();
+    emit storyDeleted(senderChatId, storyId);
+}
+
+void TDLibReceiver::processStoriesList(const QVariantMap &receivedInformation)
+{
+    // TDLib `stories` struct: { total_count, stories: vector<story>, ... }
+    // Risposta a getChatArchivedStories / getChatPostedToChatPageStories /
+    // getStoryAlbumStories. Discriminiamo i flow via @extra (lo passa il caller).
+    const int totalCount = receivedInformation.value("total_count").toInt();
+    const QVariantList stories = receivedInformation.value("stories").toList();
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    emit storiesListReceived(stories, totalCount, extra);
+}
+
+void TDLibReceiver::processStoryInteractions(const QVariantMap &receivedInformation)
+{
+    // TDLib `storyInteractions`: { total_count, total_forward_count,
+    // total_reaction_count, interactions:vector<storyInteraction>, next_offset }.
+    // Lo story_id non è nel payload: lo recuperiamo dall'@extra che il caller ha
+    // impostato come "storyInteractions:<storyId>".
+    const int totalCount = receivedInformation.value("total_count").toInt();
+    const int totalForwardCount = receivedInformation.value("total_forward_count").toInt();
+    const int totalReactionCount = receivedInformation.value("total_reaction_count").toInt();
+    const QVariantList interactions = receivedInformation.value("interactions").toList();
+    const QString nextOffset = receivedInformation.value("next_offset").toString();
+    int storyId = 0;
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    if (extra.startsWith("storyInteractions:")) {
+        storyId = extra.mid(QString("storyInteractions:").length()).toInt();
+    }
+    emit storyInteractionsReceived(storyId, interactions, totalCount, totalForwardCount, totalReactionCount, nextOffset);
 }

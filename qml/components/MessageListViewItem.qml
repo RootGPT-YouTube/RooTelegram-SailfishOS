@@ -925,6 +925,53 @@ ListItem {
                     }
                 }
 
+                // Chip "in risposta a una storia": il reply-a-storia non popola
+                // reply_to_message_id (è in reply_to come messageReplyToStory),
+                // quindi l'InReplyToRow sopra non scatta. Mostriamo un'etichetta
+                // dedicata così si capisce che il messaggio risponde a una storia.
+                Loader {
+                    id: storyReplyChipLoader
+                    active: typeof myMessage.reply_to !== "undefined" && myMessage.reply_to
+                            && myMessage.reply_to["@type"] === "messageReplyToStory"
+                    width: parent.width
+                    height: active ? Theme.iconSizeSmall + Theme.paddingSmall : 0
+                    sourceComponent: Component {
+                        Item {
+                            width: storyReplyChipLoader.width
+                            height: storyReplyChipRow.height
+                            Row {
+                                id: storyReplyChipRow
+                                spacing: Theme.paddingSmall
+                                Image {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Theme.iconSizeSmall
+                                    height: Theme.iconSizeSmall
+                                    sourceSize.width: Theme.iconSizeSmall
+                                    sourceSize.height: Theme.iconSizeSmall
+                                    source: "image://theme/icon-s-message-reply?" + Theme.highlightColor
+                                }
+                                Label {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: qsTr("In reply to a story")
+                                    font.pixelSize: Theme.fontSizeExtraSmall
+                                    color: Theme.highlightColor
+                                }
+                            }
+                            MouseArea {
+                                anchors.fill: storyReplyChipRow
+                                onClicked: {
+                                    // Apre la storia di riferimento (può essere scaduta:
+                                    // il viewer ha un timeout di fallback con toast).
+                                    pageStack.push(Qt.resolvedUrl("../pages/StoriesViewerPage.qml"), {
+                                        chatId: myMessage.reply_to.story_poster_chat_id,
+                                        storyInfos: [ { "story_id": myMessage.reply_to.story_id } ]
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Loader {
                     id: forwardedInformationLoader
                     active: typeof myMessage.forward_info !== "undefined"

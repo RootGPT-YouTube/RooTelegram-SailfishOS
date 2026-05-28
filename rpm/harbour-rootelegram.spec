@@ -12,7 +12,7 @@ Name:       harbour-rootelegram
 %define _binary_payload w6.xzdio
 
 Summary:    RooTelegram is a Telegram client for Sailfish OS
-Version:    1.7.5
+Version:    1.8
 Release:    1
 Group:      Qt/Qt
 License:    GPL-3.0

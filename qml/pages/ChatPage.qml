@@ -316,6 +316,29 @@ Page {
         if (cachedChatInformation && cachedChatInformation.pending_join_requests) {
             setPendingJoinRequests(cachedChatInformation.pending_join_requests);
         }
+        // Verifica autoritativa via TDLib: se la cache mostra richieste
+        // pendenti ma sono state già evase da un altro client, il banner
+        // resterebbe visibile a vuoto. Il timer dà un istante al resto
+        // dell'init prima di interrogare TDLib.
+        joinRequestsVerifyTimer.restart();
+    }
+
+    Timer {
+        id: joinRequestsVerifyTimer
+        interval: 250
+        repeat: false
+        onTriggered: {
+            if (!chatInformation || !chatInformation.id) {
+                return;
+            }
+            if (!chatPage.canManageJoinRequests) {
+                return;
+            }
+            if (chatPage.pendingJoinRequestsCount <= 0) {
+                return;
+            }
+            tdLibWrapper.getChatJoinRequests(chatInformation.id, "", "", ({}), 1);
+        }
     }
 
     function getMessageStatusText(message, listItemIndex, lastReadSentIndex, useElapsed) {
@@ -1209,6 +1232,21 @@ Page {
                 return;
             }
             setPendingJoinRequests(pendingJoinRequests);
+        }
+        onChatJoinRequestsReceived: {
+            // Risposta alla verifica autoritativa: se TDLib dichiara 0
+            // richieste pendenti per questa chat, puliamo lo stato locale
+            // così il banner sparisce anche se la cache lo teneva attivo.
+            if (!chatInformation || chatId.toString() !== chatInformation.id.toString()) {
+                return;
+            }
+            var actualCount = Number(totalCount);
+            if (isNaN(actualCount)) {
+                actualCount = 0;
+            }
+            if (actualCount === 0 || !requests || requests.length === 0) {
+                setPendingJoinRequests({ total_count: 0, user_ids: [] });
+            }
         }
         onOkReceived: {
             // L'aggiornamento del banner pending_join_requests è gestito

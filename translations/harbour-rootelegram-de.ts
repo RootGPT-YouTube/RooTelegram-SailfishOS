@@ -2009,6 +2009,10 @@ Nachrichten</numerusform>
             <numerusform>%n Kommentare</numerusform>
         </translation>
     </message>
+    <message>
+        <source>In reply to a story</source>
+        <translation>Antwort auf eine Story</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2149,6 +2153,10 @@ Nachrichten</numerusform>
             <numerusform>%Ln ungelesene Nachrichten</numerusform>
         </translation>
     </message>
+    <message>
+        <source>posted a new story</source>
+        <translation>hat eine neue Story gepostet</translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2239,6 +2247,10 @@ Nachrichten</numerusform>
     <message>
         <source>Blocklist</source>
         <translation>Sperrliste</translation>
+    </message>
+    <message>
+        <source>Stories</source>
+        <translation>Storys</translation>
     </message>
     <message>
         <source>Reorder Pinned Chats</source>
@@ -3301,14 +3313,6 @@ Nachrichten</numerusform>
         <translation>Beim Tippen auf eine zitierte Nachricht diese im Chat öffnen, anstatt sie in einer Overlay-Ansicht anzuzeigen.</translation>
     </message>
     <message>
-        <source>Run as daemon in background</source>
-        <translation>Im Hintergrund als Daemon ausführen</translation>
-    </message>
-    <message>
-        <source>Keep RooTelegram running in background and allow DBus daemon startup. Restart the app after changing this setting.</source>
-        <translation>Lässt RooTelegram im Hintergrund laufen und erlaubt den Start als DBus-Daemon. Starte die App nach dem Ändern dieser Einstellung neu.</translation>
-    </message>
-    <message>
         <source>Cover: only private chats in unread count</source>
         <translation>Cover: Nur private Chats in der Anzahl ungelesener Nachrichten</translation>
     </message>
@@ -3323,6 +3327,22 @@ Nachrichten</numerusform>
     <message>
         <source>Disables automatic video preloading to reduce RAM/GPU and mobile data usage. Photos are still downloaded automatically.</source>
         <translation>Deaktiviert das automatische Vorabladen von Videos, um RAM/GPU- und Mobildatenverbrauch zu reduzieren. Fotos werden weiterhin automatisch heruntergeladen.</translation>
+    </message>
+    <message>
+        <source>Notifications</source>
+        <translation>Benachrichtigungen</translation>
+    </message>
+    <message>
+        <source>Show desktop notifications for new messages. The app always stays in background; this toggle controls only notification publishing.</source>
+        <translation>Desktop-Benachrichtigungen für neue Nachrichten anzeigen. Die App bleibt immer im Hintergrund aktiv; dieser Schalter steuert nur die Veröffentlichung der Benachrichtigungen.</translation>
+    </message>
+    <message>
+        <source>Stories</source>
+        <translation>Storys</translation>
+    </message>
+    <message>
+        <source>Notify when a contact posts a new story.</source>
+        <translation>Benachrichtigen, wenn ein Kontakt eine neue Story postet.</translation>
     </message>
 </context>
 <context>
@@ -3608,6 +3628,351 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>StoriesPage</name>
+    <message>
+        <source>Stories</source>
+        <translation>Storys</translation>
+    </message>
+    <message>
+        <source>Main</source>
+        <translation>Haupt</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation>Aktualisieren</translation>
+    </message>
+    <message>
+        <source>Unknown chat</source>
+        <translation>Unbekannter Chat</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new story(es)</source>
+        <translation>
+            <numerusform>%n neue Story</numerusform>
+            <numerusform>%n neue Storys</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n story(es)</source>
+        <translation>
+            <numerusform>%n Story</numerusform>
+            <numerusform>%n Storys</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No stories from your contacts</source>
+        <translation>Keine Storys von deinen Kontakten</translation>
+    </message>
+    <message>
+        <source>Pull down to refresh</source>
+        <translation>Nach unten ziehen zum Aktualisieren</translation>
+    </message>
+    <message>
+        <source>My Archive</source>
+        <translation>Mein Archiv</translation>
+    </message>
+    <message>
+        <source>You have no archived stories</source>
+        <translation>Du hast keine archivierten Storys</translation>
+    </message>
+    <message>
+        <source>(no caption)</source>
+        <translation>(keine Beschriftung)</translation>
+    </message>
+    <message>
+        <source>New story</source>
+        <translation>Neue Story</translation>
+    </message>
+    <message>
+        <source>Delete story</source>
+        <translation>Story löschen</translation>
+    </message>
+    <message>
+        <source>Blacklist</source>
+        <translation>Blacklist</translation>
+    </message>
+    <message>
+        <source>Blacklist is empty</source>
+        <translation>Blacklist ist leer</translation>
+    </message>
+    <message>
+        <source>Remove from blacklist</source>
+        <translation>Von der Blacklist entfernen</translation>
+    </message>
+    <message>
+        <source>Add to blacklist</source>
+        <translation>Zur Blacklist hinzufügen</translation>
+    </message>
+    <message>
+        <source>Added to blacklist</source>
+        <translation>Zur Blacklist hinzugefügt</translation>
+    </message>
+    <message>
+        <source>Removed from blacklist</source>
+        <translation>Von der Blacklist entfernt</translation>
+    </message>
+    <message>
+        <source>My Profile</source>
+        <translation>Mein Profil</translation>
+    </message>
+    <message>
+        <source>You have no stories on your profile</source>
+        <translation>Du hast keine Storys in deinem Profil</translation>
+    </message>
+    <message>
+        <source>Archive</source>
+        <comment>Short label for the My Archive tab</comment>
+        <translation>Archiv</translation>
+    </message>
+    <message>
+        <source>Profile</source>
+        <comment>Short label for the My Profile tab</comment>
+        <translation>Profil</translation>
+    </message>
+</context>
+<context>
+    <name>StoriesViewerPage</name>
+    <message>
+        <source>Story</source>
+        <translation>Story</translation>
+    </message>
+    <message>
+        <source>This story type is not supported yet</source>
+        <translation>Dieser Story-Typ wird noch nicht unterstützt</translation>
+    </message>
+    <message>
+        <source>Deleting story</source>
+        <translation>Story wird gelöscht</translation>
+    </message>
+    <message>
+        <source>Could not set reaction.</source>
+        <translation>Reaktion konnte nicht gesetzt werden.</translation>
+    </message>
+    <message>
+        <source>Story not available</source>
+        <translation>Story nicht verfügbar</translation>
+    </message>
+</context>
+<context>
+    <name>StoryAudiencePickerDialog</name>
+    <message>
+        <source>Audience</source>
+        <translation>Zielgruppe</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Fertig</translation>
+    </message>
+    <message numerus="yes">
+        <source>Choose who will see your next story (%n selected).</source>
+        <translation>
+            <numerusform>Wähle, wer deine nächste Story sehen wird (%n ausgewählt).</numerusform>
+            <numerusform>Wähle, wer deine nächste Story sehen wird (%n ausgewählt).</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Search...</source>
+        <translation>Suchen...</translation>
+    </message>
+    <message>
+        <source>No contacts or private chats.</source>
+        <translation>Keine Kontakte oder privaten Chats.</translation>
+    </message>
+    <message>
+        <source>Loading contacts...</source>
+        <translation>Kontakte werden geladen...</translation>
+    </message>
+    <message>
+        <source>Custom audience</source>
+        <translation>Benutzerdefinierte Zielgruppe</translation>
+    </message>
+    <message numerus="yes">
+        <source>Members of your custom audience (%n selected). Saved across stories.</source>
+        <translation>
+            <numerusform>Mitglieder deiner benutzerdefinierten Zielgruppe (%n ausgewählt). Wird über Storys hinweg gespeichert.</numerusform>
+            <numerusform>Mitglieder deiner benutzerdefinierten Zielgruppe (%n ausgewählt). Wird über Storys hinweg gespeichert.</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>StoryComposeDialog</name>
+    <message>
+        <source>Publish</source>
+        <translation>Veröffentlichen</translation>
+    </message>
+    <message>
+        <source>New story</source>
+        <translation>Neue Story</translation>
+    </message>
+    <message>
+        <source>Tap to change</source>
+        <translation>Tippen zum Ändern</translation>
+    </message>
+    <message>
+        <source>Caption</source>
+        <translation>Beschriftung</translation>
+    </message>
+    <message>
+        <source>Add a caption (optional)</source>
+        <translation>Beschriftung hinzufügen (optional)</translation>
+    </message>
+    <message>
+        <source>Reading video…</source>
+        <translation>Video wird gelesen…</translation>
+    </message>
+    <message>
+        <source>Video too long: %1 (max %2)</source>
+        <translation>Video zu lang: %1 (max %2)</translation>
+    </message>
+    <message>
+        <source>Duration: %1</source>
+        <translation>Dauer: %1</translation>
+    </message>
+    <message>
+        <source>Cannot determine your account.</source>
+        <translation>Dein Konto konnte nicht ermittelt werden.</translation>
+    </message>
+    <message>
+        <source>Posting story…</source>
+        <translation>Story wird veröffentlicht…</translation>
+    </message>
+    <message>
+        <source>Video conversion failed.</source>
+        <translation>Videokonvertierung fehlgeschlagen.</translation>
+    </message>
+    <message>
+        <source>Story posted</source>
+        <translation>Story veröffentlicht</translation>
+    </message>
+    <message>
+        <source>Could not post story.</source>
+        <translation>Story konnte nicht veröffentlicht werden.</translation>
+    </message>
+    <message>
+        <source>Telegram stories are vertical (9:16). Your landscape video is being adapted before publishing.</source>
+        <translation>Telegram-Storys sind vertikal (9:16). Dein Querformat-Video wird vor der Veröffentlichung angepasst.</translation>
+    </message>
+    <message>
+        <source>Converting video</source>
+        <translation>Video wird konvertiert</translation>
+    </message>
+    <message>
+        <source>Uploading video</source>
+        <translation>Video wird hochgeladen</translation>
+    </message>
+    <message>
+        <source>Audience</source>
+        <translation>Zielgruppe</translation>
+    </message>
+    <message>
+        <source>Everyone</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <source>Selected contacts</source>
+        <translation>Ausgewählte Kontakte</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s) selected</source>
+        <translation>
+            <numerusform>%n Kontakt ausgewählt</numerusform>
+            <numerusform>%n Kontakte ausgewählt</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Choose contacts</source>
+        <translation>Kontakte auswählen</translation>
+    </message>
+    <message>
+        <source>Allow screenshots</source>
+        <translation>Screenshots erlauben</translation>
+    </message>
+    <message>
+        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
+        <translation>Wenn deaktiviert, wird die Story als geschützt markiert: offizielle Clients blockieren Screenshots und Weiterleitungen.</translation>
+    </message>
+    <message>
+        <source>Post to my profile</source>
+        <translation>In meinem Profil veröffentlichen</translation>
+    </message>
+    <message>
+        <source>Keep the story visible on your profile after the 24h expiration.</source>
+        <translation>Story nach Ablauf der 24 Stunden in deinem Profil sichtbar lassen.</translation>
+    </message>
+    <message>
+        <source>Custom audience</source>
+        <translation>Benutzerdefinierte Zielgruppe</translation>
+    </message>
+    <message>
+        <source>Custom audience (%1)</source>
+        <translation>Benutzerdefinierte Zielgruppe (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>StoryReplyDialog</name>
+    <message>
+        <source>Reply sent</source>
+        <translation>Antwort gesendet</translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation>Senden</translation>
+    </message>
+    <message>
+        <source>Reply to %1</source>
+        <translation>An %1 antworten</translation>
+    </message>
+    <message>
+        <source>Reply to story</source>
+        <translation>Auf Story antworten</translation>
+    </message>
+    <message>
+        <source>Reply</source>
+        <translation>Antworten</translation>
+    </message>
+    <message>
+        <source>Write a reply…</source>
+        <translation>Antwort schreiben…</translation>
+    </message>
+</context>
+<context>
+    <name>StoryViewersPage</name>
+    <message>
+        <source>Viewers</source>
+        <translation>Aufrufe</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n view(s)</source>
+        <translation>
+            <numerusform>%n Aufruf</numerusform>
+            <numerusform>%n Aufrufe</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n reaction(s)</source>
+        <translation>
+            <numerusform>%n Reaktion</numerusform>
+            <numerusform>%n Reaktionen</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Telegram user</source>
+        <translation>Telegram-Nutzer</translation>
+    </message>
+    <message>
+        <source>Forwarded</source>
+        <translation>Weitergeleitet</translation>
+    </message>
+    <message>
+        <source>Reposted</source>
+        <translation>Erneut gepostet</translation>
+    </message>
+    <message>
+        <source>No viewers yet</source>
+        <translation>Noch keine Aufrufe</translation>
+    </message>
+</context>
+<context>
     <name>SupergroupMembersPage</name>
     <message>
         <source>Removed Users</source>
@@ -3675,6 +4040,29 @@ Nachrichten</numerusform>
     <message>
         <source>Copy video to gallery</source>
         <translation>Video in Galerie kopieren</translation>
+    </message>
+</context>
+<context>
+    <name>VideoTranscoder</name>
+    <message>
+        <source>A video conversion is already in progress.</source>
+        <translation>Eine Videokonvertierung läuft bereits.</translation>
+    </message>
+    <message>
+        <source>Video converter not available.</source>
+        <translation>Video-Konverter nicht verfügbar.</translation>
+    </message>
+    <message>
+        <source>Source video not found.</source>
+        <translation>Quellvideo nicht gefunden.</translation>
+    </message>
+    <message>
+        <source>Video conversion failed.</source>
+        <translation>Videokonvertierung fehlgeschlagen.</translation>
+    </message>
+    <message>
+        <source>Could not start the video converter.</source>
+        <translation>Video-Konverter konnte nicht gestartet werden.</translation>
     </message>
 </context>
 <context>

@@ -27,6 +27,7 @@
 #include <QListIterator>
 #include <QByteArray>
 #include <QBitArray>
+#include <malloc.h>
 
 #define DEBUG_MODULE ChatModel
 #include "debuglog.h"
@@ -426,6 +427,12 @@ void ChatModel::clear(bool contentOnly)
             emit chatIdChanged();
         }
     }
+
+    // Forza glibc a restituire al kernel le pagine libere del heap: i
+    // messaggi possono contenere QVariantMap pesanti (thumbnail, file blob)
+    // e senza trim la RSS resta gonfia anche dopo qDeleteAll. Daemon mode
+    // amplifica il problema perché il processo non muore mai.
+    malloc_trim(0);
 }
 
 void ChatModel::initialize(const QVariantMap &chatInformation)

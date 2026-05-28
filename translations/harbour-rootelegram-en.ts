@@ -2009,6 +2009,10 @@ messages</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
+    <message>
+        <source>In reply to a story</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2149,6 +2153,10 @@ messages</numerusform>
             <numerusform>%Ln unread messages</numerusform>
         </translation>
     </message>
+    <message>
+        <source>posted a new story</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2239,6 +2247,10 @@ messages</numerusform>
     <message>
         <source>Blocklist</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stories</source>
+        <translation>Stories</translation>
     </message>
     <message>
         <source>Reorder Pinned Chats</source>
@@ -3301,14 +3313,6 @@ messages</numerusform>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Run as daemon in background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Keep RooTelegram running in background and allow DBus daemon startup. Restart the app after changing this setting.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Cover: only private chats in unread count</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3322,6 +3326,22 @@ messages</numerusform>
     </message>
     <message>
         <source>Disables automatic video preloading to reduce RAM/GPU and mobile data usage. Photos are still downloaded automatically.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notifications</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show desktop notifications for new messages. The app always stays in background; this toggle controls only notification publishing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stories</source>
+        <translation type="unfinished">Stories</translation>
+    </message>
+    <message>
+        <source>Notify when a contact posts a new story.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3608,6 +3628,351 @@ messages</numerusform>
     </message>
 </context>
 <context>
+    <name>StoriesPage</name>
+    <message>
+        <source>Stories</source>
+        <translation>Stories</translation>
+    </message>
+    <message>
+        <source>Main</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n new story(es)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n story(es)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>No stories from your contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pull down to refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>My Archive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You have no archived stories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(no caption)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Delete story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blacklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blacklist is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from blacklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to blacklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added to blacklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed from blacklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>My Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You have no stories on your profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archive</source>
+        <comment>Short label for the My Archive tab</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Profile</source>
+        <comment>Short label for the My Profile tab</comment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>StoriesViewerPage</name>
+    <message>
+        <source>Story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This story type is not supported yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not set reaction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Story not available</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>StoryAudiencePickerDialog</name>
+    <message>
+        <source>Audience</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Choose who will see your next story (%n selected).</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Search...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No contacts or private chats.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Loading contacts...</source>
+        <translation type="unfinished">Loading contacts...</translation>
+    </message>
+    <message>
+        <source>Custom audience</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Members of your custom audience (%n selected). Saved across stories.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>StoryComposeDialog</name>
+    <message>
+        <source>Publish</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tap to change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Caption</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add a caption (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reading video…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video too long: %1 (max %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duration: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot determine your account.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Posting story…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video conversion failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Story posted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not post story.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Telegram stories are vertical (9:16). Your landscape video is being adapted before publishing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Converting video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Uploading video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Audience</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everyone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Selected contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n contact(s) selected</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Choose contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allow screenshots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Post to my profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keep the story visible on your profile after the 24h expiration.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Custom audience</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Custom audience (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>StoryReplyDialog</name>
+    <message>
+        <source>Reply sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reply to %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reply to story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Write a reply…</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>StoryViewersPage</name>
+    <message>
+        <source>Viewers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n view(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n reaction(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Telegram user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forwarded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reposted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No viewers yet</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SupergroupMembersPage</name>
     <message>
         <source>Removed Users</source>
@@ -3675,6 +4040,29 @@ messages</numerusform>
     <message>
         <source>Copy video to gallery</source>
         <translation>Copy video to gallery</translation>
+    </message>
+</context>
+<context>
+    <name>VideoTranscoder</name>
+    <message>
+        <source>A video conversion is already in progress.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video converter not available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Source video not found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video conversion failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not start the video converter.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -370,12 +370,22 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
         if (hasInstalledFlag && !isInstalled && installedSetIds->contains(newSetId)) {
             installedSetIds->removeAll(newSetId);
         }
+        // getInstalledStickerSets ritorna stickerSetInfo SENZA la lista
+        // "stickers". Se questa versione leggera sovrascrive il set completo
+        // già in cache, hasStickerSetDetails torna false e rifetchiamo TUTTI
+        // i ~56 set a ogni add/remove. Ogni risposta ri-emette il segnale →
+        // QML riassegna la lista completa e QV4 riconverte enormi QVariant in
+        // JS (vedi backtrace: ExecutionEngine::fromVariant ricorsivo) → freeze
+        // di 20-30s sul main thread. Quindi preserviamo gli stickers in cache:
+        // hasStickerSetDetails resta true e la cascata di fetch sparisce.
+        if (newStickerSet.value("stickers").toList().isEmpty() && allSets->contains(newSetId)) {
+            const QVariantList cachedStickers = allSets->value(newSetId).toMap().value("stickers").toList();
+            if (!cachedStickers.isEmpty()) {
+                newStickerSet.insert("stickers", cachedStickers);
+            }
+        }
         allSets->insert(newSetId, newStickerSet);
-        // Fetch lazy dei dettagli: se la batch non porta gli stickers
-        // popolati (caso tipico di getInstalledStickerSets, restituisce
-        // solo stickerSetInfo), richiediamo il payload completo. Salta
-        // i set già in cache "piena", evitando i 56 round-trip sequenziali
-        // dopo una rimozione (i set rimasti hanno già i dettagli).
+        // Fetch lazy dei dettagli solo se davvero mancano (set mai fetchato).
         if (!hasStickerSetDetails(newSetId)) {
             setsToFetch.append(newSetId);
         }

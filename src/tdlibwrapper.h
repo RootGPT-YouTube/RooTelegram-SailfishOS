@@ -314,6 +314,25 @@ public:
     Q_INVOKABLE void initializeOpenWith();
     Q_INVOKABLE void removeOpenWith();
 
+    // Stories
+    Q_INVOKABLE void loadActiveStories(const QString &listType);
+    Q_INVOKABLE void getChatActiveStories(const QString &chatId);
+    Q_INVOKABLE void getStory(const QString &storySenderChatId, int storyId, bool onlyLocal = false);
+    Q_INVOKABLE void viewStory(const QString &storySenderChatId, int storyId);
+    Q_INVOKABLE void getChatArchivedStories(const QString &chatId, int fromStoryId = 0, int limit = 50, const QString &extra = QString());
+    Q_INVOKABLE void getChatPostedToChatPageStories(const QString &chatId, int fromStoryId = 0, int limit = 50, const QString &extra = QString());
+    Q_INVOKABLE void postStory(const QString &chatId, const QString &photoPath, const QString &caption = QString(), int activePeriod = 86400,
+                               const QString &privacyMode = QStringLiteral("everyone"), const QStringList &allowedUserIds = QStringList(),
+                               bool allowScreenshots = true, bool postToProfile = false);
+    Q_INVOKABLE void postVideoStory(const QString &chatId, const QString &videoPath, double duration, const QString &caption = QString(), int activePeriod = 86400,
+                                    const QString &privacyMode = QStringLiteral("everyone"), const QStringList &allowedUserIds = QStringList(),
+                                    bool allowScreenshots = true, bool postToProfile = false);
+    Q_INVOKABLE void deleteStory(const QString &storyPosterChatId, int storyId);
+    Q_INVOKABLE void getStoryInteractions(int storyId, const QString &offset = QString(), int limit = 50);
+    Q_INVOKABLE void setStoryReaction(const QString &storyPosterChatId, int storyId, const QString &emoji, bool updateRecent = true);
+    Q_INVOKABLE void sendStoryReply(const QString &storyPosterChatId, int storyId, const QString &message);
+    Q_INVOKABLE void setChatActiveStoriesList(const QString &chatId, const QString &listType);
+
 public:
     const Group* getGroup(qlonglong groupId) const;
     static ChatType chatTypeFromString(const QString &type);
@@ -420,6 +439,13 @@ signals:
     void reactionsUpdated();
     void suitableDiscussionChatsReceived(const QVariantList &chatIds);
     void availableChatThemesUpdated(const QVariantList &themes);
+    void chatActiveStoriesUpdated(const QVariantMap &activeStories);
+    void activeStoryListReordered(const QString &listType, const QVariantList &chatActiveStoriesList);
+    void storyListChatCountUpdated(const QString &listType, int chatCount);
+    void storyReceived(const QVariantMap &story);
+    void storyDeleted(qlonglong storySenderChatId, int storyId);
+    void storiesListReceived(const QVariantList &stories, int totalCount, const QString &extra);
+    void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
 
 public slots:
     void handleVersionDetected(const QString &version);

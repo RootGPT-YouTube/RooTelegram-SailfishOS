@@ -198,12 +198,29 @@ ApplicationWindow
     Connections {
         target: Qt.application
         onStateChanged: {
-            // Quando l'app esce dallo stato attivo (swipe-close / minimize),
-            // riportiamo lo stack alla Home: alla prossima attivazione l'utente
-            // riparte dalla OverviewPage anziché dall'ultima pagina aperta.
-            if (Qt.application.state !== Qt.ApplicationActive
-                    && pageStack && pageStack.depth > 1) {
-                pageStack.pop(null, PageStackAction.Immediate);
+            // Quando l'app va in background, riportiamo lo stack alla Home
+            // così la prossima attivazione riparte da OverviewPage.
+            //
+            // Su Sailfish swipe-close NON emette ApplicationHidden/Suspended,
+            // resta in ApplicationInactive ma con appWindow.visible=false.
+            // Dim display / notifica → Inactive con visible=true: NON pop.
+            //
+            // Il daemon è sempre attivo: l'app resta viva indipendentemente.
+            var s = Qt.application.state;
+            var isBackground = (s === Qt.ApplicationSuspended
+                                || s === Qt.ApplicationHidden
+                                || (s === Qt.ApplicationInactive && !appWindow.visible));
+            if (isBackground) {
+                if (pageStack && pageStack.depth > 1) {
+                    pageStack.pop(null, PageStackAction.Immediate);
+                }
+                // Libera gli oggetti QML cache-ati dal motore JS: in modalità
+                // daemon l'app resta viva e senza un gc esplicito chiusure /
+                // model / proxy continuano ad accumularsi. Mitigazione minima
+                // per la crescita di RAM osservata; i caching C++ (scheduled
+                // messages, discussion threads, custom emoji) restano e vanno
+                // ripuliti separatamente.
+                gc();
             }
         }
     }

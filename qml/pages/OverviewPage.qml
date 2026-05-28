@@ -430,6 +430,15 @@ Page {
                 horizontalAlignment: Qt.AlignHCenter
             }
             MenuItem {
+                text: qsTr("Stories")
+                onClicked: pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"))
+            }
+            Separator {
+                width: parent.width
+                color: Theme.secondaryHighlightColor
+                horizontalAlignment: Qt.AlignHCenter
+            }
+            MenuItem {
                 text: qsTr("New Group")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/CreateSupergroupPage.qml"), { "isChannel": false })
             }

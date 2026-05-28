@@ -134,6 +134,13 @@ signals:
     void chatUnreadReactionCountUpdated(qlonglong chatId, int unreadReactionCount);
     void activeEmojiReactionsUpdated(const QStringList& emojis);
     void chatThemesUpdated(const QVariantList &themes);
+    void chatActiveStoriesUpdated(const QVariantMap &activeStories);
+    void activeStoryListReordered(const QString &listType, const QVariantList &chatActiveStoriesList);
+    void storyListChatCountUpdated(const QString &listType, int chatCount);
+    void storyReceived(const QVariantMap &story);
+    void storyDeleted(qlonglong storySenderChatId, int storyId);
+    void storiesListReceived(const QVariantList &stories, int totalCount, const QString &extra);
+    void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
 
 private:
     typedef void (TDLibReceiver::*Handler)(const QVariantMap &);
@@ -236,6 +243,14 @@ private:
     void processUpdateChatFolders(const QVariantMap &receivedInformation);
     void processChatFolderInfo(const QVariantMap &receivedInformation);
     void processUpdateChatThemes(const QVariantMap &receivedInformation);
+    void processUpdateChatActiveStories(const QVariantMap &receivedInformation);
+    void processUpdateActiveStoryList(const QVariantMap &receivedInformation);
+    void processUpdateStoryListChatCount(const QVariantMap &receivedInformation);
+    void processUpdateStory(const QVariantMap &receivedInformation);
+    void processStory(const QVariantMap &receivedInformation);
+    void processUpdateStoryDeleted(const QVariantMap &receivedInformation);
+    void processStoriesList(const QVariantMap &receivedInformation);
+    void processStoryInteractions(const QVariantMap &receivedInformation);
 };
 
 #endif // TDLIBRECEIVER_H

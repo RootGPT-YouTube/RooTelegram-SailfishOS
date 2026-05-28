@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 1.7.5
+RT_APP_VERSION = 1.8
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -47,6 +47,8 @@ SOURCES += src/harbour-rootelegram.cpp \
     src/chatfoldersmodel.cpp \
     src/chatmodel.cpp \
     src/contactsmodel.cpp \
+    src/storiesmodel.cpp \
+    src/videotranscoder.cpp \
     src/dbusadaptor.cpp \
     src/dbusapplicationadaptor.cpp \
     src/dbusinterface.cpp \
@@ -185,6 +187,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/pages/ChannelAppearancePage.qml \
     qml/pages/ChannelStatisticsPage.qml \
     qml/pages/VideoPage.qml \
+    qml/pages/StoriesPage.qml \
     rpm/harbour-rootelegram.changes \
     rpm/harbour-rootelegram.spec \
     rpm/harbour-rootelegram.yaml \
@@ -216,6 +219,11 @@ LIBS += -L$$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/ -ltdjson
 telegram.files = $$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib
 telegram.path = /usr/share/$${TARGET}
 
+# ffmpeg minimale bundlato (per normalizzare i video landscape in storie 9:16).
+# Installo la dir `bin` così la copia ricorsiva preserva il bit +x del binario.
+ffmpegbin.files = $$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin
+ffmpegbin.path = /usr/share/$${TARGET}
+
 
 gui.files = qml
 gui.path = /usr/share/$${TARGET}
@@ -246,7 +254,7 @@ rootelegram.desktop.files = harbour-rootelegram.desktop
 database.files = db
 database.path = /usr/share/$${TARGET}
 
-INSTALLS += telegram 86.png 108.png 128.png 172.png 256.png \
+INSTALLS += telegram ffmpegbin 86.png 108.png 128.png 172.png 256.png \
             rootelegram.desktop gui images database
 
 HEADERS += \
@@ -257,6 +265,8 @@ HEADERS += \
     src/chatfoldersmodel.h \
     src/chatmodel.h \
     src/contactsmodel.h \
+    src/storiesmodel.h \
+    src/videotranscoder.h \
     src/dbusadaptor.h \
     src/dbusapplicationadaptor.h \
     src/dbusinterface.h \

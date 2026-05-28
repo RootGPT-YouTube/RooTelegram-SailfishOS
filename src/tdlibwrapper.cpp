@@ -196,6 +196,13 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chats(QVariantMap)), this, SLOT(handleChatsReceived(QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chat(QVariantMap)), this, SLOT(handleChatReceived(QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatThemesUpdated(QVariantList)), this, SLOT(handleChatThemesUpdated(QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(chatActiveStoriesUpdated(QVariantMap)), this, SIGNAL(chatActiveStoriesUpdated(QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(activeStoryListReordered(QString, QVariantList)), this, SIGNAL(activeStoryListReordered(QString, QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(storyListChatCountUpdated(QString, int)), this, SIGNAL(storyListChatCountUpdated(QString, int)));
+    connect(this->tdLibReceiver, SIGNAL(storyReceived(QVariantMap)), this, SIGNAL(storyReceived(QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(storyDeleted(qlonglong, int)), this, SIGNAL(storyDeleted(qlonglong, int)));
+    connect(this->tdLibReceiver, SIGNAL(storiesListReceived(QVariantList, int, QString)), this, SIGNAL(storiesListReceived(QVariantList, int, QString)));
+    connect(this->tdLibReceiver, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)), this, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)));
     connect(this->tdLibReceiver, SIGNAL(secretChat(qlonglong, QVariantMap)), this, SLOT(handleSecretChatReceived(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(secretChatUpdated(qlonglong, QVariantMap)), this, SLOT(handleSecretChatUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(recentStickersUpdated(QVariantList)), this, SIGNAL(recentStickersUpdated(QVariantList)));
@@ -3411,6 +3418,281 @@ void TDLibWrapper::removeOpenWith()
     LOG("Remove open-with");
     QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-rootelegram-open-url.desktop");
     QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
+}
+
+void TDLibWrapper::loadActiveStories(const QString &listType)
+{
+    LOG("Loading active stories" << listType);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "loadActiveStories");
+    QVariantMap storyList;
+    storyList.insert(_TYPE, listType == QStringLiteral("archive") ? "storyListArchive" : "storyListMain");
+    requestObject.insert("story_list", storyList);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getChatActiveStories(const QString &chatId)
+{
+    LOG("Getting chat active stories" << chatId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatActiveStories");
+    requestObject.insert("chat_id", chatId.toLongLong());
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getStory(const QString &storySenderChatId, int storyId, bool onlyLocal)
+{
+    // Su TDLib 1.8.62 il campo si chiama story_poster_chat_id (rinominato da
+    // story_sender_chat_id in qualche versione 1.8.x). Verificato via strings.
+    LOG("Getting story" << storySenderChatId << storyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getStory");
+    requestObject.insert("story_poster_chat_id", storySenderChatId.toLongLong());
+    requestObject.insert("story_id", storyId);
+    requestObject.insert("only_local", onlyLocal);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::viewStory(const QString &storySenderChatId, int storyId)
+{
+    // Su TDLib 1.8.62 (verificato via strings su libtdjson) la chiamata è
+    // openStory (singolare). Non esiste viewStory né viewStories. Manteniamo
+    // il nome QML-side per stabilità e mappiamo qui. Il campo è
+    // story_poster_chat_id, non story_sender_chat_id.
+    LOG("Opening story" << storySenderChatId << storyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "openStory");
+    requestObject.insert("story_poster_chat_id", storySenderChatId.toLongLong());
+    requestObject.insert("story_id", storyId);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getChatArchivedStories(const QString &chatId, int fromStoryId, int limit, const QString &extra)
+{
+    LOG("Getting chat archived stories" << chatId << fromStoryId << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatArchivedStories");
+    requestObject.insert("chat_id", chatId.toLongLong());
+    requestObject.insert("from_story_id", fromStoryId);
+    requestObject.insert("limit", limit);
+    if (!extra.isEmpty()) {
+        requestObject.insert(_EXTRA, extra);
+    }
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getChatPostedToChatPageStories(const QString &chatId, int fromStoryId, int limit, const QString &extra)
+{
+    // Storie pubblicate sul profilo (chat page): equivalente di "Highlights"
+    // sopravvissuti alle 24h. Funzione runtime verificata via strings sul
+    // libtdjson 1.8.62 del device. Stessa shape di getChatArchivedStories.
+    LOG("Getting chat posted-to-page stories" << chatId << fromStoryId << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatPostedToChatPageStories");
+    requestObject.insert("chat_id", chatId.toLongLong());
+    requestObject.insert("from_story_id", fromStoryId);
+    requestObject.insert("limit", limit);
+    if (!extra.isEmpty()) {
+        requestObject.insert(_EXTRA, extra);
+    }
+    this->sendRequest(requestObject);
+}
+
+namespace {
+    // Costruisce privacy_settings per postStory: "everyone" oppure
+    // "selected" con la lista di user_ids (int53).
+    QVariantMap buildStoryPrivacySettings(const QString &mode, const QStringList &allowedUserIds)
+    {
+        QVariantMap privacy;
+        if (mode == QStringLiteral("selected")) {
+            QVariantList userIds;
+            for (const QString &uid : allowedUserIds) {
+                bool ok = false;
+                qlonglong v = uid.toLongLong(&ok);
+                if (ok && v != 0) userIds.append(v);
+            }
+            privacy.insert(_TYPE, "storyPrivacySettingsSelectedUsers");
+            privacy.insert("user_ids", userIds);
+        } else {
+            privacy.insert(_TYPE, "storyPrivacySettingsEveryone");
+        }
+        return privacy;
+    }
+}
+
+void TDLibWrapper::postStory(const QString &chatId, const QString &photoPath, const QString &caption, int activePeriod,
+                             const QString &privacyMode, const QStringList &allowedUserIds,
+                             bool allowScreenshots, bool postToProfile)
+{
+    // TDLib 1.8.62: la funzione è postStory (NON sendStory) e i campi sono
+    // confermati via strings su libtdjson: content/privacy_settings/active_period/
+    // is_posted_to_chat_page. Per ora solo foto (inputStoryContentPhoto).
+    LOG("Posting story" << chatId << photoPath << privacyMode << allowedUserIds.size() << allowScreenshots << postToProfile);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "postStory");
+    requestObject.insert(_EXTRA, "postStory");
+    requestObject.insert("chat_id", chatId.toLongLong());
+
+    QVariantMap inputFile;
+    inputFile.insert(_TYPE, "inputFileLocal");
+    inputFile.insert("path", photoPath);
+
+    QVariantMap content;
+    content.insert(_TYPE, "inputStoryContentPhoto");
+    content.insert("photo", inputFile);
+    content.insert("added_sticker_file_ids", QVariantList());
+    requestObject.insert("content", content);
+
+    QVariantMap formattedCaption;
+    formattedCaption.insert(_TYPE, "formattedText");
+    formattedCaption.insert("text", caption);
+    formattedCaption.insert("entities", QVariantList());
+    requestObject.insert("caption", formattedCaption);
+
+    requestObject.insert("privacy_settings", buildStoryPrivacySettings(privacyMode, allowedUserIds));
+
+    // active_period valido solo: 6h/12h/24h/48h. Default 24h.
+    requestObject.insert("active_period", activePeriod > 0 ? activePeriod : 86400);
+    requestObject.insert("is_posted_to_chat_page", postToProfile);
+    requestObject.insert("protect_content", !allowScreenshots);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::postVideoStory(const QString &chatId, const QString &videoPath, double duration, const QString &caption, int activePeriod,
+                                  const QString &privacyMode, const QStringList &allowedUserIds,
+                                  bool allowScreenshots, bool postToProfile)
+{
+    // TDLib 1.8.62 (campi verificati via strings su libtdjson): content =
+    // inputStoryContentVideo video:InputFile duration:double cover_frame_timestamp:double
+    // is_animation:Bool added_sticker_file_ids:vector<int32>. Attenzione: TDLib NON
+    // transcodifica, il server rifiuta formati incompatibili o durata > 60s
+    // (errore instradato via @extra="postStory", vedi StoriesPage onErrorReceived).
+    LOG("Posting video story" << chatId << videoPath << duration << privacyMode << allowedUserIds.size() << allowScreenshots << postToProfile);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "postStory");
+    requestObject.insert(_EXTRA, "postStory");
+    requestObject.insert("chat_id", chatId.toLongLong());
+
+    QVariantMap inputFile;
+    inputFile.insert(_TYPE, "inputFileLocal");
+    inputFile.insert("path", videoPath);
+
+    QVariantMap content;
+    content.insert(_TYPE, "inputStoryContentVideo");
+    content.insert("video", inputFile);
+    content.insert("duration", duration);
+    content.insert("cover_frame_timestamp", 0.0);
+    content.insert("is_animation", false);
+    content.insert("added_sticker_file_ids", QVariantList());
+    requestObject.insert("content", content);
+
+    QVariantMap formattedCaption;
+    formattedCaption.insert(_TYPE, "formattedText");
+    formattedCaption.insert("text", caption);
+    formattedCaption.insert("entities", QVariantList());
+    requestObject.insert("caption", formattedCaption);
+
+    requestObject.insert("privacy_settings", buildStoryPrivacySettings(privacyMode, allowedUserIds));
+
+    requestObject.insert("active_period", activePeriod > 0 ? activePeriod : 86400);
+    requestObject.insert("is_posted_to_chat_page", postToProfile);
+    requestObject.insert("protect_content", !allowScreenshots);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::deleteStory(const QString &storyPosterChatId, int storyId)
+{
+    // TDLib 1.8.62: deleteStory story_poster_chat_id:int53 story_id:int32 = Ok.
+    LOG("Deleting story" << storyPosterChatId << storyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "deleteStory");
+    requestObject.insert("story_poster_chat_id", storyPosterChatId.toLongLong());
+    requestObject.insert("story_id", storyId);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getStoryInteractions(int storyId, const QString &offset, int limit)
+{
+    // TDLib 1.8.62/1.8.64 (schema verificato): getStoryInteractions story_id:int32
+    // query:string only_contacts:Bool prefer_forwards:Bool prefer_with_reaction:Bool
+    // offset:string limit:int32 = StoryInteractions. Opera implicitamente sulle
+    // storie del current user. La risposta `storyInteractions` non riporta lo
+    // story_id, quindi lo veicoliamo via @extra per correlarla lato QML.
+    LOG("Getting story interactions" << storyId << offset << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getStoryInteractions");
+    requestObject.insert(_EXTRA, "storyInteractions:" + QString::number(storyId));
+    requestObject.insert("story_id", storyId);
+    requestObject.insert("query", QString());
+    requestObject.insert("only_contacts", false);
+    requestObject.insert("prefer_forwards", false);
+    requestObject.insert("prefer_with_reaction", false);
+    requestObject.insert("offset", offset);
+    requestObject.insert("limit", limit > 0 ? limit : 50);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::setStoryReaction(const QString &storyPosterChatId, int storyId, const QString &emoji, bool updateRecent)
+{
+    // TDLib 1.8.62: setStoryReaction story_poster_chat_id:int53 story_id:int32
+    // reaction_type:ReactionType update_recent_reactions:Bool = Ok. reaction_type
+    // null rimuove la reaction. Errori (es. emoji non valida) instradati via
+    // @extra="storyReaction" → toast nel viewer.
+    LOG("Setting story reaction" << storyPosterChatId << storyId << emoji);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "setStoryReaction");
+    requestObject.insert(_EXTRA, "storyReaction");
+    requestObject.insert("story_poster_chat_id", storyPosterChatId.toLongLong());
+    requestObject.insert("story_id", storyId);
+    if (emoji.isEmpty()) {
+        requestObject.insert("reaction_type", QVariant()); // null = rimuove
+    } else {
+        QVariantMap reactionType;
+        reactionType.insert(_TYPE, "reactionTypeEmoji");
+        reactionType.insert("emoji", emoji);
+        requestObject.insert("reaction_type", reactionType);
+    }
+    requestObject.insert("update_recent_reactions", updateRecent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendStoryReply(const QString &storyPosterChatId, int storyId, const QString &message)
+{
+    // Reply privato a una storia altrui: sendMessage alla chat del poster con
+    // reply_to = inputMessageReplyToStory (schema TL verificato). Per le storie
+    // utente la chat è il poster stesso (chat_id == story_poster_chat_id).
+    LOG("Sending story reply" << storyPosterChatId << storyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "sendMessage");
+    requestObject.insert(CHAT_ID, storyPosterChatId.toLongLong());
+
+    QVariantMap replyTo;
+    replyTo.insert(_TYPE, "inputMessageReplyToStory");
+    replyTo.insert("story_poster_chat_id", storyPosterChatId.toLongLong());
+    replyTo.insert("story_id", storyId);
+    requestObject.insert(REPLY_TO, replyTo);
+
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageText");
+    inputMessageContent.insert("text", formattedTextFromMessage(message));
+    inputMessageContent.insert("disable_web_page_preview", false);
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::setChatActiveStoriesList(const QString &chatId, const QString &listType)
+{
+    // TDLib 1.8.62: setChatActiveStoriesList chat_id:int53 story_list:StoryList = Ok.
+    // Sposta le storie attive di una chat tra Main e Archived (lato utente).
+    LOG("Setting chat active stories list" << chatId << listType);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "setChatActiveStoriesList");
+    requestObject.insert(CHAT_ID, chatId.toLongLong());
+    QVariantMap storyList;
+    storyList.insert(_TYPE, listType == QStringLiteral("archive")
+                            ? "storyListArchive" : "storyListMain");
+    requestObject.insert("story_list", storyList);
+    this->sendRequest(requestObject);
 }
 
 const TDLibWrapper::Group *TDLibWrapper::updateGroup(qlonglong groupId, const QVariantMap &groupInfo, QHash<qlonglong,Group*> *groups)

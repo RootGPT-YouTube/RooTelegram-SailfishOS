@@ -44,6 +44,7 @@
 #include <QDBusReply>
 #include <QSortFilterProxyModel>
 #include <QTimer>
+#include <QPixmapCache>
 #include <functional>
 
 #include "appsettings.h"
@@ -68,6 +69,8 @@
 #include "rootelegramutils.h"
 #include "knownusersmodel.h"
 #include "contactsmodel.h"
+#include "storiesmodel.h"
+#include "videotranscoder.h"
 
 // The default filter can be overridden by QT_LOGGING_RULES envinronment variable, e.g.
 // QT_LOGGING_RULES="rootelegram.*=true" harbour-rootelegram
@@ -155,11 +158,30 @@ int main(int argc, char *argv[])
 {
     QLoggingCategory::setFilterRules(DEFAULT_LOG_FILTER);
 
+    // WEBM sticker (VP9): il decoder hardware msm_vidc (v4l2 vp9d) si incastra
+    // dopo ripetuti open/close del pipeline e porta giù l'app (vedi
+    // project_gif_loop_unsupported). Forziamo GStreamer a usare il decoder VP9
+    // SOFTWARE (libvpx vp9dec) portandolo a rank MAX: playbin lo preferisce
+    // all'hardware SOLO per il VP9. L'H264 delle GIF resta su hardware, intatto.
+    // Va settato prima che QtMultimedia faccia gst_init (qui, prima dell'app).
+    qputenv("GST_PLUGIN_FEATURE_RANK", QByteArray("vp9dec:MAX"));
+
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     const QStringList startupArguments = app->arguments();
     const bool daemonMode = startupArguments.contains("--daemon");
 
+    // Limit QPixmapCache: in daemon mode l'app non muore mai e accumulando
+    // QPixmap (thumbnail, sticker, profilo) la RSS cresce indefinitamente.
+    // Default Qt5 ~10 MB, ma su mobile può salire. Fissiamo 16 MB per tenere
+    // un cap predicibile senza penalizzare lo scroll.
+    QPixmapCache::setCacheLimit(16384);
+
     migrateSettings();
+
+    // Single-instance: sailjail-side. Quando il daemon è già vivo, una nuova
+    // invocazione tap-on-icon arriva con cmdline senza --daemon: in quel caso
+    // forwardiamo via DBus e usciamo. Quando arriva con --daemon (auto-start
+    // o reset sandbox), partiamo come istanza piena.
     if (!daemonMode && activateRunningInstance()) {
         LOG("Existing RooTelegram daemon found, activation forwarded");
         return 0;
@@ -176,9 +198,13 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<TDLibWrapper>(uri, 1, 0, "TelegramAPI", QString());
     qmlRegisterUncreatableType<RooTelegramUtils>(uri, 1, 0, "RooTelegramUtilities", QString());
     AppSettings *appSettings = new AppSettings(app.data());
-    const bool daemonEnabled = appSettings->daemonEnabled();
-    const bool effectiveDaemonMode = daemonMode && daemonEnabled;
-    app->setQuitOnLastWindowClosed(!daemonEnabled);
+    // Il daemon è sempre attivo: l'app resta viva in background tra apertura
+    // e chiusura della UI. Il vecchio toggle daemonEnabled è stato rinominato
+    // notificationsEnabled e controlla solo la pubblicazione delle notifiche
+    // desktop (vedi NotificationManager). Questo elimina i bug del lifecycle
+    // toggle ON→OFF→ON e semplifica la semantica per l'utente.
+    const bool effectiveDaemonMode = daemonMode;
+    app->setQuitOnLastWindowClosed(false);
     MceInterface *mceInterface = new MceInterface(app.data());
     TDLibWrapper *tdLibWrapper = new TDLibWrapper(appSettings, mceInterface, app.data());
     RooTelegramUtils *rootelegramUtils = new RooTelegramUtils(app.data());
@@ -212,18 +238,16 @@ int main(int argc, char *argv[])
     contactsProxyModel.setFilterRole(ContactsModel::RoleFilter);
     contactsProxyModel.setFilterCaseSensitivity(Qt::CaseInsensitive);
 
+    StoriesModel storiesModel(tdLibWrapper, app.data());
+    // Notifica desktop quando un contatto pubblica una storia nuova (gating e
+    // pubblicazione sono dentro NotificationManager::handleNewStory).
+    QObject::connect(&storiesModel, &StoriesModel::newStoryPosted,
+                     &notificationManager, &NotificationManager::handleNewStory);
+
+    VideoTranscoder videoTranscoder(app.data());
+
     QQuickView *view = Q_NULLPTR;
     bool replayingDbusSignal = false;
-
-    QObject::connect(appSettings, &AppSettings::daemonEnabledChanged, app.data(), [&]() {
-        const bool nowEnabled = appSettings->daemonEnabled();
-        LOG("daemonEnabled changed at runtime: " << nowEnabled);
-        app->setQuitOnLastWindowClosed(!nowEnabled);
-        if (!nowEnabled && (!view || !view->isVisible())) {
-            LOG("Daemon disabled and no visible view - quitting application");
-            app->quit();
-        }
-    });
 
     auto ensureViewLoaded = [&]() {
         if (!view) {
@@ -245,14 +269,9 @@ int main(int argc, char *argv[])
             context->setContextProperty("knownUsersProxyModel", &knownUsersProxyModel);
             context->setContextProperty("contactsModel", &contactsModel);
             context->setContextProperty("contactsProxyModel", &contactsProxyModel);
+            context->setContextProperty("storiesModel", &storiesModel);
+            context->setContextProperty("videoTranscoder", &videoTranscoder);
             view->setSource(SailfishApp::pathTo("qml/harbour-rootelegram.qml"));
-
-            QObject::connect(view, &QWindow::visibilityChanged, app.data(), [&](QWindow::Visibility visibility) {
-                if (visibility == QWindow::Hidden && !appSettings->daemonEnabled()) {
-                    LOG("View hidden and daemon disabled - quitting application");
-                    app->quit();
-                }
-            });
         }
     };
 

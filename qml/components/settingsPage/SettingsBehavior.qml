@@ -111,12 +111,24 @@ AccordionItem {
 
             TextSwitch {
                 width: parent.columnWidth
-                checked: appSettings.daemonEnabled
-                text: qsTr("Run as daemon in background")
-                description: qsTr("Keep RooTelegram running in background and allow DBus daemon startup. Restart the app after changing this setting.")
+                checked: appSettings.notificationsEnabled
+                text: qsTr("Notifications")
+                description: qsTr("Show desktop notifications for new messages. The app always stays in background; this toggle controls only notification publishing.")
                 automaticCheck: false
                 onClicked: {
-                    appSettings.daemonEnabled = !checked
+                    appSettings.notificationsEnabled = !checked
+                }
+            }
+
+            TextSwitch {
+                width: parent.columnWidth
+                enabled: appSettings.notificationsEnabled
+                checked: appSettings.notificationStoriesEnabled && enabled
+                text: qsTr("Stories")
+                description: qsTr("Notify when a contact posts a new story.")
+                automaticCheck: false
+                onClicked: {
+                    appSettings.notificationStoriesEnabled = !checked
                 }
             }
 

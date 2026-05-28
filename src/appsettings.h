@@ -36,12 +36,19 @@ class AppSettings : public QObject {
     Q_PROPERTY(int remainingDoubleTapHints READ remainingDoubleTapHints WRITE setRemainingDoubleTapHints NOTIFY remainingDoubleTapHintsChanged)
     Q_PROPERTY(bool onlineOnlyMode READ onlineOnlyMode WRITE setOnlineOnlyMode NOTIFY onlineOnlyModeChanged)
     Q_PROPERTY(bool delayMessageRead READ delayMessageRead WRITE setDelayMessageRead NOTIFY delayMessageReadChanged)
-    Q_PROPERTY(bool daemonEnabled READ daemonEnabled WRITE setDaemonEnabled NOTIFY daemonEnabledChanged)
+    Q_PROPERTY(bool notificationsEnabled READ notificationsEnabled WRITE setNotificationsEnabled NOTIFY notificationsEnabledChanged)
+    Q_PROPERTY(bool notificationStoriesEnabled READ notificationStoriesEnabled WRITE setNotificationStoriesEnabled NOTIFY notificationStoriesEnabledChanged)
+    // Alias deprecato: il daemon ora è sempre attivo. Il vecchio toggle
+    // controlla soltanto la pubblicazione delle notifiche desktop.
+    Q_PROPERTY(bool daemonEnabled READ notificationsEnabled WRITE setNotificationsEnabled NOTIFY notificationsEnabledChanged)
     Q_PROPERTY(bool focusTextAreaOnChatOpen READ getFocusTextAreaOnChatOpen WRITE setFocusTextAreaOnChatOpen NOTIFY focusTextAreaOnChatOpenChanged)
     Q_PROPERTY(SponsoredMess sponsoredMess READ getSponsoredMess WRITE setSponsoredMess NOTIFY sponsoredMessChanged)
     Q_PROPERTY(bool highlightUnreadConversations READ highlightUnreadConversations WRITE setHighlightUnreadConversations NOTIFY highlightUnreadConversationsChanged)
     Q_PROPERTY(bool coverHideGroupChannelUnread READ coverHideGroupChannelUnread WRITE setCoverHideGroupChannelUnread NOTIFY coverHideGroupChannelUnreadChanged)
     Q_PROPERTY(bool disableVideoPreload READ disableVideoPreload WRITE setDisableVideoPreload NOTIFY disableVideoPreloadChanged)
+    Q_PROPERTY(bool storyAllowScreenshots READ storyAllowScreenshots WRITE setStoryAllowScreenshots NOTIFY storyAllowScreenshotsChanged)
+    Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
+    Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
 
 public:
     enum SponsoredMess {
@@ -114,8 +121,11 @@ public:
 
     bool delayMessageRead() const;
     void setDelayMessageRead(bool enable);
-    bool daemonEnabled() const;
-    void setDaemonEnabled(bool enable);
+    bool notificationsEnabled() const;
+    void setNotificationsEnabled(bool enable);
+
+    bool notificationStoriesEnabled() const;
+    void setNotificationStoriesEnabled(bool enable);
 
     bool getFocusTextAreaOnChatOpen() const;
     void setFocusTextAreaOnChatOpen(bool focusTextAreaOnChatOpen);
@@ -134,6 +144,18 @@ public:
 
     Q_INVOKABLE QStringList recentEmojis() const;
     Q_INVOKABLE void addRecentEmoji(const QString &emoji);
+
+    bool storyAllowScreenshots() const;
+    void setStoryAllowScreenshots(bool enable);
+
+    bool storyPostToProfile() const;
+    void setStoryPostToProfile(bool enable);
+
+    QString storyPrivacyMode() const;
+    void setStoryPrivacyMode(const QString &mode);
+
+    Q_INVOKABLE QStringList storyCustomAudienceUserIds() const;
+    Q_INVOKABLE void setStoryCustomAudienceUserIds(const QStringList &ids);
 
 signals:
     void sendByEnterChanged();
@@ -154,13 +176,18 @@ signals:
     void remainingDoubleTapHintsChanged();
     void onlineOnlyModeChanged();
     void delayMessageReadChanged();
-    void daemonEnabledChanged();
+    void notificationsEnabledChanged();
+    void notificationStoriesEnabledChanged();
     void focusTextAreaOnChatOpenChanged();
     void sponsoredMessChanged();
     void highlightUnreadConversationsChanged();
     void coverHideGroupChannelUnreadChanged();
     void disableVideoPreloadChanged();
     void recentEmojisChanged();
+    void storyAllowScreenshotsChanged();
+    void storyPostToProfileChanged();
+    void storyPrivacyModeChanged();
+    void storyCustomAudienceUserIdsChanged();
 
 private:
     QSettings settings;
