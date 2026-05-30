@@ -134,6 +134,18 @@ AccordionItem {
 
             TextSwitch {
                 width: parent.columnWidth
+                enabled: appSettings.notificationsEnabled
+                checked: appSettings.notificationReactionsEnabled && enabled
+                text: qsTr("Reactions")
+                description: qsTr("Notify when someone reacts to one of your messages.")
+                automaticCheck: false
+                onClicked: {
+                    appSettings.notificationReactionsEnabled = !checked
+                }
+            }
+
+            TextSwitch {
+                width: parent.columnWidth
                 checked: appSettings.notificationAlwaysShowPreview
                 text: qsTr("Always append message preview to notifications")
                 description: qsTr("In addition to showing the number of unread messages, the latest message will also be appended to notifications.")

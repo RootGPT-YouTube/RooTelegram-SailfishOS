@@ -61,3 +61,5 @@ tdlibsecrets.h
 /.sfdk/
 /log.txt
 _ffmpeg_build/
+CLAUDE.md
+debug*.list

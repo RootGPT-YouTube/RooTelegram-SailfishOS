@@ -889,6 +889,15 @@
         <comment>Button: start voice call</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Video call</source>
+        <comment>Button: start video call</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video calls are not available in this build yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatJoinRequestsPage</name>
@@ -1280,6 +1289,14 @@
     <message>
         <source>No</source>
         <translation type="unfinished">No</translation>
+    </message>
+    <message>
+        <source>Type your message first, then tap this button to translate it to English!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Selected text copied to clipboard</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2013,6 +2030,14 @@ messages</numerusform>
         <source>In reply to a story</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Translate message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Someone</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2157,6 +2182,14 @@ messages</numerusform>
         <source>posted a new story</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>reacted to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>reacted %1 to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2242,10 +2275,6 @@ messages</numerusform>
     </message>
     <message>
         <source>Search chat...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Blocklist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3344,6 +3373,14 @@ messages</numerusform>
         <source>Notify when a contact posts a new story.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Reactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notify when someone reacts to one of your messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -3425,6 +3462,18 @@ messages</numerusform>
     <message>
         <source>Some inline bots request location data when using them</source>
         <translation>Some inline bots request location data when using them</translation>
+    </message>
+    <message>
+        <source>Blocklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the list of Telegram users you have blocked.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

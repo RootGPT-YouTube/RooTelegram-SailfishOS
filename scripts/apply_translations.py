@@ -28,10 +28,24 @@ IT = {
     "Notify when a contact posts a new story.": "Avvisa quando un contatto pubblica una nuova storia.",
     "posted a new story": "ha pubblicato una nuova storia",
     "In reply to a story": "In risposta a una storia",
+    # Reaction sui propri messaggi (Task 3)
+    "Reactions": "Reazioni",
+    "Notify when someone reacts to one of your messages.": "Avvisa quando qualcuno reagisce a un tuo messaggio.",
+    "reacted to your message": "ha reagito al tuo messaggio",
+    "reacted %1 to your message": "ha reagito %1 al tuo messaggio",
+    "Someone": "Qualcuno",
+    # Copia testo parziale del messaggio
+    "Selected text copied to clipboard": "Testo selezionato copiato negli appunti",
+    # Videochiamate (stub)
+    "Video call": "Videochiamata",
+    "Video calls are not available in this build yet.": "Le videochiamate non sono ancora disponibili in questa versione.",
     # Stories — tabs + lista
     "Main": "Home",
     "Archive": "Archivio",
     "Profile": "Profilo",
+    "Blocklist": "Lista bloccati",
+    "View": "Vedi",
+    "Show the list of Telegram users you have blocked.": "Mostra l'elenco degli utenti di Telegram che hai bloccato.",
     "Blacklist": "Blacklist",
     "Blacklist is empty": "La blacklist è vuota",
     "Add to blacklist": "Aggiungi alla blacklist",
@@ -115,6 +129,10 @@ IT = {
         "Membri del tuo pubblico personalizzato (%n selezionato). Salvato tra le storie.",
         "Membri del tuo pubblico personalizzato (%n selezionati). Salvato tra le storie.",
     ),
+    # Traduzione messaggi (1.8.5)
+    "Translate message": "Traduci messaggio",
+    "Type your message first, then tap this button to translate it to English!":
+        "Scrivi prima il messaggio, poi premi questo tasto per tradurlo in inglese!",
 }
 
 
@@ -131,10 +149,24 @@ DE = {
     "Notify when a contact posts a new story.": "Benachrichtigen, wenn ein Kontakt eine neue Story postet.",
     "posted a new story": "hat eine neue Story gepostet",
     "In reply to a story": "Antwort auf eine Story",
+    # Reaktionen auf eigene Nachrichten (Task 3)
+    "Reactions": "Reaktionen",
+    "Notify when someone reacts to one of your messages.": "Benachrichtigen, wenn jemand auf eine deiner Nachrichten reagiert.",
+    "reacted to your message": "hat auf deine Nachricht reagiert",
+    "reacted %1 to your message": "hat mit %1 auf deine Nachricht reagiert",
+    "Someone": "Jemand",
+    # Teilweises Kopieren von Nachrichtentext
+    "Selected text copied to clipboard": "Markierter Text in die Zwischenablage kopiert",
+    # Videoanrufe (Stub)
+    "Video call": "Videoanruf",
+    "Video calls are not available in this build yet.": "Videoanrufe sind in dieser Version noch nicht verfügbar.",
     # Stories — tabs + lista
     "Main": "Haupt",
     "Archive": "Archiv",
     "Profile": "Profil",
+    "Blocklist": "Blockierliste",
+    "View": "Anzeigen",
+    "Show the list of Telegram users you have blocked.": "Zeigt die Liste der Telegram-Nutzer, die du blockiert hast.",
     "Blacklist": "Blacklist",
     "Blacklist is empty": "Blacklist ist leer",
     "Add to blacklist": "Zur Blacklist hinzufügen",
@@ -218,6 +250,10 @@ DE = {
         "Mitglieder deiner benutzerdefinierten Zielgruppe (%n ausgewählt). Wird über Storys hinweg gespeichert.",
         "Mitglieder deiner benutzerdefinierten Zielgruppe (%n ausgewählt). Wird über Storys hinweg gespeichert.",
     ),
+    # Nachrichtenübersetzung (1.8.5)
+    "Translate message": "Nachricht übersetzen",
+    "Type your message first, then tap this button to translate it to English!":
+        "Schreibe zuerst deine Nachricht, dann tippe auf diese Schaltfläche, um sie ins Englische zu übersetzen!",
 }
 
 

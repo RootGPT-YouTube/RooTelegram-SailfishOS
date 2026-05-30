@@ -889,6 +889,15 @@
         <comment>Button: start voice call</comment>
         <translation>Anruf</translation>
     </message>
+    <message>
+        <source>Video call</source>
+        <comment>Button: start video call</comment>
+        <translation>Videoanruf</translation>
+    </message>
+    <message>
+        <source>Video calls are not available in this build yet.</source>
+        <translation>Videoanrufe sind in dieser Version noch nicht verfügbar.</translation>
+    </message>
 </context>
 <context>
     <name>ChatJoinRequestsPage</name>
@@ -1280,6 +1289,14 @@
     <message>
         <source>No</source>
         <translation>Nein</translation>
+    </message>
+    <message>
+        <source>Type your message first, then tap this button to translate it to English!</source>
+        <translation>Schreibe zuerst deine Nachricht, dann tippe auf diese Schaltfläche, um sie ins Englische zu übersetzen!</translation>
+    </message>
+    <message>
+        <source>Selected text copied to clipboard</source>
+        <translation>Markierter Text in die Zwischenablage kopiert</translation>
     </message>
 </context>
 <context>
@@ -2013,6 +2030,14 @@ Nachrichten</numerusform>
         <source>In reply to a story</source>
         <translation>Antwort auf eine Story</translation>
     </message>
+    <message>
+        <source>Translate message</source>
+        <translation>Nachricht übersetzen</translation>
+    </message>
+    <message>
+        <source>Someone</source>
+        <translation>Jemand</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2157,6 +2182,14 @@ Nachrichten</numerusform>
         <source>posted a new story</source>
         <translation>hat eine neue Story gepostet</translation>
     </message>
+    <message>
+        <source>reacted to your message</source>
+        <translation>hat auf deine Nachricht reagiert</translation>
+    </message>
+    <message>
+        <source>reacted %1 to your message</source>
+        <translation>hat mit %1 auf deine Nachricht reagiert</translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2243,10 +2276,6 @@ Nachrichten</numerusform>
     <message>
         <source>Search chat...</source>
         <translation>Chat suchen…</translation>
-    </message>
-    <message>
-        <source>Blocklist</source>
-        <translation>Sperrliste</translation>
     </message>
     <message>
         <source>Stories</source>
@@ -3344,6 +3373,14 @@ Nachrichten</numerusform>
         <source>Notify when a contact posts a new story.</source>
         <translation>Benachrichtigen, wenn ein Kontakt eine neue Story postet.</translation>
     </message>
+    <message>
+        <source>Reactions</source>
+        <translation>Reaktionen</translation>
+    </message>
+    <message>
+        <source>Notify when someone reacts to one of your messages.</source>
+        <translation>Benachrichtigen, wenn jemand auf eine deiner Nachrichten reagiert.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -3425,6 +3462,18 @@ Nachrichten</numerusform>
     <message>
         <source>Some inline bots request location data when using them</source>
         <translation>Manche Inline-Bots fordern bei der Nutzung Standortdaten an</translation>
+    </message>
+    <message>
+        <source>Blocklist</source>
+        <translation>Blockierliste</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>Anzeigen</translation>
+    </message>
+    <message>
+        <source>Show the list of Telegram users you have blocked.</source>
+        <translation>Zeigt die Liste der Telegram-Nutzer, die du blockiert hast.</translation>
     </message>
 </context>
 <context>

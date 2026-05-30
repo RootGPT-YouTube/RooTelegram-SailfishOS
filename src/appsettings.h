@@ -38,6 +38,7 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool delayMessageRead READ delayMessageRead WRITE setDelayMessageRead NOTIFY delayMessageReadChanged)
     Q_PROPERTY(bool notificationsEnabled READ notificationsEnabled WRITE setNotificationsEnabled NOTIFY notificationsEnabledChanged)
     Q_PROPERTY(bool notificationStoriesEnabled READ notificationStoriesEnabled WRITE setNotificationStoriesEnabled NOTIFY notificationStoriesEnabledChanged)
+    Q_PROPERTY(bool notificationReactionsEnabled READ notificationReactionsEnabled WRITE setNotificationReactionsEnabled NOTIFY notificationReactionsEnabledChanged)
     // Alias deprecato: il daemon ora è sempre attivo. Il vecchio toggle
     // controlla soltanto la pubblicazione delle notifiche desktop.
     Q_PROPERTY(bool daemonEnabled READ notificationsEnabled WRITE setNotificationsEnabled NOTIFY notificationsEnabledChanged)
@@ -126,6 +127,8 @@ public:
 
     bool notificationStoriesEnabled() const;
     void setNotificationStoriesEnabled(bool enable);
+    bool notificationReactionsEnabled() const;
+    void setNotificationReactionsEnabled(bool enable);
 
     bool getFocusTextAreaOnChatOpen() const;
     void setFocusTextAreaOnChatOpen(bool focusTextAreaOnChatOpen);
@@ -178,6 +181,7 @@ signals:
     void delayMessageReadChanged();
     void notificationsEnabledChanged();
     void notificationStoriesEnabledChanged();
+    void notificationReactionsEnabledChanged();
     void focusTextAreaOnChatOpenChanged();
     void sponsoredMessChanged();
     void highlightUnreadConversationsChanged();

@@ -68,10 +68,21 @@ Page {
                                     )
     property var selectedMessages: []
     readonly property bool isSelecting: selectedMessages.length > 0
+    // Testo selezionato nel singolo messaggio attivo (popolato dal delegate
+    // MessageListViewItem); guida l'icona "copia testo selezionato" nella barra azioni.
+    property string activeSelectedText: ""
+    onSelectedMessagesChanged: {
+        // Al cambio della selezione, azzera: il delegate ripopola se c'è una selezione di testo.
+        activeSelectedText = "";
+    }
     readonly property bool canSendMessages: hasSendPrivilege("can_send_basic_messages")
     property bool doSendBotStartMessage
     property string sendBotStartMessageParameter
     property var messageThreadId: 0
+    // Messaggi ricevuti: traduci nella lingua di sistema del telefono (per capirli)
+    property string translateTargetLanguage: Qt.locale().name.substring(0, 2) || "en"
+    // Testo da inviare: traduci sempre in inglese (per i gruppi internazionali)
+    property string translateOutgoingLanguage: "en"
     property var topicLastMessageId: 0
     property var currentTopicInfo: null
     property var pinnedMessagesByThread: ({})
@@ -680,6 +691,30 @@ Page {
         newMessageColumn.previousComposerText = newMessageTextField.text || "";
         newMessageTextField.focus = true;
         controlSendButton();
+    }
+
+    // translateText di Telegram restituisce la formattazione come tag HTML
+    // (<b>, <i>, ...). Li riconvertiamo nei marcatori markdown del composer
+    // (**, __, ++, ~~, `, ||) così il messaggio tradotto resta formattabile/inviabile.
+    function translatedHtmlToComposerMarkdown(html) {
+        if (!html) return html;
+        var s = html;
+        s = s.replace(/<\/?(?:b|strong)>/gi, "**");
+        s = s.replace(/<\/?(?:i|em)>/gi, "__");
+        s = s.replace(/<\/?(?:u|ins)>/gi, "++");
+        s = s.replace(/<\/?(?:s|strike|del)>/gi, "~~");
+        s = s.replace(/<\/?(?:code|pre)>/gi, "`");
+        s = s.replace(/<tg-spoiler>|<\/tg-spoiler>/gi, "||");
+        s = s.replace(/<span[^>]*tg-spoiler[^>]*>|<\/span>/gi, "||");
+        // Link: tieni solo il testo visibile
+        s = s.replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, "$1");
+        // Rimuovi eventuali tag residui non gestiti
+        s = s.replace(/<[^>]+>/g, "");
+        // Unescape entità HTML (&amp; per ultimo)
+        s = s.replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+             .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
+             .replace(/&amp;/g, "&");
+        return s;
     }
 
     function applyInlineFormatting(prefix, suffix) {
@@ -2480,6 +2515,24 @@ Page {
                     topPadding: Theme.paddingSmall + inlineQuery.buttonPadding
                     anchors.horizontalCenter: parent.horizontalCenter
                     visible: height > 0 && !(chatPage.currentTopicInfo && chatPage.currentTopicInfo.is_closed)
+                    property bool translatingInput: false
+                    property string originalInputText: ""
+
+                    Connections {
+                        target: tdLibWrapper
+                        onTextTranslated: {
+                            newMessageColumn.translatingInput = false
+                            if (translatedText !== "") {
+                                newMessageTextField.text = chatPage.translatedHtmlToComposerMarkdown(translatedText)
+                            }
+                        }
+                        onErrorReceived: {
+                            // Sblocca il pulsante se la traduzione del testo in uscita fallisce.
+                            if (extra === "translateText:" + chatPage.translateOutgoingLanguage) {
+                                newMessageColumn.translatingInput = false
+                            }
+                        }
+                    }
 
                 // Banner topic chiuso
                 Rectangle {
@@ -3563,13 +3616,57 @@ Page {
                         }
                     }
 
-                    Row {
+                    Item {
                         id: formattingRow
                         width: parent.width
                         height: Theme.itemSizeExtraSmall
                         visible: chatPage.canSendMessages && !inlineQuery.userNameIsValid
-                        layoutDirection: Qt.RightToLeft
-                        spacing: newMessageColumn.compactAttachmentSpacing
+
+                        // Globo traduzione: staccato dai tasti formato, allineato a sinistra,
+                        // stessa dimensione. Sempre visibile; toast se il testo è vuoto.
+                        Item {
+                            id: translateFormatButton
+                            width: newMessageColumn.compactAttachmentButtonSize
+                            height: width
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            opacity: newMessageColumn.translatingInput ? 0.4 : 1.0
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: width / 2
+                                color: Theme.rgba(Theme.primaryColor, 0.16)
+                            }
+                            Image {
+                                anchors.centerIn: parent
+                                source: "image://theme/icon-m-website?" + Theme.primaryColor
+                                width: parent.width * 0.62
+                                height: width
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                smooth: true
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !newMessageColumn.translatingInput
+                                onClicked: {
+                                    if (newMessageTextField.text.length > 0) {
+                                        newMessageColumn.translatingInput = true
+                                        newMessageColumn.originalInputText = newMessageTextField.text
+                                        tdLibWrapper.translateText(newMessageTextField.text, chatPage.translateOutgoingLanguage)
+                                    } else {
+                                        appNotification.show(qsTr("Type your message first, then tap this button to translate it to English!"))
+                                    }
+                                }
+                            }
+                        }
+
+                        Row {
+                            id: formattingButtonsRow
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: Theme.itemSizeExtraSmall
+                            layoutDirection: Qt.RightToLeft
+                            spacing: newMessageColumn.compactAttachmentSpacing
 
                         Item {
                             width: newMessageColumn.compactAttachmentButtonSize
@@ -3705,6 +3802,7 @@ Page {
                                     applyInlineFormatting("||", "||");
                                 }
                             }
+                        }
                         }
                     }
 
@@ -3899,6 +3997,19 @@ Page {
                         onClicked: {
                             var selectedMessage = selectedMessages[0];
                             chatPage.beginMessageEdit(selectedMessage.id.toString(), selectedMessage);
+                            chatPage.selectedMessages = [];
+                        }
+                    }
+
+                    // Copia SOLO il testo selezionato del singolo messaggio attivo.
+                    // Collocata tra la penna (edit) e l'icona "copia intero messaggio".
+                    IconButton {
+                        icon.source: "image://theme/icon-m-clipboard"
+                        icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
+                        visible: selectedMessages.length === 1 && chatPage.activeSelectedText.length > 0
+                        onClicked: {
+                            Clipboard.text = chatPage.activeSelectedText;
+                            appNotification.show(qsTr("Selected text copied to clipboard"));
                             chatPage.selectedMessages = [];
                         }
                     }

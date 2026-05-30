@@ -35,6 +35,7 @@ namespace {
     const QString KEY_DAEMON_ENABLED("daemonEnabled");           // legacy, migrated
     const QString KEY_NOTIFICATIONS_ENABLED("notificationsEnabled");
     const QString KEY_NOTIFICATION_STORIES_ENABLED("notificationStoriesEnabled");
+    const QString KEY_NOTIFICATION_REACTIONS_ENABLED("notificationReactionsEnabled");
     const QString KEY_FOCUS_TEXTAREA_ON_CHAT_OPEN("focusTextAreaOnChatOpen");
     const QString KEY_SPONSORED_MESS("sponsoredMess");
     const QString KEY_HIGHLIGHT_UNREADCONVS("highlightUnreadConversations");
@@ -344,6 +345,20 @@ void AppSettings::setNotificationStoriesEnabled(bool enable)
         LOG(KEY_NOTIFICATION_STORIES_ENABLED << enable);
         settings.setValue(KEY_NOTIFICATION_STORIES_ENABLED, enable);
         emit notificationStoriesEnabledChanged();
+    }
+}
+
+bool AppSettings::notificationReactionsEnabled() const
+{
+    return settings.value(KEY_NOTIFICATION_REACTIONS_ENABLED, true).toBool();
+}
+
+void AppSettings::setNotificationReactionsEnabled(bool enable)
+{
+    if (notificationReactionsEnabled() != enable) {
+        LOG(KEY_NOTIFICATION_REACTIONS_ENABLED << enable);
+        settings.setValue(KEY_NOTIFICATION_REACTIONS_ENABLED, enable);
+        emit notificationReactionsEnabledChanged();
     }
 }
 

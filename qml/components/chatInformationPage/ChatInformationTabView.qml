@@ -83,38 +83,87 @@ Item {
             top: parent.top
         }
 
-        BackgroundItem {
-            id: callActionItem
+        Row {
+            id: callButtonsRow
             anchors.centerIn: parent
-            width: Math.min(parent.width - (2 * Theme.horizontalPageMargin), Theme.itemSizeHuge * 2.2)
-            height: Theme.itemSizeLarge
+            spacing: Theme.paddingLarge
 
-            Row {
-                anchors.centerIn: parent
-                spacing: Theme.paddingMedium
+            // --- Chiamata vocale ---
+            BackgroundItem {
+                id: voiceCallButton
+                width: voiceCallContent.width + 2 * Theme.paddingLarge
+                height: Theme.itemSizeMedium
 
-                Image {
-                    width: Theme.iconSizeSmall
-                    height: width
-                    source: Emoji.getEmojiPath("📞")
-                    fillMode: Image.PreserveAspectFit
-                    opacity: callActionItem.pressed ? 0.7 : 1.0
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.paddingSmall
+                    color: voiceCallButton.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.55)
+                                                   : Theme.rgba(Theme.highlightBackgroundColor, 0.2)
                 }
 
-                Label {
-                    text: qsTr("Call", "Button: start voice call")
-                    highlighted: callActionItem.pressed
-                    verticalAlignment: Text.AlignVCenter
-                    font.pixelSize: Theme.fontSizeSmall
+                Row {
+                    id: voiceCallContent
+                    anchors.centerIn: parent
+                    spacing: Theme.paddingSmall
+
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "image://theme/icon-m-call"
+                        color: voiceCallButton.pressed ? Theme.highlightColor : Theme.primaryColor
+                    }
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Call", "Button: start voice call")
+                        color: voiceCallButton.pressed ? Theme.highlightColor : Theme.primaryColor
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                }
+
+                onClicked: {
+                    if (!tabViewItem.callBackendAvailable) {
+                        appNotification.show(qsTr("Voice calls are not available in this build yet."));
+                        return;
+                    }
+                    tdLibWrapper.createVoiceCall(chatPartnerGroupId, false);
                 }
             }
 
-            onClicked: {
-                if (!tabViewItem.callBackendAvailable) {
-                    appNotification.show(qsTr("Voice calls are not available in this build yet."));
-                    return;
+            // --- Videochiamata ---
+            BackgroundItem {
+                id: videoCallButton
+                width: videoCallContent.width + 2 * Theme.paddingLarge
+                height: Theme.itemSizeMedium
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Theme.paddingSmall
+                    color: videoCallButton.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.55)
+                                                   : Theme.rgba(Theme.highlightBackgroundColor, 0.2)
                 }
-                tdLibWrapper.createVoiceCall(chatPartnerGroupId, false);
+
+                Row {
+                    id: videoCallContent
+                    anchors.centerIn: parent
+                    spacing: Theme.paddingSmall
+
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "image://theme/icon-m-video"
+                        color: videoCallButton.pressed ? Theme.highlightColor : Theme.primaryColor
+                    }
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Video call", "Button: start video call")
+                        color: videoCallButton.pressed ? Theme.highlightColor : Theme.primaryColor
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                }
+
+                onClicked: {
+                    appNotification.show(qsTr("Video calls are not available in this build yet."));
+                }
             }
         }
     }

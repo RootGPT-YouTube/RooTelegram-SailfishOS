@@ -52,6 +52,7 @@ public slots:
     void handleChatDiscovered(const QString &chatId, const QVariantMap &chatInformation);
     void handleChatTitleUpdated(const QString &chatId, const QString &title);
     void handleNewStory(qlonglong chatId);
+    void handleMessageReaction(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions, int unreadReactionCount);
 
 private:
 

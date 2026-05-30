@@ -421,15 +421,6 @@ Page {
                 horizontalAlignment: Qt.AlignHCenter
             }
             MenuItem {
-                text: qsTr("Blocklist")
-                onClicked: pageStack.push(Qt.resolvedUrl("../pages/BlacklistPage.qml"))
-            }
-            Separator {
-                width: parent.width
-                color: Theme.secondaryHighlightColor
-                horizontalAlignment: Qt.AlignHCenter
-            }
-            MenuItem {
                 text: qsTr("Stories")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"))
             }

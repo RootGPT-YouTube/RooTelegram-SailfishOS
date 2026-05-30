@@ -52,6 +52,7 @@ namespace {
     const QString UNREAD_COUNT("unread_count");
     const QString UNREAD_MENTION_COUNT("unread_mention_count");
     const QString UNREAD_REACTION_COUNT("unread_reaction_count");
+    const QString UNREAD_REACTIONS("unread_reactions");
     const QString AVAILABLE_REACTIONS("available_reactions");
     const QString TEXT("text");
     const QString LAST_READ_INBOX_MESSAGE_ID("last_read_inbox_message_id");
@@ -193,10 +194,12 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateMessageInteractionInfo", &TDLibReceiver::processUpdateMessageInteractionInfo);
     handlers.insert("sessions", &TDLibReceiver::processSessions);
     handlers.insert("availableReactions", &TDLibReceiver::processAvailableReactions);
+    handlers.insert("addedReactions", &TDLibReceiver::processAddedReactions);
     handlers.insert("messageThreadInfo", &TDLibReceiver::processMessageThreadInfo);
     handlers.insert("updateMessageMentionRead", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadMentionCount", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadReactionCount", &TDLibReceiver::processUpdateChatUnreadReactionCount);
+    handlers.insert("updateMessageUnreadReactions", &TDLibReceiver::processUpdateMessageUnreadReactions);
     handlers.insert("updateActiveEmojiReactions", &TDLibReceiver::processUpdateActiveEmojiReactions);
     handlers.insert("forumTopics", &TDLibReceiver::processForumTopics);
     handlers.insert("forumTopic", &TDLibReceiver::processForumTopic);
@@ -217,6 +220,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateStoryDeleted", &TDLibReceiver::processUpdateStoryDeleted);
     handlers.insert("stories", &TDLibReceiver::processStoriesList);
     handlers.insert("storyInteractions", &TDLibReceiver::processStoryInteractions);
+    handlers.insert("formattedText", &TDLibReceiver::processFormattedText);
 }
 
 void TDLibReceiver::setActive(bool active)
@@ -916,6 +920,16 @@ void TDLibReceiver::processAvailableReactions(const QVariantMap &receivedInforma
     }
 }
 
+void TDLibReceiver::processAddedReactions(const QVariantMap &receivedInformation)
+{
+    // addedReactions{ total_count, reactions:[addedReaction{type, sender_id, date}], next_offset }
+    const qlonglong messageId = receivedInformation.value(_EXTRA).toLongLong();
+    const QVariantList reactions = receivedInformation.value("reactions").toList();
+    const int totalCount = receivedInformation.value(TOTAL_COUNT).toInt();
+    LOG("Received added reactions for message" << messageId << totalCount);
+    emit messageAddedReactionsReceived(messageId, reactions, totalCount);
+}
+
 void TDLibReceiver::processMessageThreadInfo(const QVariantMap &receivedInformation)
 {
     const QString extra = receivedInformation.value(_EXTRA).toString();
@@ -948,6 +962,16 @@ void TDLibReceiver::processUpdateChatUnreadReactionCount(const QVariantMap &rece
     const int unreadReactionCount = receivedInformation.value(UNREAD_REACTION_COUNT).toInt();
     LOG("Chat unread reaction count updated" << chatId << unreadReactionCount);
     emit chatUnreadReactionCountUpdated(chatId, unreadReactionCount);
+}
+
+void TDLibReceiver::processUpdateMessageUnreadReactions(const QVariantMap &receivedInformation)
+{
+    const qlonglong chatId = receivedInformation.value(CHAT_ID).toLongLong();
+    const qlonglong messageId = receivedInformation.value(MESSAGE_ID).toLongLong();
+    const QVariantList unreadReactions = receivedInformation.value(UNREAD_REACTIONS).toList();
+    const int unreadReactionCount = receivedInformation.value(UNREAD_REACTION_COUNT).toInt();
+    LOG("Message unread reactions updated" << chatId << messageId << unreadReactionCount);
+    emit messageUnreadReactionsUpdated(chatId, messageId, unreadReactions, unreadReactionCount);
 }
 
 void TDLibReceiver::processUpdateActiveEmojiReactions(const QVariantMap &receivedInformation)
@@ -1298,4 +1322,23 @@ void TDLibReceiver::processStoryInteractions(const QVariantMap &receivedInformat
         storyId = extra.mid(QString("storyInteractions:").length()).toInt();
     }
     emit storyInteractionsReceived(storyId, interactions, totalCount, totalForwardCount, totalReactionCount, nextOffset);
+}
+
+void TDLibReceiver::processFormattedText(const QVariantMap &receivedInformation)
+{
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    const QString translatedText = receivedInformation.value("text").toString();
+    LOG("Received translated text, extra:" << extra);
+
+    if (extra.startsWith("translateText:")) {
+        const QString toLanguageCode = extra.mid(QString("translateText:").length());
+        emit textTranslated(translatedText, toLanguageCode);
+    } else if (extra.startsWith("translateMessage:")) {
+        const QStringList parts = extra.mid(QString("translateMessage:").length()).split(":");
+        if (parts.size() >= 2) {
+            const qlonglong chatId = parts[0].toLongLong();
+            const qlonglong messageId = parts[1].toLongLong();
+            emit messageTextTranslated(chatId, messageId, translatedText);
+        }
+    }
 }

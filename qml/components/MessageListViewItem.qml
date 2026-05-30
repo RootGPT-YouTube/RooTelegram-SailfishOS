@@ -31,7 +31,7 @@ import "../js/debug.js" as Debug
 
 ListItem {
     id: messageListItem
-    contentHeight: messageBackground.height + Theme.paddingMedium + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
+    contentHeight: messageBackground.height + Theme.paddingMedium + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
     Behavior on contentHeight { NumberAnimation { duration: 200 } }
     property var chatId
     property var messageId
@@ -90,9 +90,19 @@ ListItem {
         myMessage &&
         myMessage["@type"] !== "sponsoredMessage" &&
         typeof myMessage.id !== "undefined"
-    readonly property bool canSelectMessageText: false
+    // On-demand: la selezione del testo (e il costoso Emoji.emojify + parse RichText
+    // del TextEdit) si attiva SOLO sul messaggio selezionato in modalit\u00e0 selezione,
+    // non su tutti i delegate insieme (preserva la performance su canali photo-heavy).
+    readonly property bool canSelectMessageText: !!(messageListItem.precalculatedValues && messageListItem.precalculatedValues.pageIsSelecting) && isSelected
     readonly property string selectedMessageText: canSelectMessageText ? (messageText.selectedText || "").replace(/\u2029/g, "\n") : ""
     readonly property bool hasSelectedMessageText: selectedMessageText.length > 0
+    // Propaga il testo selezionato a ChatPage cos\u00ec la barra azioni in basso pu\u00f2
+    // offrire "copia testo selezionato" accanto a "copia intero messaggio".
+    onSelectedMessageTextChanged: {
+        if (canSelectMessageText && isSelected) {
+            page.activeSelectedText = selectedMessageText;
+        }
+    }
     property bool hasContentComponent
     property bool additionalOptionsOpened
     property bool wasNavigatedTo: false
@@ -152,6 +162,9 @@ ListItem {
     readonly property bool haveSpaceForDeleteMessageMenuItem: (baseContextMenuItemCount + 3 - (deleteMessageIsOnlyExtraOption ? 1 : 0)) <= maxContextMenuItemCount
     property var chatReactions
     property var messageReactions
+    // Lista "chi ha reagito e con quale reaction" (addedReaction[]), mostrata nel
+    // pannello stellina sotto al picker delle reaction disponibili.
+    property var messageAddedReactions: null
 
     highlighted: (down || (isSelected && messageAlbumMessageIds.length === 0) || additionalOptionsOpened || wasNavigatedTo) && !menuOpen
     openMenuOnPressAndHold: !messageListItem.precalculatedValues.pageIsSelecting || !isSelected
@@ -251,6 +264,16 @@ ListItem {
         Remorse.itemAction(messageListItem, qsTr("Message deleted"), function() {
             tdLibWrapper.deleteMessages(chatId, [ messageId ]);
         })
+    }
+
+    // Traduzione del messaggio (API nativa TDLib, nessun servizio esterno).
+    property string translatedText: ""
+    property bool translating: false
+
+    function translateMessage() {
+        translating = true
+        translatedText = ""
+        tdLibWrapper.translateMessageText(page.chatInformation.id, myMessage.id, page.translateTargetLanguage)
     }
 
     // True quando il messaggio fa parte di un album multimediale TDLib
@@ -405,7 +428,39 @@ ListItem {
             Debug.log("Obtaining message reactions")
             tdLibWrapper.getMessageAvailableReactions(messageListItem.chatId, messageListItem.messageId);
         }
+        // Chi ha reagito e con cosa (asincrono: arriva via onMessageAddedReactionsReceived).
+        messageListItem.messageAddedReactions = null;
+        tdLibWrapper.getMessageAddedReactions(messageListItem.chatId, messageListItem.messageId);
         selectReactionBubble.visible = false;
+    }
+
+    function addedReactionEmoji(reactionType) {
+        if (reactionType && reactionType.emoji) {
+            return reactionType.emoji;
+        }
+        return ""; // custom emoji: nessuna emoji standard renderizzabile
+    }
+
+    function addedReactionSenderName(senderId) {
+        if (!senderId) {
+            return qsTr("Someone");
+        }
+        if (senderId.user_id) {
+            var user = tdLibWrapper.getUserInformation("" + senderId.user_id);
+            if (user) {
+                var name = ((user.first_name ? user.first_name : "") + " " + (user.last_name ? user.last_name : "")).trim();
+                if (name.length > 0) {
+                    return name;
+                }
+            }
+        }
+        if (senderId.chat_id) {
+            var chat = tdLibWrapper.getChat("" + senderId.chat_id);
+            if (chat && chat.title) {
+                return chat.title;
+            }
+        }
+        return qsTr("Someone");
     }
 
     function getContentWidthMultiplier() {
@@ -584,6 +639,11 @@ ListItem {
                     text: qsTr("Forward message")
                 }
                 MenuItem {
+                    visible: myMessage && myMessage.content && myMessage.content.text && myMessage.content.text.text
+                    onClicked: messageListItem.translateMessage()
+                    text: qsTr("Translate message")
+                }
+                MenuItem {
                     visible: canPinMessage
                     onClicked: togglePinMessage()
                     text: myMessage && myMessage.is_pinned ? qsTr("Unpin Message") : qsTr("Pin Message")
@@ -646,6 +706,19 @@ ListItem {
                 messageInReplyToLoader.inReplyToMessage = message;
             }
         }
+        onMessageTextTranslated: {
+            if (chatId === page.chatInformation.id && messageId === myMessage.id) {
+                messageListItem.translating = false
+                messageListItem.translatedText = translatedText
+            }
+        }
+        onErrorReceived: {
+            // extra == "translateMessage:<chatId>:<messageId>" della richiesta: se
+            // la traduzione fallisce (FLOOD_WAIT, lingua non supportata) sblocca lo stato.
+            if (extra === "translateMessage:" + page.chatInformation.id + ":" + myMessage.id) {
+                messageListItem.translating = false
+            }
+        }
         onMessageNotFound: {
             if (messageId === myMessage.reply_to_message_id) {
                 messageInReplyToLoader.inReplyToMessageDeleted = true;
@@ -660,6 +733,11 @@ ListItem {
                 showItemCompletelyTimer.start();
             } else {
                 messageListItem.messageReactions = null;
+            }
+        }
+        onMessageAddedReactionsReceived: {
+            if (messageListItem.messageId === messageId) {
+                messageListItem.messageAddedReactions = reactions;
             }
         }
         onReactionsUpdated: {
@@ -1033,39 +1111,39 @@ ListItem {
                     }
                 }
 
-                TextEdit {
+                // PROTOTIPO selezione nativa Sailfish: in modalità selezione il testo
+                // del messaggio selezionato viene mostrato con una Silica TextArea
+                // read-only, che fornisce le maniglie start/end + lente + popup copia
+                // nativi. È montata on-demand (solo sul messaggio selezionato) per non
+                // pagare il costo su tutti i delegate. NB: TextArea è PlainText → niente
+                // emoji-immagini né link cliccabili in selezione (limite noto del prototipo).
+                TextArea {
                     id: messageText
                     width: parent.width
-                    // Short-circuit when not in selection mode. The TextEdit is kept in the
-                    // tree so the `messageText` id stays valid for selection helpers, but
-                    // skipping the binding avoids the (very expensive) Emoji.emojify +
-                    // RichText parse on every delegate when selection is disabled. On
-                    // photo-heavy channels this cut roughly halves per-delegate cost.
                     text: messageListItem.canSelectMessageText
-                          ? (messageListItem.revealedSpoilersVersion, Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false, messageListItem.revealedSpoilers), Theme.fontSizeMedium))
+                          ? Functions.getMessageText(myMessage, true, page.myUserId, true)
                           : ""
                     font.pixelSize: Theme.fontSizeSmall
-                    color: messageListItem.textColor
                     wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
-                    textFormat: TextEdit.RichText
                     readOnly: true
-                    cursorVisible: false
-                    activeFocusOnPress: messageListItem.canSelectMessageText
-                    selectByMouse: messageListItem.canSelectMessageText
-                    persistentSelection: true
-                    selectionColor: Theme.highlightBackgroundColor
-                    selectedTextColor: Theme.primaryColor
-                    onLinkActivated: {
-                        if (messageListItem.handleSpoilerLink(link)) {
-                            return;
-                        }
-                        var chatCommand = Functions.handleLink(link);
-                        if(chatCommand) {
-                            tdLibWrapper.sendTextMessage(chatInformation.id, chatCommand);
-                        }
-                    }
+                    labelVisible: false
+                    label: ""
+                    placeholderText: ""
+                    backgroundStyle: TextEditor.NoBackground
+                    textTopPadding: 0
+                    textLeftPadding: 0
+                    textRightPadding: 0
                     horizontalAlignment: messageListItem.textAlign
                     visible: canSelectMessageText && (text !== "")
+                    // La selezione nativa di Silica su una TextArea read-only parte solo
+                    // se l'editor ha già activeFocus (focusOnClick è false in read-only).
+                    // Diamogli il focus appena diventa selezionabile, così il primo
+                    // long-press su una parola avvia subito la selezione.
+                    onVisibleChanged: {
+                        if (visible) {
+                            forceActiveFocus();
+                        }
+                    }
                 }
 
                 Text {
@@ -1250,7 +1328,7 @@ ListItem {
         readonly property int replyCount: replyInfo ? (replyInfo.reply_count || 0) : 0
 
         anchors {
-            top: reactionsColumn.visible ? reactionsColumn.bottom : messageTextRow.bottom
+            top: reactionsColumn.visible ? reactionsColumn.bottom : (translationItem.visible ? translationItem.bottom : messageTextRow.bottom)
             topMargin: Theme.paddingSmall
             horizontalCenter: parent.horizontalCenter
         }
@@ -1310,10 +1388,48 @@ ListItem {
         }
     }
 
+    // Sezione testo tradotto: fratello di reactionsColumn, con visibilità propria
+    // (NON figlio di reactionsColumn, altrimenti sparirebbe sui messaggi senza reazioni).
+    Column {
+        id: translationItem
+        width: parent.width - ( 2 * Theme.horizontalPageMargin )
+        anchors.top: messageTextRow.bottom
+        anchors.topMargin: Theme.paddingSmall
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: messageListItem.translatedText !== "" || messageListItem.translating
+        spacing: Theme.paddingSmall
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: Theme.secondaryHighlightColor
+            opacity: 0.5
+        }
+
+        BusyIndicator {
+            anchors.horizontalCenter: parent.horizontalCenter
+            running: messageListItem.translating
+            visible: messageListItem.translating
+            size: BusyIndicatorSize.ExtraSmall
+        }
+
+        Label {
+            visible: messageListItem.translatedText !== ""
+            width: parent.width
+            // translateMessageText restituisce la formattazione come tag HTML:
+            // StyledText li rende (grassetto/corsivo...) invece di mostrarli letterali.
+            textFormat: Text.StyledText
+            text: "🌐 " + messageListItem.translatedText
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.secondaryHighlightColor
+            wrapMode: Text.Wrap
+        }
+    }
+
     Column {
         id: reactionsColumn
         width: parent.width - ( 2 * Theme.horizontalPageMargin )
-        anchors.top: messageTextRow.bottom
+        anchors.top: translationItem.visible ? translationItem.bottom : messageTextRow.bottom
         anchors.topMargin: Theme.paddingMedium
         anchors.horizontalCenter: parent.horizontalCenter
         visible: messageListItem.messageReactions ? ( messageListItem.messageReactions.length > 0 ? true : false ) : false
@@ -1379,6 +1495,36 @@ ListItem {
                                 messageReactions = null
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Chi ha reagito e con quale reaction (lista sender→emoji).
+        Column {
+            width: parent.width
+            spacing: Theme.paddingSmall
+            visible: messageListItem.messageAddedReactions ? messageListItem.messageAddedReactions.length > 0 : false
+
+            Repeater {
+                model: messageListItem.messageAddedReactions
+
+                Row {
+                    spacing: Theme.paddingMedium
+
+                    Image {
+                        id: addedReactionEmojiImage
+                        source: Emoji.getEmojiPath(messageListItem.addedReactionEmoji(modelData.type))
+                        width: status === Image.Ready ? Theme.fontSizeMedium : 0
+                        height: Theme.fontSizeMedium
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+
+                    Label {
+                        text: messageListItem.addedReactionSenderName(modelData.sender_id)
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.secondaryHighlightColor
+                        anchors.verticalCenter: parent.verticalCenter
                     }
                 }
             }

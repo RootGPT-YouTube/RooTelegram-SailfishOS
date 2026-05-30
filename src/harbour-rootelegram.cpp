@@ -243,6 +243,10 @@ int main(int argc, char *argv[])
     // pubblicazione sono dentro NotificationManager::handleNewStory).
     QObject::connect(&storiesModel, &StoriesModel::newStoryPosted,
                      &notificationManager, &NotificationManager::handleNewStory);
+    // Notifica desktop quando un proprio messaggio riceve una reaction (gating e
+    // pubblicazione sono dentro NotificationManager::handleMessageReaction).
+    QObject::connect(tdLibWrapper, &TDLibWrapper::messageUnreadReactionsUpdated,
+                     &notificationManager, &NotificationManager::handleMessageReaction);
 
     VideoTranscoder videoTranscoder(app.data());
 

@@ -39,6 +39,7 @@ namespace {
     const QString _TYPE("@type");
     const QString TYPE("type");
     const QString ID("id");
+    const QString EMOJI("emoji");
     const QString CHAT_ID("chat_id");
     const QString IS_CHANNEL("is_channel");
     const QString TOTAL_COUNT("total_count");
@@ -377,6 +378,88 @@ void NotificationManager::handleNewStory(qlonglong chatId)
         notification->setUrgency(Notification::Low);
     } else {
         notification->setPreviewSummary(title);
+        notification->setPreviewBody(body);
+        notification->setHintValue(HINT_SUPPRESS_SOUND, !appSettings->notificationSoundsEnabled());
+        notification->setHintValue(HINT_DISPLAY_ON, appSettings->notificationTurnsDisplayOn());
+        notification->setHintValue(HINT_VISIBILITY, VISIBILITY_PUBLIC);
+        notification->setUrgency(Notification::Normal);
+    }
+
+    notification->publish();
+    notification->deleteLater();
+}
+
+void NotificationManager::handleMessageReaction(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions, int unreadReactionCount)
+{
+    // Subordinata al master notifiche + al toggle dedicato reaction.
+    if (!appSettings || !appSettings->notificationsEnabled() || !appSettings->notificationReactionsEnabled()) {
+        return;
+    }
+    // updateMessageUnreadReactions arriva anche quando la reaction viene letta
+    // (count torna a 0) o rimossa: notifichiamo solo quando c'è una nuova
+    // reaction non letta.
+    if (unreadReactionCount <= 0 || unreadReactions.isEmpty()) {
+        return;
+    }
+
+    // Prendiamo l'ultima reaction non letta (la più recente) per emoji + autore.
+    const QVariantMap lastReaction = unreadReactions.last().toMap();
+    const QVariantMap reactionType = lastReaction.value(TYPE).toMap();
+    const QString emoji = reactionType.value(EMOJI).toString(); // vuoto per custom emoji
+
+    // Autore della reaction: se è un utente, mostriamo il suo nome; altrimenti
+    // ripieghiamo sul titolo della chat.
+    QString reactorName;
+    const QVariantMap senderId = lastReaction.value(SENDER_ID).toMap();
+    const qlonglong reactorUserId = senderId.value(USER_ID).toLongLong();
+    if (reactorUserId != 0) {
+        // Self-reaction: improbabile, ma evitiamo di notificare noi stessi.
+        const qlonglong ownUserId = tdLibWrapper->getUserInformation().value(ID).toLongLong();
+        if (reactorUserId == ownUserId) {
+            return;
+        }
+        const QVariantMap reactor = tdLibWrapper->getUserInformation(QString::number(reactorUserId));
+        reactorName = (reactor.value(FIRST_NAME).toString() + " " + reactor.value(LAST_NAME).toString()).trimmed();
+    }
+    if (reactorName.isEmpty()) {
+        const QVariantMap chat = tdLibWrapper->getChat(QString::number(chatId));
+        reactorName = chat.value(TITLE).toString();
+        if (reactorName.isEmpty()) {
+            const ChatInfo *info = chatMap.value(chatId);
+            if (info) reactorName = info->title;
+        }
+    }
+    LOG("New reaction notification for" << chatId << messageId << reactorName << emoji);
+
+    const QString body = emoji.isEmpty()
+        ? tr("reacted to your message")
+        : tr("reacted %1 to your message").arg(emoji);
+    const bool appActive = (qGuiApp->applicationState() == Qt::ApplicationActive);
+
+    // Fire-and-forget come handleNewStory: la notifica vive nel daemon di sistema.
+    Notification *notification = new Notification(this);
+    applyBranding(notification);
+    notification->setTimestamp(QDateTime::currentDateTime());
+    notification->setSummary(reactorName);
+    notification->setBody(body);
+    notification->setHintValue(HINT_IMAGE_PATH, notificationIconFile);
+
+    // Tap = apri la chat e scrolla al messaggio reazionato (deep-link openMessage,
+    // identico a publishNotification).
+    QVariantList remoteActionArguments;
+    remoteActionArguments.append(QString::number(chatId));
+    remoteActionArguments.append(QString::number(messageId));
+    notification->setRemoteAction(Notification::remoteAction("default", "openMessage",
+        APP_ORIGIN, "/com/github/RootGPT_YouTube/rootelegram", APP_ORIGIN,
+        "openMessage", remoteActionArguments));
+
+    if (appActive) {
+        notification->setHintValue(HINT_SUPPRESS_SOUND, true);
+        notification->setHintValue(HINT_DISPLAY_ON, false);
+        notification->setHintValue(HINT_VISIBILITY, QString());
+        notification->setUrgency(Notification::Low);
+    } else {
+        notification->setPreviewSummary(reactorName);
         notification->setPreviewBody(body);
         notification->setHintValue(HINT_SUPPRESS_SOUND, !appSettings->notificationSoundsEnabled());
         notification->setHintValue(HINT_DISPLAY_ON, appSettings->notificationTurnsDisplayOn());

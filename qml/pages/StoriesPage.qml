@@ -76,33 +76,103 @@ Page {
 
                 property real tabWidth: (width - 3 * spacing) / 4
 
-                Button {
+                // Tab in stile rettangolare (come i pulsanti chiamata): lo sfondo
+                // pieno indica il tab attivo, quello tenue gli inattivi.
+                BackgroundItem {
+                    id: tabMain
                     width: tabsRow.tabWidth
-                    text: qsTr("Main")
-                    opacity: storiesModel.activeList === "main" ? 1.0 : 0.4
+                    height: Theme.itemSizeSmall
+                    readonly property bool active: storiesModel.activeList === "main"
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.paddingSmall
+                        color: tabMain.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
+                              : (tabMain.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
+                                                 : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
+                    }
+                    Label {
+                        anchors.centerIn: parent
+                        width: parent.width - 2 * Theme.paddingSmall
+                        horizontalAlignment: Text.AlignHCenter
+                        truncationMode: TruncationMode.Fade
+                        text: qsTr("Main")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: tabMain.active ? Theme.highlightColor : Theme.secondaryColor
+                    }
                     onClicked: storiesModel.activeList = "main"
                 }
 
-                Button {
+                BackgroundItem {
+                    id: tabBlacklist
                     width: tabsRow.tabWidth
-                    text: qsTr("Blacklist")
-                    opacity: storiesModel.activeList === "archive" ? 1.0 : 0.4
+                    height: Theme.itemSizeSmall
+                    readonly property bool active: storiesModel.activeList === "archive"
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.paddingSmall
+                        color: tabBlacklist.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
+                              : (tabBlacklist.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
+                                                      : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
+                    }
+                    Label {
+                        anchors.centerIn: parent
+                        width: parent.width - 2 * Theme.paddingSmall
+                        horizontalAlignment: Text.AlignHCenter
+                        truncationMode: TruncationMode.Fade
+                        text: qsTr("Blacklist")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: tabBlacklist.active ? Theme.highlightColor : Theme.secondaryColor
+                    }
                     onClicked: storiesModel.activeList = "archive"
                 }
 
                 // Label corte sui tab (Archive/Profile); il titolo lungo
                 // ("My Archive"/"My Profile") sta nel PageHeader.
-                Button {
+                BackgroundItem {
+                    id: tabArchive
                     width: tabsRow.tabWidth
-                    text: qsTr("Archive", "Short label for the My Archive tab")
-                    opacity: storiesModel.activeList === "myArchive" ? 1.0 : 0.4
+                    height: Theme.itemSizeSmall
+                    readonly property bool active: storiesModel.activeList === "myArchive"
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.paddingSmall
+                        color: tabArchive.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
+                              : (tabArchive.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
+                                                    : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
+                    }
+                    Label {
+                        anchors.centerIn: parent
+                        width: parent.width - 2 * Theme.paddingSmall
+                        horizontalAlignment: Text.AlignHCenter
+                        truncationMode: TruncationMode.Fade
+                        text: qsTr("Archive", "Short label for the My Archive tab")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: tabArchive.active ? Theme.highlightColor : Theme.secondaryColor
+                    }
                     onClicked: storiesModel.activeList = "myArchive"
                 }
 
-                Button {
+                BackgroundItem {
+                    id: tabProfile
                     width: tabsRow.tabWidth
-                    text: qsTr("Profile", "Short label for the My Profile tab")
-                    opacity: storiesModel.activeList === "myProfile" ? 1.0 : 0.4
+                    height: Theme.itemSizeSmall
+                    readonly property bool active: storiesModel.activeList === "myProfile"
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Theme.paddingSmall
+                        color: tabProfile.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
+                              : (tabProfile.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
+                                                    : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
+                    }
+                    Label {
+                        anchors.centerIn: parent
+                        width: parent.width - 2 * Theme.paddingSmall
+                        horizontalAlignment: Text.AlignHCenter
+                        truncationMode: TruncationMode.Fade
+                        text: qsTr("Profile", "Short label for the My Profile tab")
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: tabProfile.active ? Theme.highlightColor : Theme.secondaryColor
+                    }
                     onClicked: storiesModel.activeList = "myProfile"
                 }
             }

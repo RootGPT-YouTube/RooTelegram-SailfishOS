@@ -889,6 +889,15 @@
         <source>No links available.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Video call</source>
+        <comment>Button: start video call</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video calls are not available in this build yet.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatJoinRequestsPage</name>
@@ -1279,6 +1288,14 @@
     </message>
     <message>
         <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type your message first, then tap this button to translate it to English!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Selected text copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2011,6 +2028,14 @@
         <source>In reply to a story</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Translate message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Someone</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2155,6 +2180,14 @@
         <source>posted a new story</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>reacted to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>reacted %1 to your message</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2220,10 +2253,6 @@
     </message>
     <message>
         <source>Unable to open link.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Blocklist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3342,6 +3371,14 @@
         <source>Notify when a contact posts a new story.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Reactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Notify when someone reacts to one of your messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -3422,6 +3459,18 @@
     </message>
     <message>
         <source>Some inline bots request location data when using them</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blocklist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show the list of Telegram users you have blocked.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

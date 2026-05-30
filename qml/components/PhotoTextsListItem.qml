@@ -114,16 +114,7 @@ ListItem {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 radius: parent.width / 2
-                visible: chatListViewItem.unreadReactionCount > 0 || chatListViewItem.unreadMentionCount > 0
-
-                Icon {
-                    source: "image://theme/icon-s-favorite"
-                    height: Theme.iconSizeExtraSmall
-                    width: Theme.iconSizeExtraSmall
-                    highlighted: chatListViewItem.highlighted
-                    anchors.centerIn: parent
-                    visible: chatListViewItem.unreadReactionCount > 0 && !chatListViewItem.unreadMentionCount
-                }
+                visible: chatListViewItem.unreadMentionCount > 0
 
                 Text {
                     font {
@@ -163,7 +154,6 @@ ListItem {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(contentColumn.width - (verifiedImage.visible ? (verifiedImage.width + primaryTextRow.spacing) :  0) - (mutedImage.visible ? (mutedImage.width + primaryTextRow.spacing) :  0), implicitWidth)
                 font.bold: appSettings.highlightUnreadConversations && ( !chatListViewItem.isMuted && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread) )
-                font.italic: appSettings.highlightUnreadConversations  && (chatListViewItem.unreadReactionCount > 0)
                 color: (appSettings.highlightUnreadConversations && (chatListViewItem.unreadCount > 0)) ? Theme.highlightColor : Theme.primaryColor
             }
 

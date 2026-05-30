@@ -129,9 +129,11 @@ signals:
     void okReceived(const QString &request);
     void sessionsReceived(int inactive_session_ttl_days, const QVariantList &sessions);
     void availableReactionsReceived(qlonglong messageId, const QStringList &reactions);
+    void messageAddedReactionsReceived(qlonglong messageId, const QVariantList &reactions, int totalCount);
     void messageThreadInfoReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &threadInfo);
     void chatUnreadMentionCountUpdated(qlonglong chatId, int unreadMentionCount);
     void chatUnreadReactionCountUpdated(qlonglong chatId, int unreadReactionCount);
+    void messageUnreadReactionsUpdated(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions, int unreadReactionCount);
     void activeEmojiReactionsUpdated(const QStringList& emojis);
     void chatThemesUpdated(const QVariantList &themes);
     void chatActiveStoriesUpdated(const QVariantMap &activeStories);
@@ -141,6 +143,8 @@ signals:
     void storyDeleted(qlonglong storySenderChatId, int storyId);
     void storiesListReceived(const QVariantList &stories, int totalCount, const QString &extra);
     void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
+    void textTranslated(const QString &translatedText, const QString &toLanguageCode);
+    void messageTextTranslated(qlonglong chatId, qlonglong messageId, const QString &translatedText);
 
 private:
     typedef void (TDLibReceiver::*Handler)(const QVariantMap &);
@@ -231,9 +235,11 @@ private:
     void processUpdateMessageInteractionInfo(const QVariantMap &receivedInformation);
     void processSessions(const QVariantMap &receivedInformation);
     void processAvailableReactions(const QVariantMap &receivedInformation);
+    void processAddedReactions(const QVariantMap &receivedInformation);
     void processMessageThreadInfo(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadMentionCount(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadReactionCount(const QVariantMap &receivedInformation);
+    void processUpdateMessageUnreadReactions(const QVariantMap &receivedInformation);
     void processUpdateActiveEmojiReactions(const QVariantMap &receivedInformation);
     void processForumTopics(const QVariantMap &receivedInformation);
     void processForumTopic(const QVariantMap &receivedInformation);
@@ -251,6 +257,7 @@ private:
     void processUpdateStoryDeleted(const QVariantMap &receivedInformation);
     void processStoriesList(const QVariantMap &receivedInformation);
     void processStoryInteractions(const QVariantMap &receivedInformation);
+    void processFormattedText(const QVariantMap &receivedInformation);
 };
 
 #endif // TDLIBRECEIVER_H

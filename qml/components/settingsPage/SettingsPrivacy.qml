@@ -261,6 +261,16 @@ AccordionItem {
                     appSettings.allowInlineBotLocationAccess = !checked
                 }
             }
+
+            ValueButton {
+                width: parent.width
+                label: qsTr("Blocklist")
+                value: qsTr("View")
+                description: qsTr("Show the list of Telegram users you have blocked.")
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("../../pages/BlacklistPage.qml"));
+                }
+            }
         }
     }
 }

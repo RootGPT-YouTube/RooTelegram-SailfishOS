@@ -203,6 +203,8 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(storyDeleted(qlonglong, int)), this, SIGNAL(storyDeleted(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(storiesListReceived(QVariantList, int, QString)), this, SIGNAL(storiesListReceived(QVariantList, int, QString)));
     connect(this->tdLibReceiver, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)), this, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)));
+    connect(this->tdLibReceiver, SIGNAL(textTranslated(QString, QString)), this, SIGNAL(textTranslated(QString, QString)));
+    connect(this->tdLibReceiver, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)), this, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)));
     connect(this->tdLibReceiver, SIGNAL(secretChat(qlonglong, QVariantMap)), this, SLOT(handleSecretChatReceived(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(secretChatUpdated(qlonglong, QVariantMap)), this, SLOT(handleSecretChatUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(recentStickersUpdated(QVariantList)), this, SIGNAL(recentStickersUpdated(QVariantList)));
@@ -246,9 +248,11 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(okReceived(QString)), this, SLOT(handleOkReceived(QString)));
     connect(this->tdLibReceiver, SIGNAL(sessionsReceived(int, QVariantList)), this, SIGNAL(sessionsReceived(int, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(availableReactionsReceived(qlonglong, QStringList)), this, SIGNAL(availableReactionsReceived(qlonglong, QStringList)));
+    connect(this->tdLibReceiver, SIGNAL(messageAddedReactionsReceived(qlonglong, QVariantList, int)), this, SIGNAL(messageAddedReactionsReceived(qlonglong, QVariantList, int)));
     connect(this->tdLibReceiver, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)));
+    connect(this->tdLibReceiver, SIGNAL(messageUnreadReactionsUpdated(qlonglong, qlonglong, QVariantList, int)), this, SIGNAL(messageUnreadReactionsUpdated(qlonglong, qlonglong, QVariantList, int)));
     connect(this->tdLibReceiver, SIGNAL(activeEmojiReactionsUpdated(QStringList)), this, SLOT(handleActiveEmojiReactionsUpdated(QStringList)));
     connect(this->tdLibReceiver, SIGNAL(forumTopicsReceived(qlonglong, QVariantList, int, qlonglong, qlonglong, qlonglong)), this, SLOT(handleForumTopicsReceived(qlonglong, QVariantList, int, qlonglong, qlonglong, qlonglong)));
     connect(this->tdLibReceiver, SIGNAL(forumTopicReceived(qlonglong, QVariantMap)), this, SIGNAL(forumTopicReceived(qlonglong, QVariantMap)));
@@ -847,6 +851,33 @@ void TDLibWrapper::applyPendingScheduling(QVariantMap &request)
     options.insert("scheduling_state", schedulingState);
     request.insert("options", options);
     pendingScheduledSendDate = 0;
+}
+
+void TDLibWrapper::translateText(const QString &text, const QString &toLanguageCode)
+{
+    LOG("Translating text to" << toLanguageCode);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "translateText");
+    QVariantMap formattedText;
+    formattedText.insert(_TYPE, "formattedText");
+    formattedText.insert("text", text);
+    formattedText.insert("entities", QVariantList());
+    requestObject.insert("text", formattedText);
+    requestObject.insert("to_language_code", toLanguageCode);
+    requestObject.insert(_EXTRA, QString("translateText:%1").arg(toLanguageCode));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::translateMessageText(qlonglong chatId, qlonglong messageId, const QString &toLanguageCode)
+{
+    LOG("Translating message" << messageId << "to" << toLanguageCode);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "translateMessageText");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert("message_id", messageId);
+    requestObject.insert("to_language_code", toLanguageCode);
+    requestObject.insert(_EXTRA, QString("translateMessage:%1:%2").arg(chatId).arg(messageId));
+    this->sendRequest(requestObject);
 }
 
 void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId)
@@ -2271,6 +2302,20 @@ void TDLibWrapper::getMessageAvailableReactions(qlonglong chatId, qlonglong mess
     requestObject.insert(_EXTRA, QString::number(messageId));
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(MESSAGE_ID, messageId);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::getMessageAddedReactions(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Get added reactions for message" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getMessageAddedReactions");
+    requestObject.insert(_EXTRA, QString::number(messageId));
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    // reaction_type omesso = tutte le reaction; offset vuoto = dall'inizio.
+    requestObject.insert("offset", QString());
+    requestObject.insert("limit", 50);
     this->sendRequest(requestObject);
 }
 

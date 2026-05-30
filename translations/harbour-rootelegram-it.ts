@@ -889,6 +889,15 @@
         <source>No audio available.</source>
         <translation>Nessun audio disponibile.</translation>
     </message>
+    <message>
+        <source>Video call</source>
+        <comment>Button: start video call</comment>
+        <translation>Videochiamata</translation>
+    </message>
+    <message>
+        <source>Video calls are not available in this build yet.</source>
+        <translation>Le videochiamate non sono ancora disponibili in questa versione.</translation>
+    </message>
 </context>
 <context>
     <name>ChatJoinRequestsPage</name>
@@ -1280,6 +1289,14 @@
     <message>
         <source>No</source>
         <translation>No</translation>
+    </message>
+    <message>
+        <source>Type your message first, then tap this button to translate it to English!</source>
+        <translation>Scrivi prima il messaggio, poi premi questo tasto per tradurlo in inglese!</translation>
+    </message>
+    <message>
+        <source>Selected text copied to clipboard</source>
+        <translation>Testo selezionato copiato negli appunti</translation>
     </message>
 </context>
 <context>
@@ -2011,6 +2028,14 @@
         <source>In reply to a story</source>
         <translation>In risposta a una storia</translation>
     </message>
+    <message>
+        <source>Translate message</source>
+        <translation>Traduci messaggio</translation>
+    </message>
+    <message>
+        <source>Someone</source>
+        <translation>Qualcuno</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2155,6 +2180,14 @@
         <source>posted a new story</source>
         <translation>ha pubblicato una nuova storia</translation>
     </message>
+    <message>
+        <source>reacted to your message</source>
+        <translation>ha reagito al tuo messaggio</translation>
+    </message>
+    <message>
+        <source>reacted %1 to your message</source>
+        <translation>ha reagito %1 al tuo messaggio</translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -2253,10 +2286,6 @@
     <message>
         <source>Search chat...</source>
         <translation>Cerca la chat...</translation>
-    </message>
-    <message>
-        <source>Blocklist</source>
-        <translation>Lista Bloccati</translation>
     </message>
     <message>
         <source>Stories</source>
@@ -3342,6 +3371,14 @@
         <source>Notify when a contact posts a new story.</source>
         <translation>Avvisa quando un contatto pubblica una nuova storia.</translation>
     </message>
+    <message>
+        <source>Reactions</source>
+        <translation>Reazioni</translation>
+    </message>
+    <message>
+        <source>Notify when someone reacts to one of your messages.</source>
+        <translation>Avvisa quando qualcuno reagisce a un tuo messaggio.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsPage</name>
@@ -3423,6 +3460,18 @@
     <message>
         <source>Some inline bots request location data when using them</source>
         <translation>Alcuni inline bot richiedono la tua posizione mentre li usi</translation>
+    </message>
+    <message>
+        <source>Blocklist</source>
+        <translation>Lista bloccati</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>Vedi</translation>
+    </message>
+    <message>
+        <source>Show the list of Telegram users you have blocked.</source>
+        <translation>Mostra l&apos;elenco degli utenti di Telegram che hai bloccato.</translation>
     </message>
 </context>
 <context>
