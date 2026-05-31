@@ -1295,6 +1295,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>RooTelegram couldn&apos;t detect the language of the text — maybe you wrote a multilingual message?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Selected text copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2191,6 +2195,30 @@
 </context>
 <context>
     <name>OverviewPage</name>
+    <message>
+        <source>My chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Global results</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No public users, groups or channels found.</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>RooTelegram</source>
         <translation>RooTelegram</translation>
@@ -3473,6 +3501,22 @@
         <source>Show the list of Telegram users you have blocked.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Allow voice calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Privacy setting for managing who can call you.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everybody</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Nobody</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsSession</name>
@@ -4620,6 +4664,70 @@
     <name>harbour-rootelegram</name>
     <message>
         <source>Send shared content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown caller</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Calling…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Incoming voice call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exchanging encryption keys…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ending call…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Decline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unmute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>End call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Call declined</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No answer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Missed call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Call failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Speaker off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Speaker</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

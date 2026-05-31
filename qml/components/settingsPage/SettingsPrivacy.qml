@@ -37,6 +37,9 @@ AccordionItem {
                     case TelegramAPI.SettingAllowFindingByPhoneNumber:
                         allowFindingByPhoneNumberComboBox.currentIndex = rule;
                         break;
+                    case TelegramAPI.SettingAllowCalls:
+                        allowCallsComboBox.currentIndex = rule;
+                        break;
                     case TelegramAPI.SettingShowLinkInForwardedMessages:
                         showLinkInForwardedMessagesComboBox.currentIndex = rule;
                         break;
@@ -112,6 +115,40 @@ AccordionItem {
 
                     Component.onCompleted: {
                         currentIndex = tdLibWrapper.getUserPrivacySettingRule(TelegramAPI.SettingAllowFindingByPhoneNumber);
+                    }
+                }
+
+                ComboBox {
+                    id: allowCallsComboBox
+                    width: parent.columnWidth
+                    label: qsTr("Allow voice calls")
+                    description: qsTr("Privacy setting for managing who can call you.")
+                    menu: ContextMenu {
+                        x: 0
+                        width: allowCallsComboBox.width
+
+                        MenuItem {
+                            text: qsTr("Everybody")
+                            onClicked: {
+                                tdLibWrapper.setUserPrivacySettingRule(TelegramAPI.SettingAllowCalls, TelegramAPI.RuleAllowAll);
+                            }
+                        }
+                        MenuItem {
+                            text: qsTr("Your contacts only")
+                            onClicked: {
+                                tdLibWrapper.setUserPrivacySettingRule(TelegramAPI.SettingAllowCalls, TelegramAPI.RuleAllowContacts);
+                            }
+                        }
+                        MenuItem {
+                            text: qsTr("Nobody")
+                            onClicked: {
+                                tdLibWrapper.setUserPrivacySettingRule(TelegramAPI.SettingAllowCalls, TelegramAPI.RuleRestrictAll);
+                            }
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        currentIndex = tdLibWrapper.getUserPrivacySettingRule(TelegramAPI.SettingAllowCalls);
                     }
                 }
 

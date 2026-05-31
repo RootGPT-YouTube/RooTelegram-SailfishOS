@@ -195,6 +195,250 @@ ApplicationWindow
         });
     }
 
+    // ── Schermata chiamata vocale (T3 entranti + T4 UI) ──────────────────────
+    // Handler GLOBALE a livello di ApplicationWindow: l'onCallUpdated della
+    // ChatInformationTabView vive solo sulla pagina info di quella chat. Gestisce
+    // sia entranti che uscenti. Guardato da voiceCallsAvailable: build spedibile
+    // (voce OFF) → callUpdated non arriva mai, overlay invisibile, nessun cambio.
+    readonly property bool voiceCallsEnabled: (typeof voiceCallsAvailable !== 'undefined') && voiceCallsAvailable === true
+
+    // Suoneria + vibrazione su chiamata entrante via ngfd (evento voip_ringtone:
+    // suono e vibrazione gestiti dal profilo di sistema). ngfd è sul SYSTEM bus.
+    DBusInterface {
+        id: callFeedback
+        bus: DBus.SystemBus
+        service: "com.nokia.NonGraphicFeedback1.Backend"
+        path: "/com/nokia/NonGraphicFeedback1"
+        iface: "com.nokia.NonGraphicFeedback1"
+    }
+    property int ringtoneEventId: 0
+    function startCallRingtone() {
+        if (appWindow.ringtoneEventId !== 0) {
+            return;
+        }
+        callFeedback.typedCall("Play",
+            [ {"type": "s", "value": "voip_ringtone"}, {"type": "a{sv}", "value": {}} ],
+            function(result) { appWindow.ringtoneEventId = result; },
+            function() { /* ngf non disponibile: ignora */ });
+    }
+    function stopCallRingtone() {
+        if (appWindow.ringtoneEventId === 0) {
+            return;
+        }
+        callFeedback.typedCall("Stop", [ {"type": "u", "value": appWindow.ringtoneEventId} ]);
+        appWindow.ringtoneEventId = 0;
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onCallUpdated: {
+            if (!appWindow.voiceCallsEnabled) {
+                return;
+            }
+            var st = (call && call.state && call.state["@type"]) ? call.state["@type"] : "";
+            var cid = call.id;
+            var outgoing = call.is_outgoing === true;
+            var ongoing = (st === "callStatePending" || st === "callStateExchangingKeys" || st === "callStateReady");
+            if (ongoing) {
+                if (callScreen.callId !== cid) {
+                    // Nuova chiamata: risolvi nome + foto del partner.
+                    var info = tdLibWrapper.getUserInformation(call.user_id.toString());
+                    var nm = "";
+                    if (info) {
+                        nm = ((info.first_name || "") + " " + (info.last_name || "")).trim();
+                    }
+                    callScreen.callerName = nm !== "" ? nm : qsTr("Unknown caller");
+                    callScreen.callerPhoto = (info && info.profile_photo) ? info.profile_photo.small : ({});
+                    callScreen.callId = cid;
+                    callScreen.outgoing = outgoing;
+                    callScreen.muted = false;
+                    callScreen.speakerOn = false;   // default: auricolare, non vivavoce
+                    callScreen.connectedAt = 0;
+                    callScreen.elapsed = 0;
+                    if (!outgoing) {
+                        appWindow.startCallRingtone();   // entrante: squilla + vibra
+                    }
+                }
+                callScreen.callState = st;
+                if (st !== "callStatePending") {
+                    appWindow.stopCallRingtone();        // accettata/in connessione: stop
+                }
+                if (st === "callStateReady" && callScreen.connectedAt === 0) {
+                    callScreen.connectedAt = Date.now();
+                    // Allinea l'uscita audio allo stato del toggle all'attivazione.
+                    if (typeof callManager !== 'undefined') {
+                        callManager.setSpeakerphoneOn(callScreen.speakerOn);
+                    }
+                }
+                callScreen.visible = true;
+                appWindow.activate();
+            } else if (cid === callScreen.callId) {
+                appWindow.stopCallRingtone();
+                if (st === "callStateHangingUp") {
+                    callScreen.callState = st;
+                } else if (st === "callStateDiscarded" || st === "callStateError") {
+                    // Edge-case (T5): feedback breve sul motivo di chiusura.
+                    var reason = (call.state && call.state.reason && call.state.reason["@type"]) ? call.state.reason["@type"] : "";
+                    if (reason === "callDiscardReasonDeclined") {
+                        appNotification.show(qsTr("Call declined"));
+                    } else if (reason === "callDiscardReasonMissed") {
+                        appNotification.show(callScreen.outgoing ? qsTr("No answer") : qsTr("Missed call"));
+                    } else if (reason === "callDiscardReasonDisconnected" || st === "callStateError") {
+                        appNotification.show(qsTr("Call failed"));
+                    }
+                    callScreen.visible = false;
+                    callScreen.callId = 0;
+                    callScreen.callState = "";
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: callScreen
+        property int callId: 0
+        property string callerName: ""
+        property var callerPhoto: ({})   // ProfileThumbnail.photoData è un QVariantMap: mai stringa
+        property bool outgoing: false
+        property string callState: ""
+        property bool muted: false
+        property bool speakerOn: false   // default: auricolare (no vivavoce)
+        property double connectedAt: 0
+        property int elapsed: 0
+        readonly property bool ringingIncoming: callState === "callStatePending" && !outgoing
+        readonly property bool connected: callState === "callStateReady"
+
+        visible: false
+        anchors.fill: parent
+        z: 10000
+        color: Qt.rgba(0, 0, 0, 0.96)
+
+        // Assorbe i tap così non raggiungono la pagina sottostante.
+        MouseArea { anchors.fill: parent }
+
+        Timer {
+            interval: 1000
+            repeat: true
+            running: callScreen.visible && callScreen.connected
+            onTriggered: callScreen.elapsed = Math.floor((Date.now() - callScreen.connectedAt) / 1000)
+        }
+
+        function formatElapsed(s) {
+            var m = Math.floor(s / 60);
+            var sec = s % 60;
+            return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
+        }
+
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - 2 * Theme.horizontalPageMargin
+            spacing: Theme.paddingLarge
+
+            ProfileThumbnail {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: Theme.itemSizeHuge * 1.5
+                height: width
+                photoData: callScreen.callerPhoto
+                replacementStringHint: callScreen.callerName
+                optimizeImageSize: false
+            }
+
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: callScreen.callerName
+                color: Theme.highlightColor
+                font.pixelSize: Theme.fontSizeHuge
+                truncationMode: TruncationMode.Fade
+            }
+
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                color: Theme.secondaryHighlightColor
+                font.pixelSize: Theme.fontSizeLarge
+                text: {
+                    switch (callScreen.callState) {
+                    case "callStatePending":
+                        return callScreen.outgoing ? qsTr("Calling…") : qsTr("Incoming voice call");
+                    case "callStateExchangingKeys":
+                        return qsTr("Exchanging encryption keys…");
+                    case "callStateReady":
+                        return callScreen.formatElapsed(callScreen.elapsed);
+                    case "callStateHangingUp":
+                        return qsTr("Ending call…");
+                    default:
+                        return "";
+                    }
+                }
+            }
+
+            Item { width: 1; height: Theme.paddingLarge }
+
+            // Entrante che squilla: Accetta / Rifiuta.
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.paddingLarge * 2
+                visible: callScreen.ringingIncoming
+                Button {
+                    text: qsTr("Decline")
+                    color: "#ff4444"
+                    onClicked: {
+                        appWindow.stopCallRingtone();
+                        tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
+                        callScreen.visible = false;
+                    }
+                }
+                Button {
+                    text: qsTr("Accept")
+                    color: "#44dd44"
+                    onClicked: {
+                        appWindow.stopCallRingtone();
+                        tdLibWrapper.acceptVoiceCall(callScreen.callId, false);
+                    }
+                }
+            }
+
+            // Chiamata in corso (uscente o entrante accettata): Muto / Vivavoce.
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: Theme.paddingLarge * 2
+                visible: !callScreen.ringingIncoming
+                Button {
+                    text: callScreen.muted ? qsTr("Unmute") : qsTr("Mute")
+                    enabled: callScreen.connected
+                    onClicked: {
+                        callScreen.muted = !callScreen.muted;
+                        if (typeof callManager !== 'undefined') {
+                            callManager.setMicrophoneMuted(callScreen.muted);
+                        }
+                    }
+                }
+                Button {
+                    text: callScreen.speakerOn ? qsTr("Speaker off") : qsTr("Speaker")
+                    enabled: callScreen.connected
+                    onClicked: {
+                        callScreen.speakerOn = !callScreen.speakerOn;
+                        if (typeof callManager !== 'undefined') {
+                            callManager.setSpeakerphoneOn(callScreen.speakerOn);
+                        }
+                    }
+                }
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                visible: !callScreen.ringingIncoming
+                text: qsTr("End call")
+                color: "#ff4444"
+                onClicked: {
+                    tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
+                    callScreen.visible = false;
+                }
+            }
+        }
+    }
+
     Connections {
         target: Qt.application
         onStateChanged: {

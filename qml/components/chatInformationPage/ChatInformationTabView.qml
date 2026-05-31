@@ -32,7 +32,14 @@ import "../../pages"
 Item {
     id: tabViewItem
     property alias count: tabView.count
-    readonly property bool callBackendAvailable: false
+    // Abilitato solo se l'app è compilata col backend voce (CONFIG+=rt_voicecalls
+    // → context property voiceCallsAvailable). Nella build spedibile (voce OFF)
+    // resta false e il tasto mostra il toast "non disponibile".
+    readonly property bool callBackendAvailable: (typeof voiceCallsAvailable !== 'undefined') && voiceCallsAvailable === true
+
+    // T4: lo stato/UI della chiamata è gestito dalla schermata-chiamata globale
+    // in harbour-rootelegram.qml (overlay unificato entranti+uscenti). Qui resta
+    // solo il tasto Chiama che avvia createVoiceCall.
     readonly property bool isPrivateLikeInfo: chatInformationPage.isPrivateChat || chatInformationPage.isSecretChat
     readonly property var groupStatus: chatInformationPage.groupInformation && chatInformationPage.groupInformation.status ? chatInformationPage.groupInformation.status : ({})
     function statusFlag(flagName) {

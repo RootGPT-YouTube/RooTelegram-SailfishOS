@@ -1295,6 +1295,10 @@
         <translation>Schreibe zuerst deine Nachricht, dann tippe auf diese Schaltfläche, um sie ins Englische zu übersetzen!</translation>
     </message>
     <message>
+        <source>RooTelegram couldn&apos;t detect the language of the text — maybe you wrote a multilingual message?</source>
+        <translation>RooTelegram konnte die Sprache des Textes nicht erkennen – hast du vielleicht eine mehrsprachige Nachricht geschrieben?</translation>
+    </message>
+    <message>
         <source>Selected text copied to clipboard</source>
         <translation>Markierter Text in die Zwischenablage kopiert</translation>
     </message>
@@ -2193,6 +2197,30 @@ Nachrichten</numerusform>
 </context>
 <context>
     <name>OverviewPage</name>
+    <message>
+        <source>My chats</source>
+        <translation>Meine Chats</translation>
+    </message>
+    <message>
+        <source>Global results</source>
+        <translation>Globale Ergebnisse</translation>
+    </message>
+    <message>
+        <source>User</source>
+        <translation>Benutzer</translation>
+    </message>
+    <message>
+        <source>Group</source>
+        <translation>Gruppe</translation>
+    </message>
+    <message>
+        <source>Channel</source>
+        <translation>Kanal</translation>
+    </message>
+    <message>
+        <source>No public users, groups or channels found.</source>
+        <translation>Keine öffentlichen Benutzer, Gruppen oder Kanäle gefunden.</translation>
+    </message>
     <message>
         <source>RooTelegram</source>
         <translation>RooTelegram</translation>
@@ -3475,6 +3503,22 @@ Nachrichten</numerusform>
         <source>Show the list of Telegram users you have blocked.</source>
         <translation>Zeigt die Liste der Telegram-Nutzer, die du blockiert hast.</translation>
     </message>
+    <message>
+        <source>Allow voice calls</source>
+        <translation>Sprachanrufe erlauben</translation>
+    </message>
+    <message>
+        <source>Privacy setting for managing who can call you.</source>
+        <translation>Datenschutzeinstellung, wer dich anrufen darf.</translation>
+    </message>
+    <message>
+        <source>Everybody</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <source>Nobody</source>
+        <translation>Niemand</translation>
+    </message>
 </context>
 <context>
     <name>SettingsSession</name>
@@ -4623,6 +4667,70 @@ Nachrichten</numerusform>
     <message>
         <source>Send shared content</source>
         <translation>Geteilte Inhalte senden</translation>
+    </message>
+    <message>
+        <source>Unknown caller</source>
+        <translation>Unbekannter Anrufer</translation>
+    </message>
+    <message>
+        <source>Calling…</source>
+        <translation>Anruf läuft…</translation>
+    </message>
+    <message>
+        <source>Incoming voice call</source>
+        <translation>Eingehender Sprachanruf</translation>
+    </message>
+    <message>
+        <source>Exchanging encryption keys…</source>
+        <translation>Verschlüsselungsschlüssel werden ausgetauscht…</translation>
+    </message>
+    <message>
+        <source>Ending call…</source>
+        <translation>Anruf wird beendet…</translation>
+    </message>
+    <message>
+        <source>Decline</source>
+        <translation>Ablehnen</translation>
+    </message>
+    <message>
+        <source>Accept</source>
+        <translation>Annehmen</translation>
+    </message>
+    <message>
+        <source>Unmute</source>
+        <translation>Ton an</translation>
+    </message>
+    <message>
+        <source>Mute</source>
+        <translation>Stumm</translation>
+    </message>
+    <message>
+        <source>End call</source>
+        <translation>Beenden</translation>
+    </message>
+    <message>
+        <source>Call declined</source>
+        <translation>Anruf abgelehnt</translation>
+    </message>
+    <message>
+        <source>No answer</source>
+        <translation>Keine Antwort</translation>
+    </message>
+    <message>
+        <source>Missed call</source>
+        <translation>Verpasster Anruf</translation>
+    </message>
+    <message>
+        <source>Call failed</source>
+        <translation>Anruf fehlgeschlagen</translation>
+    </message>
+    <message>
+        <source>Speaker off</source>
+        <translation>Lautsprecher aus</translation>
+    </message>
+    <message>
+        <source>Speaker</source>
+        <translation>Lautsprecher</translation>
     </message>
 </context>
 </TS>

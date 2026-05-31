@@ -2523,7 +2523,16 @@ Page {
                         onTextTranslated: {
                             newMessageColumn.translatingInput = false
                             if (translatedText !== "") {
-                                newMessageTextField.text = chatPage.translatedHtmlToComposerMarkdown(translatedText)
+                                var converted = chatPage.translatedHtmlToComposerMarkdown(translatedText)
+                                // Telegram rileva la lingua di origine lato server: se la rileva
+                                // uguale alla destinazione (es. testo con anglicismi "emoji",
+                                // "reaction"…) rimanda il testo identico. Avvisa invece di
+                                // sembrare un blocco.
+                                if (converted.trim() === newMessageColumn.originalInputText.trim()) {
+                                    appNotification.show(qsTr("RooTelegram couldn't detect the language of the text — maybe you wrote a multilingual message?"))
+                                } else {
+                                    newMessageTextField.text = converted
+                                }
                             }
                         }
                         onErrorReceived: {

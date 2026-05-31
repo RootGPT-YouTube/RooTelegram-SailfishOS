@@ -55,6 +55,18 @@ public:
     Q_INVOKABLE bool supportsGeoLocation();
     Q_INVOKABLE QString getSailfishOSVersion();
     Q_INVOKABLE void initiateReverseGeocode(double latitude, double longitude);
+    // Le storie Telegram sono 9:16: una foto landscape risulta debordante sui client
+    // ufficiali. Se l'immagine è più larga che alta, la centriamo su una tela 9:16
+    // (piena larghezza, bande nere sopra/sotto) e restituiamo il nuovo file; le
+    // immagini portrait/quadrate restano invariate (ritorna il path originale).
+    // Onora l'orientamento EXIF in lettura (la fotocamera spesso salva i pixel
+    // coricati + un tag di rotazione) e applica un'ulteriore rotazione manuale
+    // dell'utente in gradi orari (0/90/180/270) impostata dal pulsante "ruota".
+    Q_INVOKABLE QString padImageToVerticalStory(const QString &imagePath, int rotationDegrees = 0);
+    // Rotazione (gradi orari 0/90/180/270) che l'EXIF imporrebbe in visualizzazione.
+    // Serve all'anteprima QML — che NON onora l'EXIF — per mostrare la foto già
+    // raddrizzata, coerente con ciò che padImageToVerticalStory poi pubblica.
+    Q_INVOKABLE int imageDisplayRotation(const QString &imagePath);
 
 signals:
     void voiceNoteDurationChanged(qlonglong duration);

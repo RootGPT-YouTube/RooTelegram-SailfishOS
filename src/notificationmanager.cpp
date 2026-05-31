@@ -482,6 +482,15 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     if (!notificationGroup->notificationOrder.isEmpty()) {
         const int lastNotificationId = notificationGroup->notificationOrder.last();
         const QVariantMap lastNotification(notificationGroup->activeNotifications.value(lastNotificationId));
+#ifdef RT_VOICE_CALLS
+        // Le chiamate entranti hanno già la loro schermata in-app (+ suoneria e
+        // vibrazione): la notifica-messaggio "ti sta chiamando" di TDLib sarebbe
+        // ridondante, la sopprimiamo.
+        if (lastNotification.value(TYPE).toMap().value("@type").toString() == QLatin1String("notificationTypeNewCall")) {
+            LOG("Skipping new-call notification (handled by in-app call UI)");
+            return;
+        }
+#endif
         messageMap = lastNotification.value(TYPE).toMap().value(MESSAGE).toMap();
     }
 

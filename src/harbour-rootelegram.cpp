@@ -71,6 +71,9 @@
 #include "contactsmodel.h"
 #include "storiesmodel.h"
 #include "videotranscoder.h"
+#ifdef RT_VOICE_CALLS
+#include "callmanager.h"
+#endif
 
 // The default filter can be overridden by QT_LOGGING_RULES envinronment variable, e.g.
 // QT_LOGGING_RULES="rootelegram.*=true" harbour-rootelegram
@@ -248,6 +251,14 @@ int main(int argc, char *argv[])
     QObject::connect(tdLibWrapper, &TDLibWrapper::messageUnreadReactionsUpdated,
                      &notificationManager, &NotificationManager::handleMessageReaction);
 
+#ifdef RT_VOICE_CALLS
+    // T0 wire-up: il CallManager si aggancia a TDLibWrapper (callUpdated /
+    // callSignalingDataReceived) e gestirà tgcalls. Nessun effetto finché
+    // l'UI non lo attiva (callBackendAvailable resta false).
+    CallManager callManager(tdLibWrapper, app.data());
+    Q_UNUSED(callManager);
+#endif
+
     VideoTranscoder videoTranscoder(app.data());
 
     QQuickView *view = Q_NULLPTR;
@@ -275,6 +286,16 @@ int main(int argc, char *argv[])
             context->setContextProperty("contactsProxyModel", &contactsProxyModel);
             context->setContextProperty("storiesModel", &storiesModel);
             context->setContextProperty("videoTranscoder", &videoTranscoder);
+            // Disponibilità del backend chiamate vocali (tgcalls+tg_owt): true
+            // solo se compilato con CONFIG+=rt_voicecalls (RT_VOICE_CALLS). La UI
+            // (ChatInformationTabView) abilita il tasto Chiama in base a questo.
+#ifdef RT_VOICE_CALLS
+            context->setContextProperty("voiceCallsAvailable", true);
+            // Esposto a QML per i controlli in-chiamata (T4): mute microfono.
+            context->setContextProperty("callManager", &callManager);
+#else
+            context->setContextProperty("voiceCallsAvailable", false);
+#endif
             view->setSource(SailfishApp::pathTo("qml/harbour-rootelegram.qml"));
         }
     };

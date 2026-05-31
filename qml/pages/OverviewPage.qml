@@ -106,6 +106,7 @@ Page {
             tdLibWrapper.getContacts();
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingAllowChatInvites);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingAllowFindingByPhoneNumber);
+            tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingAllowCalls);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowLinkInForwardedMessages);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowPhoneNumber);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowProfilePhoto);
@@ -120,16 +121,78 @@ Page {
         filterText: chatSearchField.text
     }
 
+    // Vero quando la lente è attiva e c'è del testo: in quel caso la home
+    // diventa una ricerca globale Telegram (sezione "Le mie chat" = match
+    // locali; sezione "Risultati globali" = utenti/gruppi/canali pubblici).
+    property bool searching: chatSearchField.opacity > 0 && chatSearchField.text.length > 0
+
+    // Risultati della ricerca GLOBALE (server-side): chat non necessariamente
+    // presenti tra le proprie. Popolato dalle risposte searchChatsOnServer /
+    // searchPublicChats. dynamicRoles per poter conservare la mappa photo.
+    ListModel {
+        id: searchResultsModel
+        dynamicRoles: true
+    }
+    // id già aggiunti (dedup) — chiave string del chatId
+    property var searchSeenIds: ({})
+
+    function resetSearchResults() {
+        searchResultsModel.clear();
+        searchSeenIds = ({});
+    }
+
+    function addSearchResultChat(chatId) {
+        if (chatId === undefined || chatId === null) {
+            return;
+        }
+        var idStr = chatId.toString();
+        if (searchSeenIds[idStr]) {
+            return;
+        }
+        searchSeenIds[idStr] = true;
+        var chat = tdLibWrapper.getChat(idStr);
+        if (!chat || !chat.id) {
+            return;
+        }
+        // Se la chat è già in una tua lista (ha "positions"), compare già nella
+        // sezione locale "Le mie chat": non duplicarla tra i risultati globali.
+        // NB: non basta getById, perché TDLib conosce (updateNewChat) anche le
+        // chat pubbliche trovate, pur non essendo tra le tue.
+        if (chat.positions && chat.positions.length > 0) {
+            return;
+        }
+        var chatType = chat.type ? (chat.type["@type"] || "") : "";
+        var subtitle = "";
+        if (chatType === "chatTypePrivate" || chatType === "chatTypeSecret") {
+            subtitle = qsTr("User");
+        } else if (chatType === "chatTypeBasicGroup") {
+            subtitle = qsTr("Group");
+        } else if (chatType === "chatTypeSupergroup") {
+            var superGroup = tdLibWrapper.getSuperGroup(chat.type.supergroup_id);
+            subtitle = (superGroup && superGroup.is_channel === true) ? qsTr("Channel") : qsTr("Group");
+        }
+        searchResultsModel.append({
+            "resultChatId": chat.id,
+            "resultTitle": chat.title || "",
+            "resultSubtitle": subtitle,
+            "resultPhoto": (chat.photo ? chat.photo.small : null)
+        });
+    }
+
     Timer {
         id: serverSearchTimer
         interval: 400
         repeat: false
         onTriggered: {
             var query = chatSearchField.text;
+            overviewPage.resetSearchResults();
             if (query && query.length > 0) {
                 tdLibWrapper.searchChatsOnServer(query, 50);
                 tdLibWrapper.searchContacts(query, 100);
-                if (query.length >= 5) {
+                // Ricerca pubblica (username/titolo) già da 2 caratteri, come
+                // il client ufficiale, per trovare utenti/gruppi/canali non
+                // ancora tra i propri.
+                if (query.length >= 2) {
                     tdLibWrapper.searchPublicChats(query);
                 }
             }
@@ -348,6 +411,16 @@ Page {
             }
         }
         onChatsReceived: {
+            // Le risposte di ricerca globale portano il loro @extra: vanno nei
+            // risultati, NON nella paginazione della chat-list.
+            var chatsExtra = (chats && chats["@extra"] !== undefined && chats["@extra"] !== null) ? chats["@extra"].toString() : "";
+            if (chatsExtra === "searchChatsOnServer" || chatsExtra === "searchPublicChats") {
+                var foundIds = (chats && chats.chat_ids) ? chats.chat_ids : [];
+                for (var i = 0; i < foundIds.length; i += 1) {
+                    overviewPage.addSearchResultChat(foundIds[i]);
+                }
+                return;
+            }
             if(chats && chats.chat_ids && chats.chat_ids.length === 0) {
                 chatListCreatedTimer.restart();
             } else {
@@ -747,6 +820,60 @@ Page {
             opacity: (overviewPage.chatListCreated && !overviewPage.logoutLoading) ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
             model: chatListProxyModel.sourceModel ? chatListProxyModel : chatListModel
+
+            // Sezione "Le mie chat": intestazione sopra i match locali (solo
+            // durante la ricerca e se ci sono risultati locali).
+            header: Component {
+                Item {
+                    width: chatListView.width
+                    height: (overviewPage.searching && chatListView.count > 0) ? myChatsHeader.height : 0
+                    visible: height > 0
+                    SectionHeader {
+                        id: myChatsHeader
+                        text: qsTr("My chats")
+                    }
+                }
+            }
+
+            // Sezione "Risultati globali": utenti/gruppi/canali pubblici trovati
+            // su Telegram (anche non tra le proprie chat). Sta nel footer così
+            // scorre insieme alla lista, sotto i match locali.
+            footer: Component {
+                Column {
+                    width: chatListView.width
+
+                    SectionHeader {
+                        text: qsTr("Global results")
+                        visible: overviewPage.searching && searchResultsModel.count > 0
+                        height: visible ? implicitHeight : 0
+                    }
+
+                    Repeater {
+                        model: overviewPage.searching ? searchResultsModel : null
+                        delegate: SearchResultItem {
+                            width: chatListView.width
+                            resultChatId: model.resultChatId
+                            resultTitle: model.resultTitle
+                            resultSubtitle: model.resultSubtitle
+                            resultPhoto: model.resultPhoto
+                            onClicked: overviewPage.openChat(resultChatId)
+                        }
+                    }
+
+                    Label {
+                        visible: overviewPage.searching && searchResultsModel.count === 0 && chatSearchField.text.length >= 2
+                        x: Theme.horizontalPageMargin
+                        width: parent.width - 2 * Theme.horizontalPageMargin
+                        topPadding: Theme.paddingLarge
+                        bottomPadding: Theme.paddingLarge
+                        wrapMode: Text.Wrap
+                        text: qsTr("No public users, groups or channels found.")
+                        color: Theme.secondaryColor
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                }
+            }
+
             delegate: ChatListViewItem {
                 ownUserId: overviewPage.ownUserId
                 isVerified: is_verified
@@ -770,7 +897,9 @@ Page {
             }
 
             ViewPlaceholder {
-                enabled: chatListView.count === 0
+                // Durante la ricerca i risultati (locali + globali) e l'eventuale
+                // messaggio "nessun risultato" sono gestiti da header/footer.
+                enabled: chatListView.count === 0 && !overviewPage.searching
                 text: chatListModel.count === 0 ? qsTr("You don't have any chats yet.") : qsTr("No matching chats found.")
                 hintText: qsTr("You can search public chats or create a new chat via the pull-down menu.")
             }

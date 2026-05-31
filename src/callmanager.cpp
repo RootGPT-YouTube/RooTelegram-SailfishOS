@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <pulse/pulseaudio.h>
+#include <QDebug>
 #include <QMetaObject>
 #include <QVariantList>
 #include <QStringList>
@@ -38,6 +40,8 @@ CallManager::CallManager(TDLibWrapper *tdLibWrapper, QObject *parent)
     , currentUserId(0)
     , currentIsOutgoing(false)
     , currentIsVideo(false)
+    , m_pulseMainloop(nullptr)
+    , m_pulseContext(nullptr)
 {
     Q_UNUSED(RegisterLegacyInstance);
     Q_UNUSED(RegisterV2Instance);
@@ -101,6 +105,148 @@ void CallManager::handleCallSignalingDataReceived(qlonglong callId, const QByteA
     } else {
         pendingSignalingData.append(data);
     }
+}
+
+void CallManager::setMicrophoneMuted(bool muted)
+{
+    if (instance) {
+        instance->setMuteMicrophone(muted);
+    }
+}
+
+// ── libpulse in-process ───────────────────────────────────────────────────────
+// L'app è Sailjail: un `pactl` esterno non raggiunge il server PulseAudio, ma una
+// connessione PA in-process sì (l'app già riproduce l'audio della chiamata). Usiamo
+// l'API vera (header pulse + link libpulse) per poter ENUMERARE sink/porte ed essere
+// indipendenti dal naming hardware (droid vs Sailfish nativi).
+namespace {
+// Risultato dell'enumerazione: primo sink che ha SIA una porta "speaker" SIA una
+// "earpiece/handset/receiver" (così salta sink.null). Match per keyword nel nome
+// o descrizione della porta → device-agnostico.
+struct SinkScan {
+    pa_threaded_mainloop *ml = nullptr;
+    QString sink;
+    QString speaker;
+    QString earpiece;
+};
+
+void ctxStateCb(pa_context * /*c*/, void *userdata)
+{
+    pa_threaded_mainloop_signal(static_cast<pa_threaded_mainloop *>(userdata), 0);
+}
+
+void sinkInfoCb(pa_context * /*c*/, const pa_sink_info *info, int eol, void *userdata)
+{
+    SinkScan *scan = static_cast<SinkScan *>(userdata);
+    if (eol) {
+        pa_threaded_mainloop_signal(scan->ml, 0);
+        return;
+    }
+    if (!info || !scan->sink.isEmpty()) {
+        return;
+    }
+    QString speaker, earpiece;
+    for (uint32_t p = 0; p < info->n_ports; ++p) {
+        const pa_sink_port_info *port = info->ports[p];
+        if (!port || !port->name) {
+            continue;
+        }
+        const QString name = QString::fromUtf8(port->name).toLower();
+        const QString desc = QString::fromUtf8(port->description ? port->description : "").toLower();
+        if (speaker.isEmpty() && (name.contains("speaker") || desc.contains("speaker"))) {
+            speaker = QString::fromUtf8(port->name);
+        }
+        if (earpiece.isEmpty()
+                && (name.contains("earpiece") || name.contains("handset") || name.contains("receiver")
+                    || desc.contains("earpiece") || desc.contains("handset") || desc.contains("receiver"))) {
+            earpiece = QString::fromUtf8(port->name);
+        }
+    }
+    if (!speaker.isEmpty() && !earpiece.isEmpty()) {
+        scan->sink = QString::fromUtf8(info->name);
+        scan->speaker = speaker;
+        scan->earpiece = earpiece;
+    }
+}
+} // namespace
+
+void CallManager::ensurePulseConnection()
+{
+    if (m_pulseContext) {
+        return;
+    }
+    pa_threaded_mainloop *ml = pa_threaded_mainloop_new();
+    if (!ml) {
+        WARN("Voice call: PulseAudio mainloop creation failed");
+        return;
+    }
+    pa_threaded_mainloop_start(ml);
+    pa_threaded_mainloop_lock(ml);
+    pa_context *ctx = pa_context_new(pa_threaded_mainloop_get_api(ml), "harbour-rootelegram");
+    pa_context_set_state_callback(ctx, &ctxStateCb, ml);
+    pa_context_connect(ctx, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+    for (;;) {
+        const pa_context_state_t st = pa_context_get_state(ctx);
+        if (st == PA_CONTEXT_READY) {
+            break;
+        }
+        if (st == PA_CONTEXT_FAILED || st == PA_CONTEXT_TERMINATED) {
+            pa_threaded_mainloop_unlock(ml);
+            pa_context_unref(ctx);
+            pa_threaded_mainloop_stop(ml);
+            pa_threaded_mainloop_free(ml);
+            WARN("Voice call: PulseAudio context not ready, state" << st);
+            return;
+        }
+        pa_threaded_mainloop_wait(ml);
+    }
+    // Enumera sink/porte per scegliere speaker/earpiece in modo device-agnostico.
+    SinkScan scan;
+    scan.ml = ml;
+    pa_operation *op = pa_context_get_sink_info_list(ctx, &sinkInfoCb, &scan);
+    if (op) {
+        while (pa_operation_get_state(op) == PA_OPERATION_RUNNING) {
+            pa_threaded_mainloop_wait(ml);
+        }
+        pa_operation_unref(op);
+    }
+    pa_threaded_mainloop_unlock(ml);
+
+    m_pulseMainloop = ml;
+    m_pulseContext = ctx;
+    m_audioSink = scan.sink;
+    m_speakerPort = scan.speaker;
+    m_earpiecePort = scan.earpiece;
+    if (m_audioSink.isEmpty()) {
+        // Fallback ai nomi droid (Xperia) se l'enumerazione non trova le porte.
+        m_audioSink = QStringLiteral("sink.primary_output");
+        m_speakerPort = QStringLiteral("output-speaker");
+        m_earpiecePort = QStringLiteral("output-earpiece");
+        WARN("Voice call: audio port enumeration empty, using droid fallback names");
+    } else {
+        LOG("Voice call audio routing: sink" << m_audioSink
+            << "speaker" << m_speakerPort << "earpiece" << m_earpiecePort);
+    }
+}
+
+void CallManager::setSpeakerphoneOn(bool on)
+{
+    ensurePulseConnection();
+    pa_context *ctx = static_cast<pa_context *>(m_pulseContext);
+    pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop *>(m_pulseMainloop);
+    if (!ctx || !ml || m_audioSink.isEmpty() || pa_context_get_state(ctx) != PA_CONTEXT_READY) {
+        WARN("Voice call: PulseAudio not ready, cannot route speakerphone");
+        return;
+    }
+    const QString port = on ? m_speakerPort : m_earpiecePort;
+    pa_threaded_mainloop_lock(ml);
+    pa_operation *op = pa_context_set_sink_port_by_name(ctx, m_audioSink.toUtf8().constData(),
+                                                        port.toUtf8().constData(), nullptr, nullptr);
+    if (op) {
+        pa_operation_unref(op);
+    }
+    pa_threaded_mainloop_unlock(ml);
+    LOG("Voice call speakerphone" << on << "port" << port);
 }
 
 void CallManager::stopInstance()
@@ -188,7 +334,8 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
 
 
     descriptor.stateUpdated = [this](tgcalls::State state) {
-        LOG("tgcalls runtime state changed for call" << currentCallId << "state:" << static_cast<int>(state));
+        // 0=WaitInit 1=WaitInitAck 2=Established 3=Failed 4=Reconnecting
+        LOG("tgcalls state for call" << currentCallId << "is" << static_cast<int>(state));
     };
     descriptor.signalingDataEmitted = [this](const std::vector<uint8_t> &data) {
         if (!tdLibWrapper || currentCallId <= 0 || data.empty()) {
@@ -200,7 +347,11 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
                                   Q_ARG(QByteArray, signalingData));
     };
 
-    const QVariantList servers = callState.value("connections").toList();
+    // TDLib's callStateReady carries the relay/WebRTC server list under
+    // "servers" (callStateReady protocol servers config encryption_key ...),
+    // NOT "connections" — reading the wrong key left rtcServers empty, so ICE
+    // had no relay and the call failed to connect on mobile NAT.
+    const QVariantList servers = callState.value("servers").toList();
     for (QList<QVariant>::const_iterator it = servers.cbegin(); it != servers.cend(); ++it) {
         const QVariantMap server = it->toMap();
         const QVariantMap serverType = server.value("type").toMap();
@@ -223,6 +374,26 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
                 std::memcpy(endpoint.peerTag, peerTag.constData(), 16);
             }
             descriptor.endpoints.push_back(endpoint);
+
+            // V2 instances ignore descriptor.endpoints and only use rtcServers,
+            // so expose the reflector as a relay server too. The "reflector"
+            // login makes ReflectorRelayPortFactory build a ReflectorPort; the
+            // password carries the hex-encoded peer tag (ReflectorPort parses it
+            // back as hex). TCP reflectors are skipped by the V2 ICE config.
+            if (!serverType.value("is_tcp").toBool() && peerTag.size() >= 16) {
+                const QString reflectorHost = !server.value("ip_address").toString().isEmpty()
+                        ? server.value("ip_address").toString()
+                        : server.value("ipv6_address").toString();
+                tgcalls::RtcServer reflectorServer;
+                reflectorServer.id = static_cast<uint8_t>((descriptor.rtcServers.size() % 250) + 1);
+                reflectorServer.host = reflectorHost.toStdString();
+                reflectorServer.port = static_cast<uint16_t>(server.value("port").toUInt());
+                reflectorServer.login = "reflector";
+                reflectorServer.password = QString::fromLatin1(peerTag.toHex()).toStdString();
+                reflectorServer.isTurn = true;
+                reflectorServer.isTcp = false;
+                descriptor.rtcServers.push_back(reflectorServer);
+            }
         } else if (serverTypeName == "callServerTypeWebrtc") {
             const QString host = !server.value("ip_address").toString().isEmpty()
                     ? server.value("ip_address").toString()
@@ -254,9 +425,13 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         }
     }
 
+    LOG("Creating tgcalls instance for call" << currentCallId << "version" << selectedVersion
+        << "endpoints" << static_cast<int>(descriptor.endpoints.size())
+        << "rtcServers" << static_cast<int>(descriptor.rtcServers.size()));
+
     instance = tgcalls::Meta::Create(selectedVersion.toStdString(), std::move(descriptor));
     if (!instance) {
-        WARN("Failed to create tgcalls runtime instance for call" << currentCallId << "version:" << selectedVersion);
+        WARN("Failed to create tgcalls instance for call" << currentCallId << "version" << selectedVersion);
         return;
     }
 

@@ -35,6 +35,11 @@
 #include <QDateTime>
 #include <QGeoCoordinate>
 #include <QGeoLocation>
+#include <QImage>
+#include <QImageReader>
+#include <QImageIOHandler>
+#include <QTransform>
+#include <QPainter>
 #include <QSysInfo>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -330,6 +335,91 @@ bool RooTelegramUtils::supportsGeoLocation()
 QString RooTelegramUtils::getSailfishOSVersion()
 {
     return QSysInfo::productVersion();
+}
+
+QString RooTelegramUtils::padImageToVerticalStory(const QString &imagePath, int rotationDegrees)
+{
+    QString localPath = imagePath;
+    if (localPath.startsWith("file://")) {
+        localPath = QUrl(localPath).toLocalFile();
+    }
+    // QImage(path) NON applica l'orientamento EXIF: la fotocamera salva spesso i
+    // pixel coricati + un tag di rotazione, per cui senza autotransform la foto
+    // finirebbe sdraiata nella storia (bug originale). QImageReader con
+    // setAutoTransform raddrizza in lettura.
+    QImageReader reader(localPath);
+    reader.setAutoTransform(true);
+    const bool hadExifTransform = (reader.transformation() != QImageIOHandler::TransformationNone);
+    QImage image = reader.read();
+    if (image.isNull()) {
+        WARN("padImageToVerticalStory: cannot load" << localPath << reader.errorString());
+        return imagePath;
+    }
+    // Rotazione manuale aggiuntiva (gradi orari) richiesta dall'utente dal pulsante.
+    const int rot = ((rotationDegrees % 360) + 360) % 360;
+    if (rot != 0) {
+        QTransform t;
+        t.rotate(rot);
+        image = image.transformed(t, Qt::SmoothTransformation);
+    }
+    // Le storie Telegram sono ESATTAMENTE 1080x1920 (9:16): qualunque altra
+    // proporzione viene croppata dai client (landscape ai lati, portrait alto/basso).
+    // Se l'immagine è già ~9:16 la lasciamo com'è; altrimenti la scaliamo dentro la
+    // tela 1080x1920 mantenendo le proporzioni (immagine INTERA) e riempiamo il resto
+    // con bande nere — dove servono (sopra/sotto o ai lati).
+    const int canvasWidth = 1080;
+    const int canvasHeight = 1920;
+    const double targetRatio = static_cast<double>(canvasWidth) / canvasHeight; // 0.5625
+    const double imageRatio = static_cast<double>(image.width()) / image.height();
+    // Scorciatoia solo se non c'è NIENTE da incidere: né rotazione utente, né
+    // transform EXIF da bruciare nei pixel, e già ~9:16. Altrimenti dobbiamo
+    // salvare un file con i pixel già raddrizzati (non possiamo affidarci all'EXIF
+    // del file originale, che è la causa del bug).
+    if (rot == 0 && !hadExifTransform && qAbs(imageRatio - targetRatio) < 0.01) {
+        return imagePath;
+    }
+    const QImage scaled = image.scaled(canvasWidth, canvasHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QImage canvas(canvasWidth, canvasHeight, QImage::Format_RGB32);
+    canvas.fill(Qt::black);
+    QPainter painter(&canvas);
+    painter.drawImage((canvasWidth - scaled.width()) / 2,
+                      (canvasHeight - scaled.height()) / 2, scaled);
+    painter.end();
+
+    const QString outDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QDir().mkpath(outDir);
+    const QString outPath = outDir + "/story_letterbox_"
+            + QString::number(QDateTime::currentMSecsSinceEpoch()) + ".jpg";
+    if (!canvas.save(outPath, "JPG", 92)) {
+        WARN("padImageToVerticalStory: save failed" << outPath);
+        return imagePath;
+    }
+    LOG("padImageToVerticalStory: padded to 9:16" << canvasWidth << "x" << canvasHeight << "imgRatio" << imageRatio);
+    return outPath;
+}
+
+int RooTelegramUtils::imageDisplayRotation(const QString &imagePath)
+{
+    QString localPath = imagePath;
+    if (localPath.startsWith("file://")) {
+        localPath = QUrl(localPath).toLocalFile();
+    }
+    QImageReader reader(localPath);
+    // Solo la componente di rotazione del transform EXIF (i mirror, rari nelle
+    // foto da fotocamera, vengono ignorati: l'anteprima resterebbe coerente
+    // nell'orientamento, che è ciò che conta per il pulsante "ruota").
+    switch (reader.transformation()) {
+    case QImageIOHandler::TransformationRotate90:
+    case QImageIOHandler::TransformationMirrorAndRotate90:
+    case QImageIOHandler::TransformationFlipAndRotate90:
+        return 90;
+    case QImageIOHandler::TransformationRotate180:
+        return 180;
+    case QImageIOHandler::TransformationRotate270:
+        return 270;
+    default:
+        return 0;
+    }
 }
 
 void RooTelegramUtils::initiateReverseGeocode(double latitude, double longitude)

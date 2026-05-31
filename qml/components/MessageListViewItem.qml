@@ -419,18 +419,30 @@ ListItem {
     }
 
     function openReactions() {
+        // I messaggi non ancora inviati (sending_state valorizzato), sponsorizzati
+        // o senza id valido hanno un message_id che TDLib rifiuta con
+        // MSG_ID_INVALID: evitiamo di interrogarlo (causava un toast d'errore).
+        var canQueryReactions = !!messageListItem.messageId
+                && messageListItem.messageId.toString() !== "0"
+                && !(myMessage && myMessage.sending_state);
         if (messageListItem.chatReactions) {
             Debug.log("Using chat reactions")
             messageListItem.messageReactions = chatReactions
             showItemCompletelyTimer.requestedIndex = index;
             showItemCompletelyTimer.start();
-        } else {
+        } else if (canQueryReactions) {
             Debug.log("Obtaining message reactions")
             tdLibWrapper.getMessageAvailableReactions(messageListItem.chatId, messageListItem.messageId);
         }
         // Chi ha reagito e con cosa (asincrono: arriva via onMessageAddedReactionsReceived).
+        // La interroghiamo per ogni messaggio con id valido: dove TDLib non la
+        // espone (gruppi grandi) risponde MSG_ID_INVALID, ora ignorato a livello
+        // di handleErrorMessage (niente toast), senza rompere la lista reattori
+        // nelle chat dove invece è disponibile.
         messageListItem.messageAddedReactions = null;
-        tdLibWrapper.getMessageAddedReactions(messageListItem.chatId, messageListItem.messageId);
+        if (canQueryReactions) {
+            tdLibWrapper.getMessageAddedReactions(messageListItem.chatId, messageListItem.messageId);
+        }
         selectReactionBubble.visible = false;
     }
 

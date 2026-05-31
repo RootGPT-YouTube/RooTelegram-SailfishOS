@@ -112,6 +112,7 @@ public:
         SettingShowPhoneNumber,
         SettingShowProfilePhoto,
         SettingShowStatus,
+        SettingAllowCalls,
         SettingUnknown
     };
     Q_ENUM(UserPrivacySetting)

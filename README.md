@@ -45,7 +45,7 @@ Stato attuale dello sviluppo (ROADMAP):
 5. PIN dei messaggi — ✔️ FATTO
 6. Selezione parziale del testo + copia — ✔️ FATTO
 7. Gestione richieste accesso ai gruppi (admin) — ✔️ FATTO
-8. Stati / Stories — ✔️ FATTO
+8. Stati / Stories — ⏳ DA FARE
 9. Bugfix formattazione — ✔️ FATTO
 10. Traduzione dei messaggi (possibile supporto IA) — ⏳ DA FARE
 11. Aggiungere “Invia a RooTelegram” nel menù Condividi di SailfishOS — ✔️ FATTO
@@ -107,7 +107,7 @@ Current development status (ROADMAP):
 5. Message PIN — ✔️ DONE
 6. Partial text selection + copy — ✔️ DONE
 7. Group join request management (admin) — ✔️ DONE
-8. Statuses / Stories — ✔️ DONE
+8. Statuses / Stories — ⏳ TO DO
 9. Formatting bugfixes — ✔️ DONE
 10. Message translation (possible AI support) — ⏳ TO DO
 11. Add "Send to RooTelegram" in the SailfishOS Share menu — ✔️ DONE

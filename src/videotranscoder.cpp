@@ -17,6 +17,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QDebug>
+#include <QRegularExpression>
 
 namespace {
 // Installato dal .pro in /usr/share/<TARGET>/bin/ffmpeg.
@@ -47,7 +48,76 @@ bool VideoTranscoder::available() const
     return fi.exists() && fi.isExecutable();
 }
 
-void VideoTranscoder::cropToVerticalStory(const QString &inputPath, double durationSec)
+QVariantMap VideoTranscoder::probeVideo(const QString &inputPath)
+{
+    QVariantMap result;
+    if (!available()) {
+        return result;
+    }
+    QString in = inputPath;
+    if (in.startsWith(QStringLiteral("file://"))) {
+        in = QUrl(in).toLocalFile();
+    }
+    if (!QFileInfo::exists(in)) {
+        return result;
+    }
+
+    // Solo `-i` senza output: ffmpeg stampa le info degli stream sullo stderr e poi
+    // esce con errore ("At least one output file..."). Nessun file temporaneo, nessun
+    // encoder richiesto. I metadati li leggiamo dallo stderr.
+    QStringList args;
+    args << QStringLiteral("-hide_banner") << QStringLiteral("-nostdin")
+         << QStringLiteral("-i") << in;
+
+    QProcess p;
+    p.start(FFMPEG_BIN, args);
+    if (!p.waitForStarted(3000)) {
+        return result;
+    }
+    p.waitForFinished(6000);
+    const QString err = QString::fromUtf8(p.readAllStandardError());
+
+    QRegularExpression durRe(QStringLiteral("Duration:\\s*(\\d+):(\\d+):(\\d+)\\.(\\d+)"));
+    const QRegularExpressionMatch dm = durRe.match(err);
+    if (dm.hasMatch()) {
+        const double secs = dm.captured(1).toInt() * 3600.0
+                          + dm.captured(2).toInt() * 60.0
+                          + dm.captured(3).toInt()
+                          + QStringLiteral("0.%1").arg(dm.captured(4)).toDouble();
+        result.insert(QStringLiteral("durationS"), secs);
+    }
+
+    // Risoluzione: prima coppia NxN preceduta da ", " in una riga "Video:" (evita
+    // di agganciare i tag esadecimali tipo 0x31637661 del codec).
+    QRegularExpression resRe(QStringLiteral("Video:.*?[, ](\\d{2,5})x(\\d{2,5})"));
+    const QRegularExpressionMatch rm = resRe.match(err);
+    if (rm.hasMatch()) {
+        result.insert(QStringLiteral("width"), rm.captured(1).toInt());
+        result.insert(QStringLiteral("height"), rm.captured(2).toInt());
+    }
+
+    // Rotazione del contenitore: vecchio tag "rotate : N" o il nuovo
+    // "displaymatrix: rotation of -N degrees". Il segno non ci serve: a noi basta
+    // sapere se è un quarto di giro (per scambiare width/height nella decisione crop).
+    int rot = 0;
+    QRegularExpression rotRe(QStringLiteral("rotate\\s*:\\s*(-?\\d+)"));
+    const QRegularExpressionMatch rmo = rotRe.match(err);
+    if (rmo.hasMatch()) {
+        rot = rmo.captured(1).toInt();
+    } else {
+        QRegularExpression dmRe(QStringLiteral("rotation of\\s*(-?\\d+(?:\\.\\d+)?)\\s*degrees"));
+        const QRegularExpressionMatch dmm = dmRe.match(err);
+        if (dmm.hasMatch()) {
+            rot = qRound(dmm.captured(1).toDouble());
+        }
+    }
+    result.insert(QStringLiteral("rotation"), ((rot % 360) + 360) % 360);
+
+    return result;
+}
+
+void VideoTranscoder::cropToVerticalStory(const QString &inputPath, double durationSec,
+                                          int userRotation, bool doCrop)
 {
     if (m_proc && m_proc->state() != QProcess::NotRunning) {
         emit error(tr("A video conversion is already in progress."));
@@ -80,15 +150,38 @@ void VideoTranscoder::cropToVerticalStory(const QString &inputPath, double durat
                    + QString::number(QDateTime::currentMSecsSinceEpoch())
                    + QStringLiteral(".mp4");
 
-    // Center-crop ai lati a 9:16 (chiamato SOLO su landscape: iw > ih*9/16,
-    // quindi nessuna espressione con virgole da escapare) -> scale 720x1280
-    // -> SAR 1:1 pulito. H.264 high yuv420p veryfast crf23, AAC, faststart.
+    // Catena filtri costruita in base a rotazione utente + necessità di crop.
+    // ffmpeg applica da solo l'autorotate del tag MP4 PRIMA del filtergraph (e lo
+    // azzera in output), quindi qui aggiungiamo solo il delta dell'utente via
+    // transpose. transpose=1 = 90° orari, transpose=2 = 90° antiorari; 180° = due
+    // transpose. Dopo le rotazioni iw/ih sono già le dimensioni FINALI, perciò il
+    // crop landscape (iw>ih, nessuna virgola da escapare) è valido quando doCrop.
+    QStringList filters;
+    const int rot = ((userRotation % 360) + 360) % 360;
+    if (rot == 90) {
+        filters << QStringLiteral("transpose=1");
+    } else if (rot == 180) {
+        filters << QStringLiteral("transpose=1") << QStringLiteral("transpose=1");
+    } else if (rot == 270) {
+        filters << QStringLiteral("transpose=2");
+    }
+    if (doCrop) {
+        // Center-crop ai lati a 9:16 -> scale 720x1280 -> SAR 1:1 pulito.
+        filters << QStringLiteral("crop=ih*9/16:ih:(iw-ih*9/16)/2:0")
+                << QStringLiteral("scale=720:1280") << QStringLiteral("setsar=1");
+    } else {
+        // Solo rotazione: niente scale forzato (non deformare un portrait); yuv420p
+        // richiede dimensioni pari, garantite dalle dimensioni originali della camera.
+        filters << QStringLiteral("setsar=1");
+    }
+    const QString vf = filters.join(QStringLiteral(","));
+
+    // H.264 high yuv420p veryfast crf23, AAC, faststart.
     QStringList args;
     args << QStringLiteral("-y") << QStringLiteral("-hide_banner")
          << QStringLiteral("-nostdin") << QStringLiteral("-nostats")
          << QStringLiteral("-i") << in
-         << QStringLiteral("-vf")
-         << QStringLiteral("crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale=720:1280,setsar=1")
+         << QStringLiteral("-vf") << vf
          << QStringLiteral("-c:v") << QStringLiteral("libx264")
          << QStringLiteral("-profile:v") << QStringLiteral("high")
          << QStringLiteral("-pix_fmt") << QStringLiteral("yuv420p")

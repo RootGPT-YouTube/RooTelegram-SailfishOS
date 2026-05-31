@@ -9,8 +9,8 @@
     (at your option) any later version.
 */
 import QtQuick 2.6
-import QtMultimedia 5.6
 import Sailfish.Silica 1.0
+import Nemo.Thumbnailer 1.0
 
 // Compose + pubblicazione di una storia (foto o video). È una Page (non Dialog)
 // perché i video richiedono due fasi visibili con barra di avanzamento —
@@ -25,11 +25,37 @@ Page {
     property real videoDurationS: 0      // significativo solo se isVideo
     property int videoWidth: 0
     property int videoHeight: 0
+    // Rotazione del tag contenitore MP4 (0/90/180/270): ffmpeg la applica da solo,
+    // ma ci serve per capire l'orientamento "vero" su cui decidere il crop.
+    property int videoContainerRotation: 0
+
+    // Rotazione manuale (gradi orari, 0/90/180/270) impostata dal pulsante "ruota":
+    // vale sia per foto che per video. Bruciata nel media solo al publish.
+    property int userRotation: 0
+
+    // Rotazione che l'EXIF della foto imporrebbe (l'anteprima QML non onora l'EXIF,
+    // quindi la pre-applichiamo a mano per restare coerenti col risultato pubblicato).
+    property int photoExifRotation: 0
+
+    // Rotazione totale da applicare all'ANTEPRIMA. Foto: EXIF + manuale. Video: solo
+    // manuale, perché il backend Video di Sailfish onora già il tag del contenitore.
+    readonly property int previewRotation: isVideo
+                                            ? (userRotation % 360)
+                                            : ((photoExifRotation + userRotation) % 360)
+    readonly property bool previewSwapped: (previewRotation % 180) !== 0
+
+    // Le dimensioni grezze (videoWidth/Height) vanno scambiate se l'orientamento
+    // FINALE (tag contenitore + rotazione utente) è ruotato di un quarto dispari.
+    readonly property bool dimsSwapped:
+        isVideo && ((Math.round(videoContainerRotation / 90) + Math.round(userRotation / 90)) % 2) !== 0
+    readonly property int finalVideoWidth: dimsSwapped ? videoHeight : videoWidth
+    readonly property int finalVideoHeight: dimsSwapped ? videoWidth : videoHeight
 
     // Storie Telegram = verticale 9:16. Convertiamo (center-crop ai lati) solo i
-    // video PIÙ LARGHI di 9:16; portrait e tall restano intatti.
-    readonly property bool needsCrop: isVideo && videoWidth > 0 && videoHeight > 0
-                                       && (videoWidth * 16 > videoHeight * 9)
+    // video PIÙ LARGHI di 9:16; portrait e tall restano intatti. Decisione presa
+    // sulle dimensioni FINALI così un portrait ruotato non viene scambiato per landscape.
+    readonly property bool needsCrop: isVideo && finalVideoWidth > 0 && finalVideoHeight > 0
+                                       && (finalVideoWidth * 16 > finalVideoHeight * 9)
 
     readonly property int maxVideoDurationS: 60
     readonly property bool videoTooLong: isVideo && videoDurationS > maxVideoDurationS
@@ -74,7 +100,10 @@ Page {
                 composePage.isVideo = false;
                 composePage.videoDurationS = 0;
                 composePage.videoWidth = 0; composePage.videoHeight = 0;
+                composePage.videoContainerRotation = 0;
+                composePage.userRotation = 0;
                 composePage.mediaPath = picker.selectedContentProperties.filePath;
+                composePage.photoExifRotation = rootelegramUtils.imageDisplayRotation(composePage.mediaPath);
             }
         });
     }
@@ -86,7 +115,19 @@ Page {
                 composePage.isVideo = true;
                 composePage.videoDurationS = 0;
                 composePage.videoWidth = 0; composePage.videoHeight = 0;
+                composePage.videoContainerRotation = 0;
+                composePage.userRotation = 0;
+                composePage.photoExifRotation = 0;
                 composePage.mediaPath = picker.selectedContentProperties.filePath;
+                // Sonda C++ (ffmpeg `-i`, software) per i metadati. La miniatura
+                // dell'anteprima la fa il thumbnailer di sistema (Thumbnail, sotto).
+                var info = videoTranscoder.probeVideo(composePage.mediaPath);
+                if (info) {
+                    composePage.videoDurationS = info.durationS ? info.durationS : 0;
+                    composePage.videoWidth = info.width ? info.width : 0;
+                    composePage.videoHeight = info.height ? info.height : 0;
+                    composePage.videoContainerRotation = info.rotation ? info.rotation : 0;
+                }
             }
         });
     }
@@ -139,17 +180,22 @@ Page {
             ids = appSettings.storyCustomAudienceUserIds();
         }
         if (!isVideo) {
-            // Foto: istantaneo, posta e chiudi.
-            tdLibWrapper.postStory(selfId.toString(), mediaPath, captionField.text, 86400,
+            // Foto: le storie sono 9:16. Se è landscape la mettiamo su tela verticale
+            // (bande sopra/sotto) così non deborda sui client ufficiali. Portrait
+            // invariate (ritorna il path originale). userRotation = rotazione manuale.
+            var photoPath = rootelegramUtils.padImageToVerticalStory(mediaPath, userRotation);
+            tdLibWrapper.postStory(selfId.toString(), photoPath, captionField.text, 86400,
                                    tdMode, ids, allowScreenshots, postToProfile);
             appNotification.show(qsTr("Posting story…"));
             pageStack.pop();
             return;
         }
-        if (needsCrop && videoTranscoder.available()) {
+        // Transcodifichiamo se serve croppare un landscape OPPURE se l'utente ha
+        // ruotato manualmente (la rotazione va bruciata nel file). Altrimenti upload diretto.
+        if ((needsCrop || userRotation !== 0) && videoTranscoder.available()) {
             phase = "encoding";
             encodePercent = 0;
-            videoTranscoder.cropToVerticalStory(mediaPath, videoDurationS);
+            videoTranscoder.cropToVerticalStory(mediaPath, videoDurationS, userRotation, needsCrop);
         } else {
             startUpload(mediaPath);
         }
@@ -263,52 +309,38 @@ Page {
                 height: visible ? composePage.height * 0.45 : 0
                 clip: true
 
+                // Anteprima FOTO. Ruotata (EXIF + manuale): a 90°/270° scambio
+                // width/height per restare dentro il riquadro con PreserveAspectFit,
+                // poi rotation attorno al centro.
                 Image {
-                    anchors.fill: parent
+                    anchors.centerIn: parent
+                    width: composePage.previewSwapped ? parent.height : parent.width
+                    height: composePage.previewSwapped ? parent.width : parent.height
+                    rotation: composePage.previewRotation
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     source: (composePage.mediaPath !== "" && !composePage.isVideo) ? "file://" + composePage.mediaPath : ""
                     visible: composePage.mediaPath !== "" && !composePage.isVideo
                 }
 
-                // Probe video in un Loader legato a PageStatus.Active: quando si
-                // lascia la pagina (pop/back o push del picker) il Loader si
-                // disattiva e ferma GStreamer MENTRE la Page è ancora viva
-                // (sincrono), evitando il crash di teardown della pipeline.
-                Loader {
-                    id: videoLoader
-                    anchors.fill: parent
-                    active: composePage.isVideo && composePage.mediaPath !== ""
-                            && composePage.status === PageStatus.Active
-                    sourceComponent: Component {
-                        Video {
-                            id: videoProbe
-                            anchors.fill: parent
-                            fillMode: VideoOutput.PreserveAspectFit
-                            autoLoad: true
-                            autoPlay: false
-                            muted: true
-                            source: "file://" + composePage.mediaPath
-                            function readMeta() {
-                                if (duration > 0)
-                                    composePage.videoDurationS = duration / 1000;
-                                var res = metaData ? metaData.resolution : undefined;
-                                if (res && res.width > 0 && res.height > 0) {
-                                    composePage.videoWidth = res.width;
-                                    composePage.videoHeight = res.height;
-                                }
-                            }
-                            onStatusChanged: {
-                                if (status === MediaPlayer.Loaded || status === MediaPlayer.Buffered) {
-                                    readMeta();
-                                    pause();
-                                }
-                            }
-                            onDurationChanged: if (duration > 0) composePage.videoDurationS = duration / 1000
-                            onMetaDataChanged: readMeta()
-                            Component.onDestruction: { stop(); source = ""; }
-                        }
-                    }
+                // Anteprima VIDEO via thumbnailer di sistema (daemon thumbnaild-video,
+                // fuori processo): genera il frame come fa la Galleria, SENZA aprire
+                // il decoder HW nel nostro processo — quindi nessun teardown che impalli
+                // la UI. La miniatura è già dritta (il daemon rispetta l'orientamento),
+                // perciò applico solo la rotazione manuale (previewRotation = userRotation
+                // per i video) con lo stesso swap width/height delle foto.
+                Thumbnail {
+                    anchors.centerIn: parent
+                    width: composePage.previewSwapped ? parent.height : parent.width
+                    height: composePage.previewSwapped ? parent.width : parent.height
+                    rotation: composePage.previewRotation
+                    fillMode: Thumbnail.PreserveAspectFit
+                    sourceSize.width: width
+                    sourceSize.height: height
+                    priority: Thumbnail.HighPriority
+                    mimeType: "video/mp4"
+                    source: (composePage.mediaPath !== "" && composePage.isVideo) ? "file://" + composePage.mediaPath : ""
+                    visible: composePage.mediaPath !== "" && composePage.isVideo
                 }
 
                 Rectangle {
@@ -338,6 +370,34 @@ Page {
                         font.pixelSize: Theme.fontSizeExtraSmall
                         color: Theme.secondaryColor
                         text: qsTr("Tap to change")
+                    }
+                }
+
+                // Ruota di 90° orari a ogni tap (foto e video). Sopra il tap-per-cambiare
+                // così il tocco nell'angolo ruota invece di aprire il picker.
+                BackgroundItem {
+                    id: rotateButton
+                    visible: composePage.phase === "compose"
+                    width: Theme.iconSizeMedium + Theme.paddingMedium
+                    height: width
+                    anchors {
+                        top: parent.top
+                        right: parent.right
+                        margins: Theme.paddingMedium
+                    }
+                    onClicked: composePage.userRotation = (composePage.userRotation + 90) % 360
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: Theme.rgba("black", rotateButton.highlighted ? 0.6 : 0.4)
+                    }
+                    Image {
+                        anchors.centerIn: parent
+                        width: Theme.iconSizeMedium
+                        height: width
+                        sourceSize.width: width
+                        sourceSize.height: width
+                        source: "image://theme/icon-m-rotate?white"
                     }
                 }
             }

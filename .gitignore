@@ -61,5 +61,15 @@ tdlibsecrets.h
 /.sfdk/
 /log.txt
 _ffmpeg_build/
-CLAUDE.md
-debug*.list
+
+# File privati / note locali con credenziali — MAI pubblicare
+/CLAUDE.md
+
+# Artefatti di build (path /home, binari) — MAI committare
+/RPMS/
+/harbour-rootelegram
+/debugfiles.list
+/debugsourcefiles.list
+/debugsources.list
+/rpm/*.tar.bz2
+/debuglinks.list

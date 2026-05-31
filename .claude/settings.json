@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rpm -q *)",
+      "Bash(rpm -qa *)",
+      "Bash(rpm -qi *)",
+      "Bash(rpm -ql *)",
+      "Bash(rpm -K *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(mkdir -p *)",
+      "Bash(rsync -av *)",
+      "Bash(rm -v *)"
+    ]
+  }
+}

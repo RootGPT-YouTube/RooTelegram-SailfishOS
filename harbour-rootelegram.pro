@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 1.8.5
+RT_APP_VERSION = 1.9
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -348,5 +348,43 @@ SSE2 = $$system(g++ -dM -E -x c++ - < /dev/null | grep __SSE2__)
         SOURCES += rlottie/src/vector/vdrawhelper_sse2.cpp
     } else {
         message(Using default render functions)
+    }
+}
+
+# ── Chiamate vocali (tgcalls + tg_owt) — T0 wire-up, OPT-IN ───────────────────
+# Abilitare con:  qmake CONFIG+=rt_voicecalls
+# Solo aarch64 (arm64): il prebuild vendor/tg_owt/prebuilds/arm64/libtg_owt.a
+# esiste solo per il 64 bit. Di default OFF → la build spedibile resta intatta
+# finché il link non è verde. Vedi roadmap chiamate vocali (T0).
+# Chiamate vocali abilitate di default: lo scope sotto è arm64-only (richiede il
+# prebuild vendor/tg_owt), quindi su armv7hl/i486 è un no-op automatico.
+CONFIG += rt_voicecalls
+rt_voicecalls {
+    equals(QT_ARCH, arm64)|equals(QT_ARCH, arm) {
+        message(Voice calls: tgcalls + tg_owt abilitati ($$QT_ARCH))
+        DEFINES += RT_VOICE_CALLS
+        # tg_owt 321515 (e tgcalls TGCALLS_USE_STD_OPTIONAL) richiedono C++17/20:
+        # forziamo -std=gnu++2a come Yottagram, appeso in coda così vince su
+        # eventuali -std precedenti dell'mkspec SDK.
+        QMAKE_CXXFLAGS += -std=gnu++2a
+        HEADERS += src/callmanager.h
+        SOURCES += src/callmanager.cpp
+        # Stub openh264 (encoder H264): il target SDK non ha libopenh264 e
+        # serve solo alle video-chiamate; per le voice call non è mai chiamato.
+        SOURCES += src/openh264_stub.cpp
+        include(vendor/tg_owt/abseil-cpp.pri)
+        include(vendor/tg_owt/tg_owt.pri)
+        include(vendor/tgcalls/tgcalls.pri)
+        # Dipendenze esterne non coperte dai .pri (raffinare in base al link).
+        # Dipendenze esterne della libtg_owt.a precompilata. Nessuna ha
+        # dev-symlink/.pc nel target SDK → link per soname esatto.
+        #  opus  -> audio codec ; vpx -> VP8/VP9 ; avcodec/avutil -> H264 (ffmpeg)
+        LIBS += -lssl -lcrypto -lz -lpulse \
+                -l:libopus.so.0 \
+                -l:libvpx.so.9 \
+                -l:libavcodec.so.59 \
+                -l:libavutil.so.57
+    } else {
+        warning(rt_voicecalls richiesto ma QT_ARCH != arm64: scope ignorato)
     }
 }

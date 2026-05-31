@@ -81,11 +81,19 @@ namespace {
 
     QVariantMap buildCallProtocol()
     {
+        // Must mirror the versions our bundled tgcalls actually implements
+        // (tgcalls::Meta::Versions()), newest first. Advertising versions the
+        // runtime cannot instantiate makes TDLib negotiate a protocol we then
+        // fail to speak: the call reaches callStateReady and then drops as
+        // "disconnected" after ~20s because no compatible instance connects.
+        // We cap at 9.0.0 to force the native InstanceV2Impl path (7/8/9)
+        // rather than the libwebrtc-based reference impl (10/11).
         QVariantList supportedLibraryVersions;
-        supportedLibraryVersions.append(QStringLiteral("4.0.0"));
-        supportedLibraryVersions.append(QStringLiteral("3.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("9.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("8.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("7.0.0"));
+        supportedLibraryVersions.append(QStringLiteral("5.0.0"));
         supportedLibraryVersions.append(QStringLiteral("2.7.7"));
-        supportedLibraryVersions.append(QStringLiteral("2.4.4"));
 
         QVariantMap callProtocol;
         callProtocol.insert(_TYPE, "callProtocol");
@@ -2165,6 +2173,9 @@ void TDLibWrapper::setUserPrivacySettingRule(TDLibWrapper::UserPrivacySetting se
     case SettingShowLinkInForwardedMessages:
         settingMap.insert(_TYPE, "userPrivacySettingShowLinkInForwardedMessages");
         break;
+    case SettingAllowCalls:
+        settingMap.insert(_TYPE, "userPrivacySettingAllowCalls");
+        break;
     case SettingUnknown:
         return;
     }
@@ -2219,6 +2230,9 @@ void TDLibWrapper::getUserPrivacySettingRules(TDLibWrapper::UserPrivacySetting s
         break;
     case SettingShowLinkInForwardedMessages:
         settingMap.insert(_TYPE, "userPrivacySettingShowLinkInForwardedMessages");
+        break;
+    case SettingAllowCalls:
+        settingMap.insert(_TYPE, "userPrivacySettingAllowCalls");
         break;
     case SettingUnknown:
         return;
@@ -3214,6 +3228,9 @@ void TDLibWrapper::handleUpdatedUserPrivacySettingRules(const QVariantMap &updat
     }
     if (rawSetting == "userPrivacySettingShowStatus") {
         usedSetting = UserPrivacySetting::SettingShowStatus;
+    }
+    if (rawSetting == "userPrivacySettingAllowCalls") {
+        usedSetting = UserPrivacySetting::SettingAllowCalls;
     }
     if (usedSetting != UserPrivacySetting::SettingUnknown) {
         QVariantMap rawRules = updatedRules.value("rules").toMap();

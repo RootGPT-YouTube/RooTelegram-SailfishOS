@@ -31,6 +31,14 @@ public:
     explicit CallManager(TDLibWrapper *tdLibWrapper, QObject *parent = nullptr);
     ~CallManager() override;
 
+    // Mute/unmute del microfono sull'istanza tgcalls attiva (T4). No-op se non
+    // c'è una chiamata in corso.
+    Q_INVOKABLE void setMicrophoneMuted(bool muted);
+
+    // Vivavoce (T5): su Sailfish-droid earpiece/altoparlante sono porte del sink
+    // unico sink.primary_output, commutate via pactl set-sink-port.
+    Q_INVOKABLE void setSpeakerphoneOn(bool on);
+
 private slots:
     void handleCallUpdated(const QVariantMap &call);
     void handleCallSignalingDataReceived(qlonglong callId, const QByteArray &data);
@@ -38,6 +46,10 @@ private slots:
 private:
     void stopInstance();
     void ensureInstanceForReadyCall(const QVariantMap &callState);
+    // Connessione PulseAudio in-process via dlopen di libpulse.so.0 (l'app è
+    // Sailjail: pactl come processo esterno non raggiunge il server PA, mentre
+    // una connessione in-process sì, riusando l'accesso PA che l'app già ha).
+    void ensurePulseConnection();
     std::vector<uint8_t> toByteVector(const QByteArray &data) const;
     QByteArray decodeTdlibBytes(const QString &data) const;
 
@@ -49,6 +61,13 @@ private:
     bool currentIsOutgoing;
     bool currentIsVideo;
     QList<QByteArray> pendingSignalingData;
+    // Connessione PulseAudio in-process (void* = pa_threaded_mainloop*/pa_context*,
+    // i tipi reali stanno nel .cpp). Sink e porte scoperti via enumerazione.
+    void *m_pulseMainloop;
+    void *m_pulseContext;
+    QString m_audioSink;
+    QString m_speakerPort;
+    QString m_earpiecePort;
 };
 
 #endif // CALLMANAGER_H

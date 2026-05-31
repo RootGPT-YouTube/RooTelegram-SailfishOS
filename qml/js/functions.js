@@ -612,7 +612,11 @@ function handleErrorMessage(code, message) {
             || message === "Chat is not a forum"
             || message === "There are no message threads in the chat"
             || message === "Invalid value of parameter from_message_id specified"
+            || message === "MSG_ID_INVALID"
             || message === "Not enough rights to get scheduled messages") {
+        // MSG_ID_INVALID: errore benigno quando si interrogano le reaction
+        // (getMessageAddedReactions) su messaggi che non lo supportano, es. gruppi
+        // grandi/canali — il conteggio reaction resta comunque visibile.
         return;
     }
     if (message === "USER_ALREADY_PARTICIPANT") {
