@@ -4732,5 +4732,15 @@ Nachrichten</numerusform>
         <source>Speaker</source>
         <translation>Lautsprecher</translation>
     </message>
+    <message>
+        <source>Incoming video call</source>
+        <translation>Eingehender Videoanruf</translation>
+    </message>
+    <message>
+        <source>Video not
+available</source>
+        <translation>Video nicht
+verfügbar</translation>
+    </message>
 </context>
 </TS>

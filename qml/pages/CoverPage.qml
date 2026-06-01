@@ -110,16 +110,14 @@ CoverBackground {
 
     BackgroundImage {
         id: backgroundImage
-        width: parent.height - Theme.paddingLarge
+        width: (parent.height - Theme.paddingLarge) / 2
         height: width
         sourceDimension: width
         anchors {
-            verticalCenter: parent.verticalCenter
             centerIn: undefined
+            horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
-            bottomMargin: Theme.paddingMedium
-            right: parent.right
-            rightMargin: Theme.paddingMedium
+            bottomMargin: Theme.paddingLarge
         }
     }
 

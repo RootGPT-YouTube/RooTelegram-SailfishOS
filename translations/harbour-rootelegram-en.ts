@@ -4732,5 +4732,15 @@ messages</numerusform>
         <source>Speaker</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Incoming video call</source>
+        <translation>Incoming video call</translation>
+    </message>
+    <message>
+        <source>Video not
+available</source>
+        <translation>Video not
+available</translation>
+    </message>
 </context>
 </TS>

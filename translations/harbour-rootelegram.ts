@@ -4730,5 +4730,14 @@
         <source>Speaker</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Incoming video call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video non
+disponibile</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

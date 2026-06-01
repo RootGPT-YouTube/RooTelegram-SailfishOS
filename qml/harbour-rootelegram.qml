@@ -22,6 +22,7 @@
     along with RooTelegram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
+import QtMultimedia 5.6
 import Sailfish.Silica 1.0
 import Sailfish.Share 1.0
 import Nemo.DBus 2.0
@@ -229,6 +230,34 @@ ApplicationWindow
         appWindow.ringtoneEventId = 0;
     }
 
+    // Toni telefonici della chiamata USCENTE, riprodotti localmente nell'auricolare
+    // (nessun evento ngfd standard li copre): ringback "libero" mentre l'altro
+    // squilla, tono di occupato/irraggiungibile rapido se non si connette.
+    SoundEffect {
+        id: ringbackTone
+        source: Qt.resolvedUrl("../sounds/ringback.wav")
+        loops: SoundEffect.Infinite
+    }
+    SoundEffect {
+        id: busyTone
+        source: Qt.resolvedUrl("../sounds/callbusy.wav")
+        loops: 1
+    }
+    function startRingback() {
+        // Instrada nell'auricolare prima di suonare (di default il sink droid è
+        // sull'altoparlante). callManager esiste solo con la voce abilitata.
+        if (typeof callManager !== 'undefined') {
+            callManager.setSpeakerphoneOn(false);
+        }
+        ringbackTone.play();
+    }
+    function stopRingback() {
+        ringbackTone.stop();
+    }
+    function playBusyTone() {
+        busyTone.play();
+    }
+
     Connections {
         target: tdLibWrapper
         onCallUpdated: {
@@ -251,17 +280,24 @@ ApplicationWindow
                     callScreen.callerPhoto = (info && info.profile_photo) ? info.profile_photo.small : ({});
                     callScreen.callId = cid;
                     callScreen.outgoing = outgoing;
+                    callScreen.isVideo = call.is_video === true;
+                    callScreen.videoEnabled = true;
                     callScreen.muted = false;
-                    callScreen.speakerOn = false;   // default: auricolare, non vivavoce
+                    // Vivavoce: OFF di default nelle vocali (auricolare), ON nelle
+                    // videochiamate (si tiene il telefono lontano per inquadrarsi).
+                    callScreen.speakerOn = (call.is_video === true);
                     callScreen.connectedAt = 0;
                     callScreen.elapsed = 0;
                     if (!outgoing) {
                         appWindow.startCallRingtone();   // entrante: squilla + vibra
+                    } else {
+                        appWindow.startRingback();       // uscente: "tu-tu" nell'auricolare
                     }
                 }
                 callScreen.callState = st;
                 if (st !== "callStatePending") {
                     appWindow.stopCallRingtone();        // accettata/in connessione: stop
+                    appWindow.stopRingback();            // l'altro ha risposto: stop ringback
                 }
                 if (st === "callStateReady" && callScreen.connectedAt === 0) {
                     callScreen.connectedAt = Date.now();
@@ -272,13 +308,30 @@ ApplicationWindow
                 }
                 callScreen.visible = true;
                 appWindow.activate();
+                // Blocca l'orientamento a portrait per la durata della chiamata
+                // (l'overlay è disegnato verticale). Salva il precedente una volta.
+                if (callScreen.savedOrientations === undefined && pageStack.currentPage) {
+                    callScreen.savedOrientations = pageStack.currentPage.allowedOrientations;
+                    pageStack.currentPage.allowedOrientations = Orientation.Portrait;
+                }
             } else if (cid === callScreen.callId) {
                 appWindow.stopCallRingtone();
+                appWindow.stopRingback();
                 if (st === "callStateHangingUp") {
                     callScreen.callState = st;
                 } else if (st === "callStateDiscarded" || st === "callStateError") {
                     // Edge-case (T5): feedback breve sul motivo di chiusura.
                     var reason = (call.state && call.state.reason && call.state.reason["@type"]) ? call.state.reason["@type"] : "";
+                    // Chiamata uscente mai connessa per occupato/irraggiungibile/
+                    // rifiuto/errore: tono "tu-tu-tu" rapido di linea non disponibile.
+                    var failedOutgoing = callScreen.outgoing && callScreen.connectedAt === 0
+                            && (reason === "callDiscardReasonDeclined"
+                                || reason === "callDiscardReasonDisconnected"
+                                || reason === "callDiscardReasonEmpty"
+                                || st === "callStateError");
+                    if (failedOutgoing) {
+                        appWindow.playBusyTone();
+                    }
                     if (reason === "callDiscardReasonDeclined") {
                         appNotification.show(qsTr("Call declined"));
                     } else if (reason === "callDiscardReasonMissed") {
@@ -289,6 +342,11 @@ ApplicationWindow
                     callScreen.visible = false;
                     callScreen.callId = 0;
                     callScreen.callState = "";
+                    // Ripristina l'orientamento della pagina sotto.
+                    if (callScreen.savedOrientations !== undefined && pageStack.currentPage) {
+                        pageStack.currentPage.allowedOrientations = callScreen.savedOrientations;
+                    }
+                    callScreen.savedOrientations = undefined;
                 }
             }
         }
@@ -299,7 +357,16 @@ ApplicationWindow
         property int callId: 0
         property string callerName: ""
         property var callerPhoto: ({})   // ProfileThumbnail.photoData è un QVariantMap: mai stringa
+        // V4: avatar dell'utente locale (per il placeholder della PiP a video spento).
+        readonly property var ownPhoto: (tdLibWrapper.userInformation && tdLibWrapper.userInformation.profile_photo)
+                                        ? tdLibWrapper.userInformation.profile_photo.small : ({})
         property bool outgoing: false
+        property bool isVideo: false   // V3: videochiamata
+        property bool videoEnabled: true  // V4: invio video attivo (toggle on/off)
+        // V3: l'overlay chiamata è disegnato per il portrait → blocchiamo
+        // l'orientamento della pagina sotto mentre la chiamata è visibile, e lo
+        // ripristiniamo a fine chiamata. (var = orientamenti salvati, undefined = nessun lock)
+        property var savedOrientations: undefined
         property string callState: ""
         property bool muted: false
         property bool speakerOn: false   // default: auricolare (no vivavoce)
@@ -307,6 +374,49 @@ ApplicationWindow
         property int elapsed: 0
         readonly property bool ringingIncoming: callState === "callStatePending" && !outgoing
         readonly property bool connected: callState === "callStateReady"
+        // V3c: videochiamata connessa → layout dedicato (info in alto, controlli in basso).
+        readonly property bool videoConnected: isVideo && connected
+
+        function toggleMute() {
+            muted = !muted;
+            if (typeof callManager !== 'undefined') {
+                callManager.setMicrophoneMuted(muted);
+            }
+        }
+        function toggleSpeaker() {
+            speakerOn = !speakerOn;
+            if (typeof callManager !== 'undefined') {
+                callManager.setSpeakerphoneOn(speakerOn);
+            }
+        }
+        function toggleVideo() {
+            videoEnabled = !videoEnabled;
+            if (typeof callManager !== 'undefined') {
+                callManager.setVideoEnabled(videoEnabled);
+            }
+        }
+        function switchCamera() {
+            if (typeof callManager !== 'undefined') {
+                callManager.switchCamera();
+            }
+        }
+        function endCall() {
+            appWindow.stopRingback();
+            tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
+            callScreen.visible = false;
+        }
+        function statusText() {
+            switch (callScreen.callState) {
+            case "callStatePending":
+                return callScreen.outgoing
+                       ? qsTr("Calling…")
+                       : (callScreen.isVideo ? qsTr("Incoming video call") : qsTr("Incoming voice call"));
+            case "callStateExchangingKeys": return qsTr("Exchanging encryption keys…");
+            case "callStateReady": return callScreen.formatElapsed(callScreen.elapsed);
+            case "callStateHangingUp": return qsTr("Ending call…");
+            default: return "";
+            }
+        }
 
         visible: false
         anchors.fill: parent
@@ -315,6 +425,108 @@ ApplicationWindow
 
         // Assorbe i tap così non raggiungono la pagina sottostante.
         MouseArea { anchors.fill: parent }
+
+        // V3c: video remoto a tutto schermo (sotto i controlli) + anteprima
+        // locale in PiP. Visibili solo nelle videochiamate.
+        VideoOutput {
+            id: remoteVideoOut
+            anchors.fill: parent
+            fillMode: VideoOutput.PreserveAspectFit
+            source: (typeof callManager !== 'undefined') ? callManager.remoteVideo : null
+            // Visibile finché arrivano frame remoti (lo spegnimento del remoto
+            // azzera il renderer → hasFrame=false → compare il placeholder).
+            visible: callScreen.isVideo && typeof callManager !== 'undefined'
+                     && callManager.remoteVideo && callManager.remoteVideo.hasFrame
+        }
+
+        // V4: quando il remoto NON invia video, al posto dell'ultimo frame congelato
+        // mostriamo l'avatar del contatto, oppure (se non c'è) schermo nero con
+        // scritta rossa "Video non / disponibile".
+        Rectangle {
+            id: remoteVideoPlaceholder
+            anchors.fill: parent
+            color: "black"
+            // Mostrato quando NON arrivano frame dal remoto (camera spenta o non
+            // ancora avviata): avatar del contatto, o "Video non disponibile".
+            visible: callScreen.videoConnected
+                     && !(typeof callManager !== 'undefined'
+                          && callManager.remoteVideo && callManager.remoteVideo.hasFrame)
+            property bool hasAvatar: callScreen.callerPhoto
+                                     && Object.keys(callScreen.callerPhoto).length > 0
+            ProfileThumbnail {
+                anchors.centerIn: parent
+                width: Theme.itemSizeHuge * 1.5
+                height: width
+                photoData: callScreen.callerPhoto
+                replacementStringHint: callScreen.callerName
+                optimizeImageSize: false
+                visible: remoteVideoPlaceholder.hasAvatar
+            }
+            Label {
+                anchors.centerIn: parent
+                visible: !remoteVideoPlaceholder.hasAvatar
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("Video not\navailable")
+                color: "#ff4444"
+                font.pixelSize: Theme.fontSizeExtraLarge
+                font.bold: true
+            }
+        }
+        VideoOutput {
+            id: localVideoOut
+            width: parent.width * 0.28
+            height: width * 4 / 3
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Theme.paddingMedium
+            fillMode: VideoOutput.PreserveAspectFit
+            source: (typeof callManager !== 'undefined') ? callManager.localVideo : null
+            // Nascosta se il video è disattivato (V4) o non è una videochiamata.
+            visible: callScreen.isVideo && callScreen.videoEnabled
+            z: 1
+            // V5: mirror "selfie" dell'anteprima locale con la frontale (il video
+            // INVIATO resta non specchiato → l'altro ti vede correttamente).
+            transform: Scale {
+                origin.x: localVideoOut.width / 2
+                xScale: (typeof callManager !== 'undefined' && callManager.frontCamera) ? -1 : 1
+            }
+        }
+
+        // V4: placeholder della PiP quando spegni il TUO video → tuo avatar, o
+        // "Video non disponibile" se non hai avatar (stesso trattamento del remoto).
+        Rectangle {
+            id: localVideoPlaceholder
+            width: localVideoOut.width
+            height: localVideoOut.height
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Theme.paddingMedium
+            z: 1
+            color: "black"
+            visible: callScreen.videoConnected && !callScreen.videoEnabled
+            property bool hasAvatar: callScreen.ownPhoto
+                                     && Object.keys(callScreen.ownPhoto).length > 0
+            ProfileThumbnail {
+                anchors.centerIn: parent
+                width: parent.height * 0.6
+                height: width
+                photoData: callScreen.ownPhoto
+                replacementStringHint: ""
+                optimizeImageSize: false
+                visible: localVideoPlaceholder.hasAvatar
+            }
+            Label {
+                anchors.centerIn: parent
+                width: parent.width - 2 * Theme.paddingSmall
+                visible: !localVideoPlaceholder.hasAvatar
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: qsTr("Video not\navailable")
+                color: "#ff4444"
+                font.pixelSize: Theme.fontSizeTiny
+                font.bold: true
+            }
+        }
 
         Timer {
             interval: 1000
@@ -329,10 +541,13 @@ ApplicationWindow
             return (m < 10 ? "0" + m : m) + ":" + (sec < 10 ? "0" + sec : sec);
         }
 
+        // Layout centrato: chiamate audio e fase di squillo (anche video non ancora
+        // connessa). Nelle videochiamate connesse cede il posto ai blocchi top/bottom.
         Column {
             anchors.centerIn: parent
             width: parent.width - 2 * Theme.horizontalPageMargin
             spacing: Theme.paddingLarge
+            visible: !callScreen.videoConnected
 
             ProfileThumbnail {
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -341,6 +556,7 @@ ApplicationWindow
                 photoData: callScreen.callerPhoto
                 replacementStringHint: callScreen.callerName
                 optimizeImageSize: false
+                visible: !callScreen.isVideo   // V3c: nelle video lo schermo è il video remoto
             }
 
             Label {
@@ -357,20 +573,7 @@ ApplicationWindow
                 horizontalAlignment: Text.AlignHCenter
                 color: Theme.secondaryHighlightColor
                 font.pixelSize: Theme.fontSizeLarge
-                text: {
-                    switch (callScreen.callState) {
-                    case "callStatePending":
-                        return callScreen.outgoing ? qsTr("Calling…") : qsTr("Incoming voice call");
-                    case "callStateExchangingKeys":
-                        return qsTr("Exchanging encryption keys…");
-                    case "callStateReady":
-                        return callScreen.formatElapsed(callScreen.elapsed);
-                    case "callStateHangingUp":
-                        return qsTr("Ending call…");
-                    default:
-                        return "";
-                    }
-                }
+                text: callScreen.statusText()
             }
 
             Item { width: 1; height: Theme.paddingLarge }
@@ -394,12 +597,12 @@ ApplicationWindow
                     color: "#44dd44"
                     onClicked: {
                         appWindow.stopCallRingtone();
-                        tdLibWrapper.acceptVoiceCall(callScreen.callId, false);
+                        tdLibWrapper.acceptVoiceCall(callScreen.callId, callScreen.isVideo);
                     }
                 }
             }
 
-            // Chiamata in corso (uscente o entrante accettata): Muto / Vivavoce.
+            // Chiamata in corso (audio): Muto / Vivavoce.
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.paddingLarge * 2
@@ -407,22 +610,12 @@ ApplicationWindow
                 Button {
                     text: callScreen.muted ? qsTr("Unmute") : qsTr("Mute")
                     enabled: callScreen.connected
-                    onClicked: {
-                        callScreen.muted = !callScreen.muted;
-                        if (typeof callManager !== 'undefined') {
-                            callManager.setMicrophoneMuted(callScreen.muted);
-                        }
-                    }
+                    onClicked: callScreen.toggleMute()
                 }
                 Button {
                     text: callScreen.speakerOn ? qsTr("Speaker off") : qsTr("Speaker")
                     enabled: callScreen.connected
-                    onClicked: {
-                        callScreen.speakerOn = !callScreen.speakerOn;
-                        if (typeof callManager !== 'undefined') {
-                            callManager.setSpeakerphoneOn(callScreen.speakerOn);
-                        }
-                    }
+                    onClicked: callScreen.toggleSpeaker()
                 }
             }
 
@@ -431,10 +624,76 @@ ApplicationWindow
                 visible: !callScreen.ringingIncoming
                 text: qsTr("End call")
                 color: "#ff4444"
-                onClicked: {
-                    tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
-                    callScreen.visible = false;
+                onClicked: callScreen.endCall()
+            }
+        }
+
+        // ── V3c: videochiamata connessa — info in ALTO, controlli in BASSO ──
+        // Striscia scura in alto per leggibilità di nome + timer sul video.
+        Rectangle {
+            visible: callScreen.videoConnected
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: videoTopInfo.height + 2 * Theme.paddingLarge
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.6) }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+            Column {
+                id: videoTopInfo
+                anchors { top: parent.top; left: parent.left; right: parent.right; topMargin: Theme.paddingLarge }
+                spacing: Theme.paddingSmall
+                Label {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    text: callScreen.callerName
+                    color: Theme.highlightColor
+                    font.pixelSize: Theme.fontSizeLarge
+                    truncationMode: TruncationMode.Fade
                 }
+                Label {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    color: Theme.secondaryHighlightColor
+                    font.pixelSize: Theme.fontSizeMedium
+                    text: callScreen.statusText()
+                }
+            }
+        }
+
+        // V4: barra di controllo a icone (sta comoda in una riga): microfono,
+        // vivavoce, cambia camera, video on/off, termina.
+        Row {
+            id: videoControls
+            visible: callScreen.videoConnected
+            anchors {
+                bottom: parent.bottom
+                horizontalCenter: parent.horizontalCenter
+                bottomMargin: Theme.paddingLarge * 2
+            }
+            spacing: Theme.paddingLarge
+            IconButton {
+                icon.source: callScreen.muted ? "image://theme/icon-m-mic-mute"
+                                              : "image://theme/icon-m-mic"
+                onClicked: callScreen.toggleMute()
+            }
+            IconButton {
+                icon.source: callScreen.speakerOn ? "image://theme/icon-m-speaker-on"
+                                                  : "image://theme/icon-m-speaker"
+                onClicked: callScreen.toggleSpeaker()
+            }
+            IconButton {
+                icon.source: "image://theme/icon-m-flip"
+                onClicked: callScreen.switchCamera()
+            }
+            IconButton {
+                icon.source: "image://theme/icon-m-video"
+                icon.color: callScreen.videoEnabled ? Theme.primaryColor : Theme.secondaryColor
+                onClicked: callScreen.toggleVideo()
+            }
+            IconButton {
+                icon.source: "image://theme/icon-m-call"
+                icon.color: "#ff4444"
+                onClicked: callScreen.endCall()
             }
         }
     }

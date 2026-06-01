@@ -169,7 +169,11 @@ Item {
                 }
 
                 onClicked: {
-                    appNotification.show(qsTr("Video calls are not available in this build yet."));
+                    if (!tabViewItem.callBackendAvailable) {
+                        appNotification.show(qsTr("Video calls are not available in this build yet."));
+                        return;
+                    }
+                    tdLibWrapper.createVoiceCall(chatPartnerGroupId, true);
                 }
             }
         }

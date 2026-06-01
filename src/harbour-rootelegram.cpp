@@ -73,6 +73,7 @@
 #include "videotranscoder.h"
 #ifdef RT_VOICE_CALLS
 #include "callmanager.h"
+#include "cameracaptureprobe.h"
 #endif
 
 // The default filter can be overridden by QT_LOGGING_RULES envinronment variable, e.g.
@@ -255,8 +256,11 @@ int main(int argc, char *argv[])
     // T0 wire-up: il CallManager si aggancia a TDLibWrapper (callUpdated /
     // callSignalingDataReceived) e gestirà tgcalls. Nessun effetto finché
     // l'UI non lo attiva (callBackendAvailable resta false).
-    CallManager callManager(tdLibWrapper, app.data());
+    CallManager callManager(tdLibWrapper, mceInterface, app.data());
     Q_UNUSED(callManager);
+    // V1 videochiamate: sonda di cattura camera, esposta a QML per il test sul
+    // device (DebugPage). Standalone, non tocca il path delle chiamate audio.
+    CameraCaptureProbe cameraCaptureProbe(app.data());
 #endif
 
     VideoTranscoder videoTranscoder(app.data());
@@ -293,6 +297,8 @@ int main(int argc, char *argv[])
             context->setContextProperty("voiceCallsAvailable", true);
             // Esposto a QML per i controlli in-chiamata (T4): mute microfono.
             context->setContextProperty("callManager", &callManager);
+            // V1: sonda cattura camera per il test sul device (DebugPage).
+            context->setContextProperty("cameraCaptureProbe", &cameraCaptureProbe);
 #else
             context->setContextProperty("voiceCallsAvailable", false);
 #endif

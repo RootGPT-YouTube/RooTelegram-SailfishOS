@@ -4730,5 +4730,15 @@
         <source>Speaker</source>
         <translation>Vivavoce</translation>
     </message>
+    <message>
+        <source>Incoming video call</source>
+        <translation>Videochiamata in arrivo</translation>
+    </message>
+    <message>
+        <source>Video not
+available</source>
+        <translation>Video non
+disponibile</translation>
+    </message>
 </context>
 </TS>

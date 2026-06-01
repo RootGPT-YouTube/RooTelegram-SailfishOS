@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 1.9
+RT_APP_VERSION = 1.9.5
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -221,8 +221,12 @@ telegram.path = /usr/share/$${TARGET}
 
 # ffmpeg minimale bundlato (per normalizzare i video landscape in storie 9:16).
 # Installo la dir `bin` così la copia ricorsiva preserva il bit +x del binario.
-ffmpegbin.files = $$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin
-ffmpegbin.path = /usr/share/$${TARGET}
+# Solo se presente per l'arch (i486 non ha il binario → niente transcode storie).
+exists($$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin) {
+    ffmpegbin.files = $$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin
+    ffmpegbin.path = /usr/share/$${TARGET}
+    INSTALLS += ffmpegbin
+}
 
 
 gui.files = qml
@@ -230,6 +234,10 @@ gui.path = /usr/share/$${TARGET}
 
 images.files = images
 images.path = /usr/share/$${TARGET}
+
+# Toni telefonici per le chiamate vocali uscenti (ringback "libero" + occupato).
+sounds.files = sounds
+sounds.path = /usr/share/$${TARGET}
 
 ICONPATH = /usr/share/icons/hicolor
 
@@ -254,8 +262,8 @@ rootelegram.desktop.files = harbour-rootelegram.desktop
 database.files = db
 database.path = /usr/share/$${TARGET}
 
-INSTALLS += telegram ffmpegbin 86.png 108.png 128.png 172.png 256.png \
-            rootelegram.desktop gui images database
+INSTALLS += telegram 86.png 108.png 128.png 172.png 256.png \
+            rootelegram.desktop gui images sounds database
 
 HEADERS += \
     src/appsettings.h \
@@ -369,6 +377,20 @@ rt_voicecalls {
         QMAKE_CXXFLAGS += -std=gnu++2a
         HEADERS += src/callmanager.h
         SOURCES += src/callmanager.cpp
+        # V1 videochiamate: sonda cattura camera (QtMultimedia → I420 libyuv).
+        HEADERS += src/cameracaptureprobe.h
+        SOURCES += src/cameracaptureprobe.cpp
+        # V3 videochiamate: platform interface Sailfish (sostituisce il fake),
+        # track source broadcaster + capturer camera che feeda tgcalls.
+        HEADERS += src/videocalls/sailfishvideotracksource.h \
+                   src/videocalls/callcameragrabber.h \
+                   src/videocalls/sailfishvideocapturer.h \
+                   src/videocalls/sailfishinterface.h \
+                   src/videocalls/callvideorenderer.h
+        SOURCES += src/videocalls/callcameragrabber.cpp \
+                   src/videocalls/sailfishvideocapturer.cpp \
+                   src/videocalls/sailfishinterface.cpp \
+                   src/videocalls/callvideorenderer.cpp
         # Stub openh264 (encoder H264): il target SDK non ha libopenh264 e
         # serve solo alle video-chiamate; per le voice call non è mai chiamato.
         SOURCES += src/openh264_stub.cpp
