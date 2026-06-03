@@ -99,6 +99,12 @@ MessageContentBase {
         updateVideoThumbnail();
     }
 
+    // Quando il messaggio si aggiorna (es. il server completa l'elaborazione del
+    // video appena inviato e aggiunge thumbnail/minithumbnail), videoData cambia:
+    // ri-eseguiamo l'aggancio dell'anteprima, altrimenti la preview resta vuota
+    // finché non si riapre la chat.
+    onVideoDataChanged: updateVideoThumbnail();
+
     function updateVideoThumbnail() {
         if (videoData) {
             if (typeof rawMessage !== "undefined") {

@@ -484,23 +484,32 @@ Page {
 
     PullDownMenu {
         MenuItem {
-            text: qsTr("Refresh")
-            onClicked: {
-                refreshTopics()
+            onClicked: { refreshTopics() }
+            Label {
+                anchors.centerIn: parent; text: qsTr("Refresh"); font.italic: true
+                color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                layer.enabled: true
+                layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
         MenuItem {
             visible: canManageTopics() || canCreateTopicsPermission()
-            text: qsTr("Create Topic")
-            onClicked: {
-                openCreateTopicEditor()
+            onClicked: { openCreateTopicEditor() }
+            Label {
+                anchors.centerIn: parent; text: qsTr("Create Topic"); font.italic: true
+                color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                layer.enabled: true
+                layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
         MenuItem {
             visible: canDisableTopics()
-            text: qsTr("Disable Topics")
-            onClicked: {
-                disableTopics()
+            onClicked: { disableTopics() }
+            Label {
+                anchors.centerIn: parent; text: qsTr("Disable Topics"); font.italic: true
+                color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                layer.enabled: true
+                layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
     }
@@ -1020,34 +1029,25 @@ Page {
             property var topicThreadId: Number(threadId)
             property var topicForumId: Number(forumTopicId)
 
-            openMenuOnPressAndHold: forumTopicsPage.canManageTopics()
-            menu: ContextMenu {
-                MenuItem {
-                    visible: forumTopicsPage.canManageTopics()
-                    text: qsTr("Rename topic")
-                    onClicked: {
-                        var topicId = topicDelegate.topicForumId > 0 ? topicDelegate.topicForumId : topicDelegate.topicThreadId
-                        forumTopicsPage.openRenameTopicEditor(topicId, topicName)
-                    }
+            openMenuOnPressAndHold: false
+            onPressAndHold: {
+                if (forumTopicsPage.canManageTopics()) {
+                    topicsNeonMenu.open(buildTopicActions());
                 }
-                MenuItem {
-                    visible: forumTopicsPage.canManageTopics() && (topicDelegate.topicForumId > 0 || topicDelegate.topicThreadId > 0)
-                    text: topicIsClosed ? qsTr("Reopen topic") : qsTr("Close topic")
-                    onClicked: {
-                        var topicId = topicDelegate.topicForumId > 0 ? topicDelegate.topicForumId : topicDelegate.topicThreadId
-                        forumTopicsPage.toggleTopicClosed(topicId, !topicIsClosed)
-                    }
-                }
-                MenuItem {
-                    visible: forumTopicsPage.canManageTopics() && (topicDelegate.topicForumId > 1 || topicDelegate.topicThreadId > 1)
-                    text: qsTr("Delete topic")
-                    onClicked: {
-                        var topicId = topicDelegate.topicForumId > 0 ? topicDelegate.topicForumId : topicDelegate.topicThreadId
-                        Remorse.itemAction(topicDelegate, qsTr("Deleting topic"), function() {
-                            forumTopicsPage.deleteTopic(topicId)
-                        })
-                    }
-                }
+            }
+            function buildTopicActions() {
+                var topicId = topicDelegate.topicForumId > 0 ? topicDelegate.topicForumId : topicDelegate.topicThreadId;
+                return [
+                    { text: qsTr("Rename topic"), visible: forumTopicsPage.canManageTopics(), callback: function() {
+                        forumTopicsPage.openRenameTopicEditor(topicId, topicName);
+                    }},
+                    { text: topicIsClosed ? qsTr("Reopen topic") : qsTr("Close topic"), visible: forumTopicsPage.canManageTopics() && (topicDelegate.topicForumId > 0 || topicDelegate.topicThreadId > 0), callback: function() {
+                        forumTopicsPage.toggleTopicClosed(topicId, !topicIsClosed);
+                    }},
+                    { text: qsTr("Delete topic"), visible: forumTopicsPage.canManageTopics() && (topicDelegate.topicForumId > 1 || topicDelegate.topicThreadId > 1), callback: function() {
+                        Remorse.itemAction(topicDelegate, qsTr("Deleting topic"), function() { forumTopicsPage.deleteTopic(topicId); });
+                    }}
+                ];
             }
 
             onClicked: {
@@ -1145,12 +1145,16 @@ Page {
                 spacing: Theme.paddingSmall / 2
 
                 Label {
+                    id: topicNameLabel
                     width: parent.width
                     text: topicIsClosed ? (topicName + " · " + qsTr("Closed")) : topicName
                     font.pixelSize: Theme.fontSizeMedium
-                    color: Theme.primaryColor
+                    font.italic: true
+                    color: "#ffffff"
                     truncationMode: TruncationMode.Fade
                     maximumLineCount: 1
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
 
                 Label {
@@ -1175,5 +1179,9 @@ Page {
         }
 
         VerticalScrollDecorator {}
+    }
+
+    NeonMenuOverlay {
+        id: topicsNeonMenu
     }
 }

@@ -37,6 +37,18 @@ MessageContentFileInfoBase {
     tertiaryLabel.visible: (duration || (audioPlayer.duration/1000)) > 0
     tertiaryText: (audioPlayer.position > 0 || audioPlayer.playbackState === Audio.PlayingState ? (Format.formatDuration(audioPlayer.position/1000, Formatter.DurationShort)+" / ") : "") + Format.formatDuration(contentItem.duration > 0 ? contentItem.duration : (audioPlayer.duration/1000), Formatter.DurationShort)
 
+    // Vero solo per i messaggi VOCALI (impostato da MessageVoiceNote): abilita il
+    // menù Premium "Ascolta/Trascrivi" e la trascrizione.
+    property bool isVoiceNote: false
+
+    function playPause() {
+        if (audioPlayer.playbackState === Audio.PlayingState) {
+            audioPlayer.pause();
+        } else {
+            audioPlayer.play();
+        }
+    }
+
     leftButton {
         icon.source: audioPlayer.playbackState === Audio.PlayingState || (file.isDownloadingActive && audioPlayer.autoPlay) ? "image://theme/icon-m-pause": "image://theme/icon-m-play"
         onClicked: {
@@ -47,11 +59,18 @@ MessageContentFileInfoBase {
                 audioPlayer.autoPlay = false;
                 file.cancel();
             } else if(file.isDownloadingCompleted) {
-                //playPause
-                if(audioPlayer.playbackState === Audio.PlayingState) {
-                    audioPlayer.pause();
+                // Vocale + utente Premium: menù neon "Ascolta / Trascrivi".
+                if (contentItem.isVoiceNote && contentItem.messageListItem && contentItem.messageListItem.neonMenu
+                        && typeof tdLibWrapper.userInformation !== "undefined"
+                        && tdLibWrapper.userInformation && tdLibWrapper.userInformation.is_premium) {
+                    contentItem.messageListItem.neonMenu.open([
+                        { text: qsTr("Play/Pause"), callback: function() { contentItem.playPause(); } },
+                        { text: qsTr("Transcribe"), callback: function() {
+                            tdLibWrapper.recognizeSpeech(contentItem.messageListItem.chatId, contentItem.rawMessage.id);
+                        }}
+                    ]);
                 } else {
-                    audioPlayer.play();
+                    contentItem.playPause();
                 }
             }
         }

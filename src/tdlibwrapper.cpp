@@ -268,6 +268,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(forumTopicUpdated(qlonglong, qlonglong, qlonglong, qlonglong, int)), this, SIGNAL(forumTopicUpdated(qlonglong, qlonglong, qlonglong, qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(chatFoldersReceived(QVariantList)), this, SIGNAL(chatFoldersReceived(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(chatFolderInfoReceived(QVariantMap)), this, SIGNAL(chatFolderInfoReceived(QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(chatFolderEditReceived(QVariantMap, qlonglong, int, bool)), this, SLOT(handleChatFolderEdit(QVariantMap, qlonglong, int, bool)));
 
     this->tdLibReceiver->start();
 }
@@ -421,6 +422,80 @@ void TDLibWrapper::getChatFolders()
     LOG("Getting chat folders");
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "getChatFolders");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::addChatToFolder(qlonglong chatId, int folderId)
+{
+    // TDLib non ha un'API diretta "aggiungi chat a cartella": si recupera la
+    // cartella (getChatFolder), si aggiunge il chatId a included_chat_ids e si
+    // rimanda indietro con editChatFolder. L'@extra trasporta chatId+folderId fino
+    // alla risposta (vedi handleChatFolderForAdd).
+    LOG("Adding chat to folder" << chatId << folderId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatFolder");
+    requestObject.insert("chat_folder_id", folderId);
+    requestObject.insert(_EXTRA, QString("addChatToFolder:%1:%2").arg(chatId).arg(folderId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::removeChatFromFolder(qlonglong chatId, int folderId)
+{
+    // Come addChatToFolder ma in rimozione: getChatFolder -> togli chatId da
+    // included_chat_ids -> editChatFolder (vedi handleChatFolderEdit).
+    LOG("Removing chat from folder" << chatId << folderId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getChatFolder");
+    requestObject.insert("chat_folder_id", folderId);
+    requestObject.insert(_EXTRA, QString("removeChatFromFolder:%1:%2").arg(chatId).arg(folderId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::handleChatFolderEdit(const QVariantMap &folder, qlonglong chatId, int folderId, bool add)
+{
+    QVariantMap chatFolder = folder;
+    chatFolder.remove(_EXTRA); // l'@extra è della richiesta, non va dentro l'oggetto
+
+    QVariantList included = chatFolder.value("included_chat_ids").toList();
+    if (add) {
+        for (const QVariant &v : included) {
+            if (v.toLongLong() == chatId) {
+                LOG("Chat already in folder" << chatId << folderId);
+                return; // già presente: niente da fare
+            }
+        }
+        included.append(chatId);
+        chatFolder.insert("included_chat_ids", included);
+        // Se era esclusa esplicitamente, togliamola dagli esclusi.
+        QVariantList excluded = chatFolder.value("excluded_chat_ids").toList();
+        QVariantList newExcluded;
+        for (const QVariant &v : excluded) {
+            if (v.toLongLong() != chatId) {
+                newExcluded.append(v);
+            }
+        }
+        chatFolder.insert("excluded_chat_ids", newExcluded);
+    } else {
+        QVariantList newIncluded;
+        bool found = false;
+        for (const QVariant &v : included) {
+            if (v.toLongLong() == chatId) {
+                found = true;
+            } else {
+                newIncluded.append(v);
+            }
+        }
+        if (!found) {
+            LOG("Chat not in folder included list" << chatId << folderId);
+            return;
+        }
+        chatFolder.insert("included_chat_ids", newIncluded);
+    }
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editChatFolder");
+    requestObject.insert("chat_folder_id", folderId);
+    requestObject.insert("folder", chatFolder);
     this->sendRequest(requestObject);
 }
 
@@ -915,6 +990,28 @@ void TDLibWrapper::editMessageTextWithCustomEmoji(const QString &chatId, const Q
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::editMessageCaption(const QString &chatId, const QString &messageId, const QString &caption)
+{
+    LOG("Editing message caption" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageCaption");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    requestObject.insert("caption", formattedTextFromMessage(caption));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::editMessageCaptionWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &customEmojiEntities)
+{
+    LOG("Editing message caption with custom emojis" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageCaption");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    requestObject.insert("caption", formattedTextFromMessage(caption, customEmojiEntities));
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
 {
     LOG("Sending photo message" << chatId << filePath << message << replyToMessageId);
@@ -975,9 +1072,9 @@ void TDLibWrapper::sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId)
+void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, int duration, int width, int height, const QString &thumbnailPath, int thumbnailWidth, int thumbnailHeight)
 {
-    LOG("Sending video message" << chatId << filePath << message << replyToMessageId);
+    LOG("Sending video message" << chatId << filePath << message << replyToMessageId << duration << width << height << thumbnailPath);
     QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageVideo");
@@ -986,6 +1083,32 @@ void TDLibWrapper::sendVideoMessage(qlonglong chatId, const QString &filePath, c
     videoInputFile.insert(_TYPE, "inputFileLocal");
     videoInputFile.insert("path", filePath);
     inputMessageContent.insert("video", videoInputFile);
+    // Metadati sondati lato QML (videoTranscoder.probeVideo, ffmpeg software).
+    // Senza, TDLib salva il video con duration=0 e dimensioni placeholder (320x320).
+    if (duration > 0) {
+        inputMessageContent.insert("duration", duration);
+    }
+    if (width > 0 && height > 0) {
+        inputMessageContent.insert("width", width);
+        inputMessageContent.insert("height", height);
+    }
+    inputMessageContent.insert("supports_streaming", true);
+    // Anteprima: il server Telegram NON genera la thumbnail per i video caricati
+    // senza, quindi la estraiamo noi (videoTranscoder.extractThumbnail) e la
+    // alleghiamo come inputThumbnail, come fanno i client ufficiali.
+    if (!thumbnailPath.isEmpty()) {
+        QVariantMap thumbnail;
+        thumbnail.insert(_TYPE, "inputThumbnail");
+        QVariantMap thumbnailInputFile;
+        thumbnailInputFile.insert(_TYPE, "inputFileLocal");
+        thumbnailInputFile.insert("path", thumbnailPath);
+        thumbnail.insert("thumbnail", thumbnailInputFile);
+        if (thumbnailWidth > 0 && thumbnailHeight > 0) {
+            thumbnail.insert("width", thumbnailWidth);
+            thumbnail.insert("height", thumbnailHeight);
+        }
+        inputMessageContent.insert("thumbnail", thumbnail);
+    }
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -1117,6 +1240,18 @@ void TDLibWrapper::getMessage(qlonglong chatId, qlonglong messageId)
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(MESSAGE_ID, messageId);
     requestObject.insert(_EXTRA, QString("getMessage:%1:%2").arg(chatId).arg(messageId));
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::recognizeSpeech(qlonglong chatId, qlonglong messageId)
+{
+    // Trascrizione vocale (Premium): il risultato arriva via updateMessageContent
+    // come voice_note.speech_recognition_result (Pending -> Text/Error).
+    LOG("Recognizing speech" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "recognizeSpeech");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
     this->sendRequest(requestObject);
 }
 
@@ -2176,6 +2311,9 @@ void TDLibWrapper::setUserPrivacySettingRule(TDLibWrapper::UserPrivacySetting se
     case SettingAllowCalls:
         settingMap.insert(_TYPE, "userPrivacySettingAllowCalls");
         break;
+    case SettingAllowPrivateVoiceAndVideoNoteMessages:
+        settingMap.insert(_TYPE, "userPrivacySettingAllowPrivateVoiceAndVideoNoteMessages");
+        break;
     case SettingUnknown:
         return;
     }
@@ -2196,6 +2334,45 @@ void TDLibWrapper::setUserPrivacySettingRule(TDLibWrapper::UserPrivacySetting se
     }
     QVariantList ruleMaps;
     ruleMaps.append(ruleMap);
+    QVariantMap encapsulatedRules;
+    encapsulatedRules.insert(_TYPE, "userPrivacySettingRules");
+    encapsulatedRules.insert("rules", ruleMaps);
+    requestObject.insert("rules", encapsulatedRules);
+
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::setUserPrivacySettingAllowedUsers(TDLibWrapper::UserPrivacySetting setting, const QVariantList &userIds, bool allowOnly)
+{
+    // allowOnly=true: "Solo i selezionati" (consenti SOLO questi, vieta il resto).
+    // allowOnly=false: "Tutti tranne" (vieta questi, consenti il resto).
+    LOG("Set privacy selected users" << setting << userIds.size() << "allowOnly" << allowOnly);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "setUserPrivacySettingRules");
+
+    QVariantMap settingMap;
+    if (setting == SettingAllowPrivateVoiceAndVideoNoteMessages) {
+        settingMap.insert(_TYPE, "userPrivacySettingAllowPrivateVoiceAndVideoNoteMessages");
+    } else if (setting == SettingAllowCalls) {
+        settingMap.insert(_TYPE, "userPrivacySettingAllowCalls");
+    } else {
+        return; // non supportato per gli altri setting
+    }
+    requestObject.insert("setting", settingMap);
+
+    QVariantList ids;
+    for (const QVariant &v : userIds) {
+        ids.append(v.toLongLong());
+    }
+    QVariantMap usersRule;
+    usersRule.insert(_TYPE, allowOnly ? "userPrivacySettingRuleAllowUsers" : "userPrivacySettingRuleRestrictUsers");
+    usersRule.insert("user_ids", ids);
+    QVariantMap fallbackRule;
+    fallbackRule.insert(_TYPE, allowOnly ? "userPrivacySettingRuleRestrictAll" : "userPrivacySettingRuleAllowAll");
+    QVariantList ruleMaps;
+    // Le eccezioni (allow/restrict utenti) vanno PRIMA della regola generale.
+    ruleMaps.append(usersRule);
+    ruleMaps.append(fallbackRule);
     QVariantMap encapsulatedRules;
     encapsulatedRules.insert(_TYPE, "userPrivacySettingRules");
     encapsulatedRules.insert("rules", ruleMaps);
@@ -2233,6 +2410,9 @@ void TDLibWrapper::getUserPrivacySettingRules(TDLibWrapper::UserPrivacySetting s
         break;
     case SettingAllowCalls:
         settingMap.insert(_TYPE, "userPrivacySettingAllowCalls");
+        break;
+    case SettingAllowPrivateVoiceAndVideoNoteMessages:
+        settingMap.insert(_TYPE, "userPrivacySettingAllowPrivateVoiceAndVideoNoteMessages");
         break;
     case SettingUnknown:
         return;
@@ -2484,6 +2664,16 @@ QVariantMap TDLibWrapper::getUserInformationByName(const QString &userName)
 TDLibWrapper::UserPrivacySettingRule TDLibWrapper::getUserPrivacySettingRule(TDLibWrapper::UserPrivacySetting userPrivacySetting)
 {
     return this->userPrivacySettingRules.value(userPrivacySetting, UserPrivacySettingRule::RuleAllowAll);
+}
+
+QVariantList TDLibWrapper::getUserPrivacySettingAllowedUserIds(TDLibWrapper::UserPrivacySetting userPrivacySetting)
+{
+    return this->userPrivacySettingAllowedUserIds.value(userPrivacySetting, QVariantList());
+}
+
+QVariantList TDLibWrapper::getUserPrivacySettingRestrictedUserIds(TDLibWrapper::UserPrivacySetting userPrivacySetting)
+{
+    return this->userPrivacySettingRestrictedUserIds.value(userPrivacySetting, QVariantList());
 }
 
 QVariantMap TDLibWrapper::getUnreadMessageInformation()
@@ -3192,18 +3382,30 @@ void TDLibWrapper::handleUserPrivacySettingRules(const QVariantMap &rules)
     QVariantList newGivenRules = rules.value("rules").toList();
     // If nothing (or something unsupported is sent out) it is considered to be restricted completely
     UserPrivacySettingRule newAppliedRule = UserPrivacySettingRule::RuleRestrictAll;
+    QVariantList allowedUserIds;
+    QVariantList restrictedUserIds;
     QListIterator<QVariant> givenRulesIterator(newGivenRules);
     while (givenRulesIterator.hasNext()) {
-        QString givenRule = givenRulesIterator.next().toMap().value(_TYPE).toString();
+        const QVariantMap givenRuleMap = givenRulesIterator.next().toMap();
+        const QString givenRule = givenRuleMap.value(_TYPE).toString();
         if (givenRule == "userPrivacySettingRuleAllowContacts") {
             newAppliedRule = UserPrivacySettingRule::RuleAllowContacts;
         }
         if (givenRule == "userPrivacySettingRuleAllowAll") {
             newAppliedRule = UserPrivacySettingRule::RuleAllowAll;
         }
+        // "Solo i selezionati" / "Tutti tranne": conserva le liste utenti per il prefill.
+        if (givenRule == "userPrivacySettingRuleAllowUsers") {
+            allowedUserIds = givenRuleMap.value("user_ids").toList();
+        }
+        if (givenRule == "userPrivacySettingRuleRestrictUsers") {
+            restrictedUserIds = givenRuleMap.value("user_ids").toList();
+        }
     }
     UserPrivacySetting usedSetting = static_cast<UserPrivacySetting>(rules.value(_EXTRA).toInt());
     this->userPrivacySettingRules.insert(usedSetting, newAppliedRule);
+    this->userPrivacySettingAllowedUserIds.insert(usedSetting, allowedUserIds);
+    this->userPrivacySettingRestrictedUserIds.insert(usedSetting, restrictedUserIds);
     emit userPrivacySettingUpdated(usedSetting, newAppliedRule);
 }
 
@@ -3228,6 +3430,9 @@ void TDLibWrapper::handleUpdatedUserPrivacySettingRules(const QVariantMap &updat
     }
     if (rawSetting == "userPrivacySettingShowStatus") {
         usedSetting = UserPrivacySetting::SettingShowStatus;
+    }
+    if (rawSetting == "userPrivacySettingAllowPrivateVoiceAndVideoNoteMessages") {
+        usedSetting = UserPrivacySetting::SettingAllowPrivateVoiceAndVideoNoteMessages;
     }
     if (rawSetting == "userPrivacySettingAllowCalls") {
         usedSetting = UserPrivacySetting::SettingAllowCalls;

@@ -215,9 +215,9 @@ Page {
             width: parent.width
             spacing: Theme.paddingSmall
 
-            PageHeader {
-                title: getPageTitle()
-                description: chatTitle ? Emoji.emojify(chatTitle, font.pixelSize) : ""
+            NeonPageHeader {
+                text: getPageTitle()
+                description: chatTitle ? Emoji.emojify(chatTitle, Theme.fontSizeSmall) : ""
             }
         }
 
@@ -242,14 +242,14 @@ Page {
             secondaryText.text: getStatusText(status)
             tertiaryText.text: joined_chat_date > 0 ? qsTr("Joined %1").arg(Functions.getDateTimeTimepoint(joined_chat_date)) : ""
 
-            openMenuOnPressAndHold: isBannedMode()
-            menu: ContextMenu {
-                MenuItem {
-                    text: memberDelegate.inProgress ? qsTr("Unbanning…") : qsTr("Unban")
-                    enabled: !memberDelegate.inProgress
-                    onClicked: {
-                        supergroupMembersPage.triggerUnban(user_id)
-                    }
+            openMenuOnPressAndHold: false
+            onPressAndHold: {
+                if (isBannedMode()) {
+                    membersNeonMenu.open([
+                        { text: memberDelegate.inProgress ? qsTr("Unbanning…") : qsTr("Unban"),
+                          visible: !memberDelegate.inProgress,
+                          callback: function() { supergroupMembersPage.triggerUnban(user_id); } }
+                    ]);
                 }
             }
 
@@ -342,5 +342,9 @@ Page {
 
     Component.onCompleted: {
         refreshMembers()
+    }
+
+    NeonMenuOverlay {
+        id: membersNeonMenu
     }
 }

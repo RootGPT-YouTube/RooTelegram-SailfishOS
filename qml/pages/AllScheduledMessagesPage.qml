@@ -1,5 +1,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
+import "../components"
 
 Page {
     id: page
@@ -113,8 +115,8 @@ Page {
         anchors.fill: parent
         model: page.items
 
-        header: PageHeader {
-            title: qsTr("Scheduled messages")
+        header: NeonPageHeader {
+            text: qsTr("Scheduled messages")
             description: page.items.length > 0
                 ? qsTr("%n scheduled message(s)", "", page.items.length)
                 : (page.loading ? qsTr("Loading…") : qsTr("No scheduled messages"))
@@ -122,8 +124,13 @@ Page {
 
         PullDownMenu {
             MenuItem {
-                text: qsTr("Refresh")
                 onClicked: page.refresh()
+                Label {
+                    anchors.centerIn: parent; text: qsTr("Refresh"); font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
         }
 
@@ -156,16 +163,11 @@ Page {
                 });
             }
 
-            menu: ContextMenu {
-                MenuItem {
-                    text: qsTr("Reschedule")
-                    onClicked: item.rescheduleMe()
-                }
-                MenuItem {
-                    text: qsTr("Delete")
-                    onClicked: item.deleteMe()
-                }
-            }
+            openMenuOnPressAndHold: false
+            onPressAndHold: scheduledNeonMenu.open([
+                { text: qsTr("Reschedule"), callback: function() { item.rescheduleMe(); } },
+                { text: qsTr("Delete"), callback: function() { item.deleteMe(); } }
+            ])
 
             Column {
                 id: contentCol
@@ -199,5 +201,9 @@ Page {
         }
 
         VerticalScrollDecorator {}
+    }
+
+    NeonMenuOverlay {
+        id: scheduledNeonMenu
     }
 }

@@ -128,6 +128,7 @@ Page {
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowPhoneNumber);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowProfilePhoto);
             tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingShowStatus);
+            tdLibWrapper.getUserPrivacySettingRules(TelegramAPI.SettingAllowPrivateVoiceAndVideoNoteMessages);
         }
     }
 
@@ -288,20 +289,20 @@ Page {
     function setPageStatus() {
         switch (overviewPage.connectionState) {
         case TelegramAPI.WaitingForNetwork:
-            pageHeader.title = qsTr("Waiting for network...");
+            pageHeader.connectionTitle = qsTr("Waiting for network...");
             break;
         case TelegramAPI.Connecting:
-            pageHeader.title = qsTr("Connecting to network...");
+            pageHeader.connectionTitle = qsTr("Connecting to network...");
             break;
         case TelegramAPI.ConnectingToProxy:
-            pageHeader.title = qsTr("Connecting to proxy...");
+            pageHeader.connectionTitle = qsTr("Connecting to proxy...");
             break;
         case TelegramAPI.ConnectionReady:
             // Stato "pronto": il titolo testuale resta vuoto, mostra il brand neon (brandLabel)
-            pageHeader.title = "";
+            pageHeader.connectionTitle = "";
             break;
         case TelegramAPI.Updating:
-            pageHeader.title = qsTr("Updating content...");
+            pageHeader.connectionTitle = qsTr("Updating content...");
             break;
         }
     }
@@ -500,36 +501,81 @@ Page {
         visible: !overviewPage.loading
 
         PullDownMenu {
+            // Solo il TESTO al neon bianco (come il nuovo menù): lo sfondo/comportamento
+            // del PullDownMenu resta quello standard Silica. I MenuItem non espongono il
+            // colore del testo, quindi svuotiamo `text` e mettiamo una Label figlia neon.
             MenuItem {
-                text: qsTr("Debug")
                 visible: Debug.enabled
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/DebugPage.qml"))
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Debug")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             MenuItem {
-                text: qsTr("Settings")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/SettingsPage.qml"))
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Settings")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             NeonSeparator {
                 width: parent.width
             }
             MenuItem {
-                text: qsTr("Stories")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"))
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Stories")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             NeonSeparator {
                 width: parent.width
             }
             MenuItem {
-                text: qsTr("New Group")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/CreateSupergroupPage.qml"), { "isChannel": false })
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("New Group")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             MenuItem {
-                text: qsTr("New Channel")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/CreateSupergroupPage.qml"), { "isChannel": true })
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("New Channel")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             MenuItem {
-                text: qsTr("New Chat")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/NewChatPage.qml"))
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("New Chat")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
         }
 
@@ -542,6 +588,24 @@ Page {
             height: Math.max(implicitHeight, brandNeon.visible ? brandNeon.implicitHeight + 2 * Theme.paddingLarge : 0)
             Behavior on opacity { FadeAnimation {} }
 
+            // Testo degli stati di connessione ("Connecting…"): il title nativo del
+            // PageHeader sarebbe allineato a destra; qui lo mostriamo CENTRATO e su
+            // UNA sola riga, coerente col brand. Assegnato da setPageStatus().
+            property string connectionTitle: ""
+            Label {
+                id: connectionLabel
+                anchors.centerIn: parent
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: pageHeader.connectionTitle
+                visible: !brandNeon.visible && text !== ""
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.NoWrap
+                maximumLineCount: 1
+                truncationMode: TruncationMode.Fade
+                font.pixelSize: Theme.fontSizeLarge
+                color: Theme.highlightColor
+            }
+
             // Brand "R∞Telegram" in vero stile tubo al neon (nucleo chiaro brillante + alone
             // magenta che diffonde), mostrato solo a connessione pronta; negli altri stati il
             // titolo testuale del PageHeader mostra "Connecting…", ecc.
@@ -553,8 +617,7 @@ Page {
                 width: implicitWidth
                 height: implicitHeight
                 anchors {
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
+                    horizontalCenter: parent.horizontalCenter
                     verticalCenter: parent.verticalCenter
                 }
 
@@ -610,44 +673,9 @@ Page {
                 }
             }
 
-            Image {
-                id: pageStatus
-                // lente in stile neon: glyph tinta arancione + glow, stesso colore del titolo
-                source: "image://theme/icon-m-search?#ff8a3d"
-                width: Theme.iconSizeMedium
-                height: Theme.iconSizeMedium
-                fillMode: Image.PreserveAspectFit
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: Theme.paddingLarge
-                layer.enabled: true
-                layer.effect: Glow {
-                    color: "#e65000"
-                    radius: 10
-                    samples: 21
-                    spread: 0.5
-                    transparentBorder: true
-                }
-            }
-
+            // Lente rimossa dalla home: il comando "Search..." è ora nel menu del titolo.
             MouseArea {
-                id: searchTapArea
-                anchors.verticalCenter: pageStatus.verticalCenter
-                anchors.horizontalCenter: pageStatus.horizontalCenter
-                width: pageStatus.width + 2 * Theme.paddingLarge
-                height: pageStatus.height + 2 * Theme.paddingLarge
-                onClicked: {
-                    chatSearchField.focus = true;
-                    chatSearchField.opacity = 1.0;
-                    pageHeader.opacity = 0.0;
-                }
-            }
-
-            MouseArea {
-                anchors.left: searchTapArea.right
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
+                anchors.fill: parent
                 onClicked: titleMenuPanel.opened = !titleMenuPanel.opened
             }
         }
@@ -666,13 +694,17 @@ Page {
             anchors.top: pageHeader.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            // stesso arancione della ContextMenu del long-press su "Tutte": tinta SMORZATA (l'arancione
-            // saturo risultava troppo acceso) — scurito e desaturato mescolando un po' di grigio,
-            // con leggera sfumatura verticale come il "vetro" Silica
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.tint(Qt.darker(Theme.highlightBackgroundColor, 1.7), "#3c7a7a7a") }
-                GradientStop { position: 1.0; color: Qt.tint(Qt.darker(Theme.highlightBackgroundColor, 2.05), "#3c7a7a7a") }
-            }
+            anchors.leftMargin: Theme.horizontalPageMargin
+            anchors.rightMargin: Theme.horizontalPageMargin
+            // Card "vetro appannato": bianco semi-opaco (lascia vagamente intravedere
+            // ciò che c'è sotto ma resta leggibile) + bordo arancione sottile + angoli
+            // stondati, coerente con le altre card neon (AccordionItem/NeonButton).
+            radius: Theme.paddingLarge
+            // Alternativa scelta dall'utente: sfondo ARANCIONE, scritte BIANCHE, cornice ROSSA.
+            // Arancione scurito del 50% (#ff6a00 -> #803500): meno acceso.
+            color: Theme.rgba("#803500", 0.82)
+            border.width: 4
+            border.color: "#ff2d2d"
             z: 100
             clip: true
             height: opened ? titleMenuColumn.height + 2 * Theme.paddingMedium : 0
@@ -686,64 +718,56 @@ Page {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                BackgroundItem {
-                    width: parent.width
-                    height: Theme.itemSizeSmall
-                    onClicked: {
-                        titleMenuPanel.opened = false;
-                        overviewPage.markAllChatsAsRead();
-                    }
-                    Label {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Mark all as read")
-                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
-                    }
-                }
-                BackgroundItem {
-                    width: parent.width
-                    height: Theme.itemSizeSmall
-                    onClicked: {
-                        titleMenuPanel.opened = false;
-                        pageStack.push(Qt.resolvedUrl("../pages/ChatFoldersPage.qml"));
-                    }
-                    Label {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Edit folders")
-                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
-                    }
-                }
-                BackgroundItem {
-                    width: parent.width
-                    height: Theme.itemSizeSmall
-                    onClicked: {
-                        titleMenuPanel.opened = false;
-                        pageStack.push(Qt.resolvedUrl("../pages/ReorderPinnedChatsPage.qml"));
-                    }
-                    Label {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Reorder Pinned Chats")
-                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
-                    }
-                }
-                BackgroundItem {
-                    width: parent.width
-                    height: Theme.itemSizeSmall
-                    onClicked: {
-                        titleMenuPanel.opened = false;
-                        pageStack.push(Qt.resolvedUrl("../pages/AllScheduledMessagesPage.qml"));
-                    }
-                    Label {
-                        anchors.fill: parent
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Scheduled messages")
-                        color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                Repeater {
+                    model: [
+                        { "text": qsTr("Search..."), "action": "search" },
+                        { "text": qsTr("Mark all as read"), "action": "markRead" },
+                        { "text": qsTr("Edit folders"), "action": "editFolders" },
+                        { "text": qsTr("Reorder Pinned Chats"), "action": "reorderPinned" },
+                        { "text": qsTr("Scheduled messages"), "action": "scheduled" }
+                    ]
+                    delegate: BackgroundItem {
+                        width: parent.width
+                        height: Theme.itemSizeSmall
+                        onClicked: {
+                            titleMenuPanel.opened = false;
+                            switch (modelData.action) {
+                            case "search":
+                                chatSearchField.focus = true;
+                                chatSearchField.opacity = 1.0;
+                                pageHeader.opacity = 0.0;
+                                break;
+                            case "markRead":
+                                overviewPage.markAllChatsAsRead();
+                                break;
+                            case "editFolders":
+                                pageStack.push(Qt.resolvedUrl("../pages/ChatFoldersPage.qml"));
+                                break;
+                            case "reorderPinned":
+                                pageStack.push(Qt.resolvedUrl("../pages/ReorderPinnedChatsPage.qml"));
+                                break;
+                            case "scheduled":
+                                pageStack.push(Qt.resolvedUrl("../pages/AllScheduledMessagesPage.qml"));
+                                break;
+                            }
+                        }
+                        Label {
+                            anchors.centerIn: parent
+                            width: parent.width
+                            horizontalAlignment: Text.AlignHCenter
+                            text: modelData.text
+                            font.italic: true
+                            // Scritte bianche al neon su sfondo arancione.
+                            color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                            layer.enabled: true
+                            layer.effect: Glow {
+                                color: "#ffffff"
+                                radius: 6
+                                samples: 13
+                                spread: 0.2
+                                transparentBorder: true
+                            }
+                        }
                     }
                 }
             }
@@ -757,6 +781,8 @@ Page {
             width: parent.width
             height: pageHeader.height
             placeholderText: qsTr("Search chat...")
+            // Niente lente: resta solo il placeholder "Cerca la chat...".
+            leftItem: null
             canHide: text === ""
 
             onTextChanged: serverSearchTimer.restart()
@@ -801,7 +827,8 @@ Page {
                 width: Theme.itemSizeLarge
                 contentHeight: Theme.itemSizeExtraLarge
                 highlighted: activeFolderId === 0
-                openMenuOnPressAndHold: true
+                // Long-press su "Tutte" rimosso: le stesse voci sono nel menu del titolo.
+                openMenuOnPressAndHold: false
                 menu: ContextMenu {
                     MenuItem {
                         text: qsTr("Mark all as read")
@@ -1030,6 +1057,8 @@ Page {
 
             delegate: ChatListViewItem {
                 ownUserId: overviewPage.ownUserId
+                activeFolderId: overviewPage.activeFolderId
+                neonMenu: chatNeonMenu
                 isVerified: is_verified
                 onClicked: {
                     // Se è un supergruppo forum, mostra prima la lista dei topic
@@ -1094,6 +1123,11 @@ Page {
         anchors.fill: parent
         Behavior on opacity { FadeAnimation {} }
         opacity: 0
+    }
+
+    // Menù neon a comparsa per il long-press sulle chat (sostituisce il ContextMenu Silica).
+    NeonMenuOverlay {
+        id: chatNeonMenu
     }
 
 }

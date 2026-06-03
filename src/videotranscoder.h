@@ -39,6 +39,14 @@ public:
     // Ritorna { durationS:double, width:int, height:int, rotation:int }.
     Q_INVOKABLE QVariantMap probeVideo(const QString &inputPath);
 
+    // Estrae SINCRONO il primo frame del video come JPEG (per l'anteprima da
+    // allegare all'invio: il server Telegram NON genera thumbnail per i video
+    // caricati senza). ffmpeg autoruota già col tag del contenitore, quindi
+    // outWidth/outHeight vanno passati nelle dimensioni di VISUALIZZAZIONE.
+    // Richiede l'encoder mjpeg + muxer image2 nel binario ffmpeg bundlato.
+    // Ritorna il path del JPEG (nella cache) o stringa vuota se fallisce.
+    Q_INVOKABLE QString extractThumbnail(const QString &inputPath, int outWidth = 0, int outHeight = 0);
+
     // Avvia il transcode per la storia. durationSec serve per calcolare la %.
     // userRotation (0/90/180/270, orari) è la rotazione manuale dell'utente: ffmpeg
     // applica già da solo l'autorotate del tag MP4, qui aggiungiamo SOLO il delta

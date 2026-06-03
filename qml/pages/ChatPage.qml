@@ -434,7 +434,16 @@ Page {
         var customEmojiEntities = getComposerCustomEmojiEntitiesForSend();
         tdLibWrapper.setPendingScheduledSendDate(sendDate ? Math.floor(sendDate) : 0);
         if (newMessageColumn.editMessageId !== "0") {
-            if (customEmojiEntities.length > 0) {
+            if (newMessageColumn.editMessageIsMedia) {
+                // Foto/video/animazione/audio/documento/vocale: si modifica la
+                // didascalia (editMessageCaption), non il testo (editMessageText
+                // fallirebbe su questi tipi).
+                if (customEmojiEntities.length > 0) {
+                    tdLibWrapper.editMessageCaptionWithCustomEmoji(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text, customEmojiEntities);
+                } else {
+                    tdLibWrapper.editMessageCaption(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
+                }
+            } else if (customEmojiEntities.length > 0) {
                 tdLibWrapper.editMessageTextWithCustomEmoji(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text, customEmojiEntities);
             } else {
                 tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
@@ -449,7 +458,45 @@ Page {
                     }
                 }
                 if (attachmentPreviewRow.isVideo) {
-                    tdLibWrapper.sendVideoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    // Sonda i metadati (durata/dimensioni/rotazione) con l'ffmpeg
+                    // software, così TDLib non manda il video con duration=0 e
+                    // dimensioni placeholder (che impediscono l'anteprima).
+                    var vDuration = 0, vWidth = 0, vHeight = 0;
+                    var vThumbPath = "", vThumbW = 0, vThumbH = 0;
+                    var vPath = attachmentPreviewRow.fileProperties.filePath;
+                    if (typeof videoTranscoder !== "undefined" && videoTranscoder) {
+                        var vInfo = videoTranscoder.probeVideo(vPath);
+                        if (vInfo) {
+                            vDuration = Math.round(vInfo.durationS ? vInfo.durationS : 0);
+                            vWidth = vInfo.width ? vInfo.width : 0;
+                            vHeight = vInfo.height ? vInfo.height : 0;
+                            // Per rotazioni di 90/270° le dimensioni visualizzate
+                            // sono invertite rispetto al frame memorizzato.
+                            var vRot = vInfo.rotation ? vInfo.rotation : 0;
+                            if (vRot === 90 || vRot === 270) {
+                                var vTmp = vWidth; vWidth = vHeight; vHeight = vTmp;
+                            }
+                        }
+                        // Thumbnail (il server non la genera): estrai il 1° frame
+                        // come JPEG riscalato al lato lungo max 320px (formato Telegram).
+                        if (vWidth > 0 && vHeight > 0) {
+                            var maxThumb = 320;
+                            if (vWidth >= vHeight) {
+                                vThumbW = Math.min(maxThumb, vWidth);
+                                vThumbH = Math.max(1, Math.round(vHeight * vThumbW / vWidth));
+                            } else {
+                                vThumbH = Math.min(maxThumb, vHeight);
+                                vThumbW = Math.max(1, Math.round(vWidth * vThumbH / vHeight));
+                            }
+                            // scale di ffmpeg richiede dimensioni pari per alcuni encoder;
+                            // mjpeg le accetta dispari, ma arrotondiamo a pari per sicurezza.
+                            vThumbW -= (vThumbW % 2); vThumbH -= (vThumbH % 2);
+                            if (vThumbW < 2) vThumbW = 2;
+                            if (vThumbH < 2) vThumbH = 2;
+                            vThumbPath = videoTranscoder.extractThumbnail(vPath, vThumbW, vThumbH);
+                        }
+                    }
+                    tdLibWrapper.sendVideoMessage(chatInformation.id, vPath, newMessageTextField.text, newMessageColumn.replyToMessageId, vDuration, vWidth, vHeight, vThumbPath, vThumbW, vThumbH);
                 }
                 if (attachmentPreviewRow.isDocument) {
                     tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
@@ -481,6 +528,7 @@ Page {
         newMessageColumn.quickEmojiPickerVisible = false;
         newMessageColumn.quickPremiumEmojiPickerVisible = false;
         newMessageColumn.customEmojiEntities = [];
+        newMessageColumn.activeFormatMarkers = [];
         newMessageColumn.previousComposerText = newMessageTextField.text || "";
     }
 
@@ -694,13 +742,36 @@ Page {
 
     function beginMessageEdit(messageId, message) {
         newMessageColumn.editMessageId = messageId;
+        // I media con didascalia (foto/video/animazione/audio/documento/vocale)
+        // si modificano via editMessageCaption: editMessageText fallirebbe.
+        var editContentType = (message && message.content) ? message.content["@type"] : "";
+        newMessageColumn.editMessageIsMedia =
+            (["messagePhoto", "messageVideo", "messageAnimation",
+              "messageAudio", "messageDocument", "messageVoiceNote"].indexOf(editContentType) !== -1);
         newMessageInReplyToRow.inReplyToMessage = null;
-        var editText = Functions.getMessageText(message, false, chatPage.myUserId, true);
+        newMessageColumn.activeFormatMarkers = [];
+        // Il testo formattato sta in content.text (messaggi di testo) oppure in
+        // content.caption (media).
+        var editFormattedText = (message && message.content) ? (message.content.text || message.content.caption) : null;
+        var editText;
+        if (editFormattedText && Functions.formattedTextHasFormatting(editFormattedText)) {
+            // Modifica che PRESERVA la formattazione: ricostruisco i marcatori
+            // markdown (** __ ...) dalle entità, così non si perde grassetto/corsivo.
+            editText = Functions.formattedTextToComposerMarkdown(editFormattedText);
+        } else {
+            editText = Functions.getMessageText(message, false, chatPage.myUserId, true);
+        }
         newMessageColumn.suspendCustomEmojiTracking = true;
         newMessageTextField.text = editText;
         newMessageTextField.cursorPosition = editText.length;
         newMessageColumn.suspendCustomEmojiTracking = false;
-        newMessageColumn.customEmojiEntities = extractCustomEmojiEntitiesFromFormattedText(message && message.content ? message.content.text : null);
+        // Custom emoji tracciati solo quando NON c'è formattazione (con i marcatori
+        // gli offset si sfaserebbero): per i messaggi formattati i custom degradano.
+        if (editFormattedText && Functions.formattedTextHasFormatting(editFormattedText)) {
+            newMessageColumn.customEmojiEntities = [];
+        } else {
+            newMessageColumn.customEmojiEntities = extractCustomEmojiEntitiesFromFormattedText(editFormattedText);
+        }
         newMessageColumn.previousComposerText = newMessageTextField.text || "";
         newMessageTextField.focus = true;
         controlSendButton();
@@ -728,6 +799,57 @@ Page {
              .replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
              .replace(/&amp;/g, "&");
         return s;
+    }
+
+    // Toggle di un marcatore di formattazione (B/I/U/S/code/spoiler).
+    // - Con testo SELEZIONATO: avvolge subito la selezione (comportamento classico),
+    //   senza entrare in "modalità digitazione".
+    // - Senza selezione: ATTIVA inserendo la coppia di marcatori col cursore in mezzo
+    //   (quel che scrivi finisce dentro), il pulsante resta premuto; ri-premendo
+    //   DISATTIVA saltando oltre il marcatore di chiusura. Più formati insieme si
+    //   annidano (LIFO): B poi I → **__testo__**.
+    function toggleFormat(marker) {
+        var tf = newMessageTextField;
+        var selStart = Number(tf.selectionStart);
+        var selEnd = Number(tf.selectionEnd);
+        if (selStart !== selEnd) {
+            applyInlineFormatting(marker, marker);
+            return;
+        }
+        var cur = tf.text || "";
+        var pos = Number(tf.cursorPosition);
+        if (isNaN(pos) || pos < 0 || pos > cur.length) {
+            pos = cur.length;
+        }
+        var markers = newMessageColumn.activeFormatMarkers.slice();
+        var idx = markers.indexOf(marker);
+        if (idx === -1) {
+            // Attiva: inserisci coppia, cursore tra i due marcatori.
+            markers.push(marker);
+            newMessageColumn.activeFormatMarkers = markers;
+            tf.text = cur.substring(0, pos) + marker + marker + cur.substring(pos);
+            tf.cursorPosition = pos + marker.length;
+            lostFocusTimer.pendingCursorPosition = pos + marker.length;
+        } else {
+            // Disattiva: l'utente vuole tornare a scrivere SENZA formattazione →
+            // azzero TUTTI i toggle e porto il cursore in FONDO al testo, così può
+            // riprendere a scrivere subito. Se la coppia è vuota (niente digitato in
+            // mezzo) la rimuovo per non lasciare marcatori orfani.
+            var before = cur.substr(Math.max(0, pos - marker.length), marker.length);
+            var after = cur.substr(pos, marker.length);
+            if (before === marker && after === marker) {
+                tf.text = cur.substring(0, pos - marker.length) + cur.substring(pos + marker.length);
+            }
+            newMessageColumn.activeFormatMarkers = [];
+            tf.cursorPosition = (tf.text || "").length;
+            lostFocusTimer.pendingCursorPosition = (tf.text || "").length;
+        }
+        // lostFocusTimer (refocus differito) mantiene la tastiera in vista; un
+        // forceActiveFocus immediato qui la farebbe invece sparire. La posizione
+        // del cursore viene riapplicata DENTRO il timer (dopo il refocus), altrimenti
+        // forceActiveFocus la riporterebbe dov'era prima.
+        lostFocusTimer.start();
+        controlSendButton();
     }
 
     function applyInlineFormatting(prefix, suffix) {
@@ -1207,6 +1329,11 @@ Page {
             if (!chatPage.isInitialized || modelMismatch) {
                 chatModel.messageThreadId = chatPage.messageThreadId;
                 chatModel.topicLastMessageId = chatPage.topicLastMessageId;
+                // Deep-link da notifica (vai-a-messaggio): ancora il caricamento
+                // iniziale al messaggio target così non carica le centinaia di
+                // messaggi intermedi (evita il freeze su cold-start).
+                chatModel.initialMessageId = (chatPage.messageIdToShow && !chatPage.messageThreadId)
+                    ? Number(chatPage.messageIdToShow) : 0;
                 chatModel.initialize(chatInformation);
             }
             if (!chatPage.isInitialized) {
@@ -1310,8 +1437,10 @@ Page {
             }
             Debug.log("Received message ID: " + messageId + ", message ID to show: " + chatPage.messageIdToShow)
             if (chatPage.messageIdToShow && chatPage.messageIdToShow === String(messageId)) {
-                messageOverlayLoader.overlayMessage = message;
-                messageOverlayLoader.active = true;
+                // Deep-link da notifica: scrolla al messaggio nella chat invece di
+                // aprirlo in overlay a tutto schermo.
+                chatPage.showMessage(String(messageId), true);
+                chatPage.messageIdToShow = "";
             }
         }
         onPinnedMessagesReceived: {
@@ -1479,8 +1608,17 @@ Page {
         interval: 200
         running: false
         repeat: false
+        // Posizione cursore da applicare DOPO il refocus (-1 = non toccare). Serve
+        // ai toggle di formattazione: forceActiveFocus ripristinerebbe il cursore
+        // alla posizione precedente, quindi lo riposizioniamo qui, per ultimo.
+        property int pendingCursorPosition: -1
         onTriggered: {
             newMessageTextField.forceActiveFocus();
+            if (pendingCursorPosition >= 0) {
+                var len = (newMessageTextField.text || "").length;
+                newMessageTextField.cursorPosition = Math.min(pendingCursorPosition, len);
+                pendingCursorPosition = -1;
+            }
         }
     }
 
@@ -2105,7 +2243,13 @@ Page {
                                     messageOverlayLoader.active = true;
                                 }
                                 if (chatPage.messageIdToShow) {
-                                    tdLibWrapper.getMessage(chatPage.chatInformation.id, chatPage.messageIdToShow);
+                                    // Tap su notifica (messaggio ricevuto o reaction sui
+                                    // propri messaggi): porta in vista il messaggio NELLA
+                                    // chat (scroll + highlight), non in overlay a tutto
+                                    // schermo. showMessage carica la cronologia attorno al
+                                    // messaggio se non è ancora nel modello.
+                                    chatPage.showMessage(String(chatPage.messageIdToShow), true);
+                                    chatPage.messageIdToShow = "";
                                 }
                             }
                         }
@@ -2347,6 +2491,7 @@ Page {
                                 id: messageListViewItemComponent
                                 MessageListViewItem {
                                     precalculatedValues: chatView.precalculatedValues
+                                    neonMenu: messageNeonMenu
                                     chatId: chatModel.chatId
                                     myMessage: model.display
                                     messageId: model.message_id
@@ -2617,6 +2762,13 @@ Page {
                     readonly property bool isNeeded: !chatPage.isSelecting && chatPage.canSendMessages
                     property string replyToMessageId: "0";
                     property string editMessageId: "0";
+                    // true se il messaggio in modifica è un media con didascalia
+                    // (foto/video/...): su send si usa editMessageCaption.
+                    property bool editMessageIsMedia: false;
+                    // Marcatori di formattazione attivi (toggle B/I/U/S/code/spoiler):
+                    // stack LIFO dei marker (es. ["**","__"]) inseriti come coppia col
+                    // cursore in mezzo; ciò che si digita finisce dentro la formattazione.
+                    property var activeFormatMarkers: [];
                     property bool quickEmojiPickerVisible: false;
                     property bool quickPremiumEmojiPickerVisible: false;
                     property bool quickStickerPickerVisible: false;
@@ -3694,11 +3846,24 @@ Page {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
+                                // Vetro neon coerente con i pulsanti formato.
+                                color: Theme.rgba("#ffffff", 0.06)
+                                border.width: 1
+                                border.color: Theme.rgba("#ff8a3d", 0.4)
+                            }
+                            // Alone neon arancione dietro l'icona mappamondo.
+                            Glow {
+                                anchors.fill: translateGlobeIcon
+                                source: translateGlobeIcon
+                                radius: 8
+                                samples: 17
+                                color: "#ff8a3d"
+                                z: -1
                             }
                             Image {
+                                id: translateGlobeIcon
                                 anchors.centerIn: parent
-                                source: "image://theme/icon-m-website?" + Theme.primaryColor
+                                source: "image://theme/icon-m-website?#ff9a3d"
                                 width: parent.width * 0.62
                                 height: width
                                 sourceSize.width: width
@@ -3728,138 +3893,55 @@ Page {
                             layoutDirection: Qt.RightToLeft
                             spacing: newMessageColumn.compactAttachmentSpacing
 
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "B"
-                                font.bold: true
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("**", "**");
-                                }
-                            }
-                        }
+                        Repeater {
+                            model: [
+                                { "label": "B",   "marker": "**", "style": "bold" },
+                                { "label": "I",   "marker": "__", "style": "italic" },
+                                { "label": "U",   "marker": "++", "style": "underline" },
+                                { "label": "S",   "marker": "~~", "style": "strike" },
+                                { "label": "{ }", "marker": "`",  "style": "mono" },
+                                { "label": "||",  "marker": "||", "style": "spoiler" }
+                            ]
+                            delegate: Item {
+                                id: fmtBtn
+                                width: newMessageColumn.compactAttachmentButtonSize
+                                height: width
+                                // Toggle attivo = marcatore presente nello stack.
+                                property bool active: newMessageColumn.activeFormatMarkers.indexOf(modelData.marker) !== -1
 
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "I"
-                                font.italic: true
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("__", "__");
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: width / 2
+                                    // Vetro neon: più acceso quando il formato è attivo (premuto).
+                                    color: Theme.rgba("#ffffff", fmtBtn.active ? 0.18 : 0.06)
+                                    border.width: fmtBtn.active ? 2 : 1
+                                    border.color: Theme.rgba("#ff8a3d", fmtBtn.active ? 0.9 : 0.4)
                                 }
-                            }
-                        }
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "U"
-                                font.underline: true
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("++", "++");
+                                // Alone neon GEMELLO dietro l'etichetta (pattern corretto:
+                                // sorgente nitida + Glow dietro z:-1, non layer.effect).
+                                Glow {
+                                    anchors.fill: fmtLabel
+                                    source: fmtLabel
+                                    radius: 8
+                                    samples: 17
+                                    color: "#ff8a3d"
+                                    visible: fmtBtn.active
+                                    z: -1
                                 }
-                            }
-                        }
-
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "S"
-                                font.strikeout: true
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("~~", "~~");
+                                Label {
+                                    id: fmtLabel
+                                    anchors.centerIn: parent
+                                    text: modelData.label
+                                    font.bold: modelData.style === "bold" || modelData.style === "spoiler"
+                                    font.italic: modelData.style === "italic"
+                                    font.underline: modelData.style === "underline"
+                                    font.strikeout: modelData.style === "strike"
+                                    font.pixelSize: modelData.style === "mono" ? Theme.fontSizeTiny : Theme.fontSizeExtraSmall
+                                    color: fmtBtn.active ? "#fff3e6" : Theme.primaryColor
                                 }
-                            }
-                        }
-
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "{ }"
-                                font.pixelSize: Theme.fontSizeTiny
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("`", "`");
-                                }
-                            }
-                        }
-
-                        Item {
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
-                            Rectangle {
-                                anchors.fill: parent
-                                radius: width / 2
-                                color: Theme.rgba(Theme.primaryColor, 0.16)
-                            }
-                            Label {
-                                anchors.centerIn: parent
-                                text: "||"
-                                font.bold: true
-                                font.pixelSize: Theme.fontSizeExtraSmall
-                                color: Theme.primaryColor
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    applyInlineFormatting("||", "||");
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: chatPage.toggleFormat(modelData.marker)
                                 }
                             }
                         }
@@ -4232,5 +4314,10 @@ Page {
         anchors.bottom: parent.bottom
         text: qsTr("Double-tap on a message to choose a reaction")
         visible: false
+    }
+
+    // Menù neon a comparsa per il long-press sui messaggi (sostituisce il ContextMenu Silica).
+    NeonMenuOverlay {
+        id: messageNeonMenu
     }
 }

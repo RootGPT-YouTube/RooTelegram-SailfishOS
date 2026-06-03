@@ -8,7 +8,7 @@ Name:       harbour-rootelegram
 # >> macros
 # << macros
 %define __provides_exclude_from ^%{_datadir}/.*$
-%define __requires_exclude ^libtdjson.*$
+%define __requires_exclude ^(libtdjson|libavcodec|libavutil|libswresample|libvpx|libopus|libvorbisenc|libvorbis|libtheoradec|libtheoraenc|libwebpmux|libwebp|libopenjp2|libspeex|libogg|libsharpyuv)\..*$
 %define _binary_payload w6.xzdio
 
 Summary:    RooTelegram is a Telegram client for Sailfish OS

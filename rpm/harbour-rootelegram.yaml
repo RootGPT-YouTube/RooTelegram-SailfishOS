@@ -35,7 +35,7 @@ PkgConfigBR:
 # NB: spectacle has a bug where it will remove custom "#<< macros" lines, so define them here:
 Macros:
   - '__provides_exclude_from;^%{_datadir}/.*$'
-  - '__requires_exclude;^libtdjson.*$'
+  - '__requires_exclude;^(libtdjson|libavcodec|libavutil|libswresample|libvpx|libopus|libvorbisenc|libvorbis|libtheoradec|libtheoraenc|libwebpmux|libwebp|libopenjp2|libspeex|libogg|libsharpyuv)\..*$'
   - '_binary_payload;w6.xzdio'
 
 # Build dependencies without a pkgconfig setup can be listed here

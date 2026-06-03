@@ -72,6 +72,46 @@ RECIPE        : scripts/build-ffmpeg.sh
 LICENSE TEXT  : ffmpeg/LICENSE
 
 --------------------------------------------------------------------------------
+BUNDLED RUNTIME LIBRARIES (SailfishOS 5.0 + 5.1 compatibility)
+--------------------------------------------------------------------------------
+For a single RPM that installs on both SailfishOS 5.0 and 5.1, RooTelegram ships
+its own copies of the multimedia shared libraries it links against, because some
+of them have version-bumped SONAMEs across SFOS releases (e.g. libvpx.so.9 on 5.0
+vs libvpx.so.12 on 5.1). The copies are taken from the SailfishOS 5.0 system,
+installed under /usr/share/harbour-rootelegram/lib/ and loaded via the binary's
+RPATH. They are dynamically linked (each is a separate .so and can be replaced),
+which satisfies the LGPL relinking requirement. Full license texts are shipped in
+/usr/share/harbour-rootelegram/licenses/bundled/ (source: bundledlibs/licenses/).
+
+COMPONENT : FFmpeg shared libraries — libavcodec.so.59, libavutil.so.57,
+            libswresample.so.4
+LICENSE   : LGPL v2.1 or later (this system build does NOT link libx264, so it is
+            LGPL, not GPL)
+COPYRIGHT : The FFmpeg developers
+SOURCE    : https://ffmpeg.org
+
+COMPONENT : libvpx (VP8/VP9)        LICENSE: BSD-3-Clause
+COPYRIGHT : Copyright (c) The WebM Project authors (Google)
+SOURCE    : https://chromium.googlesource.com/webm/libvpx
+
+COMPONENT : libopus               LICENSE: BSD-3-Clause
+COPYRIGHT : Copyright (c) Xiph.Org, Skype Limited, Octasic, Jean-Marc Valin et al.
+SOURCE    : https://opus-codec.org
+
+COMPONENT : libogg, libvorbis, libvorbisenc, libtheoradec, libtheoraenc, libspeex
+LICENSE   : BSD-3-Clause
+COPYRIGHT : Copyright (c) The Xiph.Org Foundation
+SOURCE    : https://xiph.org
+
+COMPONENT : libwebp, libwebpmux, libsharpyuv   LICENSE: BSD-3-Clause
+COPYRIGHT : Copyright (c) Google Inc.
+SOURCE    : https://chromium.googlesource.com/webm/libwebp
+
+COMPONENT : libopenjp2 (OpenJPEG)   LICENSE: BSD-2-Clause
+COPYRIGHT : Copyright (c) UCLouvain and the OpenJPEG contributors
+SOURCE    : https://github.com/uclouvain/openjpeg
+
+--------------------------------------------------------------------------------
 COMPONENT     : Twemoji (emoji graphics, jdecked fork)
 LICENSE       : MIT License (code) and CC-BY 4.0 (graphics)
 COPYRIGHT     : Copyright the Twemoji contributors

@@ -337,35 +337,20 @@ ChatInformationTabItemBase {
             property bool canPromoteCurrent: tabBase.canPromoteTarget(memberEntry)
             property bool canRemoveCurrent: tabBase.canRemoveTarget(memberEntry)
             property bool canDemoteCurrent: tabBase.canDemoteTarget(memberEntry)
-            openMenuOnPressAndHold: chatInformationPage.isSuperGroup && !chatInformationPage.isChannel && (canPromoteCurrent || canRemoveCurrent || canDemoteCurrent)
-            menu: ContextMenu {
-                MenuItem {
-                    visible: memberDelegate.canPromoteCurrent
-                    text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Promote to Admin")
-                    enabled: !memberDelegate.actionInProgress
-                    onClicked: {
-                        tabBase.promoteMemberToAdmin(memberDelegate.memberUserId)
-                    }
-                }
-                MenuItem {
-                    visible: memberDelegate.canDemoteCurrent
-                    text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove Admin")
-                    enabled: !memberDelegate.actionInProgress
-                    onClicked: {
-                        Remorse.itemAction(memberDelegate, qsTr("Removing Admin"), function() {
-                            tabBase.demoteAdminToMember(memberDelegate.memberUserId)
-                        })
-                    }
-                }
-                MenuItem {
-                    visible: memberDelegate.canRemoveCurrent
-                    text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove from group")
-                    enabled: !memberDelegate.actionInProgress
-                    onClicked: {
-                        Remorse.itemAction(memberDelegate, qsTr("Removing user"), function() {
-                            tabBase.removeMemberFromGroup(memberDelegate.memberUserId)
-                        })
-                    }
+            openMenuOnPressAndHold: false
+            onPressAndHold: {
+                if (chatInformationPage.isSuperGroup && !chatInformationPage.isChannel && (canPromoteCurrent || canRemoveCurrent || canDemoteCurrent)) {
+                    membersTabNeonMenu.open([
+                        { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Promote to Admin"), visible: memberDelegate.canPromoteCurrent, callback: function() {
+                            tabBase.promoteMemberToAdmin(memberDelegate.memberUserId);
+                        }},
+                        { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove Admin"), visible: memberDelegate.canDemoteCurrent, callback: function() {
+                            Remorse.itemAction(memberDelegate, qsTr("Removing Admin"), function() { tabBase.demoteAdminToMember(memberDelegate.memberUserId); });
+                        }},
+                        { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove from group"), visible: memberDelegate.canRemoveCurrent, callback: function() {
+                            Remorse.itemAction(memberDelegate, qsTr("Removing user"), function() { tabBase.removeMemberFromGroup(memberDelegate.memberUserId); });
+                        }}
+                    ]);
                 }
             }
 
@@ -591,6 +576,10 @@ ChatInformationTabItemBase {
         } else if(chatInformationPage.isSuperGroup) {
             fetchMoreMembersTimer.start();
         }
+    }
+
+    NeonMenuOverlay {
+        id: membersTabNeonMenu
     }
 
 }

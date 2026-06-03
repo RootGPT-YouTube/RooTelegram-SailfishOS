@@ -10,8 +10,29 @@ import sys
 
 
 IT = {
+    # Attribuzione librerie multimediali bundlate (compat 5.0/5.1)
+    "For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg's multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.": "Per la compatibilità con SailfishOS 5.0/5.1 questo pacchetto include anche le dipendenze multimediali di FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) e OpenJPEG (BSD-2). Copyright dei rispettivi autori. I testi completi delle licenze sono in /usr/share/harbour-rootelegram/licenses/.",
     # Privacy chiamate (2.0 #1): rinominato da "Allow voice calls"
     "Allow calls": "Consenti chiamate",
+    "Search...": "Cerca...",
+    "Play/Pause": "Play/Pausa",
+    "Transcribe": "Trascrivi",
+    "Voice and video messages": "Messaggi vocali e video",
+    "Who can send you voice messages and video notes (round videos). Premium feature.": "Chi può inviarti messaggi vocali e video circolari (video note). Funzione Premium.",
+    "This is a Premium-only feature.": "Questa è una funzione solo per utenti Premium.",
+    "Only selected": "Solo i selezionati",
+    "Everybody except": "Tutti tranne",
+    "Choose who can send you voice messages and video notes.": "Scegli chi può inviarti messaggi vocali e video circolari.",
+    "Choose who cannot send you voice messages and video notes.": "Scegli chi NON può inviarti messaggi vocali e video circolari.",
+    "Privacy updated": "Privacy aggiornata",
+    "(%n selected)": ("(%n selezionato)", "(%n selezionati)"),
+    "Add to folder: %1": "Aggiungi alla cartella: %1",
+    "Added to folder: %1": "Aggiunto alla cartella: %1",
+    "Add to folder...": "Aggiungi alla cartella...",
+    "Add to folder": "Aggiungi alla cartella",
+    "No folders": "Nessuna cartella",
+    "Remove from folder: %1": "Rimuovi dalla cartella: %1",
+    "Removed from folder: %1": "Rimosso dalla cartella: %1",
     # Settings / generali
     "Recent": "Recenti",
     "Sticker set": "Set di sticker",
@@ -139,8 +160,29 @@ IT = {
 
 
 DE = {
+    # Zuordnung der gebündelten Multimedia-Bibliotheken (Kompat. 5.0/5.1)
+    "For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg's multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.": "Für die Kompatibilität mit SailfishOS 5.0/5.1 bündelt dieses Paket auch die Multimedia-Abhängigkeiten von FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) und OpenJPEG (BSD-2). Copyright der jeweiligen Autoren. Die vollständigen Lizenztexte liegen in /usr/share/harbour-rootelegram/licenses/.",
     # Anrufe-Datenschutz (2.0 #1): umbenannt von "Allow voice calls"
     "Allow calls": "Anrufe erlauben",
+    "Search...": "Suchen...",
+    "Play/Pause": "Wiedergabe/Pause",
+    "Transcribe": "Transkribieren",
+    "Voice and video messages": "Sprach- und Videonachrichten",
+    "Who can send you voice messages and video notes (round videos). Premium feature.": "Wer dir Sprachnachrichten und Videonachrichten (runde Videos) senden kann. Premium-Funktion.",
+    "This is a Premium-only feature.": "Dies ist eine reine Premium-Funktion.",
+    "Only selected": "Nur ausgewählte",
+    "Everybody except": "Alle außer",
+    "Choose who can send you voice messages and video notes.": "Wähle, wer dir Sprach- und Videonachrichten senden kann.",
+    "Choose who cannot send you voice messages and video notes.": "Wähle, wer dir keine Sprach- und Videonachrichten senden kann.",
+    "Privacy updated": "Datenschutz aktualisiert",
+    "(%n selected)": ("(%n ausgewählt)", "(%n ausgewählt)"),
+    "Add to folder: %1": "Zum Ordner hinzufügen: %1",
+    "Added to folder: %1": "Zum Ordner hinzugefügt: %1",
+    "Add to folder...": "Zum Ordner hinzufügen...",
+    "Add to folder": "Zum Ordner hinzufügen",
+    "No folders": "Keine Ordner",
+    "Remove from folder: %1": "Aus Ordner entfernen: %1",
+    "Removed from folder: %1": "Aus Ordner entfernt: %1",
     # Settings / generali — DE ha già "Recent/Sticker set/Yes/No/..." tradotti.
     "Refresh": "Aktualisieren",
     "Unknown chat": "Unbekannter Chat",
@@ -269,7 +311,17 @@ UNFINISHED_RE = re.compile(r'<translation type="unfinished">.*?</translation>', 
 def xml_escape(s):
     return (s.replace("&", "&amp;")
              .replace("<", "&lt;")
-             .replace(">", "&gt;"))
+             .replace(">", "&gt;")
+             .replace("'", "&apos;")
+             .replace('"', "&quot;"))
+
+
+def xml_unescape(s):
+    return (s.replace("&apos;", "'")
+             .replace("&quot;", '"')
+             .replace("&lt;", "<")
+             .replace("&gt;", ">")
+             .replace("&amp;", "&"))
 
 
 def patch_ts(path: Path, translations: dict):
@@ -284,7 +336,7 @@ def patch_ts(path: Path, translations: dict):
         src_m = SOURCE_RE.search(body)
         if not src_m:
             return body
-        src = src_m.group(1)
+        src = xml_unescape(src_m.group(1))
         if 'type="unfinished"' not in body:
             return body
         if src not in translations:

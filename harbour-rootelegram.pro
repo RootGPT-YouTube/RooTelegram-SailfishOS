@@ -234,6 +234,22 @@ exists($$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin) {
     INSTALLS += ffmpeglicense
 }
 
+# COMPATIBILITÀ SFOS 5.0 + 5.1: il binario linka libavcodec/libavutil/libvpx di
+# SISTEMA, che su 5.1 hanno SONAME diversi (es. libvpx.so.9 -> .so.12). Per un RPM
+# unico spediamo NOSTRE copie (dello stack ffmpeg 5.0) in /usr/share/<app>/lib e le
+# carichiamo via il DT_RPATH del binario (transitivo). Lo spec esclude i requisiti
+# di sistema su questi SONAME. Solo per le arch che hanno la cartella pronta.
+exists($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}) {
+    bundledlibs.files = $$files($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}/*.so.*)
+    bundledlibs.path = /usr/share/$${TARGET}/lib
+    INSTALLS += bundledlibs
+
+    # Licenze delle librerie bundlate (LGPL ffmpeg + BSD codec): spedite con l'RPM.
+    bundledlicenses.files = $$files($$PWD/bundledlibs/licenses/*)
+    bundledlicenses.path = /usr/share/$${TARGET}/licenses/bundled
+    INSTALLS += bundledlicenses
+}
+
 # Conformità licenze: il testo GPLv3 dell'app e il NOTICE con tutte le
 # dipendenze (GPL/LGPL/MIT) devono essere raggiungibili da chi riceve l'RPM.
 licenses.files = $$PWD/LICENSE $$PWD/NOTICE

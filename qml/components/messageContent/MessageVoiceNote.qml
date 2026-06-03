@@ -19,6 +19,7 @@
 import QtQuick 2.6
 
 MessageAudio {
+    isVoiceNote: true
     fileInformation: rawMessage.content.voice_note.voice
     primaryText: qsTr("Voice Note")
     secondaryText: ""

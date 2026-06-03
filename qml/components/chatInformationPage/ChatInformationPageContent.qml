@@ -817,6 +817,10 @@ SilicaFlickable {
     PageHeader {
         id: headerItem
         z: 5
+        // Titolo info (gruppo/canale/utente/chat) in arancio neon-brand. NB: questo
+        // header è speciale (avatar che si rimpicciolisce allo scroll), quindi non si
+        // può usare NeonPageHeader; il glow non è aggiungibile sul title interno.
+        palette.highlightColor: "#ff9a3d"
         Item {
             id: imageContainer
             property bool hasImage: typeof chatInformationPage.chatInformation.photo !== "undefined"

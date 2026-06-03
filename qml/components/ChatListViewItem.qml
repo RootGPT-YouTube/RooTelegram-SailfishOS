@@ -14,8 +14,68 @@ PhotoTextsListItem {
         highlighted: listItem.highlighted && !listItem.menuOpen
     }
     property int ownUserId
+    // Cartella attualmente visualizzata (0 = "Tutte"): se !=0 mostriamo la voce
+    // "Rimuovi dalla cartella" nel menu long-press.
+    property int activeFolderId: 0
+    // Menù neon a comparsa (NeonMenuOverlay) della pagina: se impostato, il long-press
+    // apre quello (stile arancio/rosso) invece del ContextMenu Silica.
+    property var neonMenu: null
     property bool showDraft: !!draft_message_text && draft_message_date > last_message_date
     property string previewText: showDraft ? draft_message_text : last_message_text
+
+    function folderNameById(fid) {
+        if (!chatFoldersModel) return "";
+        for (var i = 0; i < chatFoldersModel.count; i++) {
+            if (chatFoldersModel.getId(i) === fid) return chatFoldersModel.getName(i);
+        }
+        return "";
+    }
+
+    // Azioni del menù long-press (per il NeonMenuOverlay): array di {text, visible, callback}.
+    function buildChatMenuActions() {
+        var anyUnread = unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0;
+        var actions = [];
+        actions.push({ text: qsTr("Mark all messages as read"), visible: anyUnread, callback: function() {
+            tdLibWrapper.viewMessage(chat_id, display.last_message.id, true);
+            tdLibWrapper.readAllChatMentions(chat_id);
+            tdLibWrapper.readAllChatReactions(chat_id);
+            tdLibWrapper.toggleChatIsMarkedAsUnread(chat_id, false);
+        }});
+        actions.push({ text: is_marked_as_unread ? qsTr("Mark chat as read") : qsTr("Mark chat as unread"), visible: !anyUnread, callback: function() {
+            tdLibWrapper.toggleChatIsMarkedAsUnread(chat_id, !is_marked_as_unread);
+        }});
+        actions.push({ text: is_pinned ? qsTr("Unpin chat") : qsTr("Pin chat"), callback: function() {
+            tdLibWrapper.toggleChatIsPinned(chat_id, !is_pinned);
+        }});
+        actions.push({ text: display.notification_settings.mute_for > 0 ? qsTr("Unmute chat") : qsTr("Mute chat"), visible: chat_id != listItem.ownUserId, callback: function() {
+            var ns = display.notification_settings;
+            ns.mute_for = ns.mute_for > 0 ? 0 : 6666666;
+            ns.use_default_mute_for = false;
+            tdLibWrapper.setChatNotificationSettings(chat_id, ns);
+        }});
+        actions.push({ text: qsTr("Add to folder..."), visible: !!(chatFoldersModel && chatFoldersModel.count > 0), callback: function() {
+            pageStack.push(Qt.resolvedUrl("../pages/AddToFolderPage.qml"), { "chatId": chat_id });
+        }});
+        actions.push({ text: qsTr("Remove from folder: %1").arg(listItem.folderNameById(listItem.activeFolderId)), visible: listItem.activeFolderId !== 0, callback: function() {
+            var fn = listItem.folderNameById(listItem.activeFolderId);
+            tdLibWrapper.removeChatFromFolder(chat_id, listItem.activeFolderId);
+            appNotification.show(qsTr("Removed from folder: %1").arg(fn));
+        }});
+        actions.push({ text: model.display.type['@type'] === "chatTypePrivate" ? qsTr("User Info") : qsTr("Group Info"), callback: function() {
+            if (pageStack.depth > 2) {
+                pageStack.pop(pageStack.find(function(page){ return(page._depth === 0) }), PageStackAction.Immediate);
+            }
+            pageStack.push(Qt.resolvedUrl("../pages/ChatInformationPage.qml"), { "chatInformation" : display });
+        }});
+        actions.push({ text: qsTr("Delete Chat"), visible: model.display.type['@type'] === "chatTypePrivate", callback: function() {
+            var chatIdToDelete = chat_id;
+            var revoke = !!model.display.can_be_deleted_for_all_users;
+            Remorse.itemAction(listItem, qsTr("Deleting chat"), function() {
+                tdLibWrapper.sendRequest({ "@type": "deleteChatHistory", "chat_id": chatIdToDelete, "remove_from_chat_list": true, "revoke": revoke });
+            });
+        }});
+        return actions;
+    }
 
     // chat title
     primaryText.text: title ? Emoji.emojify(title, Theme.fontSizeMedium) : qsTr("Unknown")
@@ -41,7 +101,11 @@ PhotoTextsListItem {
     openMenuOnPressAndHold: true//chat_id != overviewPage.ownUserId
 
     onPressAndHold: {
-        contextMenuLoader.active = true;
+        if (neonMenu) {
+            neonMenu.open(buildChatMenuActions());
+        } else {
+            contextMenuLoader.active = true;
+        }
     }
 
     Loader {
@@ -80,6 +144,27 @@ PhotoTextsListItem {
                         tdLibWrapper.toggleChatIsPinned(chat_id, !is_pinned);
                     }
                     text: is_pinned ? qsTr("Unpin chat") : qsTr("Pin chat")
+                }
+
+                // Voce singola: apre una pagina con l'elenco delle cartelle (evita un
+                // menu lunghissimo quando le cartelle sono molte).
+                MenuItem {
+                    visible: chatFoldersModel && chatFoldersModel.count > 0
+                    text: qsTr("Add to folder...")
+                    onClicked: {
+                        pageStack.push(Qt.resolvedUrl("../pages/AddToFolderPage.qml"), { "chatId": chat_id });
+                    }
+                }
+
+                // Visibile solo dentro una cartella: rimuove la chat dalla cartella attiva.
+                MenuItem {
+                    visible: listItem.activeFolderId !== 0
+                    text: qsTr("Remove from folder: %1").arg(listItem.folderNameById(listItem.activeFolderId))
+                    onClicked: {
+                        var fn = listItem.folderNameById(listItem.activeFolderId);
+                        tdLibWrapper.removeChatFromFolder(chat_id, listItem.activeFolderId);
+                        appNotification.show(qsTr("Removed from folder: %1").arg(fn));
+                    }
                 }
 
                 MenuItem {

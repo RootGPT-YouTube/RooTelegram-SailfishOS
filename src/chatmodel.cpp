@@ -465,8 +465,15 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
             tdLibWrapper->getMessageThreadHistory(chatId, anchorMessageId);
         }
     } else {
-        tdLibWrapper->getChatHistory(chatId, this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong());
+        // Deep-link da notifica: ancora al messaggio richiesto (carica la finestra
+        // attorno a quel messaggio) invece dell'ultimo letto, così non si caricano
+        // le centinaia di messaggi intermedi (causava il freeze su cold-start).
+        qlonglong startFrom = initialMessageId != 0
+            ? initialMessageId
+            : this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong();
+        tdLibWrapper->getChatHistory(chatId, startFrom);
     }
+    initialMessageId = 0; // ancora una-tantum
 }
 
 void ChatModel::triggerLoadHistoryForMessage(qlonglong messageId)

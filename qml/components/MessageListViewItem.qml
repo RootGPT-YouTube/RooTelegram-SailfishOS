@@ -31,7 +31,7 @@ import "../js/debug.js" as Debug
 
 ListItem {
     id: messageListItem
-    contentHeight: messageBackground.height + Theme.paddingMedium + ( addedReactionsAbove.visible ? addedReactionsAbove.height + Theme.paddingSmall : 0 ) + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
+    contentHeight: messageBackground.height + Theme.paddingMedium + ( addedReactionsAbove.visible ? addedReactionsAbove.height + Theme.paddingSmall : 0 ) + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( transcriptionItem.visible ? transcriptionItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
     Behavior on contentHeight { NumberAnimation { duration: 200 } }
     property var chatId
     property var messageId
@@ -77,13 +77,20 @@ ListItem {
         !!(myMessage.can_be_deleted_for_all_users || myMessage.can_be_deleted_only_for_self) ||
         (isPrivateLikeChat && myMessage["@type"] !== "sponsoredMessage") ||
         ((page.isBasicGroup || page.isSuperGroup) && adminCanDeleteAnyMessage)
+    // I tipi modificabili: testo e i media con didascalia (foto/video/animazione/
+    // audio/documento/vocale). Il fallback can_be_edited di TDLib da solo non basta
+    // (spesso assente/false sui media), quindi per i messaggi PROPRI abilitiamo
+    // esplicitamente questi tipi: l'eventuale rifiuto (es. troppo vecchio) arriva
+    // poi dal server, come già accade per il testo.
+    readonly property var editableContentTypes: ["messageText", "messagePhoto",
+        "messageVideo", "messageAnimation", "messageAudio", "messageDocument", "messageVoiceNote"]
     readonly property bool canEditMessage:
         (typeof myMessage.can_be_edited !== "undefined" && myMessage.can_be_edited === true) ||
         (isOwnMessage &&
          myMessage &&
          myMessage["@type"] !== "sponsoredMessage" &&
          myMessage.content &&
-         myMessage.content["@type"] === "messageText" &&
+         editableContentTypes.indexOf(myMessage.content["@type"]) !== -1 &&
          !myMessage.sending_state)
     readonly property bool canPinMessage:
         page.canPinMessages() &&
@@ -278,6 +285,13 @@ ListItem {
     property string translatedText: ""
     property bool translating: false
 
+    // Trascrizione vocale (Premium): letta direttamente dal messaggio (reattiva agli
+    // updateMessageContent). Pending = in corso, Text = pronta.
+    readonly property var speechResult: (myMessage && myMessage.content && myMessage.content.voice_note && myMessage.content.voice_note.speech_recognition_result)
+                                        ? myMessage.content.voice_note.speech_recognition_result : null
+    readonly property string transcribedText: (speechResult && speechResult['@type'] === "speechRecognitionResultText" && speechResult.text) ? speechResult.text : ""
+    readonly property bool transcribing: !!(speechResult && speechResult['@type'] === "speechRecognitionResultPending")
+
     function translateMessage() {
         translating = true
         translatedText = ""
@@ -388,9 +402,31 @@ ListItem {
         messageOptionsDrawer.open = true;
     }
 
+    // Menù neon a comparsa (NeonMenuOverlay) della ChatPage: se impostato, il
+    // long-press apre quello (stile arancio/rosso) invece del ContextMenu Silica.
+    property var neonMenu: null
+
+    // Azioni del menù long-press messaggio per il NeonMenuOverlay.
+    function buildMessageMenuActions() {
+        var actions = [];
+        actions.push({ text: anySpoilerRevealed ? qsTr("Hide spoiler") : qsTr("Reveal spoiler"), visible: hasSpoilers, callback: function() { toggleAllSpoilers(); }});
+        actions.push({ text: qsTr("Reply to Message"), visible: canReplyToMessage, callback: function() { replyToMessage(); }});
+        actions.push({ text: qsTr("Copy Message to Clipboard"), visible: showCopyMessageToClipboardMenuItem, callback: function() { copyMessageToClipboard(); }});
+        actions.push({ text: qsTr("Forward message"), visible: showForwardMessageMenuItem, callback: function() { forwardMessage(); }});
+        actions.push({ text: qsTr("Translate message"), visible: !!(myMessage && myMessage.content && myMessage.content.text && myMessage.content.text.text), callback: function() { messageListItem.translateMessage(); }});
+        actions.push({ text: (myMessage && myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message"), visible: canPinMessage, callback: function() { togglePinMessage(); }});
+        actions.push({ text: qsTr("Edit Message"), visible: canEditMessage, callback: function() { requestEditMessage(); }});
+        actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { deleteMessage(); }});
+        actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { deleteAlbum(); }});
+        actions.push({ text: qsTr("More Options..."), visible: (numberOfExtraOptionsOtherThanDeleteMessage > 0) || (canDeleteMessage && !haveSpaceForDeleteMessageMenuItem), callback: function() { openAdditionalOptionsDrawer(); }});
+        return actions;
+    }
+
     function openContextMenu() {
         messageOptionsDrawer.open = false
-        if (messageListItem.menu) {
+        if (neonMenu) {
+            neonMenu.open(buildMessageMenuActions());
+        } else if (messageListItem.menu) {
             openMenu()
         } else {
             contextMenuLoader.active = true
@@ -1418,7 +1454,7 @@ ListItem {
         readonly property int replyCount: replyInfo ? (replyInfo.reply_count || 0) : 0
 
         anchors {
-            top: reactionsColumn.visible ? reactionsColumn.bottom : (translationItem.visible ? translationItem.bottom : messageTextRow.bottom)
+            top: reactionsColumn.visible ? reactionsColumn.bottom : (translationItem.visible ? translationItem.bottom : (transcriptionItem.visible ? transcriptionItem.bottom : messageTextRow.bottom))
             topMargin: Theme.paddingSmall
             horizontalCenter: parent.horizontalCenter
         }
@@ -1516,10 +1552,45 @@ ListItem {
         }
     }
 
+    // Trascrizione vocale (Premium), stile come la traduzione: testo arancione FUORI
+    // dal fumetto, sotto il messaggio, con icona cassa audio invece del mappamondo.
+    Column {
+        id: transcriptionItem
+        width: parent.width - ( 2 * Theme.horizontalPageMargin )
+        anchors.top: messageTextRow.bottom
+        anchors.topMargin: Theme.paddingSmall
+        anchors.horizontalCenter: parent.horizontalCenter
+        visible: messageListItem.transcribedText !== "" || messageListItem.transcribing
+        spacing: Theme.paddingSmall
+
+        Rectangle {
+            width: parent.width
+            height: 1
+            color: Theme.secondaryHighlightColor
+            opacity: 0.5
+        }
+
+        BusyIndicator {
+            anchors.horizontalCenter: parent.horizontalCenter
+            running: messageListItem.transcribing
+            visible: messageListItem.transcribing
+            size: BusyIndicatorSize.ExtraSmall
+        }
+
+        Label {
+            visible: messageListItem.transcribedText !== ""
+            width: parent.width
+            text: "🔊 " + messageListItem.transcribedText
+            font.pixelSize: Theme.fontSizeSmall
+            color: Theme.secondaryHighlightColor
+            wrapMode: Text.Wrap
+        }
+    }
+
     Column {
         id: reactionsColumn
         width: parent.width - ( 2 * Theme.horizontalPageMargin )
-        anchors.top: translationItem.visible ? translationItem.bottom : messageTextRow.bottom
+        anchors.top: translationItem.visible ? translationItem.bottom : (transcriptionItem.visible ? transcriptionItem.bottom : messageTextRow.bottom)
         anchors.topMargin: Theme.paddingMedium
         anchors.horizontalCenter: parent.horizontalCenter
         visible: messageListItem.messageReactions ? ( messageListItem.messageReactions.length > 0 ? true : false ) : false

@@ -113,6 +113,7 @@ public:
         SettingShowProfilePhoto,
         SettingShowStatus,
         SettingAllowCalls,
+        SettingAllowPrivateVoiceAndVideoNoteMessages,
         SettingUnknown
     };
     Q_ENUM(UserPrivacySetting)
@@ -151,6 +152,8 @@ public:
     Q_INVOKABLE bool hasUserInformation(const QString &userId);
     Q_INVOKABLE QVariantMap getUserInformationByName(const QString &userName);
     Q_INVOKABLE UserPrivacySettingRule getUserPrivacySettingRule(UserPrivacySetting userPrivacySetting);
+    Q_INVOKABLE QVariantList getUserPrivacySettingAllowedUserIds(UserPrivacySetting userPrivacySetting);
+    Q_INVOKABLE QVariantList getUserPrivacySettingRestrictedUserIds(UserPrivacySetting userPrivacySetting);
     Q_INVOKABLE QVariantMap getUnreadMessageInformation();
     Q_INVOKABLE QVariantMap getUnreadChatInformation();
     Q_INVOKABLE QVariantMap getBasicGroup(qlonglong groupId) const;
@@ -177,6 +180,8 @@ public:
     Q_INVOKABLE void logout();
     Q_INVOKABLE void getChats();
     Q_INVOKABLE void getChatFolders();
+    Q_INVOKABLE void addChatToFolder(qlonglong chatId, int folderId);
+    Q_INVOKABLE void removeChatFromFolder(qlonglong chatId, int folderId);
     Q_INVOKABLE void downloadFile(int fileId);
     Q_INVOKABLE void openChat(const QString &chatId);
     Q_INVOKABLE void closeChat(const QString &chatId);
@@ -193,7 +198,7 @@ public:
     Q_INVOKABLE void translateMessageText(qlonglong chatId, qlonglong messageId, const QString &toLanguageCode);
     Q_INVOKABLE void sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths, const QString &caption, qlonglong replyToMessageId = 0);
-    Q_INVOKABLE void sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, int duration = 0, int width = 0, int height = 0, const QString &thumbnailPath = QString(), int thumbnailWidth = 0, int thumbnailHeight = 0);
     Q_INVOKABLE void sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId = 0);
@@ -201,6 +206,7 @@ public:
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption);
     Q_INVOKABLE void getMessage(qlonglong chatId, qlonglong messageId);
+    Q_INVOKABLE void recognizeSpeech(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getMessageLinkInfo(const QString &url, const QString &extra = "");
     Q_INVOKABLE void getExternalLinkInfo(const QString &url, const QString &extra = "");
     Q_INVOKABLE void getCallbackQueryAnswer(const QString &chatId, const QString &messageId, const QVariantMap &payload);
@@ -211,6 +217,8 @@ public:
     Q_INVOKABLE void setChatNotificationSettings(const QString &chatId, const QVariantMap &notificationSettings);
     Q_INVOKABLE void editMessageText(const QString &chatId, const QString &messageId, const QString &message);
     Q_INVOKABLE void editMessageTextWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &customEmojiEntities);
+    Q_INVOKABLE void editMessageCaption(const QString &chatId, const QString &messageId, const QString &caption);
+    Q_INVOKABLE void editMessageCaptionWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &customEmojiEntities);
     Q_INVOKABLE void deleteMessages(const QString &chatId, const QVariantList messageIds);
     Q_INVOKABLE void deleteChatMessagesBySender(qlonglong chatId, qlonglong senderUserId);
     Q_INVOKABLE void banChatMember(qlonglong chatId, qlonglong userId, qlonglong bannedUntilDate = 0);
@@ -285,6 +293,9 @@ public:
     Q_INVOKABLE void setName(const QString &firstName, const QString &lastName);
     Q_INVOKABLE void setUsername(const QString &userName);
     Q_INVOKABLE void setUserPrivacySettingRule(UserPrivacySetting setting, UserPrivacySettingRule rule);
+    // allowOnly=true: consenti SOLO questi utenti (resto vietato) = "Solo i selezionati".
+    // allowOnly=false: vieta questi utenti (resto consentito) = "Tutti tranne".
+    Q_INVOKABLE void setUserPrivacySettingAllowedUsers(UserPrivacySetting setting, const QVariantList &userIds, bool allowOnly = true);
     Q_INVOKABLE void getUserPrivacySettingRules(UserPrivacySetting setting);
     Q_INVOKABLE void setProfilePhoto(const QString &filePath);
     Q_INVOKABLE void deleteProfilePhoto(const QString &profilePhotoId);
@@ -468,6 +479,7 @@ public slots:
     void handleUnreadMessageCountUpdated(const QVariantMap &messageCountInformation);
     void handleUnreadChatCountUpdated(const QVariantMap &chatCountInformation);
     void handleAvailableReactionsUpdated(qlonglong chatId, const QVariantMap &availableReactions);
+    void handleChatFolderEdit(const QVariantMap &folder, qlonglong chatId, int folderId, bool add);
     void handleChatPendingJoinRequestsUpdated(qlonglong chatId, const QVariantMap &pendingJoinRequests);
     void handleNewChatJoinRequest(qlonglong chatId, const QVariantMap &request, const QVariantMap &inviteLink);
     void handleBasicGroupUpdated(qlonglong groupId, const QVariantMap &groupInformation);
@@ -521,6 +533,8 @@ private:
     QVariantMap options;
     QVariantMap userInformation;
     QMap<UserPrivacySetting, UserPrivacySettingRule> userPrivacySettingRules;
+    QMap<UserPrivacySetting, QVariantList> userPrivacySettingAllowedUserIds;
+    QMap<UserPrivacySetting, QVariantList> userPrivacySettingRestrictedUserIds;
     QVariantMap usersById;
     QVariantMap usersByName;
     QVariantMap chats;

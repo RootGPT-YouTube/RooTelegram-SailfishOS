@@ -71,6 +71,7 @@ signals:
     void forumTopicUpdated(qlonglong chatId, qlonglong threadId, qlonglong lastReadInboxMessageId, qlonglong lastReadOutboxMessageId, int unreadMentionCount);
     void chatFoldersReceived(const QVariantList &folders);
     void chatFolderInfoReceived(const QVariantMap &folderInfo);
+    void chatFolderEditReceived(const QVariantMap &folder, qlonglong chatId, int folderId, bool add);
     void messagesReceived(const QVariantList &messages, int totalCount);
     void messagesReceivedWithExtra(const QVariantList &messages, int totalCount, const QString &extra);
     void pinnedMessagesFound(qlonglong chatId, qlonglong messageThreadId, const QVariantList &messages);
@@ -248,6 +249,7 @@ private:
     void processUpdateForumTopicUpdate(const QVariantMap &receivedInformation);
     void processUpdateChatFolders(const QVariantMap &receivedInformation);
     void processChatFolderInfo(const QVariantMap &receivedInformation);
+    void processChatFolder(const QVariantMap &receivedInformation);
     void processUpdateChatThemes(const QVariantMap &receivedInformation);
     void processUpdateChatActiveStories(const QVariantMap &receivedInformation);
     void processUpdateActiveStoryList(const QVariantMap &receivedInformation);

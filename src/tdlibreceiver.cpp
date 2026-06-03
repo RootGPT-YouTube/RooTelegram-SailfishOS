@@ -210,7 +210,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateChatFolders", &TDLibReceiver::processUpdateChatFolders);
     handlers.insert("chatFolders", &TDLibReceiver::processUpdateChatFolders);
     handlers.insert("chatFolderInfo", &TDLibReceiver::processChatFolderInfo);
-    handlers.insert("chatFolder", &TDLibReceiver::processChatFolderInfo);
+    handlers.insert("chatFolder", &TDLibReceiver::processChatFolder);
     handlers.insert("updateChatThemes", &TDLibReceiver::processUpdateChatThemes);
     handlers.insert("updateChatActiveStories", &TDLibReceiver::processUpdateChatActiveStories);
     handlers.insert("updateActiveStoryList", &TDLibReceiver::processUpdateActiveStoryList);
@@ -1241,6 +1241,24 @@ void TDLibReceiver::processChatFolderInfo(const QVariantMap &receivedInformation
     LOG("Chat folder response received, type:" << receivedInformation.value(_TYPE).toString()
         << "id:" << receivedInformation.value(ID).toInt());
     emit chatFolderInfoReceived(receivedInformation);
+}
+
+void TDLibReceiver::processChatFolder(const QVariantMap &receivedInformation)
+{
+    // Risposta di getChatFolder (oggetto chatFolder completo, con included_chat_ids).
+    // Lo usiamo per il "long-press chat -> aggiungi a cartella": l'@extra codifica
+    // "addChatToFolder:<chatId>:<folderId>".
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    const bool isAdd = extra.startsWith(QLatin1String("addChatToFolder:"));
+    const bool isRemove = extra.startsWith(QLatin1String("removeChatFromFolder:"));
+    if (isAdd || isRemove) {
+        const QStringList parts = extra.split(":");
+        if (parts.length() >= 3) {
+            const qlonglong chatId = parts.at(1).toLongLong();
+            const int folderId = parts.at(2).toInt();
+            emit chatFolderEditReceived(receivedInformation, chatId, folderId, isAdd);
+        }
+    }
 }
 
 void TDLibReceiver::processUpdateChatThemes(const QVariantMap &receivedInformation)

@@ -596,6 +596,72 @@ function getMessagesArrayText(messages) {
     return lines.join("\n");
 }
 
+// Vero se il messaggio ha entità di formattazione "markdown-izzabili" (grassetto,
+// corsivo, ecc.). Usato in modifica per decidere se ricostruire i marcatori.
+function formattedTextHasFormatting(formattedText) {
+    if (!formattedText || !formattedText.entities) {
+        return false;
+    }
+    var fmt = ["textEntityTypeBold", "textEntityTypeItalic", "textEntityTypeUnderline",
+               "textEntityTypeStrikethrough", "textEntityTypeCode", "textEntityTypePre",
+               "textEntityTypePreCode", "textEntityTypeSpoiler"];
+    for (var i = 0; i < formattedText.entities.length; i++) {
+        var e = formattedText.entities[i];
+        if (e['@type'] === "textEntity" && fmt.indexOf(e.type['@type']) !== -1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Converte un formattedText TDLib nei MARCATORI markdown del composer (** __ ++
+// ~~ ` ||), così la modifica di un messaggio ne PRESERVA la formattazione (il
+// parser markdown all'invio li riconverte in entità). NB: i custom emoji non
+// vengono marcati (restano il loro carattere); per i messaggi formattati gli
+// eventuali custom emoji degradano a emoji normali (caso raro).
+function formattedTextToComposerMarkdown(formattedText) {
+    if (!formattedText) {
+        return "";
+    }
+    var text = formattedText.text || "";
+    var entities = formattedText.entities ? formattedText.entities : [];
+    var markerFor = {
+        "textEntityTypeBold": "**",
+        "textEntityTypeItalic": "__",
+        "textEntityTypeUnderline": "++",
+        "textEntityTypeStrikethrough": "~~",
+        "textEntityTypeCode": "`",
+        "textEntityTypePre": "`",
+        "textEntityTypePreCode": "`",
+        "textEntityTypeSpoiler": "||"
+    };
+    var inserts = [];
+    for (var i = 0; i < entities.length; i++) {
+        var e = entities[i];
+        if (e['@type'] !== "textEntity") {
+            continue;
+        }
+        var m = markerFor[e.type['@type']];
+        if (!m) {
+            continue;
+        }
+        inserts.push({ offset: e.offset, str: m });
+        inserts.push({ offset: e.offset + e.length, str: m });
+    }
+    if (inserts.length === 0) {
+        return text;
+    }
+    // Inserisco dalle posizioni più alte alle più basse per non sfasare gli offset.
+    inserts.sort(function(a, b) { return b.offset - a.offset; });
+    for (var j = 0; j < inserts.length; j++) {
+        var p = inserts[j].offset;
+        if (p < 0) p = 0;
+        if (p > text.length) p = text.length;
+        text = text.substring(0, p) + inserts[j].str + text.substring(p);
+    }
+    return text;
+}
+
 function handleErrorMessage(code, message) {
     if (code === 404 || (code === 400 && message === "USERNAME_INVALID")) {
         // Silently ignore
@@ -613,10 +679,13 @@ function handleErrorMessage(code, message) {
             || message === "There are no message threads in the chat"
             || message === "Invalid value of parameter from_message_id specified"
             || message === "MSG_ID_INVALID"
+            || message === "BROADCAST_FORBIDDEN"
             || message === "Not enough rights to get scheduled messages") {
-        // MSG_ID_INVALID: errore benigno quando si interrogano le reaction
-        // (getMessageAddedReactions) su messaggi che non lo supportano, es. gruppi
-        // grandi/canali — il conteggio reaction resta comunque visibile.
+        // MSG_ID_INVALID / BROADCAST_FORBIDDEN: errori benigni quando si
+        // interrogano i reattori (getMessageAddedReactions) su messaggi che non
+        // lo supportano — es. gruppi grandi (MSG_ID_INVALID) e canali, dove chi
+        // ha messo la reaction è anonimo/non elencabile (BROADCAST_FORBIDDEN).
+        // Le reaction funzionano comunque; qui evitiamo solo il toast grezzo.
         return;
     }
     if (message === "USER_ALREADY_PARTICIPANT") {

@@ -7,6 +7,9 @@
 *.lai
 *.so
 *.so.*
+# Eccezione: le librerie multimediali bundlate per la compatibilità SFOS 5.0+5.1
+# (vedi NOTICE / bundledlibs/) sono parte del pacchetto e vanno tracciate.
+!bundledlibs/*/*.so.*
 *.dll
 *.dylib
 

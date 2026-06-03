@@ -30,6 +30,10 @@ class ChatModel : public QAbstractListModel
     Q_PROPERTY(QVariantMap smallPhoto READ smallPhoto NOTIFY smallPhotoChanged)
     Q_PROPERTY(qlonglong messageThreadId READ getMessageThreadId WRITE setMessageThreadId NOTIFY messageThreadIdChanged)
     Q_PROPERTY(qlonglong topicLastMessageId READ getTopicLastMessageId WRITE setTopicLastMessageId NOTIFY topicLastMessageIdChanged)
+    // Se !=0, l'apertura della chat ancora il caricamento iniziale a QUESTO messaggio
+    // (deep-link da notifica) invece che all'ultimo letto: evita di caricare centinaia
+    // di messaggi intermedi (freeze su cold-start). Azzerato dopo l'uso in initialize().
+    Q_PROPERTY(qlonglong initialMessageId MEMBER initialMessageId)
 
 public:
     ChatModel(TDLibWrapper *tdLibWrapper);
@@ -114,6 +118,7 @@ private:
     qlonglong chatId;
     qlonglong messageThreadId;
     qlonglong topicLastMessageId;
+    qlonglong initialMessageId = 0;
     bool inReload;
     bool inIncrementalUpdate;
     bool searchModeActive;

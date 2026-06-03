@@ -103,6 +103,10 @@
         <source>Open tgcalls on GitHub</source>
         <translation>Apri tgcalls su GitHub</translation>
     </message>
+    <message>
+        <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
+        <translation>Per la compatibilità con SailfishOS 5.0/5.1 questo pacchetto include anche le dipendenze multimediali di FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) e OpenJPEG (BSD-2). Copyright dei rispettivi autori. I testi completi delle licenze sono in /usr/share/harbour-rootelegram/licenses/.</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -141,6 +145,21 @@
     <message>
         <source>Member added.</source>
         <translation>Membro aggiunto.</translation>
+    </message>
+</context>
+<context>
+    <name>AddToFolderPage</name>
+    <message>
+        <source>Add to folder</source>
+        <translation>Aggiungi alla cartella</translation>
+    </message>
+    <message>
+        <source>Added to folder: %1</source>
+        <translation>Aggiunto alla cartella: %1</translation>
+    </message>
+    <message>
+        <source>No folders</source>
+        <translation>Nessuna cartella</translation>
     </message>
 </context>
 <context>
@@ -1023,6 +1042,18 @@
     <message>
         <source>Deleting chat</source>
         <translation>Eliminazione chat</translation>
+    </message>
+    <message>
+        <source>Add to folder...</source>
+        <translation>Aggiungi alla cartella...</translation>
+    </message>
+    <message>
+        <source>Remove from folder: %1</source>
+        <translation>Rimuovi dalla cartella: %1</translation>
+    </message>
+    <message>
+        <source>Removed from folder: %1</source>
+        <translation>Rimosso dalla cartella: %1</translation>
     </message>
 </context>
 <context>
@@ -1948,6 +1979,17 @@
     </message>
 </context>
 <context>
+    <name>MessageAudio</name>
+    <message>
+        <source>Transcribe</source>
+        <translation>Trascrivi</translation>
+    </message>
+    <message>
+        <source>Play/Pause</source>
+        <translation>Play/Pausa</translation>
+    </message>
+</context>
+<context>
     <name>MessageListViewItem</name>
     <message>
         <source>Reply to Message</source>
@@ -2349,6 +2391,10 @@
     <message>
         <source>Scheduled messages</source>
         <translation>Messaggi programmati</translation>
+    </message>
+    <message>
+        <source>Search...</source>
+        <translation>Cerca...</translation>
     </message>
 </context>
 <context>
@@ -3256,6 +3302,26 @@
         <source>Open Twemoji on GitHub</source>
         <translation>Apri Twemoji su GitHub</translation>
     </message>
+    <message>
+        <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
+        <translation>Questo progetto include FFmpeg, compilato con libx264, per normalizzare i video prima del caricamento. Grazie per averlo reso disponibile secondo le condizioni della LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+    </message>
+    <message>
+        <source>Open FFmpeg website</source>
+        <translation>Apri il sito di FFmpeg</translation>
+    </message>
+    <message>
+        <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
+        <translation>Questo progetto utilizza tgcalls e tg_owt (WebRTC) per le chiamate vocali e le videochiamate. Grazie per averli resi disponibili secondo le condizioni della GPL v2+!</translation>
+    </message>
+    <message>
+        <source>Open tgcalls on GitHub</source>
+        <translation>Apri tgcalls su GitHub</translation>
+    </message>
+    <message>
+        <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
+        <translation>Per la compatibilità con SailfishOS 5.0/5.1 questo pacchetto include anche le dipendenze multimediali di FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) e OpenJPEG (BSD-2). Copyright dei rispettivi autori. I testi completi delle licenze sono in /usr/share/harbour-rootelegram/licenses/.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsAppearance</name>
@@ -3539,6 +3605,38 @@
     <message>
         <source>Allow calls</source>
         <translation>Consenti chiamate</translation>
+    </message>
+    <message>
+        <source>This is a Premium-only feature.</source>
+        <translation>Questa è una funzione solo per utenti Premium.</translation>
+    </message>
+    <message>
+        <source>Only selected</source>
+        <translation>Solo i selezionati</translation>
+    </message>
+    <message>
+        <source>Privacy updated</source>
+        <translation>Privacy aggiornata</translation>
+    </message>
+    <message>
+        <source>Voice and video messages</source>
+        <translation>Messaggi vocali e video</translation>
+    </message>
+    <message>
+        <source>Who can send you voice messages and video notes (round videos). Premium feature.</source>
+        <translation>Chi può inviarti messaggi vocali e video circolari (video note). Funzione Premium.</translation>
+    </message>
+    <message>
+        <source>Choose who can send you voice messages and video notes.</source>
+        <translation>Scegli chi può inviarti messaggi vocali e video circolari.</translation>
+    </message>
+    <message>
+        <source>Choose who cannot send you voice messages and video notes.</source>
+        <translation>Scegli chi NON può inviarti messaggi vocali e video circolari.</translation>
+    </message>
+    <message>
+        <source>Everybody except</source>
+        <translation>Tutti tranne</translation>
     </message>
 </context>
 <context>
@@ -3905,6 +4003,13 @@
         <translation>
             <numerusform>Membri del tuo pubblico personalizzato (%n selezionato). Salvato tra le storie.</numerusform>
             <numerusform>Membri del tuo pubblico personalizzato (%n selezionati). Salvato tra le storie.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>(%n selected)</source>
+        <translation>
+            <numerusform>(%n selezionato)</numerusform>
+            <numerusform>(%n selezionati)</numerusform>
         </translation>
     </message>
 </context>

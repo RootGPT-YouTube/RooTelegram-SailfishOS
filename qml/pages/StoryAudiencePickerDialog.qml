@@ -31,6 +31,13 @@ Dialog {
     // Lista user_id selezionati (come stringhe). Letta dal chiamante in onAccepted.
     property var selectedUserIds: []
 
+    // Override testi (per riuso fuori dalle storie, es. privacy messaggi vocali):
+    // se vuoti si usano i testi di default delle storie.
+    property string headerTitle: ""
+    property string headerDescription: ""
+    // Preselezione iniziale (user_id come stringhe) per il prefill quando si riapre.
+    property var initialSelectedIds: []
+
     property bool contactsLoaded: false
     property var rawUsers: []                  // {user_id, title, username, photo_small, user_status, user_last_online}
     property var selectedMap: ({})             // userIdString -> true
@@ -180,6 +187,8 @@ Dialog {
     Component.onCompleted: {
         if (isCustomMode) {
             preselect(appSettings.storyCustomAudienceUserIds());
+        } else if (initialSelectedIds && initialSelectedIds.length > 0) {
+            preselect(initialSelectedIds);
         }
         tdLibWrapper.sendRequest({
             "@type": "getContacts",
@@ -200,9 +209,9 @@ Dialog {
             spacing: Theme.paddingMedium
 
             DialogHeader {
-                title: audiencePicker.isCustomMode
-                       ? qsTr("Custom audience")
-                       : qsTr("Audience")
+                title: audiencePicker.headerTitle !== ""
+                       ? audiencePicker.headerTitle
+                       : (audiencePicker.isCustomMode ? qsTr("Custom audience") : qsTr("Audience"))
                 acceptText: qsTr("Done")
             }
 
@@ -212,9 +221,11 @@ Dialog {
                 wrapMode: Text.Wrap
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryColor
-                text: audiencePicker.isCustomMode
-                      ? qsTr("Members of your custom audience (%n selected). Saved across stories.", "", selectionCounter.count)
-                      : qsTr("Choose who will see your next story (%n selected).", "", selectionCounter.count)
+                text: audiencePicker.headerDescription !== ""
+                      ? (audiencePicker.headerDescription + " " + qsTr("(%n selected)", "", selectionCounter.count))
+                      : (audiencePicker.isCustomMode
+                         ? qsTr("Members of your custom audience (%n selected). Saved across stories.", "", selectionCounter.count)
+                         : qsTr("Choose who will see your next story (%n selected).", "", selectionCounter.count))
             }
 
             SearchField {

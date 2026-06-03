@@ -10,6 +10,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import "../components"
 
 Page {
@@ -76,116 +77,78 @@ Page {
 
                 property real tabWidth: (width - 3 * spacing) / 4
 
-                // Tab in stile rettangolare (come i pulsanti chiamata): lo sfondo
-                // pieno indica il tab attivo, quello tenue gli inattivi.
-                BackgroundItem {
-                    id: tabMain
-                    width: tabsRow.tabWidth
-                    height: Theme.itemSizeSmall
-                    readonly property bool active: storiesModel.activeList === "main"
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: Theme.paddingSmall
-                        color: tabMain.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
-                              : (tabMain.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
-                                                 : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
+                // Tab in stile NEON-VETRO (come i pulsanti di RooTelegram): vetro bianco
+                // translucido + bordo arancione + testo bianco neon; il tab attivo è più
+                // acceso (fill + bordo + glow più forti).
+                Repeater {
+                    model: [
+                        { "label": qsTr("Main"), "list": "main" },
+                        { "label": qsTr("Blacklist"), "list": "archive" },
+                        // Label corte (Archive/Profile); il titolo lungo sta nel PageHeader.
+                        { "label": qsTr("Archive", "Short label for the My Archive tab"), "list": "myArchive" },
+                        { "label": qsTr("Profile", "Short label for the My Profile tab"), "list": "myProfile" }
+                    ]
+                    delegate: BackgroundItem {
+                        id: tabDelegate
+                        width: tabsRow.tabWidth
+                        height: Theme.itemSizeSmall
+                        readonly property bool active: storiesModel.activeList === modelData.list
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Theme.paddingSmall
+                            color: Theme.rgba("#ffffff", tabDelegate.active ? 0.18 : (tabDelegate.pressed ? 0.12 : 0.06))
+                            border.width: 2
+                            border.color: Theme.rgba("#ff8a3d", tabDelegate.active ? 0.9 : 0.45)
+                        }
+                        Label {
+                            id: tabLabel
+                            anchors.centerIn: parent
+                            width: parent.width - 2 * Theme.paddingSmall
+                            horizontalAlignment: Text.AlignHCenter
+                            truncationMode: TruncationMode.Fade
+                            text: modelData.label
+                            font.pixelSize: Theme.fontSizeSmall
+                            font.italic: true
+                            color: tabDelegate.active ? "#fff3e6" : "#ffffff"
+                            layer.enabled: true
+                            layer.effect: Glow {
+                                color: "#ffffff"
+                                radius: tabDelegate.active ? 8 : 5
+                                samples: 17
+                                spread: 0.2
+                                transparentBorder: true
+                            }
+                        }
+                        onClicked: storiesModel.activeList = modelData.list
                     }
-                    Label {
-                        anchors.centerIn: parent
-                        width: parent.width - 2 * Theme.paddingSmall
-                        horizontalAlignment: Text.AlignHCenter
-                        truncationMode: TruncationMode.Fade
-                        text: qsTr("Main")
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: tabMain.active ? Theme.highlightColor : Theme.secondaryColor
-                    }
-                    onClicked: storiesModel.activeList = "main"
-                }
-
-                BackgroundItem {
-                    id: tabBlacklist
-                    width: tabsRow.tabWidth
-                    height: Theme.itemSizeSmall
-                    readonly property bool active: storiesModel.activeList === "archive"
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: Theme.paddingSmall
-                        color: tabBlacklist.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
-                              : (tabBlacklist.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
-                                                      : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
-                    }
-                    Label {
-                        anchors.centerIn: parent
-                        width: parent.width - 2 * Theme.paddingSmall
-                        horizontalAlignment: Text.AlignHCenter
-                        truncationMode: TruncationMode.Fade
-                        text: qsTr("Blacklist")
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: tabBlacklist.active ? Theme.highlightColor : Theme.secondaryColor
-                    }
-                    onClicked: storiesModel.activeList = "archive"
-                }
-
-                // Label corte sui tab (Archive/Profile); il titolo lungo
-                // ("My Archive"/"My Profile") sta nel PageHeader.
-                BackgroundItem {
-                    id: tabArchive
-                    width: tabsRow.tabWidth
-                    height: Theme.itemSizeSmall
-                    readonly property bool active: storiesModel.activeList === "myArchive"
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: Theme.paddingSmall
-                        color: tabArchive.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
-                              : (tabArchive.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
-                                                    : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
-                    }
-                    Label {
-                        anchors.centerIn: parent
-                        width: parent.width - 2 * Theme.paddingSmall
-                        horizontalAlignment: Text.AlignHCenter
-                        truncationMode: TruncationMode.Fade
-                        text: qsTr("Archive", "Short label for the My Archive tab")
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: tabArchive.active ? Theme.highlightColor : Theme.secondaryColor
-                    }
-                    onClicked: storiesModel.activeList = "myArchive"
-                }
-
-                BackgroundItem {
-                    id: tabProfile
-                    width: tabsRow.tabWidth
-                    height: Theme.itemSizeSmall
-                    readonly property bool active: storiesModel.activeList === "myProfile"
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: Theme.paddingSmall
-                        color: tabProfile.active ? Theme.rgba(Theme.highlightBackgroundColor, 0.5)
-                              : (tabProfile.pressed ? Theme.rgba(Theme.highlightBackgroundColor, 0.3)
-                                                    : Theme.rgba(Theme.highlightBackgroundColor, 0.12))
-                    }
-                    Label {
-                        anchors.centerIn: parent
-                        width: parent.width - 2 * Theme.paddingSmall
-                        horizontalAlignment: Text.AlignHCenter
-                        truncationMode: TruncationMode.Fade
-                        text: qsTr("Profile", "Short label for the My Profile tab")
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: tabProfile.active ? Theme.highlightColor : Theme.secondaryColor
-                    }
-                    onClicked: storiesModel.activeList = "myProfile"
                 }
             }
         }
 
         PullDownMenu {
+            // Voci in bianco neon (come il menù principale): MenuItem non espone il
+            // colore del testo, quindi Label figlia neon e `text` svuotato.
             MenuItem {
-                text: qsTr("Refresh")
                 onClicked: storiesModel.refresh()
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Refresh")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
             MenuItem {
-                text: qsTr("New story")
                 onClicked: storiesPage.postNewStory()
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("New story")
+                    font.italic: true
+                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
             }
         }
 
@@ -213,7 +176,30 @@ Page {
             }
             property var rowChatId: model.chat_id ? model.chat_id : 0
 
-            menu: storyChatItem.isOwnStoryList ? ownStoryMenu : chatMenu
+            // Menù neon a comparsa al posto del ContextMenu Silica.
+            openMenuOnPressAndHold: false
+            onPressAndHold: storiesNeonMenu.open(buildStoryActions())
+            function buildStoryActions() {
+                if (storyChatItem.isOwnStoryList) {
+                    return [{ text: qsTr("Delete story"), callback: function() {
+                        var sid = storyChatItem.archiveStoryId;
+                        var pcid = storyChatItem.archivePosterChatId;
+                        tdLibWrapper.deleteStory(pcid, sid);
+                        if (storyChatItem.isMyProfile) {
+                            storiesModel.removeMyProfileRow(sid);
+                        } else {
+                            storiesModel.removeMyArchiveRow(sid);
+                        }
+                    }}];
+                }
+                return [{ text: storiesModel.activeList === "archive" ? qsTr("Remove from blacklist") : qsTr("Add to blacklist"), callback: function() {
+                    var cid = "" + storyChatItem.rowChatId;
+                    var target = storiesModel.activeList === "archive" ? "main" : "archive";
+                    tdLibWrapper.setChatActiveStoriesList(cid, target);
+                    storiesModel.removeChatRow(storyChatItem.rowChatId);
+                    appNotification.show(target === "archive" ? qsTr("Added to blacklist") : qsTr("Removed from blacklist"));
+                }}];
+            }
 
             Component {
                 id: ownStoryMenu
@@ -426,5 +412,9 @@ Page {
         }
 
         VerticalScrollDecorator {}
+    }
+
+    NeonMenuOverlay {
+        id: storiesNeonMenu
     }
 }

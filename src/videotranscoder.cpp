@@ -116,6 +116,56 @@ QVariantMap VideoTranscoder::probeVideo(const QString &inputPath)
     return result;
 }
 
+QString VideoTranscoder::extractThumbnail(const QString &inputPath, int outWidth, int outHeight)
+{
+    if (!available()) {
+        return QString();
+    }
+    QString in = inputPath;
+    if (in.startsWith(QStringLiteral("file://"))) {
+        in = QUrl(in).toLocalFile();
+    }
+    if (!QFileInfo::exists(in)) {
+        return QString();
+    }
+
+    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QDir().mkpath(cacheDir);
+    const QString out = cacheDir + QStringLiteral("/rt_vthumb_")
+                        + QString::number(QDateTime::currentMSecsSinceEpoch())
+                        + QStringLiteral(".jpg");
+
+    // Un solo frame, niente audio, eventualmente riscalato alle dimensioni della
+    // thumbnail. mjpeg (-q:v 3 ~ buona qualità) + muxer image2.
+    QStringList args;
+    args << QStringLiteral("-y") << QStringLiteral("-hide_banner")
+         << QStringLiteral("-nostdin") << QStringLiteral("-nostats")
+         << QStringLiteral("-i") << in
+         << QStringLiteral("-frames:v") << QStringLiteral("1")
+         << QStringLiteral("-an");
+    if (outWidth > 0 && outHeight > 0) {
+        args << QStringLiteral("-vf")
+             << QStringLiteral("scale=%1:%2").arg(outWidth).arg(outHeight);
+    }
+    args << QStringLiteral("-q:v") << QStringLiteral("3")
+         << QStringLiteral("-f") << QStringLiteral("image2") << out;
+
+    QProcess p;
+    p.start(FFMPEG_BIN, args);
+    if (!p.waitForStarted(3000)) {
+        return QString();
+    }
+    p.waitForFinished(8000);
+
+    QFileInfo fi(out);
+    if (p.exitStatus() == QProcess::NormalExit && p.exitCode() == 0
+            && fi.exists() && fi.size() > 0) {
+        return out;
+    }
+    QFile::remove(out);
+    return QString();
+}
+
 void VideoTranscoder::cropToVerticalStory(const QString &inputPath, double durationSec,
                                           int userRotation, bool doCrop)
 {

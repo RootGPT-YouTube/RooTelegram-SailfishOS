@@ -9,6 +9,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import "../components"
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
@@ -135,9 +136,16 @@ Page {
 
     PullDownMenu {
         MenuItem {
-            text: qsTr("Refresh")
             onClicked: {
                 loadBlocked(false)
+            }
+            Label {
+                anchors.centerIn: parent
+                text: qsTr("Refresh")
+                font.italic: true
+                color: parent.highlighted ? "#fff3e6" : "#ffffff"
+                layer.enabled: true
+                layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
     }
@@ -153,8 +161,8 @@ Page {
             }
         }
 
-        header: PageHeader {
-            title: qsTr("Blacklist")
+        header: NeonPageHeader {
+            text: qsTr("Blacklist")
             description: totalCount > 0 ? qsTr("%1 blocked", "", totalCount).arg(totalCount) : ""
         }
 
@@ -178,16 +186,12 @@ Page {
             secondaryText.text: ""
             tertiaryText.text: inProgress ? qsTr("Unblocking…") : ""
 
-            openMenuOnPressAndHold: true
-            menu: ContextMenu {
-                MenuItem {
-                    text: blockedDelegate.inProgress ? qsTr("Unblocking…") : qsTr("Unblock")
-                    enabled: !blockedDelegate.inProgress
-                    onClicked: {
-                        blacklistPage.triggerUnblock(user_id)
-                    }
-                }
-            }
+            openMenuOnPressAndHold: false
+            onPressAndHold: blacklistNeonMenu.open([
+                { text: blockedDelegate.inProgress ? qsTr("Unblocking…") : qsTr("Unblock"),
+                  visible: !blockedDelegate.inProgress,
+                  callback: function() { blacklistPage.triggerUnblock(user_id); } }
+            ])
 
             onClicked: {
                 if (user_id > 0) {
@@ -287,5 +291,9 @@ Page {
 
     Component.onCompleted: {
         loadBlocked(false)
+    }
+
+    NeonMenuOverlay {
+        id: blacklistNeonMenu
     }
 }

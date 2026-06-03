@@ -35,6 +35,10 @@ Dialog {
     DialogHeader {
         id: dialogHeader
         title: ""
+        // Annulla/Accetta in bianco per coerenza neon (le label del DialogHeader
+        // usano palette.primaryColor; il glow non è aggiungibile su queste interne).
+        palette.primaryColor: "#ffffff"
+        palette.highlightColor: "#fff3e6"
     }
 
     SilicaFlickable {

@@ -103,6 +103,10 @@
         <source>Open tgcalls on GitHub</source>
         <translation>Open tgcalls on GitHub</translation>
     </message>
+    <message>
+        <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -140,6 +144,21 @@
     </message>
     <message>
         <source>Member added.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AddToFolderPage</name>
+    <message>
+        <source>Add to folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Added to folder: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No folders</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1022,6 +1041,18 @@
     </message>
     <message>
         <source>Deleting chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to folder...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove from folder: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed from folder: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1948,6 +1979,17 @@
     </message>
 </context>
 <context>
+    <name>MessageAudio</name>
+    <message>
+        <source>Transcribe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Play/Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageListViewItem</name>
     <message>
         <source>Reply to Message</source>
@@ -2348,6 +2390,10 @@
     </message>
     <message>
         <source>Stories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3256,6 +3302,26 @@
         <source>Open Twemoji on GitHub</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
+        <translation type="unfinished">This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+    </message>
+    <message>
+        <source>Open FFmpeg website</source>
+        <translation type="unfinished">Open FFmpeg website</translation>
+    </message>
+    <message>
+        <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
+        <translation type="unfinished">This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</translation>
+    </message>
+    <message>
+        <source>Open tgcalls on GitHub</source>
+        <translation type="unfinished">Open tgcalls on GitHub</translation>
+    </message>
+    <message>
+        <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsAppearance</name>
@@ -3538,6 +3604,38 @@
     </message>
     <message>
         <source>Allow calls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is a Premium-only feature.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Privacy updated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice and video messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Who can send you voice messages and video notes (round videos). Premium feature.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose who can send you voice messages and video notes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose who cannot send you voice messages and video notes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Everybody except</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3902,6 +4000,13 @@
     </message>
     <message numerus="yes">
         <source>Members of your custom audience (%n selected). Saved across stories.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>(%n selected)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>

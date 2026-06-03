@@ -201,6 +201,49 @@ AccordionItem {
                 x: Theme.horizontalPageMargin
                 width: parent.width - (2 * Theme.horizontalPageMargin)
                 wrapMode: Text.Wrap
+                text: qsTr("This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                text: "<a href=\"https://ffmpeg.org\">" + qsTr("Open FFmpeg website") + "</a>"
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: Theme.fontSizeSmall
+                linkColor: Theme.highlightColor
+                onLinkActivated: Qt.openUrlExternally("https://ffmpeg.org")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                wrapMode: Text.Wrap
+                text: qsTr("For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg's multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                wrapMode: Text.Wrap
+                text: qsTr("This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Text {
+                text: "<a href=\"https://github.com/TelegramMessenger/tgcalls\">" + qsTr("Open tgcalls on GitHub") + "</a>"
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: Theme.fontSizeSmall
+                linkColor: Theme.highlightColor
+                onLinkActivated: Qt.openUrlExternally("https://github.com/TelegramMessenger/tgcalls")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                wrapMode: Text.Wrap
                 text: qsTr("This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!")
                 font.pixelSize: Theme.fontSizeExtraSmall
                 anchors.horizontalCenter: parent.horizontalCenter
