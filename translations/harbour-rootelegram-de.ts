@@ -87,6 +87,22 @@
         <source>Open Twemoji on GitHub</source>
         <translation>Twemoji auf GitHub öffnen</translation>
     </message>
+    <message>
+        <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
+        <translation>Dieses Projekt bündelt FFmpeg, erstellt mit libx264, um Videos vor dem Hochladen zu normalisieren. Danke, dass es unter den Bedingungen der LGPL v2.1+ / GPL v2+ (libx264) verfügbar gemacht wurde!</translation>
+    </message>
+    <message>
+        <source>Open FFmpeg website</source>
+        <translation>FFmpeg-Website öffnen</translation>
+    </message>
+    <message>
+        <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
+        <translation>Dieses Projekt verwendet tgcalls und tg_owt (WebRTC) für Sprach- und Videoanrufe. Danke, dass sie unter den Bedingungen der GPL v2+ verfügbar gemacht wurden!</translation>
+    </message>
+    <message>
+        <source>Open tgcalls on GitHub</source>
+        <translation>tgcalls auf GitHub öffnen</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -1512,6 +1528,17 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>CreateSupergroupPage</name>
+    <message>
+        <source>New Channel</source>
+        <translation>Neuer Kanal</translation>
+    </message>
+    <message>
+        <source>New Group</source>
+        <translation>Neue Gruppe</translation>
+    </message>
+</context>
+<context>
     <name>EditGroupChatPermissionsColumn</name>
     <message>
         <source>Group Member Permissions</source>
@@ -2220,10 +2247,6 @@ Nachrichten</numerusform>
     <message>
         <source>No public users, groups or channels found.</source>
         <translation>Keine öffentlichen Benutzer, Gruppen oder Kanäle gefunden.</translation>
-    </message>
-    <message>
-        <source>RooTelegram</source>
-        <translation>RooTelegram</translation>
     </message>
     <message>
         <source>Waiting for network...</source>
@@ -3504,10 +3527,6 @@ Nachrichten</numerusform>
         <translation>Zeigt die Liste der Telegram-Nutzer, die du blockiert hast.</translation>
     </message>
     <message>
-        <source>Allow voice calls</source>
-        <translation>Sprachanrufe erlauben</translation>
-    </message>
-    <message>
         <source>Privacy setting for managing who can call you.</source>
         <translation>Datenschutzeinstellung, wer dich anrufen darf.</translation>
     </message>
@@ -3518,6 +3537,10 @@ Nachrichten</numerusform>
     <message>
         <source>Nobody</source>
         <translation>Niemand</translation>
+    </message>
+    <message>
+        <source>Allow calls</source>
+        <translation>Anrufe erlauben</translation>
     </message>
 </context>
 <context>

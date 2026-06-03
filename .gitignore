@@ -64,6 +64,7 @@ _ffmpeg_build/
 
 # File privati / note locali con credenziali — MAI pubblicare
 /CLAUDE.md
+/.claude/
 
 # Artefatti di build (path /home, binari) — MAI committare
 /RPMS/

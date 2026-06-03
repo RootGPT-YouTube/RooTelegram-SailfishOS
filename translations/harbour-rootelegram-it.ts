@@ -87,6 +87,22 @@
         <source>Open Twemoji on GitHub</source>
         <translation>Apri Twemoji su GitHub</translation>
     </message>
+    <message>
+        <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
+        <translation>Questo progetto include FFmpeg, compilato con libx264, per normalizzare i video prima del caricamento. Grazie per averlo reso disponibile secondo le condizioni della LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+    </message>
+    <message>
+        <source>Open FFmpeg website</source>
+        <translation>Apri il sito di FFmpeg</translation>
+    </message>
+    <message>
+        <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
+        <translation>Questo progetto utilizza tgcalls e tg_owt (WebRTC) per le chiamate vocali e le videochiamate. Grazie per averli resi disponibili secondo le condizioni della GPL v2+!</translation>
+    </message>
+    <message>
+        <source>Open tgcalls on GitHub</source>
+        <translation>Apri tgcalls su GitHub</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -1510,6 +1526,17 @@
     </message>
 </context>
 <context>
+    <name>CreateSupergroupPage</name>
+    <message>
+        <source>New Channel</source>
+        <translation>Nuovo Canale</translation>
+    </message>
+    <message>
+        <source>New Group</source>
+        <translation>Nuovo Gruppo</translation>
+    </message>
+</context>
+<context>
     <name>EditGroupChatPermissionsColumn</name>
     <message>
         <source>Group Member Permissions</source>
@@ -2230,10 +2257,6 @@
     <message>
         <source>New Channel</source>
         <translation>Nuovo Canale</translation>
-    </message>
-    <message>
-        <source>RooTelegram</source>
-        <translation>RooTelegram</translation>
     </message>
     <message>
         <source>Settings</source>
@@ -3502,10 +3525,6 @@
         <translation>Mostra l&apos;elenco degli utenti di Telegram che hai bloccato.</translation>
     </message>
     <message>
-        <source>Allow voice calls</source>
-        <translation>Consenti chiamate vocali</translation>
-    </message>
-    <message>
         <source>Privacy setting for managing who can call you.</source>
         <translation>Impostazione privacy per gestire chi può chiamarti.</translation>
     </message>
@@ -3516,6 +3535,10 @@
     <message>
         <source>Nobody</source>
         <translation>Nessuno</translation>
+    </message>
+    <message>
+        <source>Allow calls</source>
+        <translation>Consenti chiamate</translation>
     </message>
 </context>
 <context>

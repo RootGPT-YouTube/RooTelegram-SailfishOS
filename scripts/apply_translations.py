@@ -10,6 +10,8 @@ import sys
 
 
 IT = {
+    # Privacy chiamate (2.0 #1): rinominato da "Allow voice calls"
+    "Allow calls": "Consenti chiamate",
     # Settings / generali
     "Recent": "Recenti",
     "Sticker set": "Set di sticker",
@@ -137,6 +139,8 @@ IT = {
 
 
 DE = {
+    # Anrufe-Datenschutz (2.0 #1): umbenannt von "Allow voice calls"
+    "Allow calls": "Anrufe erlauben",
     # Settings / generali — DE ha già "Recent/Sticker set/Yes/No/..." tradotti.
     "Refresh": "Aktualisieren",
     "Unknown chat": "Unbekannter Chat",

@@ -206,7 +206,7 @@ Page {
                 size: BusyIndicatorSize.Small
             }
 
-            Button {
+            NeonButton {
                 anchors.centerIn: parent
                 text: qsTr("Load more")
                 visible: !loading && blockedModel.count > 0 && blockedModel.count < totalCount

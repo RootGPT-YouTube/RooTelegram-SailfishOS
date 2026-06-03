@@ -283,7 +283,7 @@ Page {
                     }
                     spacing: Theme.paddingSmall
 
-                    Button {
+                    NeonButton {
                         width: (requestActionsRow.width - requestActionsRow.spacing) / 2
                         height: parent.height
                         text: requestDelegate.requestProcessing ? qsTr("Approving…") : qsTr("Approve")
@@ -292,7 +292,7 @@ Page {
                             chatJoinRequestsPage.handleProcessJoinRequest(user_id, true)
                         }
                     }
-                    Button {
+                    NeonButton {
                         width: (requestActionsRow.width - requestActionsRow.spacing) / 2
                         height: parent.height
                         text: requestDelegate.requestProcessing ? qsTr("Rejecting…") : qsTr("Reject")
@@ -314,7 +314,7 @@ Page {
                     size: BusyIndicatorSize.Small
                 }
 
-                Button {
+                NeonButton {
                     anchors.centerIn: parent
                     text: qsTr("Load more")
                     visible: !loading && requestsModel.count > 0 && requestsModel.count < totalCount

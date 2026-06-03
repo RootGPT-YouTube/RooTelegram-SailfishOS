@@ -31,7 +31,7 @@ import "../js/debug.js" as Debug
 
 ListItem {
     id: messageListItem
-    contentHeight: messageBackground.height + Theme.paddingMedium + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
+    contentHeight: messageBackground.height + Theme.paddingMedium + ( addedReactionsAbove.visible ? addedReactionsAbove.height + Theme.paddingSmall : 0 ) + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
     Behavior on contentHeight { NumberAnimation { duration: 200 } }
     property var chatId
     property var messageId
@@ -90,6 +90,14 @@ ListItem {
         myMessage &&
         myMessage["@type"] !== "sponsoredMessage" &&
         typeof myMessage.id !== "undefined"
+    // Media singolo foto/video (NON album): il fumetto si stringe sul media (cornice
+    // minima) e il media è mostrato completo, ridotto all'80% schermo (#5). Il
+    // componente media espone `preferredWidth`.
+    readonly property bool isSingleMedia:
+        myMessage &&
+        myMessage.content &&
+        (myMessage.content["@type"] === "messagePhoto" || myMessage.content["@type"] === "messageVideo") &&
+        (typeof myMessage.media_album_id === "undefined" || myMessage.media_album_id === "0")
     // On-demand: la selezione del testo (e il costoso Emoji.emojify + parse RichText
     // del TextEdit) si attiva SOLO sul messaggio selezionato in modalit\u00e0 selezione,
     // non su tutti i delegate insieme (preserva la performance su canali photo-heavy).
@@ -405,7 +413,11 @@ ListItem {
                 reactionText = reaction.reaction_type.emoji
             }
             if (reactionText) {
-                interactionText += ( "&nbsp;" + Emoji.emojify(reactionText, size) );
+                // 2.0 (#2): emoji della reaction RICEVUTA RADDOPPIATA (più leggibile).
+                // NB emojify applica un fattore 0.8 alla size → per raddoppiare l'emoji
+                // visibile passo size*2 (1.2 non cambiava nulla: 1.2*0.8≈1).
+                // La 👁️ del conteggio visualizzazioni resta alla dimensione base.
+                interactionText += ( "&nbsp;" + Emoji.emojify(reactionText, Math.round(size * 2)) );
                 if (!chatPage.isPrivateChat) {
                     var rawCount = (typeof reaction.total_count !== "undefined") ? reaction.total_count : reaction.count
                     var count = Functions.getShortenedCount(rawCount || 0)
@@ -860,13 +872,53 @@ ListItem {
         }
     }
 
+    // 2.0 abbellimento (#4): la lista "chi ha reagito" (emoji + nome) compare SOPRA
+    // il bubble del messaggio (non più sotto le reaction); il messaggio scende per
+    // fare spazio. Visibile finché il menu del messaggio è aperto (messageAddedReactions).
+    Column {
+        id: addedReactionsAbove
+        width: parent.width - ( 2 * Theme.horizontalPageMargin )
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: Theme.paddingSmall
+        spacing: Theme.paddingSmall
+        visible: messageListItem.messageAddedReactions ? messageListItem.messageAddedReactions.length > 0 : false
+
+        Repeater {
+            model: messageListItem.messageAddedReactions
+
+            Row {
+                spacing: Theme.paddingMedium
+
+                Image {
+                    source: Emoji.getEmojiPath(messageListItem.addedReactionEmoji(modelData.type))
+                    width: status === Image.Ready ? Theme.fontSizeMedium : 0
+                    height: Theme.fontSizeMedium
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                Label {
+                    text: messageListItem.addedReactionSenderName(modelData.sender_id)
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryHighlightColor
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
+        }
+    }
+
     Row {
         id: messageTextRow
         spacing: Theme.paddingSmall
         width: precalculatedValues.entryWidth
+        // 2.0 abbellimento (#6): nei gruppi/commenti canali l'avatar dei propri
+        // messaggi va a destra del bubble, coerente col lato dei propri messaggi.
+        layoutDirection: messageListItem.useOutgoingLayout ? Qt.RightToLeft : Qt.LeftToRight
         anchors.horizontalCenter: Functions.isWidescreen(appWindow) ? undefined : parent.horizontalCenter
         anchors.left: Functions.isWidescreen(appWindow) ? parent.left : undefined
-        y: Theme.paddingSmall
+        // Scende sotto la lista "chi ha reagito" quando è visibile (#4).
+        y: addedReactionsAbove.visible
+           ? (addedReactionsAbove.y + addedReactionsAbove.height + Theme.paddingSmall)
+           : Theme.paddingSmall
         anchors.leftMargin: Functions.isWidescreen(appWindow) ? Theme.paddingMedium : undefined
 
         Loader {
@@ -906,19 +958,33 @@ ListItem {
                 id: messageBackground
 
                 anchors {
-                    left: parent.left
-                    leftMargin: messageListItem.useOutgoingLayout ? precalculatedValues.pageMarginDouble : 0
+                    // Foto singola: allinea il fumetto al lato giusto (dx i propri, sx gli altrui);
+                    // altrimenti comportamento classico (sinistra + leftMargin per i propri).
+                    left: (messageListItem.useOutgoingLayout && messageListItem.isSingleMedia) ? undefined : parent.left
+                    right: (messageListItem.useOutgoingLayout && messageListItem.isSingleMedia) ? parent.right : undefined
+                    leftMargin: (messageListItem.useOutgoingLayout && !messageListItem.isSingleMedia) ? precalculatedValues.pageMarginDouble : 0
                     verticalCenter: parent.verticalCenter
                 }
-                height: messageTextColumn.height + precalculatedValues.paddingMediumDouble
-                width: precalculatedValues.backgroundWidth
+                // Cornice MINIMA per le foto singole: il fumetto avvolge l'immagine.
+                height: messageListItem.isSingleMedia
+                        ? messageTextColumn.height + 2 * Theme.paddingSmall
+                        : messageTextColumn.height + precalculatedValues.paddingMediumDouble
+                width: (messageListItem.isSingleMedia && extraContentLoader.item)
+                       ? Math.round(extraContentLoader.item.preferredWidth + 2 * Theme.paddingSmall)
+                       : precalculatedValues.backgroundWidth
                 property bool isUnread: messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage"
-                color: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
+                // Effetto "vetro leggero" (glassmorphism): fumetto molto più trasparente
+                // (alpha bassa sul colore, opacity=1) + bordo sottile luminoso. Niente blur
+                // (sarebbe 1 passata per messaggio nella lista → pesante su CPU/batteria).
+                property color glassBase: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
+                color: Theme.rgba(glassBase, isUnread ? 0.22 : 0.08)
                 radius: parent.width / 50
-                opacity: isUnread ? 0.5 : 0.2
+                opacity: 1
+                border.width: 2
+                // Bordo "vetro" colorato: ROSSO per i propri messaggi, ARANCIONE per gli altrui.
+                border.color: Theme.rgba(messageListItem.isOwnMessage ? "#ff5252" : "#ff8a3d", 0.45)
                 visible: appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji")
                 Behavior on color { ColorAnimation { duration: 200 } }
-                Behavior on opacity { FadeAnimation {} }
             }
 
             Column {
@@ -926,7 +992,10 @@ ListItem {
 
                 spacing: Theme.paddingSmall
 
-                width: precalculatedValues.textColumnWidth
+                // Foto singola: la colonna (e quindi il fumetto) larga quanto l'immagine.
+                width: (messageListItem.isSingleMedia && extraContentLoader.item)
+                       ? extraContentLoader.item.preferredWidth
+                       : precalculatedValues.textColumnWidth
                 anchors.centerIn: messageBackground
 
 
@@ -972,8 +1041,11 @@ ListItem {
                             && !(page.messageThreadId > 1
                                  && Number(myMessage.reply_to_message_id) === Number(page.messageThreadId))
                     width: parent.width
-                    // text height ~= 1,28*font.pixelSize
-                    height: active ? precalculatedValues.messageInReplyToHeight : 0
+                    // Altezza = altezza REALE del contenuto (InReplyToRow: nome + anteprima).
+                    // Stimarla con un moltiplicatore del font la rendeva troppo corta e
+                    // tagliava drasticamente la riga citata; precalc solo come fallback
+                    // per il frame in cui l'item non è ancora caricato.
+                    height: active ? (item ? item.height : precalculatedValues.messageInReplyToHeight) : 0
                     clip: true
                     property var inReplyToMessage;
                     property bool inReplyToMessageDeleted: false;
@@ -1123,6 +1195,24 @@ ListItem {
                     }
                 }
 
+                // Contenuto media (foto/video/...) — SOPRA l'eventuale didascalia (#5).
+                Loader {
+                    id: extraContentLoader
+                    width: (messageListItem.isSingleMedia && item)
+                           ? item.preferredWidth
+                           : parent.width * getContentWidthMultiplier()
+                    asynchronous: true
+                    readonly property var defaultExtraContentHeight: messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width, model.album_message_ids.length) : 0
+                    height: item ? item.height : defaultExtraContentHeight
+                }
+
+                Binding {
+                    target: extraContentLoader.item
+                    when: extraContentLoader.item && ("highlighted" in extraContentLoader.item) && (typeof extraContentLoader.item.highlighted === "boolean")
+                    property: "highlighted"
+                    value: messageListItem.highlighted
+                }
+
                 // PROTOTIPO selezione nativa Sailfish: in modalità selezione il testo
                 // del messaggio selezionato viene mostrato con una Silica TextArea
                 // read-only, che fornisce le maniglie start/end + lente + popup copia
@@ -1164,6 +1254,8 @@ ListItem {
                     text: (messageListItem.revealedSpoilersVersion, Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false, messageListItem.revealedSpoilers), Theme.fontSizeMedium))
                     font.pixelSize: Theme.fontSizeSmall
                     color: messageListItem.textColor
+                    // Link a siti esterni in ROSSO-ARANCIO (il blu di default si legge male).
+                    linkColor: "#ff6e40"
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {
@@ -1216,21 +1308,6 @@ ListItem {
                 }
 
                 Loader {
-                    id: extraContentLoader
-                    width: parent.width * getContentWidthMultiplier()
-                    asynchronous: true
-                    readonly property var defaultExtraContentHeight: messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width, model.album_message_ids.length) : 0
-                    height: item ? item.height : defaultExtraContentHeight
-                }
-
-                Binding {
-                    target: extraContentLoader.item
-                    when: extraContentLoader.item && ("highlighted" in extraContentLoader.item) && (typeof extraContentLoader.item.highlighted === "boolean")
-                    property: "highlighted"
-                    value: messageListItem.highlighted
-                }
-
-                Loader {
                     id: replyMarkupLoader
                     width: parent.width
                     height: active ? (myMessage.reply_markup.rows.length * (Theme.itemSizeSmall + Theme.paddingSmall) - Theme.paddingSmall) : 0
@@ -1274,7 +1351,8 @@ ListItem {
                     width: parent.width
                     asynchronous: true
                     active: ( chatPage.isChannel && messageViewCount > 0 ) || reactions.length > 0
-                    height: ( ( chatPage.isChannel && messageViewCount > 0 ) || reactions.length > 0 ) ? ( Theme.fontSizeExtraSmall + Theme.paddingSmall ) : 0
+                    // Più alto per contenere l'emoji reaction raddoppiata (#2).
+                    height: ( ( chatPage.isChannel && messageViewCount > 0 ) || reactions.length > 0 ) ? ( Math.max(Theme.fontSizeExtraSmall, Math.round(Theme.fontSizeTiny * 1.6)) + Theme.paddingSmall ) : 0
                     sourceComponent: Component {
                         Label {
                             text: getInteractionText(messageViewCount, reactions, font.pixelSize, Theme.highlightColor)
@@ -1507,36 +1585,6 @@ ListItem {
                                 messageReactions = null
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        // Chi ha reagito e con quale reaction (lista sender→emoji).
-        Column {
-            width: parent.width
-            spacing: Theme.paddingSmall
-            visible: messageListItem.messageAddedReactions ? messageListItem.messageAddedReactions.length > 0 : false
-
-            Repeater {
-                model: messageListItem.messageAddedReactions
-
-                Row {
-                    spacing: Theme.paddingMedium
-
-                    Image {
-                        id: addedReactionEmojiImage
-                        source: Emoji.getEmojiPath(messageListItem.addedReactionEmoji(modelData.type))
-                        width: status === Image.Ready ? Theme.fontSizeMedium : 0
-                        height: Theme.fontSizeMedium
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Label {
-                        text: messageListItem.addedReactionSenderName(modelData.sender_id)
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.secondaryHighlightColor
-                        anchors.verticalCenter: parent.verticalCenter
                     }
                 }
             }

@@ -290,7 +290,7 @@ Page {
                 size: BusyIndicatorSize.Small
             }
 
-            Button {
+            NeonButton {
                 anchors.centerIn: parent
                 text: qsTr("Load more")
                 visible: !loading && canLoadMore && eventsModel.count > 0

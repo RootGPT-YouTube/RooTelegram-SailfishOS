@@ -367,7 +367,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypeUrl":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:#ff6e40;\" href=\"" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -442,7 +442,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypeTextUrl":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"" + entity.type.url + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:#ff6e40;\" href=\"" + entity.type.url + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -566,7 +566,7 @@ function getVideoHeight(videoWidth, videoData) {
 }
 
 function replaceUrlsWithLinks(string) {
-    return string.replace(/((\w+):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, "<a href=\"$1\">$1</a>");
+    return string.replace(/((\w+):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, "<a style=\"color:#ff6e40;\" href=\"$1\">$1</a>");
 }
 
 function sortMessagesArrayByDate(messages) {

@@ -18,6 +18,7 @@
 */
 
 import QtQuick 2.6
+import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
 Item {
@@ -60,36 +61,69 @@ Item {
             area.parent.animate = true;
             area.parent.setActiveArea(area.expanded ? -1 : area.text)
         }
+        // "Cartello di vetro": pannello translucido + bordo arancione luminoso
+        // (stesso linguaggio dei fumetti glassmorphism delle chat). Niente blur (CPU).
         Rectangle {
+            id: glassCard
             anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Theme.rgba(Theme.highlightBackgroundColor, 0.15) }
-                GradientStop { position: 1.0; color: "transparent" }
+            anchors.leftMargin: Theme.horizontalPageMargin
+            anchors.rightMargin: Theme.horizontalPageMargin
+            anchors.topMargin: Theme.paddingSmall / 2
+            anchors.bottomMargin: Theme.paddingSmall / 2
+            radius: Theme.paddingLarge
+            color: Theme.rgba("#ffffff", (button.highlighted || area.expanded) ? 0.14 : 0.06)
+            border.width: 2
+            border.color: Theme.rgba("#ff8a3d", (button.highlighted || area.expanded) ? 0.80 : 0.45)
+            Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on border.color { ColorAnimation { duration: 150 } }
+        }
+        // Scritta della scheda in NEON BIANCO, centrata: alone (Glow) + nucleo nitido.
+        Label {
+            id: labelHalo
+            anchors {
+                left: glassCard.left
+                right: glassCard.right
+                verticalCenter: glassCard.verticalCenter
+                leftMargin: Theme.paddingLarge
+                rightMargin: Theme.paddingLarge
+            }
+            horizontalAlignment: Text.AlignHCenter
+            truncationMode: TruncationMode.Fade
+            text: label.text
+            font.family: Theme.fontFamilyHeading
+            font.italic: true
+            color: "#ffffff"
+            textFormat: Text.PlainText
+            layer.enabled: true
+            layer.effect: Glow {
+                color: "#ffffff"
+                radius: 12
+                samples: 25
+                spread: 0.20
+                transparentBorder: true
             }
         }
         Label {
             id: label
             anchors {
-                left: parent.left
-                right: image.left
-                verticalCenter: parent.verticalCenter
-                leftMargin: Theme.horizontalPageMargin + Theme.paddingLarge
-                rightMargin: Theme.paddingMedium
+                left: glassCard.left
+                right: glassCard.right
+                verticalCenter: glassCard.verticalCenter
+                leftMargin: Theme.paddingLarge
+                rightMargin: Theme.paddingLarge
             }
-            horizontalAlignment: Text.AlignRight
+            horizontalAlignment: Text.AlignHCenter
             truncationMode: TruncationMode.Fade
-            color: button.highlighted ? Theme.highlightColor : Theme.primaryColor
+            font.family: Theme.fontFamilyHeading
+            font.italic: true
+            color: "#ffffff"
             textFormat: Text.PlainText
         }
+        // Freccia rimossa dall'UI (id mantenuto per alias `icon` e stato expanded).
         HighlightImage {
             id: image
-            anchors {
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-                rightMargin: Theme.horizontalPageMargin
-            }
-            width: visible ? Theme.iconSizeMedium : 0
-            highlighted: parent.highlighted
+            visible: false
+            width: 0
             source: "image://theme/icon-m-left"
             rotation: -90
         }

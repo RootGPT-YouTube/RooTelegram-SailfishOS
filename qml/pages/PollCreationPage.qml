@@ -293,7 +293,7 @@ Dialog {
                 }
             }
             ButtonLayout {
-                Button {
+                NeonButton {
                     enabled: pollCreationPage.options.count < 10
                     text: qsTr("Add an answer")
                     onClicked: {

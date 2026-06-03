@@ -22,6 +22,7 @@
     along with RooTelegram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
+import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
 
@@ -30,7 +31,8 @@ Item {
 
     property alias photoData: file.fileInformation
     property string replacementStringHint: "X"
-    property int radius: width / 2
+    // 2.0 abbellimento (#3): angoli stondati (rounded-square) invece di cerchio/quadrato
+    property int radius: Math.round(width * 0.3)
     property int imageStatus: -1
     property bool optimizeImageSize: true
     property bool highlighted
@@ -81,7 +83,7 @@ Item {
                 asynchronous: true
                 visible: true
                 layer.enabled: true
-                layer.effect: null
+                layer.effect: OpacityMask { maskSource: profileThumbnailMask }
                 onStatusChanged: {
                     profileThumbnail.imageStatus = status
                 }
@@ -89,12 +91,11 @@ Item {
 
             Rectangle {
                 id: profileThumbnailMask
-                width: parent.width - Theme.paddingSmall
-                height: parent.height - Theme.paddingSmall
-                color: "transparent"
+                width: singleImage.width
+                height: singleImage.height
+                color: "white"
                 radius: profileThumbnail.radius
                 anchors.centerIn: singleImage
-                clip: true
                 visible: false
             }
         }
@@ -117,7 +118,7 @@ Item {
             id: replacementThumbnailBackground
             anchors.fill: parent
             color: (Theme.colorScheme === Theme.LightOnDark) ? Theme.darkSecondaryColor : Theme.lightSecondaryColor
-            radius: parent.width / 2
+            radius: profileThumbnail.radius
             opacity: 0.8
         }
 

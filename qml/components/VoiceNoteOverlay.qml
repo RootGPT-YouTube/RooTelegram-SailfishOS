@@ -199,7 +199,7 @@ Item {
                 }
             }
 
-            Button {
+            NeonButton {
                 visible: recordingDone
                 anchors {
                     horizontalCenter: parent.horizontalCenter

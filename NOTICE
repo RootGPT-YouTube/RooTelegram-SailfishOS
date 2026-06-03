@@ -1,0 +1,83 @@
+RooTelegram — Third-party components and licenses
+=================================================
+
+RooTelegram is free software released under the GNU General Public License
+version 3 (see the LICENSE file). It is a fork of Fernschreiber by Sebastian J.
+Wolf, with contributions inspired by Yottagram by Michal Szczepaniak.
+
+This file lists the third-party components distributed with, or linked into, the
+RooTelegram package, together with their license and a pointer to the
+corresponding upstream source, as required by the GPL/LGPL/MIT licenses.
+
+Note on distribution: some of these components are not committed to this source
+repository (they are excluded via .gitignore) but are downloaded and/or compiled
+at build time and end up inside the distributed RPM. Their corresponding source
+is identified below by upstream project and version/tag.
+
+--------------------------------------------------------------------------------
+COMPONENT     : RooTelegram (this application)
+LICENSE       : GPL v3
+SOURCE        : https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS
+BASED ON      : Fernschreiber (GPL v3) — https://github.com/Wunderfitz/harbour-fernschreiber
+NOTES         : Full license text in ./LICENSE
+
+--------------------------------------------------------------------------------
+COMPONENT     : TDLib (Telegram Database Library, libtdjson)
+VERSION       : 1.8.62
+LICENSE       : Boost Software License 1.0
+SOURCE        : https://github.com/tdlib/td
+DISTRIBUTION  : prebuilt libtdjson bundled in the RPM (excluded from this repo
+                via .gitignore: /tdlib/)
+
+--------------------------------------------------------------------------------
+COMPONENT     : tg_owt (Telegram's WebRTC build, used for voice/video calls)
+LICENSE       : GPL v2 or later (BSD-style WebRTC components; overall GPL)
+SOURCE        : https://github.com/desktop-app/tg_owt
+DISTRIBUTION  : compiled and linked into the RPM (excluded from this repo via
+                .gitignore: /vendor/)
+
+--------------------------------------------------------------------------------
+COMPONENT     : tgcalls (Telegram calls library, voice/video calls)
+LICENSE       : GPL v2 or later
+SOURCE        : https://github.com/TelegramMessenger/tgcalls
+DISTRIBUTION  : compiled and linked into the RPM (excluded from this repo via
+                .gitignore: /vendor/)
+
+--------------------------------------------------------------------------------
+COMPONENT     : rlottie (animated Lottie stickers)
+LICENSE       : MIT License
+COPYRIGHT     : Copyright (c) 2020 Samsung Electronics Co., Ltd. and other
+                contributors
+SOURCE        : https://github.com/Samsung/rlottie
+DISTRIBUTION  : compiled into the RPM (excluded from this repo via .gitignore:
+                /rlottie/)
+
+--------------------------------------------------------------------------------
+COMPONENT     : FFmpeg (minimal static build, video normalization for stories)
+VERSION       : 7.0.2
+LICENSE       : LGPL v2.1 or later — but this build is GPL v2 or later because
+                it is configured with --enable-gpl and linked against libx264
+SOURCE        : https://ffmpeg.org  —  https://ffmpeg.org/releases/ffmpeg-7.0.2.tar.xz
+RECIPE        : scripts/build-ffmpeg.sh
+LICENSE TEXT  : ffmpeg/LICENSE
+DISTRIBUTION  : binary committed at ffmpeg/<arch>/bin/ffmpeg
+
+--------------------------------------------------------------------------------
+COMPONENT     : libx264 (H.264 encoder, linked into the bundled FFmpeg binary)
+VERSION       : stable
+LICENSE       : GPL v2 or later
+SOURCE        : https://www.videolan.org/developers/x264.html
+                https://code.videolan.org/videolan/x264
+RECIPE        : scripts/build-ffmpeg.sh
+LICENSE TEXT  : ffmpeg/LICENSE
+
+--------------------------------------------------------------------------------
+COMPONENT     : Twemoji (emoji graphics, jdecked fork)
+LICENSE       : MIT License (code) and CC-BY 4.0 (graphics)
+COPYRIGHT     : Copyright the Twemoji contributors
+SOURCE        : https://github.com/jdecked/twemoji
+
+--------------------------------------------------------------------------------
+COMPONENT     : OpenStreetMap Nominatim (reverse geocoding web service)
+LICENSE       : ODbL (data) — used as a network service, not bundled
+SOURCE        : https://wiki.openstreetmap.org/wiki/Nominatim

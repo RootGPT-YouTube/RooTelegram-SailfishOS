@@ -23,6 +23,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import Nemo.Notifications 1.0
 import WerkWolf.RooTelegram 1.0
 import "../components"
@@ -56,9 +57,14 @@ Page {
         target: dBusAdaptor
         onPleaseOpenMessage: {
             Debug.log("[OverviewPage] Opening chat from external requested: ", chatId, messageId);
-            // We open the chat only for now - as it's automatically positioned at the last read message
-            // it's probably better as if the message itself is displayed in the overlay
-            openChat(chatId);
+            // Deep-link al messaggio specifico (es. tap notifica reaction su un proprio
+            // messaggio): apriamo la chat E mostriamo quel messaggio (overlay via
+            // messageIdToShow). Se non c'è messageId, ripieghiamo sull'apertura chat.
+            if (messageId && messageId.length > 0 && messageId !== "0") {
+                openChatWithMessageId(chatId, messageId);
+            } else {
+                openChat(chatId);
+            }
         }
         onPleaseOpenUrl: {
             Debug.log("[OverviewPage] Opening URL requested: ", url);
@@ -73,6 +79,17 @@ Page {
         repeat: false
         onTriggered: {
             overviewPage.chatListCreated = true;
+            // Deep-link messo in coda mentre la lista non era ancora pronta (tap
+            // notifica ad app chiusa / da daemon): ora apriamo chat/messaggio/URL.
+            if (overviewPage.chatToOpen && overviewPage.chatToOpen.length === 2) {
+                if (typeof overviewPage.chatToOpen[1] === "object") {
+                    overviewPage.openChatWithMessage(overviewPage.chatToOpen[0], overviewPage.chatToOpen[1]);
+                } else {
+                    overviewPage.openChatWithMessageId(overviewPage.chatToOpen[0], overviewPage.chatToOpen[1]);
+                }
+            } else if (overviewPage.urlToOpen && overviewPage.urlToOpen.length > 1) {
+                overviewPage.openUrl(overviewPage.urlToOpen);
+            }
             chatListView.scrollToTop();
             updateSecondaryContentTimer.start();
             var remainingInteractionHints = appSettings.remainingInteractionHints;
@@ -280,7 +297,8 @@ Page {
             pageHeader.title = qsTr("Connecting to proxy...");
             break;
         case TelegramAPI.ConnectionReady:
-            pageHeader.title = qsTr("RooTelegram");
+            // Stato "pronto": il titolo testuale resta vuoto, mostra il brand neon (brandLabel)
+            pageHeader.title = "";
             break;
         case TelegramAPI.Updating:
             pageHeader.title = qsTr("Updating content...");
@@ -471,6 +489,9 @@ Page {
         initializePage();
     }
 
+    // Sfondo a circuiti elettrici blu (#19), tenue, dietro la lista.
+    CircuitBackground {}
+
     SilicaFlickable {
         id: overviewContainer
         contentHeight: parent.height
@@ -488,19 +509,15 @@ Page {
                 text: qsTr("Settings")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/SettingsPage.qml"))
             }
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.secondaryHighlightColor
-                horizontalAlignment: Qt.AlignHCenter
             }
             MenuItem {
                 text: qsTr("Stories")
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"))
             }
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.secondaryHighlightColor
-                horizontalAlignment: Qt.AlignHCenter
             }
             MenuItem {
                 text: qsTr("New Group")
@@ -518,20 +535,99 @@ Page {
 
         PageHeader {
             id: pageHeader
-            title: qsTr("RooTelegram")
+            title: ""
             leftMargin: Theme.itemSizeMedium
             visible: opacity > 0
+            // Non lasciare che l'altezza fissa di default schiacci il titolo neon: cresce col label
+            height: Math.max(implicitHeight, brandNeon.visible ? brandNeon.implicitHeight + 2 * Theme.paddingLarge : 0)
             Behavior on opacity { FadeAnimation {} }
+
+            // Brand "R∞Telegram" in vero stile tubo al neon (nucleo chiaro brillante + alone
+            // magenta che diffonde), mostrato solo a connessione pronta; negli altri stati il
+            // titolo testuale del PageHeader mostra "Connecting…", ecc.
+            Item {
+                id: brandNeon
+                visible: overviewPage.connectionState === TelegramAPI.ConnectionReady
+                implicitWidth: neonCore.implicitWidth
+                implicitHeight: neonCore.implicitHeight
+                width: implicitWidth
+                height: implicitHeight
+                anchors {
+                    right: parent.right
+                    rightMargin: Theme.horizontalPageMargin
+                    verticalCenter: parent.verticalCenter
+                }
+
+                // Luce proiettata sullo SFONDO dietro la parola (come il muro illuminato dal neon)
+                RadialGradient {
+                    id: neonBackglow
+                    anchors.centerIn: parent
+                    width: neonCore.implicitWidth * 1.5
+                    height: neonCore.implicitHeight * 2.6
+                    horizontalRadius: width / 2
+                    verticalRadius: height / 2
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Qt.rgba(1, 0.34, 0.0, 0.45) }
+                        GradientStop { position: 0.55; color: Qt.rgba(1, 0.34, 0.0, 0.12) }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                }
+
+                // Alone largo e morbido: è il colore "del tubo" che diffonde nell'aria
+                Label {
+                    id: neonHalo
+                    anchors.centerIn: parent
+                    text: "R∞Telegram"
+                    font.pixelSize: Theme.fontSizeHuge
+                    font.italic: true
+                    color: "#e65000"
+                    layer.enabled: true
+                    layer.effect: Glow {
+                        color: "#e65000"
+                        radius: 32
+                        samples: 49
+                        spread: 0.30
+                        transparentBorder: true
+                    }
+                }
+
+                // Nucleo: la scritta quasi bianca/luminosa con un glow stretto rosa acceso
+                Label {
+                    id: neonCore
+                    anchors.centerIn: parent
+                    text: "R∞Telegram"
+                    font.pixelSize: Theme.fontSizeHuge
+                    font.italic: true
+                    color: "#fff3e6"
+                    layer.enabled: true
+                    layer.effect: Glow {
+                        color: "#ff9a3d"
+                        radius: 8
+                        samples: 17
+                        spread: 0.55
+                        transparentBorder: true
+                    }
+                }
+            }
 
             Image {
                 id: pageStatus
-                source: "image://theme/icon-m-search"
+                // lente in stile neon: glyph tinta arancione + glow, stesso colore del titolo
+                source: "image://theme/icon-m-search?#ff8a3d"
                 width: Theme.iconSizeMedium
                 height: Theme.iconSizeMedium
                 fillMode: Image.PreserveAspectFit
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: Theme.paddingLarge
+                layer.enabled: true
+                layer.effect: Glow {
+                    color: "#e65000"
+                    radius: 10
+                    samples: 21
+                    spread: 0.5
+                    transparentBorder: true
+                }
             }
 
             MouseArea {
@@ -570,7 +666,13 @@ Page {
             anchors.top: pageHeader.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            color: Theme.highlightBackgroundColor
+            // stesso arancione della ContextMenu del long-press su "Tutte": tinta SMORZATA (l'arancione
+            // saturo risultava troppo acceso) — scurito e desaturato mescolando un po' di grigio,
+            // con leggera sfumatura verticale come il "vetro" Silica
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.tint(Qt.darker(Theme.highlightBackgroundColor, 1.7), "#3c7a7a7a") }
+                GradientStop { position: 1.0; color: Qt.tint(Qt.darker(Theme.highlightBackgroundColor, 2.05), "#3c7a7a7a") }
+            }
             z: 100
             clip: true
             height: opened ? titleMenuColumn.height + 2 * Theme.paddingMedium : 0
@@ -727,9 +829,21 @@ Page {
                     }
                 }
 
+                // alone neon dietro l'icona (icona nitida sopra)
+                Glow {
+                    anchors.fill: allIcon
+                    source: allIcon
+                    color: "#ffffff"
+                    radius: 8
+                    samples: 17
+                    spread: 0.25
+                    transparentBorder: true
+                    opacity: allIcon.opacity
+                    z: -1
+                }
                 Image {
                     id: allIcon
-                    source: "image://theme/icon-m-chat"
+                    source: "image://theme/icon-m-chat?#ffffff"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: Theme.paddingMedium
@@ -739,15 +853,29 @@ Page {
                     opacity: activeFolderId === 0 ? 1.0 : 0.6
                 }
 
+                Glow {
+                    anchors.fill: allLabel
+                    source: allLabel
+                    color: "#ffffff"
+                    radius: 6
+                    samples: 13
+                    spread: 0.2
+                    transparentBorder: true
+                    opacity: allLabel.opacity
+                    z: -1
+                }
                 Label {
+                    id: allLabel
                     text: qsTr("All")
                     font.pixelSize: Theme.fontSizeExtraSmall
+                    font.italic: true
                     anchors.top: allIcon.bottom
                     anchors.topMargin: Theme.paddingSmall
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: Theme.itemSizeMedium
                     horizontalAlignment: Text.AlignHCenter
-                    color: activeFolderId === 0 ? Theme.highlightColor : Theme.primaryColor
+                    color: "#ffffff"
+                    opacity: activeFolderId === 0 ? 1.0 : 0.6
                 }
 
                 onClicked: {
@@ -766,9 +894,21 @@ Page {
                 clip: true
                 highlighted: activeFolderId === folderId
 
+                // alone neon dietro l'icona (icona nitida sopra)
+                Glow {
+                    anchors.fill: folderIcon
+                    source: folderIcon
+                    color: "#ffffff"
+                    radius: 8
+                    samples: 17
+                    spread: 0.3
+                    transparentBorder: true
+                    opacity: folderIcon.opacity
+                    z: -1
+                }
                 Image {
                     id: folderIcon
-                    source: "image://theme/icon-m-folder"
+                    source: "image://theme/icon-m-folder?#ffffff"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: Theme.paddingMedium
@@ -778,9 +918,22 @@ Page {
                     opacity: activeFolderId === folderId ? 1.0 : 0.6
                 }
 
+                Glow {
+                    anchors.fill: folderLabel
+                    source: folderLabel
+                    color: "#ffffff"
+                    radius: 6
+                    samples: 13
+                    spread: 0.25
+                    transparentBorder: true
+                    opacity: folderLabel.opacity
+                    z: -1
+                }
                 Label {
+                    id: folderLabel
                     text: folderName
                     font.pixelSize: Theme.fontSizeExtraSmall
+                    font.italic: true
                     anchors.top: folderIcon.bottom
                     anchors.topMargin: Theme.paddingSmall
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -788,7 +941,8 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     lineHeight: 0.8
-                    color: activeFolderId === folderId ? Theme.highlightColor : Theme.primaryColor
+                    color: "#ffffff"
+                    opacity: activeFolderId === folderId ? 1.0 : 0.6
                 }
 
                 onClicked: {

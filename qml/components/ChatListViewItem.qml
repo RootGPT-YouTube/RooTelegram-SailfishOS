@@ -7,6 +7,8 @@ import "../js/functions.js" as Functions
 
 PhotoTextsListItem {
     id: listItem
+    // Anteprima home: nome+messaggio in flusso unico su 2 righe, orario in basso a dx
+    useCompactPreview: true
     pictureThumbnail {
         photoData: photo_small || ({})
         highlighted: listItem.highlighted && !listItem.menuOpen
@@ -17,6 +19,11 @@ PhotoTextsListItem {
 
     // chat title
     primaryText.text: title ? Emoji.emojify(title, Theme.fontSizeMedium) : qsTr("Unknown")
+    // 2.0 abbellimento: tutti i nomi chat in corsivo (#9); pinnate in rosso (#8)
+    primaryText.font.italic: true
+    primaryText.color: is_pinned
+                       ? "#ff5252"
+                       : ((appSettings.highlightUnreadConversations && (unread_count > 0)) ? Theme.highlightColor : Theme.primaryColor)
     // last user
     prologSecondaryText.text: showDraft ? "<i>"+qsTr("Draft")+"</i>" : (is_channel ? "" : ( last_message_sender_id ? ( last_message_sender_id !== ownUserId ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(last_message_sender_id)), Theme.fontSizeExtraSmall) : qsTr("You") ) : "" ))
     // last message

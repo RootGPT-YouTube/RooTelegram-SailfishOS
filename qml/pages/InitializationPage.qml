@@ -19,6 +19,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "../components"
 
 Page {
     id: initializationPage
@@ -172,7 +173,7 @@ Page {
                     }
                 }
 
-                Button {
+                NeonButton {
                     id: continueWithPhoneNumberButton
                     text: qsTr("Continue")
                     anchors {
@@ -203,7 +204,7 @@ Page {
                     text: ""
                 }
 
-                Button {
+                NeonButton {
                     text: qsTr("OK")
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -239,7 +240,7 @@ Page {
                     horizontalAlignment: TextInput.AlignHCenter
                 }
 
-                Button {
+                NeonButton {
                     text: qsTr("OK")
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -280,7 +281,7 @@ Page {
                     EnterKey.onClicked: enterPinButton.enter()
                 }
 
-                Button {
+                NeonButton {
                     id: enterPinButton
                     text: qsTr("OK")
                     anchors {
@@ -309,7 +310,7 @@ Page {
                     text: qsTr("Unable to authenticate you with the entered code.")
                 }
 
-                Button {
+                NeonButton {
                     text: qsTr("Enter code again")
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -320,7 +321,7 @@ Page {
                     }
                 }
 
-                Button {
+                NeonButton {
                     text: qsTr("Restart authentication")
                     anchors {
                         horizontalCenter: parent.horizontalCenter
@@ -370,7 +371,7 @@ Page {
                     }
                 }
 
-                Button {
+                NeonButton {
                     visible: waitRegistrationInfoLabel.visible
                     text: qsTr("OK")
                     anchors {
@@ -413,7 +414,7 @@ Page {
                         if(acceptableInput) registerUserButton.onClicked(null);
                     }
                 }
-                Button {
+                NeonButton {
                     id: registerUserButton
                     visible: !waitRegistrationInfoLabel.visible
                     opacity: visible ? 1.0 : 0.0

@@ -23,6 +23,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import Sailfish.Pickers 1.0
 import Nemo.Thumbnailer 1.0
 import WerkWolf.RooTelegram 1.0
@@ -35,6 +36,16 @@ Page {
     id: chatPage
     allowedOrientations: Orientation.All
     backNavigation: !stickerPickerLoader.active
+
+    // Sfondo a circuiti elettrici blu (#19), tenue, dietro la conversazione.
+    CircuitBackground {}
+
+    // Misura REALE dell'altezza di riga del testo extra-small: serve a dimensionare
+    // il chip "in risposta a" (nome + anteprima = 2 righe) senza tagliarne il fondo.
+    FontMetrics {
+        id: replyChipFontMetrics
+        font.pixelSize: Theme.fontSizeExtraSmall
+    }
 
     property bool loading: true;
     property bool isInitialized: false;
@@ -368,21 +379,23 @@ Page {
         }
 
         if (chatPage.myUserId === message.sender_id.user_id) {
+            // Pallini colorati di stato (#12): verde=letto, blu=consegnato,
+            // arancione=in invio, rosso=non recapitato.
             messageStatusSuffix += "&nbsp;&nbsp;"
             if (listItemIndex <= lastReadSentIndex) {
                 // Read by other party
-                messageStatusSuffix += Emoji.emojify("✅", Theme.fontSizeTiny);
+                messageStatusSuffix += "<font color=\"#4caf50\">●</font>";
             } else {
                 // Not yet read by other party
                 if (message.sending_state) {
                     if (message.sending_state['@type'] === "messageSendingStatePending") {
-                        messageStatusSuffix += Emoji.emojify("🕙", Theme.fontSizeTiny);
+                        messageStatusSuffix += "<font color=\"#ff9800\">●</font>";
                     } else {
                         // Sending failed...
-                        messageStatusSuffix += Emoji.emojify("❌", Theme.fontSizeTiny);
+                        messageStatusSuffix += "<font color=\"#f44336\">●</font>";
                     }
                 } else {
-                    messageStatusSuffix += Emoji.emojify("☑️", Theme.fontSizeTiny);
+                    messageStatusSuffix += "<font color=\"#2196f3\">●</font>";
                 }
             }
         }
@@ -1866,6 +1879,32 @@ Page {
                         height: chatNameText.height + (topicNameText.visible ? topicNameText.height : 0) + chatStatusText.height
                         anchors.bottom: parent.bottom
                         anchors.bottomMargin: chatPage.isPortrait ? Theme.paddingMedium : Theme.paddingSmall
+                        // Nome chat in stile NEON come il brand "R∞Telegram" della home:
+                        // alone arancione largo dietro + nucleo chiaro con glow stretto.
+                        // truncationMode Elide (NON Fade): il Fade usa un layer e va in
+                        // conflitto col layer.effect Glow.
+                        Label {
+                            id: chatNameHalo
+                            width: chatNameText.width
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            text: chatNameText.text
+                            textFormat: Text.StyledText
+                            font.pixelSize: chatNameText.font.pixelSize
+                            font.family: Theme.fontFamilyHeading
+                            font.italic: true
+                            color: "#e65000"
+                            truncationMode: TruncationMode.Elide
+                            maximumLineCount: 1
+                            layer.enabled: true
+                            layer.effect: Glow {
+                                color: "#e65000"
+                                radius: 18
+                                samples: 37
+                                spread: 0.30
+                                transparentBorder: true
+                            }
+                        }
                         Label {
                             id: chatNameText
                             width: Math.min(implicitWidth, parent.width)
@@ -1875,9 +1914,18 @@ Page {
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
                             font.family: Theme.fontFamilyHeading
-                            color: Theme.highlightColor
-                            truncationMode: TruncationMode.Fade
+                            font.italic: true
+                            color: "#fff3e6"
+                            truncationMode: TruncationMode.Elide
                             maximumLineCount: 1
+                            layer.enabled: true
+                            layer.effect: Glow {
+                                color: "#ff9a3d"
+                                radius: 6
+                                samples: 13
+                                spread: 0.55
+                                transparentBorder: true
+                            }
                         }
                         Label {
                             id: topicNameText
@@ -2101,7 +2149,10 @@ Page {
                             readonly property int backgroundWidth: page.isChannel ? textItemWidth : textItemWidth - pageMarginDouble
                             readonly property int backgroundRadius: textItemWidth/50
                             readonly property int textColumnWidth: backgroundWidth - Theme.horizontalPageMargin
-                            readonly property int messageInReplyToHeight: Theme.fontSizeExtraSmall * 2.571428571 + Theme.paddingSmall;
+                            // 2 righe extra-small (nome + anteprima) + spacing della Column.
+                            // Misura REALE (FontMetrics.height) invece del vecchio moltiplicatore
+                            // 2.571 che era leggermente troppo corto → tagliava il fondo del chip.
+                            readonly property int messageInReplyToHeight: Math.ceil(2 * replyChipFontMetrics.height) + Theme.paddingSmall;
                             readonly property int webPagePreviewHeight: ( (textColumnWidth * 2 / 3) + (6 * Theme.fontSizeExtraSmall) + ( 7 * Theme.paddingSmall) )
                             readonly property bool pageIsSelecting: chatPage.isSelecting
                         }
@@ -4128,10 +4179,8 @@ Page {
                 font.pixelSize: Theme.fontSizeMedium
             }
 
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.primaryColor
-                horizontalAlignment: Qt.AlignHCenter
             }
 
             BackgroundItem {

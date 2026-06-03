@@ -40,8 +40,27 @@ MessageContentBase {
     property bool onScreen: messageListItem ? messageListItem.page.status === PageStatus.Active : true;
     property string videoType : "video";
     property bool playRequested: false;
+    // Stato di riproduzione: pilota la visibilità di anteprima/controlli/badge via
+    // BINDING (gli assegnamenti imperativi a playButton.visible dall'interno del
+    // Loader non "attaccavano" → i controlli non tornavano a fine video).
+    property bool isPlaying: false;
 
-    height: videoMessageComponent.isVideoNote ? width : Functions.getVideoHeight(width, videoData)
+    // Dimensionamento come le foto (#5): primo frame mostrato COMPLETO, ridotto
+    // all'80% della finestra (portrait e landscape), fumetto stretto sul media.
+    property real mediaAspect: (videoData && videoData.width > 0 && videoData.height > 0)
+                               ? (videoData.width / videoData.height) : 1.0
+    readonly property real maxBoxWidth: {
+        var screenCap = Math.round(appWindow.width * 0.8);
+        var avail = messageListItem ? (messageListItem.precalculatedValues.textItemWidth - 2 * Theme.paddingSmall) : screenCap;
+        return Math.min(screenCap, avail);
+    }
+    readonly property real maxBoxHeight: Math.round(appWindow.height * 0.8)
+    readonly property real preferredWidth: Math.max(Theme.itemSizeSmall,
+        Math.min(maxBoxWidth, maxBoxHeight * mediaAspect))
+
+    height: videoMessageComponent.isVideoNote
+            ? width
+            : Math.max(Theme.itemSizeExtraSmall, Math.round(width / Math.max(mediaAspect, 0.05)))
 
     Timer {
         id: screensaverTimer
@@ -99,11 +118,9 @@ MessageContentBase {
                 } else {
                     tdLibWrapper.downloadFile(previewFileId);
                 }
-            } else {
-                placeholderImage.source = "image://theme/icon-m-video?white";
-                placeholderImage.width = Theme.itemSizeLarge
-                placeholderImage.height = Theme.itemSizeLarge
             }
+            // Niente più icona videocamera di ripiego: se manca la thumbnail resta
+            // il BackgroundImage scuro, con i controlli discreti in basso.
         }
     }
 
@@ -143,99 +160,142 @@ MessageContentBase {
         }
     }
 
+    // Anteprima del primo frame SFOCATA (minithumbnail, sempre presente nel
+    // messaggio): usata quando manca/non è ancora pronta la thumbnail completa,
+    // così la preview non resta vuota (niente più logo RT sui video).
+    TDLibMinithumbnail {
+        id: videoMinithumbnail
+        anchors.fill: parent
+        minithumbnail: videoData ? videoData.minithumbnail : undefined
+        fillMode: Image.PreserveAspectFit
+        highlighted: videoMessageComponent.highlighted
+        visible: placeholderImage.status !== Image.Ready
+    }
+
     Image {
         id: placeholderImage
         width: parent.width
         height: parent.height
         anchors.centerIn: parent
-        fillMode: Image.PreserveAspectCrop
+        // Primo frame mostrato INTERO (come le foto), niente crop.
+        fillMode: Image.PreserveAspectFit
         asynchronous: true
-        visible: status === Image.Ready ? true : false
+        visible: status === Image.Ready && !videoMessageComponent.isPlaying
         layer.enabled: videoMessageComponent.highlighted
         layer.effect: PressEffect { source: placeholderImage }
     }
 
     BackgroundImage {
-        visible: placeholderImage.status !== Image.Ready
+        // Solo se non c'è NÉ thumbnail completa NÉ minithumbnail.
+        visible: placeholderImage.status !== Image.Ready && !videoMinithumbnail.active
     }
 
+    // Controlli DISCRETI in basso a sinistra (play + schermo intero), su una pill
+    // scura semitrasparente: leggibili su qualsiasi frame senza rovinare la preview.
     Rectangle {
-        color: "black"
-        opacity: 0.3
-        height: parent.height
-        width: parent.width
-        visible: playButton.visible
-    }
-
-    Column {
-        width: parent.width
-        height: downloadingProgressBar.height + videoControlRow.height
-        anchors.centerIn: parent
+        id: videoControlsPill
+        visible: !videoMessageComponent.isPlaying && !videoDownloadBusyIndicator.visible
+        anchors {
+            left: parent.left
+            bottom: parent.bottom
+            leftMargin: Theme.paddingMedium
+            bottomMargin: Theme.paddingMedium
+        }
+        radius: height / 2
+        color: Theme.rgba("#000000", 0.5)
+        border.width: 1
+        border.color: Theme.rgba("#ffffff", 0.25)
+        width: videoControlsRow.width + 2 * Theme.paddingMedium
+        height: videoControlsRow.height + Theme.paddingSmall
 
         Row {
-            id: videoControlRow
-            width: parent.width
-            Item {
-                width: videoMessageComponent.fullscreen ? parent.width : ( parent.width / 2 )
-                height: Theme.iconSizeLarge
-                IconButton {
-                    id: playButton
-                    anchors.centerIn: parent
-                    width: Theme.iconSizeLarge
-                    height: Theme.iconSizeLarge
-                    icon {
-                        source: "image://theme/icon-l-play?white"
-                        asynchronous: true
-                    }
-                    highlighted: videoMessageComponent.highlighted || down
-                    visible: placeholderImage.status === Image.Ready ? true : false
-                    onClicked: {
-                        fullscreenItem.visible = false;
-                        handlePlay();
-                    }
+            id: videoControlsRow
+            anchors.centerIn: parent
+            spacing: Theme.paddingLarge
+
+            IconButton {
+                id: playButton
+                width: Theme.iconSizeSmall
+                height: Theme.iconSizeSmall
+                icon {
+                    source: "image://theme/icon-m-play?white"
+                    asynchronous: true
                 }
-                BusyIndicator {
-                    id: videoDownloadBusyIndicator
-                    running: false
-                    visible: running
-                    anchors.centerIn: parent
-                    size: BusyIndicatorSize.Large
+                highlighted: videoMessageComponent.highlighted || down
+                visible: true
+                onClicked: {
+                    handlePlay();
                 }
             }
+
             Item {
                 id: fullscreenItem
-                width: parent.width / 2
-                height: Theme.iconSizeLarge
+                width: videoMessageComponent.fullscreen ? 0 : Theme.iconSizeSmall
+                height: Theme.iconSizeSmall
                 visible: !videoMessageComponent.fullscreen
                 IconButton {
                     id: fullscreenButton
                     anchors.centerIn: parent
-                    width: Theme.iconSizeLarge
-                    height: Theme.iconSizeLarge
+                    width: Theme.iconSizeSmall
+                    height: Theme.iconSizeSmall
                     icon {
                         asynchronous: true
                         source: "../../../images/icon-l-fullscreen.svg"
                         sourceSize {
-                            width: Theme.iconSizeLarge
-                            height: Theme.iconSizeLarge
+                            width: Theme.iconSizeSmall
+                            height: Theme.iconSizeSmall
                         }
                     }
                     highlighted: videoMessageComponent.highlighted || down
-                    visible: ( placeholderImage.status === Image.Ready && !videoMessageComponent.fullscreen ) ? true : false
                     onClicked: {
                         pageStack.push(Qt.resolvedUrl("../../pages/VideoPage.qml"), {"videoData": videoData, "sourceMessage": rawMessage});
                     }
                 }
             }
         }
-        ProgressBar {
-            id: downloadingProgressBar
-            minimumValue: 0
-            maximumValue: 100
-            value: 0
-            visible: videoDownloadBusyIndicator.visible
-            width: parent.width
+    }
+
+    // Badge durata in basso a destra (stile Telegram).
+    Rectangle {
+        id: durationBadge
+        visible: !videoMessageComponent.isPlaying && !videoMessageComponent.isVideoNote && videoData && videoData.duration > 0
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+            rightMargin: Theme.paddingMedium
+            bottomMargin: Theme.paddingMedium
         }
+        radius: height / 2
+        color: Theme.rgba("#000000", 0.5)
+        border.width: 1
+        border.color: Theme.rgba("#ffffff", 0.25)
+        width: durationLabel.width + 2 * Theme.paddingMedium
+        height: durationLabel.height + Theme.paddingSmall
+        Label {
+            id: durationLabel
+            anchors.centerIn: parent
+            text: getTimeString(videoData ? videoData.duration : 0)
+            color: "white"
+            font.pixelSize: Theme.fontSizeExtraSmall
+        }
+    }
+
+    // Download in corso: indicatore al centro + barra di avanzamento in basso.
+    BusyIndicator {
+        id: videoDownloadBusyIndicator
+        running: false
+        visible: running
+        anchors.centerIn: parent
+        size: BusyIndicatorSize.Large
+    }
+    ProgressBar {
+        id: downloadingProgressBar
+        minimumValue: 0
+        maximumValue: 100
+        value: 0
+        visible: videoDownloadBusyIndicator.visible
+        width: parent.width
+        anchors.bottom: parent.bottom
     }
 
     Rectangle {
@@ -287,8 +347,7 @@ MessageContentBase {
             Connections {
                 target: messageVideo
                 onPlaying: {
-                    playButton.visible = false;
-                    placeholderImage.visible = false;
+                    videoMessageComponent.isPlaying = true;
                     messageVideo.visible = true;
                 }
             }
@@ -333,8 +392,10 @@ MessageContentBase {
                         videoBusyIndicator.visible = false;
                     }
                     if (status == MediaPlayer.EndOfMedia) {
-                        Debug.log("End of Media");
                         videoBusyIndicator.visible = false;
+                        // A fine video ripristina anteprima + controlli (onStopped non
+                        // sempre scatta su EndOfMedia): senza questo restavano nascosti.
+                        messageVideo.restorePreview();
                     }
                     if (status == MediaPlayer.InvalidMedia) {
                         Debug.log("Invalid Media");
@@ -352,13 +413,21 @@ MessageContentBase {
                 source: videoUrl
                 layer.enabled: videoMessageComponent.highlighted
                 layer.effect: PressEffect { source: messageVideo }
-                onStopped: {
+                function restorePreview() {
                     enableScreensaver();
                     messageVideo.visible = false;
-                    placeholderImage.visible = true;
-                    playButton.visible = true;
+                    videoMessageComponent.isPlaying = false;
                     videoComponentLoader.active = false;
-                    fullscreenItem.visible = !videoMessageComponent.fullscreen;
+                }
+                onStopped: {
+                    restorePreview();
+                }
+                onPlaybackStateChanged: {
+                    // Alcuni backend GStreamer non emettono onStopped a fine video:
+                    // a EOS lo stato diventa StoppedState → ripristiniamo qui.
+                    if (playbackState === MediaPlayer.StoppedState) {
+                        restorePreview();
+                    }
                 }
 
                 MouseArea {

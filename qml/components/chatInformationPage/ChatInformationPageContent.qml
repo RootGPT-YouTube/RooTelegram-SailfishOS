@@ -1369,10 +1369,8 @@ SilicaFlickable {
                 height: (chatInformationPage.isBasicGroup || chatInformationPage.isSuperGroup) ? Theme.paddingLarge : 0
             }
 
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.primaryColor
-                horizontalAlignment: Qt.AlignHCenter
                 opacity: (tabViewLoader.status === Loader.Ready && tabViewLoader.item.count > 0) ? 1.0 : 0.0
 
                 Behavior on opacity { FadeAnimation {}}

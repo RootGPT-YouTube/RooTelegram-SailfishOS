@@ -10,6 +10,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "../components"
 
 Page {
     id: chatFoldersPage
@@ -541,7 +542,7 @@ Page {
                 }
             }
 
-            Button {
+            NeonButton {
                 width: parent.width - (2 * Theme.horizontalPageMargin)
                 anchors.horizontalCenter: parent.horizontalCenter
                 enabled: chatFoldersPage.normalizedFolderTitle(newFolderNameField.text).length > 0 && !waitingFolderCreation

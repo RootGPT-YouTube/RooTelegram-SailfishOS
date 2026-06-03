@@ -17,6 +17,7 @@
     along with RooTelegram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
+import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
 import WerkWolf.RooTelegram 1.0
@@ -39,8 +40,8 @@ Page {
             width: settingsPage.width
             bottomPadding: Theme.paddingLarge
 
-            PageHeader {
-                title: qsTr("Settings")
+            NeonPageHeader {
+                text: qsTr("Settings")
             }
 
             Accordion {

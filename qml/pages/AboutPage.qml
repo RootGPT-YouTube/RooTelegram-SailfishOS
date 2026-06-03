@@ -128,10 +128,8 @@ Page {
                 onLinkActivated: Qt.openUrlExternally("https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS")
             }
 
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.primaryColor
-                horizontalAlignment: Qt.AlignHCenter
             }
 
             Label {
@@ -176,7 +174,7 @@ Page {
                 }
             }
 
-            Button {
+            NeonButton {
                 text: qsTr("Terms of Service")
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -186,7 +184,7 @@ Page {
                 }
             }
 
-            Button {
+            NeonButton {
                 text: qsTr("Privacy Policy")
                 anchors {
                     horizontalCenter: parent.horizontalCenter
@@ -269,6 +267,50 @@ Page {
                 linkColor: Theme.highlightColor
 
                 onLinkActivated: Qt.openUrlExternally("https://github.com/Samsung/rlottie")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width  - ( 2 * Theme.horizontalPageMargin )
+                text: qsTr("This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                wrapMode: Text.Wrap
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Text {
+                text: "<a href=\"https://ffmpeg.org\">" + qsTr("Open FFmpeg website") + "</a>"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+                font.pixelSize: Theme.fontSizeSmall
+                linkColor: Theme.highlightColor
+
+                onLinkActivated: Qt.openUrlExternally("https://ffmpeg.org")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width  - ( 2 * Theme.horizontalPageMargin )
+                text: qsTr("This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                wrapMode: Text.Wrap
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+            }
+
+            Text {
+                text: "<a href=\"https://github.com/TelegramMessenger/tgcalls\">" + qsTr("Open tgcalls on GitHub") + "</a>"
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                }
+                font.pixelSize: Theme.fontSizeSmall
+                linkColor: Theme.highlightColor
+
+                onLinkActivated: Qt.openUrlExternally("https://github.com/TelegramMessenger/tgcalls")
             }
 
             Label {

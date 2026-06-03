@@ -9,6 +9,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import "../components"
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
 
@@ -216,7 +217,7 @@ Page {
                 onClicked: toggleProtectedContent()
             }
 
-            Button {
+            NeonButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: Math.min(parent.width - 2 * Theme.horizontalPageMargin, Theme.itemSizeHuge * 2)
                 text: saveInProgress ? qsTr("Saving…") : qsTr("Save")

@@ -61,8 +61,8 @@ Page {
             width: parent.width
             spacing: Theme.paddingMedium
 
-            PageHeader {
-                title: headerTitle()
+            NeonPageHeader {
+                text: headerTitle()
             }
 
             Row {

@@ -258,19 +258,21 @@ QString ChatListModel::ChatData::senderMessageStatus() const
     if (isChannel() || myUserId != senderUserId() || myUserId == chatId) {
         return "";
     }
+    // Pallini colorati di stato (#12): verde=letto, blu=consegnato,
+    // arancione=in invio, rosso=non recapitato.
     if (lastMessage(ID) == chatData.value(LAST_READ_OUTBOX_MESSAGE_ID)) {
-        return "&nbsp;&nbsp;✅";
+        return "&nbsp;&nbsp;<font color=\"#4caf50\">●</font>";
     } else {
         QVariantMap lastMessage = chatData.value(LAST_MESSAGE).toMap();
         if (lastMessage.contains(SENDING_STATE)) {
             QVariantMap sendingState = lastMessage.value(SENDING_STATE).toMap();
             if (sendingState.value(_TYPE).toString() == "messageSendingStatePending") {
-                return "&nbsp;&nbsp;🕙";
+                return "&nbsp;&nbsp;<font color=\"#ff9800\">●</font>";
             } else {
-                return "&nbsp;&nbsp;❌";
+                return "&nbsp;&nbsp;<font color=\"#f44336\">●</font>";
             }
         } else {
-            return "&nbsp;&nbsp;☑️";
+            return "&nbsp;&nbsp;<font color=\"#2196f3\">●</font>";
         }
     }
 }

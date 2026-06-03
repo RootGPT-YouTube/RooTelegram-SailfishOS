@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 1.9.5
+RT_APP_VERSION = 2.0
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -226,7 +226,19 @@ exists($$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin) {
     ffmpegbin.files = $$PWD/ffmpeg/$${TARGET_ARCHITECTURE}/bin
     ffmpegbin.path = /usr/share/$${TARGET}
     INSTALLS += ffmpegbin
+
+    # Il binario ffmpeg è GPL v2+ (libx264): la sua licenza deve viaggiare
+    # con l'RPM, non solo nel repo sorgente.
+    ffmpeglicense.files = $$PWD/ffmpeg/LICENSE
+    ffmpeglicense.path = /usr/share/$${TARGET}/ffmpeg
+    INSTALLS += ffmpeglicense
 }
+
+# Conformità licenze: il testo GPLv3 dell'app e il NOTICE con tutte le
+# dipendenze (GPL/LGPL/MIT) devono essere raggiungibili da chi riceve l'RPM.
+licenses.files = $$PWD/LICENSE $$PWD/NOTICE
+licenses.path = /usr/share/$${TARGET}/licenses
+INSTALLS += licenses
 
 
 gui.files = qml

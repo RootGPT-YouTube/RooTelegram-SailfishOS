@@ -121,7 +121,7 @@ AccordionItem {
                 ComboBox {
                     id: allowCallsComboBox
                     width: parent.columnWidth
-                    label: qsTr("Allow voice calls")
+                    label: qsTr("Allow calls")
                     description: qsTr("Privacy setting for managing who can call you.")
                     menu: ContextMenu {
                         x: 0

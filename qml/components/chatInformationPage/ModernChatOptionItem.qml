@@ -9,6 +9,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import "../"
 
 BackgroundItem {
     id: optionItem
@@ -73,13 +74,11 @@ BackgroundItem {
         visible: optionItem.showDisclosure
     }
 
-    Separator {
+    NeonSeparator {
         anchors {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
         }
-        color: Theme.primaryColor
-        horizontalAlignment: Qt.AlignHCenter
     }
 }

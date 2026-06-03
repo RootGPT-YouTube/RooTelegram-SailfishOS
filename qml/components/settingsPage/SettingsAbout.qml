@@ -10,6 +10,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "../"
 
 AccordionItem {
     // Etichetta non tradotta per richiesta esplicita dell'utente
@@ -89,10 +90,8 @@ AccordionItem {
                 onLinkActivated: Qt.openUrlExternally("https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS")
             }
 
-            Separator {
+            NeonSeparator {
                 width: parent.width
-                color: Theme.primaryColor
-                horizontalAlignment: Qt.AlignHCenter
             }
 
             Label {
@@ -128,13 +127,13 @@ AccordionItem {
                 anchors.horizontalCenter: parent.horizontalCenter
             }
 
-            Button {
+            NeonButton {
                 text: qsTr("Terms of Service")
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: Qt.openUrlExternally("https://telegram.org/tos")
             }
 
-            Button {
+            NeonButton {
                 text: qsTr("Privacy Policy")
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: Qt.openUrlExternally("https://telegram.org/privacy")

@@ -174,7 +174,7 @@ AccordionItem {
                         }
                     }
 
-                    Button {
+                    NeonButton {
                         id: syncContactsButton
                         text: qsTr("Synchronize Contacts with Telegram")
                         visible: !contactSyncItem.syncInProgress
@@ -242,7 +242,7 @@ AccordionItem {
                     spacing: Theme.paddingSmall
                     width: parent.width / 2
 
-                    Button {
+                    NeonButton {
                         id: addProfilePictureButton
                         text: qsTr("Add Picture")
                         anchors {
@@ -253,7 +253,7 @@ AccordionItem {
                         }
                     }
 
-                    Button {
+                    NeonButton {
                         id: removeProfilePictureButton
                         text: qsTr("Delete Picture")
                         anchors {
@@ -330,7 +330,7 @@ AccordionItem {
                     }
                 }
 
-                Button {
+                NeonButton {
                     id: logOutButton
                     text: qsTr("Log Out")
                     anchors.horizontalCenter: parent.horizontalCenter

@@ -11,6 +11,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Nemo.Thumbnailer 1.0
+import "../components"
 
 // Compose + pubblicazione di una storia (foto o video). È una Page (non Dialog)
 // perché i video richiedono due fasi visibili con barra di avanzamento —
@@ -583,7 +584,7 @@ Page {
             }
 
             // ---- Pulsante Pubblica (compose) ----
-            Button {
+            NeonButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: composePage.phase === "compose"
                 enabled: composePage.canPublish

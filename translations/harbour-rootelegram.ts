@@ -87,6 +87,22 @@
         <source>Open Twemoji on GitHub</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
+        <translation>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+    </message>
+    <message>
+        <source>Open FFmpeg website</source>
+        <translation>Open FFmpeg website</translation>
+    </message>
+    <message>
+        <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
+        <translation>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</translation>
+    </message>
+    <message>
+        <source>Open tgcalls on GitHub</source>
+        <translation>Open tgcalls on GitHub</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -1510,6 +1526,17 @@
     </message>
 </context>
 <context>
+    <name>CreateSupergroupPage</name>
+    <message>
+        <source>New Channel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New Group</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>EditGroupChatPermissionsColumn</name>
     <message>
         <source>Group Member Permissions</source>
@@ -2218,10 +2245,6 @@
     <message>
         <source>No public users, groups or channels found.</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RooTelegram</source>
-        <translation>RooTelegram</translation>
     </message>
     <message>
         <source>Waiting for network...</source>
@@ -3502,10 +3525,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Allow voice calls</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Privacy setting for managing who can call you.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3515,6 +3534,10 @@
     </message>
     <message>
         <source>Nobody</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Allow calls</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4735,8 +4758,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Video non
-disponibile</source>
+        <source>Video not
+available</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

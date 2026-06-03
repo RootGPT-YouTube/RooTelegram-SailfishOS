@@ -72,10 +72,8 @@ AccordionItem {
                             height: contentHeight
                             model: activeSessionsItem.activeSessions
                             headerPositioning: ListView.OverlayHeader
-                            header: Separator {
+                            header: NeonSeparator {
                                 width: parent.width
-                                color: Theme.primaryColor
-                                horizontalAlignment: Qt.AlignHCenter
                                 visible: activeSessionsListView.count > 0
                             }
                             delegate: ListItem {
@@ -145,14 +143,12 @@ AccordionItem {
                                     }
                                 }
 
-                                Separator {
+                                NeonSeparator {
                                     anchors {
                                         bottom: parent.bottom
                                     }
 
                                     width: parent.width
-                                    color: Theme.primaryColor
-                                    horizontalAlignment: Qt.AlignHCenter
                                 }
                             }
                         }

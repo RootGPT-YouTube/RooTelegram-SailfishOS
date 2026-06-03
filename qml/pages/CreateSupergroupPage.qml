@@ -9,6 +9,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import "../components"
 
 Dialog {
     id: createSupergroupPage
@@ -29,9 +30,11 @@ Dialog {
         });
     }
 
+    // DialogHeader svuotato: conserva il pulsante Accetta; il titolo lo rendiamo
+    // noi in NEON (brand RooTelegram) come prima riga del contenuto.
     DialogHeader {
         id: dialogHeader
-        title: isChannel ? "Nuovo Canale" : "Nuovo Gruppo"
+        title: ""
     }
 
     SilicaFlickable {
@@ -47,6 +50,10 @@ Dialog {
             id: contentColumn
             width: parent.width
             spacing: Theme.paddingMedium
+
+            NeonPageHeader {
+                text: isChannel ? qsTr("New Channel") : qsTr("New Group")
+            }
 
             TextField {
                 id: titleField

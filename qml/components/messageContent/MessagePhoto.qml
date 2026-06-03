@@ -29,17 +29,29 @@ MessageContentBase {
     id: messagePhotoContent
 
     readonly property alias photoData: photo.photo;
-    readonly property real landscapePreviewAspectRatio: (16.0 / 9.0)
-    readonly property real portraitPreviewAspectRatio: (9.0 / 16.0)
-    property real targetPreviewAspectRatio: landscapePreviewAspectRatio
+    // Aspect ratio REALE (w/h) dell'immagine: la mostriamo COMPLETA (niente crop a
+    // 16:9/9:16 come prima), ridotta per stare entro l'80% della finestra sia in
+    // larghezza che in altezza (in portrait e in landscape del device).
+    property real photoAspect: 1.0
     // Once teardown begins we stop touching aliases — accessing `photo.photo`
     // (photoData) during incubation cancellation is what surfaces the
     // "Object destroyed during incubation" warning on fast scroll.
     property bool _destroying: false
 
-    // Height comes directly from width and aspect ratio — no intermediate properties,
-    // no Math.min(width, ...). TDLibPhoto fills parent via a single anchors.fill binding.
-    height: Math.max(Theme.itemSizeExtraSmall, Math.round(width / targetPreviewAspectRatio))
+    // Box massimo = 80% della finestra; in larghezza non superiamo comunque lo
+    // spazio disponibile per il fumetto (textItemWidth), così non sborda.
+    readonly property real maxBoxWidth: {
+        var screenCap = Math.round(appWindow.width * 0.8);
+        var avail = messageListItem ? (messageListItem.precalculatedValues.textItemWidth - 2 * Theme.paddingSmall) : screenCap;
+        return Math.min(screenCap, avail);
+    }
+    readonly property real maxBoxHeight: Math.round(appWindow.height * 0.8)
+    // Larghezza preferita = fit dell'immagine completa nel box 80%×80%.
+    readonly property real preferredWidth: Math.max(Theme.itemSizeSmall,
+        Math.min(maxBoxWidth, maxBoxHeight * photoAspect))
+
+    // L'altezza segue la larghezza (forzata dal Loader) e l'aspect reale.
+    height: Math.max(Theme.itemSizeExtraSmall, Math.round(width / Math.max(photoAspect, 0.05)))
 
     onPhotoDataChanged: updateAspectRatio()
     Component.onCompleted: updateAspectRatio()
@@ -54,7 +66,21 @@ MessageContentBase {
         if (_destroying) {
             return;
         }
-        targetPreviewAspectRatio = getAspectRatio() < 1 ? portraitPreviewAspectRatio : landscapePreviewAspectRatio;
+        photoAspect = getAspectRatio();
+    }
+    // Aspect AUTOREVOLE = quello renderizzato: con PreserveAspectFit
+    // paintedWidth/paintedHeight hanno SEMPRE le proporzioni reali dell'immagine,
+    // così il box si adatta esattamente (niente crop, niente bande) senza dipendere
+    // da photo.sizes (che per alcune immagini riportava proporzioni errate).
+    function refreshRenderedAspect() {
+        if (_destroying || !photo.image) {
+            return;
+        }
+        var pw = photo.image.paintedWidth;
+        var ph = photo.image.paintedHeight;
+        if (pw > 0 && ph > 0) {
+            photoAspect = pw / ph;
+        }
     }
     function getAspectRatio() {
         if (!photoData || !photoData.sizes || photoData.sizes.length === 0) {
@@ -87,6 +113,18 @@ MessageContentBase {
         // and roughly half the memory of Screen.width on a 1080-wide device.
         // Full-quality decode is preserved in MediaAlbumPage/ImagePage which
         // don't set this property.
-        Component.onCompleted: image.maxSourceDimension = 720
+        // PreserveAspectFit: l'immagine si vede SEMPRE INTERA (niente crop),
+        // solo ridimensionata; il box si adatta alle proporzioni reali (sotto).
+        Component.onCompleted: {
+            image.maxSourceDimension = 720;
+            image.fillMode = Image.PreserveAspectFit;
+        }
+    }
+
+    Connections {
+        target: photo.image
+        onPaintedWidthChanged: messagePhotoContent.refreshRenderedAspect()
+        onPaintedHeightChanged: messagePhotoContent.refreshRenderedAspect()
+        onStatusChanged: messagePhotoContent.refreshRenderedAspect()
     }
 }

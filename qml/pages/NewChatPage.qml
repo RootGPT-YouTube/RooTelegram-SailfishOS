@@ -93,9 +93,9 @@ Page {
             width: newChatPage.width
             height: newChatPage.height
 
-            PageHeader {
+            NeonPageHeader {
                 id: newChatPageHeader
-                title: qsTr("Your Contacts")
+                text: qsTr("Your Contacts")
             }
 
             Item {
@@ -360,11 +360,9 @@ Page {
 
                                 }
 
-                                Separator {
+                                NeonSeparator {
                                     id: chatTypeSeparator
                                     width: parent.width
-                                    color: Theme.primaryColor
-                                    horizontalAlignment: Qt.AlignHCenter
                                 }
 
                             }

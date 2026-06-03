@@ -9,8 +9,11 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import QtGraphicalEffects 1.0
 import WerkWolf.RooTelegram 1.0
+import "../components"
 import "../js/functions.js" as Functions
+import "../js/twemoji.js" as Emoji
 
 Page {
     id: forumTopicsPage
@@ -793,6 +796,43 @@ Page {
 
     ListModel { id: topicsModel }
 
+    // ── Sfondo: avatar del gruppo a TUTTA LARGHEZZA e molto TRASPARENTE, con
+    //    dissolvenza verso il basso, così non disturba la lettura dei topic. ──
+    TDLibFile {
+        id: groupAvatarFile
+        tdlib: tdLibWrapper
+        autoLoad: true
+        fileInformation: (forumTopicsPage.chatInformation && forumTopicsPage.chatInformation.photo)
+                         ? forumTopicsPage.chatInformation.photo.small : null
+    }
+    Image {
+        id: backgroundAvatar
+        z: -1
+        anchors.centerIn: parent
+        width: parent.width
+        height: width
+        visible: groupAvatarFile.isDownloadingCompleted
+        source: groupAvatarFile.isDownloadingCompleted ? groupAvatarFile.path : ""
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        opacity: 0.15
+        layer.enabled: true
+        layer.effect: OpacityMask { maskSource: backgroundAvatarMask }
+    }
+    Rectangle {
+        id: backgroundAvatarMask
+        width: backgroundAvatar.width
+        height: backgroundAvatar.height
+        visible: false
+        // Dissolvenza simmetrica (alto+basso) così l'avatar centrato sfuma su entrambi i lati.
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "transparent" }
+            GradientStop { position: 0.30; color: "white" }
+            GradientStop { position: 0.70; color: "white" }
+            GradientStop { position: 1.0; color: "transparent" }
+        }
+    }
+
     // ── Editor topic (FUORI dal ListView header per accessibilità ID) ──────
     Column {
         id: topicEditorColumn
@@ -818,14 +858,14 @@ Page {
             x: Theme.horizontalPageMargin
             spacing: Theme.paddingSmall
 
-            Button {
+            NeonButton {
                 width: (parent.width - Theme.paddingSmall) / 2
                 text: qsTr("Cancel")
                 enabled: !topicEditorBusy
                 onClicked: { closeTopicEditor() }
             }
 
-            Button {
+            NeonButton {
                 width: (parent.width - Theme.paddingSmall) / 2
                 enabled: topicNameField.text.trim().length > 0 && !topicEditorBusy
                 text: topicEditorBusy
@@ -846,15 +886,111 @@ Page {
             spacing: Theme.paddingSmall
 
             PageHeader {
-                title: chatInformation ? chatInformation.title : ""
-                description: qsTr("Topics")
+                id: topicsHeader
+                // Titolo gruppo in stile NEON (come header chat / brand home): alone
+                // arancione + nucleo chiaro. title vuoto: rendiamo noi titolo+sottotitolo.
+                title: ""
+                height: Theme.itemSizeLarge
+
+                Label {
+                    id: topicsTitleHalo
+                    anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; bottom: parent.verticalCenter }
+                    width: Math.min(implicitWidth, topicsHeader.width - 2 * Theme.horizontalPageMargin)
+                    horizontalAlignment: Text.AlignRight
+                    text: topicsTitleCore.text
+                    textFormat: Text.StyledText
+                    font.pixelSize: Theme.fontSizeLarge
+                    font.family: Theme.fontFamilyHeading
+                    font.italic: true
+                    truncationMode: TruncationMode.Elide
+                    maximumLineCount: 1
+                    color: "#e65000"
+                    layer.enabled: true
+                    layer.effect: Glow {
+                        color: "#e65000"
+                        radius: 18
+                        samples: 37
+                        spread: 0.30
+                        transparentBorder: true
+                    }
+                }
+                Label {
+                    id: topicsTitleCore
+                    anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; bottom: parent.verticalCenter }
+                    width: Math.min(implicitWidth, topicsHeader.width - 2 * Theme.horizontalPageMargin)
+                    horizontalAlignment: Text.AlignRight
+                    text: forumTopicsPage.chatInformation ? Emoji.emojify(forumTopicsPage.chatInformation.title, font.pixelSize) : ""
+                    textFormat: Text.StyledText
+                    font.pixelSize: Theme.fontSizeLarge
+                    font.family: Theme.fontFamilyHeading
+                    font.italic: true
+                    truncationMode: TruncationMode.Elide
+                    maximumLineCount: 1
+                    color: "#fff3e6"
+                    layer.enabled: true
+                    layer.effect: Glow {
+                        color: "#ff9a3d"
+                        radius: 6
+                        samples: 13
+                        spread: 0.55
+                        transparentBorder: true
+                    }
+                }
+                Label {
+                    id: topicsDescLabel
+                    anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; top: parent.verticalCenter; topMargin: Theme.paddingSmall / 2 }
+                    text: qsTr("Topics")
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryColor
+                    horizontalAlignment: Text.AlignRight
+                }
             }
-            Button {
-                width: parent.width - (2 * Theme.horizontalPageMargin)
-                x: Theme.horizontalPageMargin
+            // Pulsante "Crea topic" come FINESTRA A NEON (stesso linguaggio delle
+            // schede Impostazioni): cartello di vetro + scritta neon bianca centrata.
+            BackgroundItem {
+                id: createTopicButton
+                width: parent.width
+                height: Theme.itemSizeMedium
                 visible: topicEditorMode === "" && (canManageTopics() || canCreateTopicsPermission())
-                text: qsTr("Create Topic")
                 onClicked: { openCreateTopicEditor() }
+
+                Rectangle {
+                    id: createTopicCard
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.horizontalPageMargin
+                    anchors.rightMargin: Theme.horizontalPageMargin
+                    anchors.topMargin: Theme.paddingSmall / 2
+                    anchors.bottomMargin: Theme.paddingSmall / 2
+                    radius: Theme.paddingLarge
+                    color: Theme.rgba("#ffffff", createTopicButton.highlighted ? 0.14 : 0.06)
+                    border.width: 2
+                    border.color: Theme.rgba("#ff8a3d", createTopicButton.highlighted ? 0.80 : 0.45)
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                    Behavior on border.color { ColorAnimation { duration: 150 } }
+                }
+                Label {
+                    id: createTopicHalo
+                    anchors.centerIn: createTopicCard
+                    text: qsTr("Create Topic")
+                    font.family: Theme.fontFamilyHeading
+                    font.italic: true
+                    color: "#ffffff"
+                    layer.enabled: true
+                    layer.effect: Glow {
+                        color: "#ffffff"
+                        radius: 12
+                        samples: 25
+                        spread: 0.20
+                        transparentBorder: true
+                    }
+                }
+                Label {
+                    anchors.centerIn: createTopicCard
+                    text: qsTr("Create Topic")
+                    font.family: Theme.fontFamilyHeading
+                    font.italic: true
+                    color: "#ffffff"
+                }
             }
             // Spazio placeholder quando l'editor è visibile
             Item {
@@ -932,7 +1068,9 @@ Page {
                 })
             }
 
-            // Icona colorata del topic (pallino con #)
+            // Finestra a NEON tonda del topic: interno translucido + CORNICE colorata
+            // (colore TDLib, diverso per topic) + alone tenue; dentro la PRIMA LETTERA
+            // del titolo invece dell'onnipresente "#".
             Rectangle {
                 id: topicIcon
                 anchors.left: parent.left
@@ -942,17 +1080,32 @@ Page {
                 height: width
                 radius: width / 2
                 // Colore TDLib: int ARGB -> estraiamo RGB
-                color: iconColor ? Qt.rgba(
+                property color topicColor: iconColor ? Qt.rgba(
                     ((iconColor >> 16) & 0xFF) / 255.0,
                     ((iconColor >> 8)  & 0xFF) / 255.0,
                     ( iconColor        & 0xFF) / 255.0,
                     1.0) : Theme.secondaryHighlightColor
+                color: Theme.rgba(topicColor, 0.18)
+                border.width: 2
+                border.color: topicColor
+
+                // Alone neon (cheap, niente Glow per-delegate): anello esterno tenue.
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: parent.width + Theme.paddingSmall
+                    height: width
+                    radius: width / 2
+                    color: "transparent"
+                    border.width: 2
+                    border.color: Theme.rgba(topicIcon.topicColor, 0.30)
+                }
 
                 Label {
                     anchors.centerIn: parent
-                    text: "#"
-                    font.pixelSize: Theme.fontSizeSmall
+                    text: (topicName && topicName.length > 0) ? topicName.charAt(0).toUpperCase() : "#"
+                    font.pixelSize: Theme.fontSizeLarge
                     font.bold: true
+                    font.family: Theme.fontFamilyHeading
                     color: "white"
                 }
             }
