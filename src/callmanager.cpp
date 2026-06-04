@@ -267,6 +267,7 @@ struct SinkInputScan {
     pa_threaded_mainloop *ml = nullptr;
     uint32_t index = PA_INVALID_INDEX;
     bool found = false;
+    uint8_t channels = 2;
 };
 
 void sinkInputInfoCb(pa_context * /*c*/, const pa_sink_input_info *info, int eol, void *userdata)
@@ -282,6 +283,7 @@ void sinkInputInfoCb(pa_context * /*c*/, const pa_sink_input_info *info, int eol
     const char *app = pa_proplist_gets(info->proplist, "application.name");
     if (app && (std::strstr(app, "WEBRTC") || std::strstr(app, "VoiceEngine"))) {
         scan->index = info->index;
+        scan->channels = info->volume.channels > 0 ? info->volume.channels : 2;
         scan->found = true;
     }
 }
@@ -404,6 +406,14 @@ bool CallManager::routeWebrtcToCallSink()
         pa_operation *o2 = pa_context_set_sink_input_mute(ctx, scan.index, 0, nullptr, nullptr);
         if (o2) {
             pa_operation_unref(o2);
+        }
+        // Forza il volume a 100%/0dB: su SFOS 5.1 lo stream WEBRTC nasce a 0%
+        // (-inf dB) → audio inesistente finché non lo si riporta a livello normale.
+        pa_cvolume cv;
+        pa_cvolume_set(&cv, scan.channels, PA_VOLUME_NORM);
+        pa_operation *o3 = pa_context_set_sink_input_volume(ctx, scan.index, &cv, nullptr, nullptr);
+        if (o3) {
+            pa_operation_unref(o3);
         }
     }
     pa_threaded_mainloop_unlock(ml);
@@ -651,11 +661,13 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
     }
     if (currentIsVideo) {
         instance->setIncomingVideoOutput(remoteVideoRenderer->sink());
-        // Instrada l'audio in arrivo sul sink di chiamata + smute (parte mutato su
-        // Halium) e schermo sempre acceso per tutta la videochiamata.
-        routeWebrtcToCallSink();    // tentativo immediato
-        m_audioUnmuteTimer->start(); // + ritenta finché lo stream compare
-        startKeepDisplayOn();
+    }
+    // Instrada l'audio in arrivo sul sink di chiamata + smute (parte mutato su
+    // Halium) + volume a 100% (su SFOS 5.1 nasce a 0%). Vale per vocali E video.
+    routeWebrtcToCallSink();    // tentativo immediato
+    m_audioUnmuteTimer->start(); // + ritenta finché lo stream compare
+    if (currentIsVideo) {
+        startKeepDisplayOn();    // schermo sempre acceso solo per le videochiamate
     }
 
     while (!pendingSignalingData.isEmpty()) {
