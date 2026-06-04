@@ -311,6 +311,19 @@ public:
     Q_INVOKABLE void setNetworkType(NetworkType networkType);
     Q_INVOKABLE void setInactiveSessionTtl(int days);
 
+    // Proxy (anti-censura). TDLib persiste la lista nel suo DB.
+    Q_INVOKABLE void getProxies();
+    Q_INVOKABLE void addProxyMtproto(const QString &server, int port, const QString &secret, bool enable = true);
+    Q_INVOKABLE void addProxySocks5(const QString &server, int port, const QString &username, const QString &password, bool enable = true);
+    Q_INVOKABLE void addProxyHttp(const QString &server, int port, const QString &username, const QString &password, bool httpOnly, bool enable = true);
+    Q_INVOKABLE void enableProxy(int proxyId);
+    Q_INVOKABLE void disableProxy();
+    Q_INVOKABLE void removeProxy(int proxyId);
+    Q_INVOKABLE void pingProxy(int proxyId);
+    Q_INVOKABLE QVariantList getCachedProxies() const;
+    // Usato da CallManager: proxy SOCKS5 abilitato (l'unico tipo che tgcalls può usare per le chiamate), o vuoto.
+    QVariantMap enabledSocks5Proxy() const;
+
     // Forum Topics (Telegram Supergroup Forums)
     Q_INVOKABLE void getForumTopics(qlonglong chatId, const QString &query = QString(), qlonglong offsetDate = 0, qlonglong offsetMessageId = 0, qlonglong offsetMessageThreadId = 0, int limit = 50);
     Q_INVOKABLE void switchChatList(int chatListType, int folderId = 0);
@@ -465,6 +478,9 @@ signals:
     void storyDeleted(qlonglong storySenderChatId, int storyId);
     void storiesListReceived(const QVariantList &stories, int totalCount, const QString &extra);
     void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
+    void proxiesReceived(const QVariantList &proxies);
+    void proxyAdded(const QVariantMap &proxy);
+    void proxyPinged(int proxyId, double seconds);
 
 public slots:
     void handleVersionDetected(const QString &version);
@@ -504,6 +520,8 @@ public slots:
     void handleGetPageSourceFinished();
     void handleChatsReceived(const QVariantMap &chats);
     void handleChatThemesUpdated(const QVariantList &themes);
+    void handleProxiesReceived(const QVariantList &proxies);
+    void handleProxyPinged(const QString &extra, double seconds);
 
 private:
     void setOption(const QString &name, const QString &type, const QVariant &value);
@@ -531,6 +549,8 @@ private:
     QVariantMap authorizationStateData;
     TDLibWrapper::ConnectionState connectionState;
     QVariantMap options;
+    QVariantList proxies;   // cache della lista proxy (per CallManager + UI)
+    bool proxiesRequested = false;
     QVariantMap userInformation;
     QMap<UserPrivacySetting, UserPrivacySettingRule> userPrivacySettingRules;
     QMap<UserPrivacySetting, QVariantList> userPrivacySettingAllowedUserIds;

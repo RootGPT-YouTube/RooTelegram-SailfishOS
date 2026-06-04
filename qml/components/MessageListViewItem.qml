@@ -418,6 +418,7 @@ ListItem {
         actions.push({ text: qsTr("Edit Message"), visible: canEditMessage, callback: function() { requestEditMessage(); }});
         actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { deleteMessage(); }});
         actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { deleteAlbum(); }});
+        actions.push({ text: qsTr("Select Message"), visible: true, callback: function() { page.toggleMessageSelection(myMessage); }});
         actions.push({ text: qsTr("More Options..."), visible: (numberOfExtraOptionsOtherThanDeleteMessage > 0) || (canDeleteMessage && !haveSpaceForDeleteMessageMenuItem), callback: function() { openAdditionalOptionsDrawer(); }});
         return actions;
     }

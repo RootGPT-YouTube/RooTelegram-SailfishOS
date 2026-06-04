@@ -156,6 +156,51 @@ IT = {
     "Translate message": "Traduci messaggio",
     "Type your message first, then tap this button to translate it to English!":
         "Scrivi prima il messaggio, poi premi questo tasto per tradurlo in inglese!",
+    # Proxy anti-censura (2.1)
+    "Proxy added and enabled": "Proxy aggiunto e attivato",
+    "Add proxy": "Aggiungi proxy",
+    "Add": "Aggiungi",
+    "Paste a proxy link (optional)": "Incolla un link proxy (facoltativo)",
+    "tg://proxy?server=…  or  https://t.me/proxy?…": "tg://proxy?server=…  oppure  https://t.me/proxy?…",
+    "Link recognised": "Link riconosciuto",
+    "Type": "Tipo",
+    "MTProto (recommended)": "MTProto (consigliato)",
+    "SOCKS5 (also for calls)": "SOCKS5 (anche per le chiamate)",
+    "HTTP": "HTTP",
+    "Server": "Server",
+    "Server (host or IP)": "Server (host o IP)",
+    "Port": "Porta",
+    "Secret": "Secret",
+    "Secret (supports dd… and ee… Fake-TLS)": "Secret (supporta dd… e ee… Fake-TLS)",
+    "Username (optional)": "Nome utente (facoltativo)",
+    "Username": "Nome utente",
+    "Password (optional)": "Password (facoltativa)",
+    "Password": "Password",
+    "HTTP only": "Solo HTTP",
+    "The proxy supports only HTTP requests (no HTTPS tunnelling).":
+        "Il proxy supporta solo richieste HTTP (nessun tunneling HTTPS).",
+    "MTProto": "MTProto",
+    "SOCKS5": "SOCKS5",
+    "%1 ms": "%1 ms",
+    "Proxy": "Proxy",
+    "Disable proxy (direct connection)": "Disattiva proxy (connessione diretta)",
+    "Proxy disabled": "Proxy disattivato",
+    "No proxies": "Nessun proxy",
+    "Pull down to add a proxy, or paste a tg://proxy link.":
+        "Trascina giù per aggiungere un proxy, o incolla un link tg://proxy.",
+    "Disable": "Disattiva",
+    "Enable": "Attiva",
+    "Test connection": "Prova connessione",
+    "Remove": "Rimuovi",
+    "Removing proxy": "Rimozione proxy",
+    "Connection": "Connessione",
+    "Proxies route your Telegram traffic through another server to bypass censorship. MTProto proxies (especially with Fake-TLS) are the most resistant to blocking. SOCKS5 proxies also cover voice and video calls.":
+        "I proxy instradano il tuo traffico Telegram attraverso un altro server per aggirare la censura. I proxy MTProto (specialmente con Fake-TLS) sono i più resistenti ai blocchi. I proxy SOCKS5 coprono anche le chiamate vocali e video.",
+    "On (%n configured)": ("Attivo (%n configurato)", "Attivo (%n configurati)"),
+    "Off (%n configured)": ("Disattivo (%n configurato)", "Disattivo (%n configurati)"),
+    "Off": "Disattivo",
+    "Add, enable and test connection proxies.":
+        "Aggiungi, attiva e prova la connessione dei proxy.",
 }
 
 
@@ -300,6 +345,51 @@ DE = {
     "Translate message": "Nachricht übersetzen",
     "Type your message first, then tap this button to translate it to English!":
         "Schreibe zuerst deine Nachricht, dann tippe auf diese Schaltfläche, um sie ins Englische zu übersetzen!",
+    # Zensurresistenter Proxy (2.1)
+    "Proxy added and enabled": "Proxy hinzugefügt und aktiviert",
+    "Add proxy": "Proxy hinzufügen",
+    "Add": "Hinzufügen",
+    "Paste a proxy link (optional)": "Proxy-Link einfügen (optional)",
+    "tg://proxy?server=…  or  https://t.me/proxy?…": "tg://proxy?server=…  oder  https://t.me/proxy?…",
+    "Link recognised": "Link erkannt",
+    "Type": "Typ",
+    "MTProto (recommended)": "MTProto (empfohlen)",
+    "SOCKS5 (also for calls)": "SOCKS5 (auch für Anrufe)",
+    "HTTP": "HTTP",
+    "Server": "Server",
+    "Server (host or IP)": "Server (Host oder IP)",
+    "Port": "Port",
+    "Secret": "Secret",
+    "Secret (supports dd… and ee… Fake-TLS)": "Secret (unterstützt dd… und ee… Fake-TLS)",
+    "Username (optional)": "Benutzername (optional)",
+    "Username": "Benutzername",
+    "Password (optional)": "Passwort (optional)",
+    "Password": "Passwort",
+    "HTTP only": "Nur HTTP",
+    "The proxy supports only HTTP requests (no HTTPS tunnelling).":
+        "Der Proxy unterstützt nur HTTP-Anfragen (kein HTTPS-Tunneling).",
+    "MTProto": "MTProto",
+    "SOCKS5": "SOCKS5",
+    "%1 ms": "%1 ms",
+    "Proxy": "Proxy",
+    "Disable proxy (direct connection)": "Proxy deaktivieren (direkte Verbindung)",
+    "Proxy disabled": "Proxy deaktiviert",
+    "No proxies": "Keine Proxys",
+    "Pull down to add a proxy, or paste a tg://proxy link.":
+        "Nach unten ziehen, um einen Proxy hinzuzufügen, oder einen tg://proxy-Link einfügen.",
+    "Disable": "Deaktivieren",
+    "Enable": "Aktivieren",
+    "Test connection": "Verbindung testen",
+    "Remove": "Entfernen",
+    "Removing proxy": "Proxy wird entfernt",
+    "Connection": "Verbindung",
+    "Proxies route your Telegram traffic through another server to bypass censorship. MTProto proxies (especially with Fake-TLS) are the most resistant to blocking. SOCKS5 proxies also cover voice and video calls.":
+        "Proxys leiten deinen Telegram-Datenverkehr über einen anderen Server, um Zensur zu umgehen. MTProto-Proxys (besonders mit Fake-TLS) sind am widerstandsfähigsten gegen Sperren. SOCKS5-Proxys decken auch Sprach- und Videoanrufe ab.",
+    "On (%n configured)": ("An (%n konfiguriert)", "An (%n konfiguriert)"),
+    "Off (%n configured)": ("Aus (%n konfiguriert)", "Aus (%n konfiguriert)"),
+    "Off": "Aus",
+    "Add, enable and test connection proxies.":
+        "Proxys hinzufügen, aktivieren und Verbindung testen.",
 }
 
 

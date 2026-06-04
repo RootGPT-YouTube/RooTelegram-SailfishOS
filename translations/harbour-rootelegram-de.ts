@@ -148,6 +148,93 @@
     </message>
 </context>
 <context>
+    <name>AddProxyDialog</name>
+    <message>
+        <source>Proxy added and enabled</source>
+        <translation>Proxy hinzugefügt und aktiviert</translation>
+    </message>
+    <message>
+        <source>Add proxy</source>
+        <translation>Proxy hinzufügen</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <source>Paste a proxy link (optional)</source>
+        <translation>Proxy-Link einfügen (optional)</translation>
+    </message>
+    <message>
+        <source>tg://proxy?server=…  or  https://t.me/proxy?…</source>
+        <translation>tg://proxy?server=…  oder  https://t.me/proxy?…</translation>
+    </message>
+    <message>
+        <source>Link recognised</source>
+        <translation>Link erkannt</translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation>Typ</translation>
+    </message>
+    <message>
+        <source>MTProto (recommended)</source>
+        <translation>MTProto (empfohlen)</translation>
+    </message>
+    <message>
+        <source>SOCKS5 (also for calls)</source>
+        <translation>SOCKS5 (auch für Anrufe)</translation>
+    </message>
+    <message>
+        <source>HTTP</source>
+        <translation>HTTP</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <source>Server (host or IP)</source>
+        <translation>Server (Host oder IP)</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Secret</source>
+        <translation>Secret</translation>
+    </message>
+    <message>
+        <source>Secret (supports dd… and ee… Fake-TLS)</source>
+        <translation>Secret (unterstützt dd… und ee… Fake-TLS)</translation>
+    </message>
+    <message>
+        <source>Username (optional)</source>
+        <translation>Benutzername (optional)</translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation>Benutzername</translation>
+    </message>
+    <message>
+        <source>Password (optional)</source>
+        <translation>Passwort (optional)</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation>Passwort</translation>
+    </message>
+    <message>
+        <source>HTTP only</source>
+        <translation>Nur HTTP</translation>
+    </message>
+    <message>
+        <source>The proxy supports only HTTP requests (no HTTPS tunnelling).</source>
+        <translation>Der Proxy unterstützt nur HTTP-Anfragen (kein HTTPS-Tunneling).</translation>
+    </message>
+</context>
+<context>
     <name>AddToFolderPage</name>
     <message>
         <source>Add to folder</source>
@@ -2727,6 +2814,69 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>ProxyListPage</name>
+    <message>
+        <source>MTProto</source>
+        <translation>MTProto</translation>
+    </message>
+    <message>
+        <source>SOCKS5</source>
+        <translation>SOCKS5</translation>
+    </message>
+    <message>
+        <source>HTTP</source>
+        <translation>HTTP</translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <translation>%1 ms</translation>
+    </message>
+    <message>
+        <source>Proxy</source>
+        <translation>Proxy</translation>
+    </message>
+    <message>
+        <source>Add proxy</source>
+        <translation>Proxy hinzufügen</translation>
+    </message>
+    <message>
+        <source>Disable proxy (direct connection)</source>
+        <translation>Proxy deaktivieren (direkte Verbindung)</translation>
+    </message>
+    <message>
+        <source>Proxy disabled</source>
+        <translation>Proxy deaktiviert</translation>
+    </message>
+    <message>
+        <source>No proxies</source>
+        <translation>Keine Proxys</translation>
+    </message>
+    <message>
+        <source>Pull down to add a proxy, or paste a tg://proxy link.</source>
+        <translation>Nach unten ziehen, um einen Proxy hinzuzufügen, oder einen tg://proxy-Link einfügen.</translation>
+    </message>
+    <message>
+        <source>Disable</source>
+        <translation>Deaktivieren</translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation>Aktivieren</translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation>Verbindung testen</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Entfernen</translation>
+    </message>
+    <message>
+        <source>Removing proxy</source>
+        <translation>Proxy wird entfernt</translation>
+    </message>
+</context>
+<context>
     <name>ReorderPinnedChatsPage</name>
     <message>
         <source>Unable to update pinned chat order.</source>
@@ -3497,6 +3647,43 @@ Nachrichten</numerusform>
     <message>
         <source>Notify when someone reacts to one of your messages.</source>
         <translation>Benachrichtigen, wenn jemand auf eine deiner Nachrichten reagiert.</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsConnection</name>
+    <message>
+        <source>Connection</source>
+        <translation>Verbindung</translation>
+    </message>
+    <message>
+        <source>Proxies route your Telegram traffic through another server to bypass censorship. MTProto proxies (especially with Fake-TLS) are the most resistant to blocking. SOCKS5 proxies also cover voice and video calls.</source>
+        <translation>Proxys leiten deinen Telegram-Datenverkehr über einen anderen Server, um Zensur zu umgehen. MTProto-Proxys (besonders mit Fake-TLS) sind am widerstandsfähigsten gegen Sperren. SOCKS5-Proxys decken auch Sprach- und Videoanrufe ab.</translation>
+    </message>
+    <message>
+        <source>Proxy</source>
+        <translation>Proxy</translation>
+    </message>
+    <message numerus="yes">
+        <source>On (%n configured)</source>
+        <translation>
+            <numerusform>An (%n konfiguriert)</numerusform>
+            <numerusform>An (%n konfiguriert)</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Off (%n configured)</source>
+        <translation>
+            <numerusform>Aus (%n konfiguriert)</numerusform>
+            <numerusform>Aus (%n konfiguriert)</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation>Aus</translation>
+    </message>
+    <message>
+        <source>Add, enable and test connection proxies.</source>
+        <translation>Proxys hinzufügen, aktivieren und Verbindung testen.</translation>
     </message>
 </context>
 <context>

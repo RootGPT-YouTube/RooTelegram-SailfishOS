@@ -146,6 +146,9 @@ signals:
     void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
     void textTranslated(const QString &translatedText, const QString &toLanguageCode);
     void messageTextTranslated(qlonglong chatId, qlonglong messageId, const QString &translatedText);
+    void proxiesReceived(const QVariantList &proxies);
+    void proxyAdded(const QVariantMap &proxy);
+    void proxyPinged(const QString &extra, double seconds);
 
 private:
     typedef void (TDLibReceiver::*Handler)(const QVariantMap &);
@@ -200,6 +203,9 @@ private:
     void processChat(const QVariantMap &receivedInformation);
     void processUpdateRecentStickers(const QVariantMap &receivedInformation);
     void processStickers(const QVariantMap &receivedInformation);
+    void processProxy(const QVariantMap &receivedInformation);
+    void processProxies(const QVariantMap &receivedInformation);
+    void processSeconds(const QVariantMap &receivedInformation);
     void processUpdateInstalledStickerSets(const QVariantMap &receivedInformation);
     void processStickerSets(const QVariantMap &receivedInformation);
     void processStickerSet(const QVariantMap &receivedInformation);

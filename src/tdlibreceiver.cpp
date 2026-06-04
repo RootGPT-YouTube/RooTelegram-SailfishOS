@@ -157,6 +157,9 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("chat", &TDLibReceiver::processChat);
     handlers.insert("updateRecentStickers", &TDLibReceiver::processUpdateRecentStickers);
     handlers.insert("stickers", &TDLibReceiver::processStickers);
+    handlers.insert("proxy", &TDLibReceiver::processProxy);
+    handlers.insert("proxies", &TDLibReceiver::processProxies);
+    handlers.insert("seconds", &TDLibReceiver::processSeconds);
     handlers.insert("updateInstalledStickerSets", &TDLibReceiver::processUpdateInstalledStickerSets);
     handlers.insert("stickerSets", &TDLibReceiver::processStickerSets);
     handlers.insert("stickerSet", &TDLibReceiver::processStickerSet);
@@ -635,6 +638,27 @@ void TDLibReceiver::processStickers(const QVariantMap &receivedInformation)
         emit customEmojiStickers(cleanedStickers, extra);
     } else {
         emit stickers(cleanedStickers);
+    }
+}
+
+void TDLibReceiver::processProxy(const QVariantMap &receivedInformation)
+{
+    LOG("Received a proxy (added/edited)");
+    emit proxyAdded(receivedInformation);
+}
+
+void TDLibReceiver::processProxies(const QVariantMap &receivedInformation)
+{
+    LOG("Received the proxy list");
+    emit proxiesReceived(receivedInformation.value("proxies").toList());
+}
+
+void TDLibReceiver::processSeconds(const QVariantMap &receivedInformation)
+{
+    // pingProxy returns a "seconds" object; correlate via @extra (pingProxy:<id>).
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    if (extra.startsWith("pingProxy:")) {
+        emit proxyPinged(extra, receivedInformation.value("seconds").toDouble());
     }
 }
 

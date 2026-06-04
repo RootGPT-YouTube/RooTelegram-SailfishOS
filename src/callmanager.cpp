@@ -530,6 +530,22 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
     }
     descriptor.config.customParameters = callState.value("custom_parameters").toString().toStdString();
 
+    // Anti-censura: se è abilitato un proxy SOCKS5, instrada anche le chiamate
+    // (tgcalls supporta SOLO SOCKS5; MTProto/HTTP valgono per l'API TDLib, non per le call).
+    if (tdLibWrapper) {
+        const QVariantMap socksProxy = tdLibWrapper->enabledSocks5Proxy();
+        if (!socksProxy.isEmpty()) {
+            auto proxy = std::make_unique<tgcalls::Proxy>();
+            proxy->host = socksProxy.value("server").toString().toStdString();
+            proxy->port = static_cast<uint16_t>(socksProxy.value("port").toInt());
+            const QVariantMap proxyType = socksProxy.value("type").toMap();
+            proxy->login = proxyType.value("username").toString().toStdString();
+            proxy->password = proxyType.value("password").toString().toStdString();
+            descriptor.proxy = std::move(proxy);
+            LOG("Call routed through SOCKS5 proxy" << socksProxy.value("server").toString());
+        }
+    }
+
     // V3: per le videochiamate crea la cattura camera (SailfishInterface →
     // QtMultimedia → I420 → encoder VP8). L'audio resta identico alle vocali.
     if (currentIsVideo) {

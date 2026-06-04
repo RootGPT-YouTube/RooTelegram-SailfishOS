@@ -213,6 +213,9 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)), this, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)));
     connect(this->tdLibReceiver, SIGNAL(textTranslated(QString, QString)), this, SIGNAL(textTranslated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)), this, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)));
+    connect(this->tdLibReceiver, SIGNAL(proxiesReceived(QVariantList)), this, SLOT(handleProxiesReceived(QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(proxyAdded(QVariantMap)), this, SIGNAL(proxyAdded(QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(proxyPinged(QString, double)), this, SLOT(handleProxyPinged(QString, double)));
     connect(this->tdLibReceiver, SIGNAL(secretChat(qlonglong, QVariantMap)), this, SLOT(handleSecretChatReceived(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(secretChatUpdated(qlonglong, QVariantMap)), this, SLOT(handleSecretChatUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(recentStickersUpdated(QVariantList)), this, SIGNAL(recentStickersUpdated(QVariantList)));
@@ -2630,6 +2633,132 @@ void TDLibWrapper::setInactiveSessionTtl(int days)
     this->sendRequest(requestObject);
 }
 
+// ── Proxy (anti-censura) ────────────────────────────────────────────────────
+void TDLibWrapper::getProxies()
+{
+    LOG("Retrieving proxy list");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getProxies");
+    requestObject.insert(_EXTRA, "getProxies");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::addProxyMtproto(const QString &server, int port, const QString &secret, bool enable)
+{
+    LOG("Adding MTProto proxy" << server << port);
+    QVariantMap type;
+    type.insert(_TYPE, "proxyTypeMtproto");
+    type.insert("secret", secret);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "addProxy");
+    requestObject.insert("server", server);
+    requestObject.insert("port", port);
+    requestObject.insert("enable", enable);
+    requestObject.insert(TYPE, type);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::addProxySocks5(const QString &server, int port, const QString &username, const QString &password, bool enable)
+{
+    LOG("Adding SOCKS5 proxy" << server << port);
+    QVariantMap type;
+    type.insert(_TYPE, "proxyTypeSocks5");
+    type.insert("username", username);
+    type.insert("password", password);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "addProxy");
+    requestObject.insert("server", server);
+    requestObject.insert("port", port);
+    requestObject.insert("enable", enable);
+    requestObject.insert(TYPE, type);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::addProxyHttp(const QString &server, int port, const QString &username, const QString &password, bool httpOnly, bool enable)
+{
+    LOG("Adding HTTP proxy" << server << port);
+    QVariantMap type;
+    type.insert(_TYPE, "proxyTypeHttp");
+    type.insert("username", username);
+    type.insert("password", password);
+    type.insert("http_only", httpOnly);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "addProxy");
+    requestObject.insert("server", server);
+    requestObject.insert("port", port);
+    requestObject.insert("enable", enable);
+    requestObject.insert(TYPE, type);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::enableProxy(int proxyId)
+{
+    LOG("Enabling proxy" << proxyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "enableProxy");
+    requestObject.insert("proxy_id", proxyId);
+    this->sendRequest(requestObject);
+    this->getProxies();   // ricarica la lista (is_enabled aggiornato)
+}
+
+void TDLibWrapper::disableProxy()
+{
+    LOG("Disabling proxy (direct connection)");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "disableProxy");
+    this->sendRequest(requestObject);
+    this->getProxies();
+}
+
+void TDLibWrapper::removeProxy(int proxyId)
+{
+    LOG("Removing proxy" << proxyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "removeProxy");
+    requestObject.insert("proxy_id", proxyId);
+    this->sendRequest(requestObject);
+    this->getProxies();
+}
+
+void TDLibWrapper::pingProxy(int proxyId)
+{
+    LOG("Pinging proxy" << proxyId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "pingProxy");
+    requestObject.insert(_EXTRA, QStringLiteral("pingProxy:") + QString::number(proxyId));
+    requestObject.insert("proxy_id", proxyId);
+    this->sendRequest(requestObject);
+}
+
+QVariantList TDLibWrapper::getCachedProxies() const
+{
+    return this->proxies;
+}
+
+QVariantMap TDLibWrapper::enabledSocks5Proxy() const
+{
+    for (const QVariant &p : this->proxies) {
+        const QVariantMap proxy = p.toMap();
+        if (proxy.value("is_enabled").toBool()
+                && proxy.value("type").toMap().value(_TYPE).toString() == QStringLiteral("proxyTypeSocks5")) {
+            return proxy;
+        }
+    }
+    return QVariantMap();
+}
+
+void TDLibWrapper::handleProxiesReceived(const QVariantList &proxies)
+{
+    this->proxies = proxies;
+    emit proxiesReceived(proxies);
+}
+
+void TDLibWrapper::handleProxyPinged(const QString &extra, double seconds)
+{
+    const int proxyId = extra.section(':', 1, 1).toInt();
+    emit proxyPinged(proxyId, seconds);
+}
+
 void TDLibWrapper::searchEmoji(const QString &queryString)
 {
     LOG("Searching emoji" << queryString);
@@ -2959,6 +3088,12 @@ void TDLibWrapper::handleConnectionStateChanged(const QString &connectionState)
     }
     if (connectionState == "connectionStateReady") {
         this->connectionState = ConnectionState::ConnectionReady;
+        if (!this->proxiesRequested) {
+            // Una volta connessi, carica la lista proxy in cache (serve a CallManager
+            // per instradare le chiamate via SOCKS5 e alla UI delle impostazioni).
+            this->proxiesRequested = true;
+            this->getProxies();
+        }
     }
     if (connectionState == "connectionStateUpdating") {
         this->connectionState = ConnectionState::Updating;

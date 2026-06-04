@@ -148,6 +148,93 @@
     </message>
 </context>
 <context>
+    <name>AddProxyDialog</name>
+    <message>
+        <source>Proxy added and enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Paste a proxy link (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>tg://proxy?server=…  or  https://t.me/proxy?…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Link recognised</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MTProto (recommended)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SOCKS5 (also for calls)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HTTP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server (host or IP)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Secret (supports dd… and ee… Fake-TLS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username</source>
+        <translation type="unfinished">Username</translation>
+    </message>
+    <message>
+        <source>Password (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HTTP only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The proxy supports only HTTP requests (no HTTPS tunnelling).</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>AddToFolderPage</name>
     <message>
         <source>Add to folder</source>
@@ -2727,6 +2814,69 @@ messages</numerusform>
     </message>
 </context>
 <context>
+    <name>ProxyListPage</name>
+    <message>
+        <source>MTProto</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SOCKS5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>HTTP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 ms</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable proxy (direct connection)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxy disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No proxies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pull down to add a proxy, or paste a tg://proxy link.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Disable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Test connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removing proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ReorderPinnedChatsPage</name>
     <message>
         <source>Unable to update pinned chat order.</source>
@@ -3496,6 +3646,43 @@ messages</numerusform>
     </message>
     <message>
         <source>Notify when someone reacts to one of your messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SettingsConnection</name>
+    <message>
+        <source>Connection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxies route your Telegram traffic through another server to bypass censorship. MTProto proxies (especially with Fake-TLS) are the most resistant to blocking. SOCKS5 proxies also cover voice and video calls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proxy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>On (%n configured)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>Off (%n configured)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Off</source>
+        <translation type="unfinished">Off</translation>
+    </message>
+    <message>
+        <source>Add, enable and test connection proxies.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

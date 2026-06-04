@@ -49,6 +49,7 @@ Page {
                 SettingsUserProfile { asynchronous: false }
                 SettingsSession {}
                 SettingsPrivacy {}
+                SettingsConnection {}
                 SettingsBehavior {}
                 SettingsAppearance {}
                 SettingsStorage {}
