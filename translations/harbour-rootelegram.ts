@@ -2274,6 +2274,17 @@
     </message>
 </context>
 <context>
+    <name>MessageViewersPage</name>
+    <message>
+        <source>Seen by</source>
+        <translation>Seen by</translation>
+    </message>
+    <message>
+        <source>No views</source>
+        <translation>No views</translation>
+    </message>
+</context>
+<context>
     <name>MessageVoiceNote</name>
     <message>
         <source>Voice Note</source>
@@ -3499,6 +3510,26 @@
         <source>Animate stickers</source>
         <translation type="unfinished">Animate stickers</translation>
     </message>
+    <message>
+        <source>Cyberpunk look (requires a dark and orange theme for the perfect experience)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Silica base theme (lighter, also good on light themes)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose RooTelegram&apos;s theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Silica (base theme)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Neon (cyberpunk)</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -4430,6 +4461,45 @@
     </message>
     <message>
         <source>User has been unbanned.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ThemeConfirmDialog</name>
+    <message>
+        <source>Apply now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Neon theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Silica theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cyberpunk look</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Base theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Apply this theme now?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

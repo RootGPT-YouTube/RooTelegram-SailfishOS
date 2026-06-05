@@ -31,7 +31,7 @@ import "../js/debug.js" as Debug
 
 ListItem {
     id: messageListItem
-    contentHeight: messageBackground.height + Theme.paddingMedium + ( addedReactionsAbove.visible ? addedReactionsAbove.height + Theme.paddingSmall : 0 ) + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( transcriptionItem.visible ? transcriptionItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
+    contentHeight: messageBackground.height + Theme.paddingMedium + ( topInfoVisible ? topInfoHeight + Theme.paddingSmall : 0 ) + ( translationItem.visible ? translationItem.height + Theme.paddingSmall : 0 ) + ( transcriptionItem.visible ? transcriptionItem.height + Theme.paddingSmall : 0 ) + ( reactionsColumn.visible ? reactionsColumn.height : 0 ) + ( commentsButton.visible ? commentsButton.height + Theme.paddingSmall : 0 )
     Behavior on contentHeight { NumberAnimation { duration: 200 } }
     property var chatId
     property var messageId
@@ -180,6 +180,22 @@ ListItem {
     // Lista "chi ha reagito e con quale reaction" (addedReaction[]), mostrata nel
     // pannello stellina sotto al picker delle reaction disponibili.
     property var messageAddedReactions: null
+
+    // Chi ha VISTO il messaggio (messageViewer[] = {user_id, view_date}); disponibile solo
+    // per i propri messaggi in gruppi piccoli/recenti (flag can_get_viewers del messaggio).
+    property var messageViewers: null
+    function messageViewersText() {
+        if (!messageViewers || messageViewers.length === 0) return "";
+        var names = [];
+        for (var i = 0; i < messageViewers.length; i++) {
+            names.push(Functions.getUserName(tdLibWrapper.getUserInformation(messageViewers[i].user_id)));
+        }
+        return names.join(", ");
+    }
+    // Banda info in cima al bubble (reaction a sx + visualizzatori a dx): altezza = la più alta.
+    readonly property bool topInfoVisible: addedReactionsAbove.visible || messageViewersRow.visible
+    readonly property real topInfoHeight: Math.max(addedReactionsAbove.visible ? addedReactionsAbove.height : 0,
+                                                    messageViewersRow.visible ? messageViewersRow.height : 0)
 
     highlighted: (down || (isSelected && messageAlbumMessageIds.length === 0) || additionalOptionsOpened || wasNavigatedTo) && !menuOpen
     openMenuOnPressAndHold: !messageListItem.precalculatedValues.pageIsSelecting || !isSelected
@@ -492,6 +508,12 @@ ListItem {
         if (canQueryReactions) {
             tdLibWrapper.getMessageAddedReactions(messageListItem.chatId, messageListItem.messageId);
         }
+        // Chi ha VISTO il messaggio: solo dove TDLib lo consente (can_get_viewers =
+        // propri messaggi in gruppi piccoli/recenti). Altrimenti non interroghiamo.
+        messageListItem.messageViewers = null;
+        if (canQueryReactions && myMessage && myMessage.can_get_viewers) {
+            tdLibWrapper.getMessageViewers(messageListItem.chatId, messageListItem.messageId);
+        }
         selectReactionBubble.visible = false;
     }
 
@@ -585,7 +607,21 @@ ListItem {
             webPagePreviewLoader.item.clicked()
         }
 
-        if (messageListItem.messageReactions) {
+        if (messageListItem.isOwnMessage) {
+            // Sui PROPRI messaggi la reaction è inutile: il tap mostra/chiude CHI ha
+            // visto il messaggio (👁) invece della stellina. Disponibile solo se TDLib
+            // lo consente (can_get_viewers: gruppi piccoli/recenti); altrimenti niente.
+            // can_get_viewers è inaffidabile nella cache (spesso assente anche quando
+            // disponibile) → interroghiamo sempre; TDLib risponde con la lista (vuota
+            // dove non disponibile, senza errori bloccanti).
+            selectReactionBubble.visible = false;
+            if (messageListItem.messageViewers) {
+                messageListItem.messageViewers = null;   // secondo tap richiude
+            } else if (!!messageListItem.messageId && messageListItem.messageId.toString() !== "0") {
+                tdLibWrapper.getMessageViewers(messageListItem.chatId, messageListItem.messageId);
+                elementSelected(index);
+            }
+        } else if (messageListItem.messageReactions) {
             messageListItem.messageReactions = null;
             selectReactionBubble.visible = false;
         } else {
@@ -801,6 +837,11 @@ ListItem {
                 messageListItem.messageAddedReactions = reactions;
             }
         }
+        onMessageViewersReceived: {
+            if (messageListItem.messageId === messageId) {
+                messageListItem.messageViewers = viewers;
+            }
+        }
         onReactionsUpdated: {
             chatReactions = tdLibWrapper.getChatReactions(page.chatInformation.id);
         }
@@ -943,6 +984,58 @@ ListItem {
         }
     }
 
+    // Chi ha VISTO il messaggio: in alto a DESTRA del bubble (occhio + nomi). Compare al
+    // tap quando TDLib lo consente (can_get_viewers: propri messaggi, gruppi piccoli/recenti).
+    Column {
+        id: messageViewersRow
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.horizontalPageMargin
+        y: Theme.paddingSmall
+        spacing: Theme.paddingSmall
+        visible: messageListItem.messageViewers ? messageListItem.messageViewers.length > 0 : false
+
+        // Prime 5 persone che hanno visto il messaggio (👁 sulla prima riga).
+        Repeater {
+            model: messageListItem.messageViewers ? Math.min(5, messageListItem.messageViewers.length) : 0
+
+            Row {
+                anchors.right: parent.right
+                spacing: Theme.paddingSmall
+
+                Image {
+                    source: index === 0 ? Emoji.getEmojiPath("👁") : ""
+                    width: (index === 0 && status === Image.Ready) ? Theme.fontSizeSmall : 0
+                    height: Theme.fontSizeSmall
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Label {
+                    text: Functions.getUserName(tdLibWrapper.getUserInformation(messageListItem.messageViewers[index].user_id))
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.secondaryHighlightColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.min(implicitWidth, messageListItem.width * 0.55)
+                    truncationMode: TruncationMode.Fade
+                }
+            }
+        }
+
+        // "+x": apre l'elenco COMPLETO dei visualizzatori in una pagina dedicata.
+        Label {
+            anchors.right: parent.right
+            visible: messageListItem.messageViewers && messageListItem.messageViewers.length > 5
+            text: "+" + (messageListItem.messageViewers ? (messageListItem.messageViewers.length - 5) : 0)
+            font.pixelSize: Theme.fontSizeSmall
+            font.bold: true
+            color: Theme.highlightColor
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: pageStack.push(Qt.resolvedUrl("../pages/MessageViewersPage.qml"),
+                                          { chatId: messageListItem.chatId, messageId: messageListItem.messageId })
+            }
+        }
+    }
+
     Row {
         id: messageTextRow
         spacing: Theme.paddingSmall
@@ -953,8 +1046,8 @@ ListItem {
         anchors.horizontalCenter: Functions.isWidescreen(appWindow) ? undefined : parent.horizontalCenter
         anchors.left: Functions.isWidescreen(appWindow) ? parent.left : undefined
         // Scende sotto la lista "chi ha reagito" quando è visibile (#4).
-        y: addedReactionsAbove.visible
-           ? (addedReactionsAbove.y + addedReactionsAbove.height + Theme.paddingSmall)
+        y: messageListItem.topInfoVisible
+           ? (Theme.paddingSmall + messageListItem.topInfoHeight + Theme.paddingSmall)
            : Theme.paddingSmall
         anchors.leftMargin: Functions.isWidescreen(appWindow) ? Theme.paddingMedium : undefined
 
@@ -1014,11 +1107,13 @@ ListItem {
                 // (alpha bassa sul colore, opacity=1) + bordo sottile luminoso. Niente blur
                 // (sarebbe 1 passata per messaggio nella lista → pesante su CPU/batteria).
                 property color glassBase: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
-                color: Theme.rgba(glassBase, isUnread ? 0.22 : 0.08)
+                // Tema Silica: fumetto più solido, senza bordo neon colorato.
+                color: appSettings.useNeonTheme ? Theme.rgba(glassBase, isUnread ? 0.22 : 0.08)
+                                                : Theme.rgba(glassBase, isUnread ? 0.32 : 0.18)
                 radius: parent.width / 50
                 opacity: 1
-                border.width: 2
-                // Bordo "vetro" colorato: ROSSO per i propri messaggi, ARANCIONE per gli altrui.
+                border.width: appSettings.useNeonTheme ? 2 : 0
+                // Bordo "vetro" colorato (solo Neon): ROSSO per i propri messaggi, ARANCIONE per gli altrui.
                 border.color: Theme.rgba(messageListItem.isOwnMessage ? "#ff5252" : "#ff8a3d", 0.45)
                 visible: appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji")
                 Behavior on color { ColorAnimation { duration: 200 } }
@@ -1291,8 +1386,8 @@ ListItem {
                     text: (messageListItem.revealedSpoilersVersion, Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false, messageListItem.revealedSpoilers), Theme.fontSizeMedium))
                     font.pixelSize: Theme.fontSizeSmall
                     color: messageListItem.textColor
-                    // Link a siti esterni in ROSSO-ARANCIO (il blu di default si legge male).
-                    linkColor: "#ff6e40"
+                    // Link a siti esterni: ROSSO-ARANCIO in Neon, highlight Silica altrimenti.
+                    linkColor: appSettings.useNeonTheme ? "#ff6e40" : Theme.highlightColor
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {

@@ -29,6 +29,8 @@ Item {
     property alias text: label.text
     property alias asynchronous: content.asynchronous
     property bool expanded: false
+    // Tema Neon (card di vetro) vs Silica (header piatto nativo).
+    readonly property bool neon: appSettings.useNeonTheme
     default property alias els: content.sourceComponent
     states: [
         State {
@@ -70,16 +72,19 @@ Item {
             anchors.rightMargin: Theme.horizontalPageMargin
             anchors.topMargin: Theme.paddingSmall / 2
             anchors.bottomMargin: Theme.paddingSmall / 2
-            radius: Theme.paddingLarge
-            color: Theme.rgba("#ffffff", (button.highlighted || area.expanded) ? 0.14 : 0.06)
-            border.width: 2
+            // Tema Silica: nessuna card di vetro (trasparente, piatta).
+            radius: area.neon ? Theme.paddingLarge : 0
+            color: area.neon ? Theme.rgba("#ffffff", (button.highlighted || area.expanded) ? 0.14 : 0.06)
+                             : (button.highlighted ? Theme.rgba(Theme.highlightColor, 0.1) : "transparent")
+            border.width: area.neon ? 2 : 0
             border.color: Theme.rgba("#ff8a3d", (button.highlighted || area.expanded) ? 0.80 : 0.45)
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
         }
-        // Scritta della scheda in NEON BIANCO, centrata: alone (Glow) + nucleo nitido.
+        // Scritta della scheda in NEON BIANCO, centrata (alone Glow): solo in tema Neon.
         Label {
             id: labelHalo
+            visible: area.neon
             anchors {
                 left: glassCard.left
                 right: glassCard.right
@@ -112,11 +117,12 @@ Item {
                 leftMargin: Theme.paddingLarge
                 rightMargin: Theme.paddingLarge
             }
-            horizontalAlignment: Text.AlignHCenter
+            // Tema Silica: header allineato a sinistra, colore highlight, non corsivo.
+            horizontalAlignment: area.neon ? Text.AlignHCenter : Text.AlignLeft
             truncationMode: TruncationMode.Fade
-            font.family: Theme.fontFamilyHeading
-            font.italic: true
-            color: "#ffffff"
+            font.family: area.neon ? Theme.fontFamilyHeading : Theme.fontFamily
+            font.italic: area.neon
+            color: area.neon ? "#ffffff" : ((button.highlighted || area.expanded) ? Theme.highlightColor : Theme.primaryColor)
             textFormat: Text.PlainText
         }
         // Freccia rimossa dall'UI (id mantenuto per alias `icon` e stato expanded).

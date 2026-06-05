@@ -22,24 +22,28 @@ Item {
     width: parent ? parent.width : 0
     height: Math.round(Theme.paddingSmall / 2)
 
-    // Alone (bloom): due linee bianche tenui sopra/sotto, anch'esse sfumate ai bordi.
+    readonly property bool neon: appSettings.useNeonTheme
+
+    // Alone (bloom): due linee bianche tenui sopra/sotto — solo in tema Neon.
     Separator {
+        visible: neonSeparator.neon
         anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter; verticalCenterOffset: -1 }
         width: parent.width
         color: Qt.rgba(1, 1, 1, 0.18)
         horizontalAlignment: Qt.AlignHCenter
     }
     Separator {
+        visible: neonSeparator.neon
         anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter; verticalCenterOffset: 1 }
         width: parent.width
         color: Qt.rgba(1, 1, 1, 0.18)
         horizontalAlignment: Qt.AlignHCenter
     }
-    // Linea nitida centrale bianca.
+    // Linea centrale: bianca neon nitida, oppure Separator Silica standard.
     Separator {
         anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter }
         width: parent.width
-        color: Qt.rgba(1, 1, 1, 0.9)
+        color: neonSeparator.neon ? Qt.rgba(1, 1, 1, 0.9) : Theme.primaryColor
         horizontalAlignment: Qt.AlignHCenter
     }
 }

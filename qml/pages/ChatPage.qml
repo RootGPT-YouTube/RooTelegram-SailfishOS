@@ -37,6 +37,9 @@ Page {
     allowedOrientations: Orientation.All
     backNavigation: !stickerPickerLoader.active
 
+    // Tema Neon (cyberpunk) vs Silica base. In Silica niente glow/corsivo/sfondo neon.
+    readonly property bool neon: appSettings.useNeonTheme
+
     // Sfondo a circuiti elettrici blu (#19), tenue, dietro la conversazione.
     CircuitBackground {}
 
@@ -520,6 +523,10 @@ Page {
                 lostFocusTimer.start();
             }
         }
+        // Dopo l'invio la bozza sul server va azzerata subito: altrimenti quella
+        // salvata durante la digitazione (o al passaggio in background) sopravvive
+        // all'invio e ricompare nella lista chat e nel composer alla riapertura.
+        chatPage.clearDraft();
         controlSendButton();
         newMessageInReplyToRow.inReplyToMessage = null;
         newMessageColumn.editMessageId = "0";
@@ -1281,13 +1288,40 @@ Page {
         initializePage();
     }
 
-    Component.onDestruction: {
+    // Salva la bozza (testo + eventuale reply) sul server via TDLib.
+    function saveDraft() {
         if (chatPage.canSendMessages && !chatPage.isDeletedUser) {
             tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, newMessageTextField.text,
                 newMessageInReplyToRow.inReplyToMessage ? newMessageInReplyToRow.inReplyToMessage.id : 0);
         }
+    }
+
+    // Azzera esplicitamente la bozza sul server (testo vuoto = clear lato TDLib).
+    // Va chiamata dopo l'invio: indipendente dal contenuto del composer, così non
+    // resta una bozza fantasma dopo aver mandato il messaggio.
+    function clearDraft() {
+        if (chatInformation && chatInformation.id) {
+            newMessageColumn.replyToMessageId = "0";
+            tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, 0, "");
+        }
+    }
+
+    Component.onDestruction: {
+        saveDraft();
         rootelegramUtils.stopGeoLocationUpdates();
         tdLibWrapper.closeChat(chatInformation.id);
+    }
+
+    // Salva la bozza anche quando l'app passa in background: se il sistema poi
+    // sospende e uccide il processo, la bozza è già persistita sul server e viene
+    // ripristinata al riavvio (Component.onDestruction non scatta in quel caso).
+    Connections {
+        target: Qt.application
+        onActiveChanged: {
+            if (!Qt.application.active) {
+                chatPage.saveDraft();
+            }
+        }
     }
 
     onStatusChanged: {
@@ -2023,6 +2057,7 @@ Page {
                         // conflitto col layer.effect Glow.
                         Label {
                             id: chatNameHalo
+                            visible: chatPage.neon
                             width: chatNameText.width
                             anchors.right: parent.right
                             anchors.top: parent.top
@@ -2051,12 +2086,12 @@ Page {
                             text: chatInformation.title !== "" ? Emoji.emojify(chatInformation.title, font.pixelSize) : qsTr("Unknown")
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
-                            font.family: Theme.fontFamilyHeading
-                            font.italic: true
-                            color: "#fff3e6"
+                            font.family: chatPage.neon ? Theme.fontFamilyHeading : Theme.fontFamily
+                            font.italic: chatPage.neon
+                            color: chatPage.neon ? "#fff3e6" : Theme.highlightColor
                             truncationMode: TruncationMode.Elide
                             maximumLineCount: 1
-                            layer.enabled: true
+                            layer.enabled: chatPage.neon
                             layer.effect: Glow {
                                 color: "#ff9a3d"
                                 radius: 6
@@ -2718,17 +2753,16 @@ Page {
                         target: tdLibWrapper
                         onTextTranslated: {
                             newMessageColumn.translatingInput = false
-                            if (translatedText !== "") {
-                                var converted = chatPage.translatedHtmlToComposerMarkdown(translatedText)
-                                // Telegram rileva la lingua di origine lato server: se la rileva
-                                // uguale alla destinazione (es. testo con anglicismi "emoji",
-                                // "reaction"…) rimanda il testo identico. Avvisa invece di
-                                // sembrare un blocco.
-                                if (converted.trim() === newMessageColumn.originalInputText.trim()) {
-                                    appNotification.show(qsTr("RooTelegram couldn't detect the language of the text — maybe you wrote a multilingual message?"))
-                                } else {
-                                    newMessageTextField.text = converted
-                                }
+                            var converted = (translatedText !== "") ? chatPage.translatedHtmlToComposerMarkdown(translatedText) : ""
+                            // Due casi di "non traducibile" lato Telegram, entrambi da segnalare
+                            // invece di restare muti:
+                            //  - testo VUOTO: il server non ha prodotto traduzione;
+                            //  - testo IDENTICO all'originale: lingua non rilevata o già uguale
+                            //    alla destinazione (es. anglicismi "emoji", "reaction"…).
+                            if (converted.trim() === "" || converted.trim() === newMessageColumn.originalInputText.trim()) {
+                                appNotification.show(qsTr("RooTelegram couldn't detect the language of the text — maybe you wrote a multilingual message?"))
+                            } else {
+                                newMessageTextField.text = converted
                             }
                         }
                         onErrorReceived: {
@@ -3846,13 +3880,14 @@ Page {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: width / 2
-                                // Vetro neon coerente con i pulsanti formato.
-                                color: Theme.rgba("#ffffff", 0.06)
+                                // Vetro neon, oppure bordo Silica discreto.
+                                color: chatPage.neon ? Theme.rgba("#ffffff", 0.06) : "transparent"
                                 border.width: 1
-                                border.color: Theme.rgba("#ff8a3d", 0.4)
+                                border.color: chatPage.neon ? Theme.rgba("#ff8a3d", 0.4) : Theme.rgba(Theme.primaryColor, 0.4)
                             }
-                            // Alone neon arancione dietro l'icona mappamondo.
+                            // Alone neon arancione dietro l'icona mappamondo (solo Neon).
                             Glow {
+                                visible: chatPage.neon
                                 anchors.fill: translateGlobeIcon
                                 source: translateGlobeIcon
                                 radius: 8
@@ -3863,7 +3898,7 @@ Page {
                             Image {
                                 id: translateGlobeIcon
                                 anchors.centerIn: parent
-                                source: "image://theme/icon-m-website?#ff9a3d"
+                                source: chatPage.neon ? "image://theme/icon-m-website?#ff9a3d" : "image://theme/icon-m-website"
                                 width: parent.width * 0.62
                                 height: width
                                 sourceSize.width: width
@@ -3912,20 +3947,21 @@ Page {
                                 Rectangle {
                                     anchors.fill: parent
                                     radius: width / 2
-                                    // Vetro neon: più acceso quando il formato è attivo (premuto).
-                                    color: Theme.rgba("#ffffff", fmtBtn.active ? 0.18 : 0.06)
+                                    // Vetro neon (più acceso se attivo), oppure bordo Silica discreto.
+                                    color: chatPage.neon ? Theme.rgba("#ffffff", fmtBtn.active ? 0.18 : 0.06)
+                                                         : (fmtBtn.active ? Theme.rgba(Theme.highlightColor, 0.2) : "transparent")
                                     border.width: fmtBtn.active ? 2 : 1
-                                    border.color: Theme.rgba("#ff8a3d", fmtBtn.active ? 0.9 : 0.4)
+                                    border.color: chatPage.neon ? Theme.rgba("#ff8a3d", fmtBtn.active ? 0.9 : 0.4)
+                                                                : Theme.rgba(fmtBtn.active ? Theme.highlightColor : Theme.primaryColor, fmtBtn.active ? 0.9 : 0.4)
                                 }
-                                // Alone neon GEMELLO dietro l'etichetta (pattern corretto:
-                                // sorgente nitida + Glow dietro z:-1, non layer.effect).
+                                // Alone neon GEMELLO dietro l'etichetta (solo Neon, quando attivo).
                                 Glow {
                                     anchors.fill: fmtLabel
                                     source: fmtLabel
                                     radius: 8
                                     samples: 17
                                     color: "#ff8a3d"
-                                    visible: fmtBtn.active
+                                    visible: fmtBtn.active && chatPage.neon
                                     z: -1
                                 }
                                 Label {
@@ -3937,7 +3973,7 @@ Page {
                                     font.underline: modelData.style === "underline"
                                     font.strikeout: modelData.style === "strike"
                                     font.pixelSize: modelData.style === "mono" ? Theme.fontSizeTiny : Theme.fontSizeExtraSmall
-                                    color: fmtBtn.active ? "#fff3e6" : Theme.primaryColor
+                                    color: fmtBtn.active ? (chatPage.neon ? "#fff3e6" : Theme.highlightColor) : Theme.primaryColor
                                 }
                                 MouseArea {
                                     anchors.fill: parent

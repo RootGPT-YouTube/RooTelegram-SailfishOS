@@ -22,6 +22,8 @@ Page {
     property var chatInformation
     property bool loading: false
     property bool loaded: false
+    // Tema Neon (cyberpunk) vs Silica base. In Silica niente glow/corsivo neon.
+    readonly property bool neon: appSettings.useNeonTheme
     // Thread ID dell'ultimo topic visitato (per il reload ritardato)
     property int lastViewedThreadId: 0
     // Se true, al prossimo refresh topics proviamo a sincronizzare anche il badge chat in home.
@@ -486,9 +488,9 @@ Page {
         MenuItem {
             onClicked: { refreshTopics() }
             Label {
-                anchors.centerIn: parent; text: qsTr("Refresh"); font.italic: true
-                color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                layer.enabled: true
+                anchors.centerIn: parent; text: qsTr("Refresh"); font.italic: forumTopicsPage.neon
+                color: forumTopicsPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                layer.enabled: forumTopicsPage.neon
                 layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
@@ -496,9 +498,9 @@ Page {
             visible: canManageTopics() || canCreateTopicsPermission()
             onClicked: { openCreateTopicEditor() }
             Label {
-                anchors.centerIn: parent; text: qsTr("Create Topic"); font.italic: true
-                color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                layer.enabled: true
+                anchors.centerIn: parent; text: qsTr("Create Topic"); font.italic: forumTopicsPage.neon
+                color: forumTopicsPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                layer.enabled: forumTopicsPage.neon
                 layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
@@ -506,9 +508,9 @@ Page {
             visible: canDisableTopics()
             onClicked: { disableTopics() }
             Label {
-                anchors.centerIn: parent; text: qsTr("Disable Topics"); font.italic: true
-                color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                layer.enabled: true
+                anchors.centerIn: parent; text: qsTr("Disable Topics"); font.italic: forumTopicsPage.neon
+                color: forumTopicsPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                layer.enabled: forumTopicsPage.neon
                 layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
             }
         }
@@ -903,6 +905,7 @@ Page {
 
                 Label {
                     id: topicsTitleHalo
+                    visible: forumTopicsPage.neon
                     anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; bottom: parent.verticalCenter }
                     width: Math.min(implicitWidth, topicsHeader.width - 2 * Theme.horizontalPageMargin)
                     horizontalAlignment: Text.AlignRight
@@ -910,11 +913,11 @@ Page {
                     textFormat: Text.StyledText
                     font.pixelSize: Theme.fontSizeLarge
                     font.family: Theme.fontFamilyHeading
-                    font.italic: true
+                    font.italic: forumTopicsPage.neon
                     truncationMode: TruncationMode.Elide
                     maximumLineCount: 1
                     color: "#e65000"
-                    layer.enabled: true
+                    layer.enabled: forumTopicsPage.neon
                     layer.effect: Glow {
                         color: "#e65000"
                         radius: 18
@@ -931,12 +934,12 @@ Page {
                     text: forumTopicsPage.chatInformation ? Emoji.emojify(forumTopicsPage.chatInformation.title, font.pixelSize) : ""
                     textFormat: Text.StyledText
                     font.pixelSize: Theme.fontSizeLarge
-                    font.family: Theme.fontFamilyHeading
-                    font.italic: true
+                    font.family: forumTopicsPage.neon ? Theme.fontFamilyHeading : Theme.fontFamily
+                    font.italic: forumTopicsPage.neon
                     truncationMode: TruncationMode.Elide
                     maximumLineCount: 1
-                    color: "#fff3e6"
-                    layer.enabled: true
+                    color: forumTopicsPage.neon ? "#fff3e6" : Theme.highlightColor
+                    layer.enabled: forumTopicsPage.neon
                     layer.effect: Glow {
                         color: "#ff9a3d"
                         radius: 6
@@ -970,21 +973,24 @@ Page {
                     anchors.rightMargin: Theme.horizontalPageMargin
                     anchors.topMargin: Theme.paddingSmall / 2
                     anchors.bottomMargin: Theme.paddingSmall / 2
-                    radius: Theme.paddingLarge
-                    color: Theme.rgba("#ffffff", createTopicButton.highlighted ? 0.14 : 0.06)
-                    border.width: 2
+                    // Tema Silica: nessuna card di vetro (piatta, niente bordo neon).
+                    radius: forumTopicsPage.neon ? Theme.paddingLarge : 0
+                    color: forumTopicsPage.neon ? Theme.rgba("#ffffff", createTopicButton.highlighted ? 0.14 : 0.06)
+                                                : (createTopicButton.highlighted ? Theme.rgba(Theme.highlightColor, 0.1) : "transparent")
+                    border.width: forumTopicsPage.neon ? 2 : 0
                     border.color: Theme.rgba("#ff8a3d", createTopicButton.highlighted ? 0.80 : 0.45)
                     Behavior on color { ColorAnimation { duration: 150 } }
                     Behavior on border.color { ColorAnimation { duration: 150 } }
                 }
                 Label {
                     id: createTopicHalo
+                    visible: forumTopicsPage.neon
                     anchors.centerIn: createTopicCard
                     text: qsTr("Create Topic")
                     font.family: Theme.fontFamilyHeading
-                    font.italic: true
+                    font.italic: forumTopicsPage.neon
                     color: "#ffffff"
-                    layer.enabled: true
+                    layer.enabled: forumTopicsPage.neon
                     layer.effect: Glow {
                         color: "#ffffff"
                         radius: 12
@@ -996,9 +1002,9 @@ Page {
                 Label {
                     anchors.centerIn: createTopicCard
                     text: qsTr("Create Topic")
-                    font.family: Theme.fontFamilyHeading
-                    font.italic: true
-                    color: "#ffffff"
+                    font.family: forumTopicsPage.neon ? Theme.fontFamilyHeading : Theme.fontFamily
+                    font.italic: forumTopicsPage.neon
+                    color: forumTopicsPage.neon ? "#ffffff" : Theme.highlightColor
                 }
             }
             // Spazio placeholder quando l'editor è visibile
@@ -1078,7 +1084,8 @@ Page {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Theme.itemSizeMedium * 0.8
                 height: width
-                radius: width / 2
+                // Tema Silica: icona quadrata (come gli avatar); Neon: tonda.
+                radius: forumTopicsPage.neon ? width / 2 : 0
                 // Colore TDLib: int ARGB -> estraiamo RGB
                 property color topicColor: iconColor ? Qt.rgba(
                     ((iconColor >> 16) & 0xFF) / 255.0,
@@ -1089,8 +1096,9 @@ Page {
                 border.width: 2
                 border.color: topicColor
 
-                // Alone neon (cheap, niente Glow per-delegate): anello esterno tenue.
+                // Alone neon (cheap, niente Glow per-delegate): anello esterno tenue. Solo Neon.
                 Rectangle {
+                    visible: forumTopicsPage.neon
                     anchors.centerIn: parent
                     width: parent.width + Theme.paddingSmall
                     height: width
@@ -1149,11 +1157,11 @@ Page {
                     width: parent.width
                     text: topicIsClosed ? (topicName + " · " + qsTr("Closed")) : topicName
                     font.pixelSize: Theme.fontSizeMedium
-                    font.italic: true
-                    color: "#ffffff"
+                    font.italic: forumTopicsPage.neon
+                    color: forumTopicsPage.neon ? "#ffffff" : Theme.primaryColor
                     truncationMode: TruncationMode.Fade
                     maximumLineCount: 1
-                    layer.enabled: true
+                    layer.enabled: forumTopicsPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
 

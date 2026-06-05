@@ -39,6 +39,73 @@ AccordionItem {
         ResponsiveGrid {
             bottomPadding: Theme.paddingMedium
 
+            // Selettore tema RooTelegram: Silica (base, leggero) o Neon (cyberpunk).
+            // Alla scelta di un tema diverso da quello attivo chiediamo conferma in un
+            // popup ("Applica ora? Sì/No"); applichiamo solo dopo conferma.
+            ComboBox {
+                id: themeCombo
+                width: parent.columnWidth
+                label: qsTr("Choose RooTelegram's theme")
+                currentIndex: appSettings.useNeonTheme ? 1 : 0
+                description: appSettings.useNeonTheme
+                    ? qsTr("Cyberpunk look (requires a dark and orange theme for the perfect experience)")
+                    : qsTr("Silica base theme (lighter, also good on light themes)")
+
+                // Tema richiesto dalla tendina, in attesa di conferma.
+                property bool pendingWantNeon: false
+
+                // Riallinea la tendina al tema realmente attivo (dopo apply o annullo).
+                function syncSelection() {
+                    themeCombo.currentIndex = appSettings.useNeonTheme ? 1 : 0;
+                }
+
+                // index 0 = Silica, index 1 = Neon. Conferma prima di applicare.
+                function requestTheme(wantNeon) {
+                    if (wantNeon === appSettings.useNeonTheme) {
+                        return; // nessun cambiamento
+                    }
+                    themeCombo.pendingWantNeon = wantNeon;
+                    // Push differito (Timer, non Qt.callLater: assente in Qt 5.6 di SFOS):
+                    // la ContextMenu si sta chiudendo, spingere la Dialog nello stesso giro
+                    // d'eventi la farebbe "mangiare".
+                    openThemeDialogTimer.restart();
+                }
+
+                Timer {
+                    id: openThemeDialogTimer
+                    interval: 1
+                    repeat: false
+                    onTriggered: {
+                        var wantNeon = themeCombo.pendingWantNeon;
+                        var dialog = pageStack.push(Qt.resolvedUrl("../../pages/ThemeConfirmDialog.qml"),
+                                                    { "wantNeon": wantNeon });
+                        dialog.accepted.connect(function() {
+                            appSettings.useNeonTheme = wantNeon;
+                            themeCombo.syncSelection();
+                        });
+                        dialog.rejected.connect(function() {
+                            themeCombo.syncSelection();
+                        });
+                    }
+                }
+
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Silica (base theme)")
+                        onClicked: themeCombo.requestTheme(false)
+                    }
+                    MenuItem {
+                        text: qsTr("Neon (cyberpunk)")
+                        onClicked: themeCombo.requestTheme(true)
+                    }
+                }
+
+                Connections {
+                    target: appSettings
+                    onUseNeonThemeChanged: themeCombo.syncSelection()
+                }
+            }
+
             TextSwitch {
                 width: parent.columnWidth
                 checked: appSettings.showStickersAsEmojis

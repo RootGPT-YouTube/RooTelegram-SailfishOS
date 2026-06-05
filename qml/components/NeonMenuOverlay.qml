@@ -23,6 +23,8 @@ Item {
     visible: false
     z: 1000
 
+    readonly property bool neon: appSettings.useNeonTheme
+
     // Lista azioni: array di { text:string, visible:bool(opz), callback:function }.
     property var actions: []
 
@@ -51,10 +53,10 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width - 2 * Theme.horizontalPageMargin
         height: Math.min(menuColumn.height + 2 * Theme.paddingLarge, parent.height - 2 * Theme.paddingLarge)
-        radius: Theme.paddingLarge
-        // Leggermente trasparente come il menù titolo (lascia intravedere il sotto).
-        color: Theme.rgba("#803500", 0.82)
-        border.width: 4
+        // Tema Silica: card opaca piatta (niente vetro/trasparenza/angoli stondati/bordo neon).
+        radius: overlay.neon ? Theme.paddingLarge : 0
+        color: overlay.neon ? Theme.rgba("#803500", 0.82) : Theme.overlayBackgroundColor
+        border.width: overlay.neon ? 4 : 0
         border.color: "#ff2d2d"
         clip: true
 
@@ -86,9 +88,11 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         truncationMode: TruncationMode.Fade
                         text: act ? act.text : ""
-                        font.italic: true
-                        color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                        layer.enabled: true
+                        font.italic: overlay.neon
+                        color: overlay.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                                            : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                        // Glow solo in tema Neon.
+                        layer.enabled: overlay.neon
                         layer.effect: Glow {
                             color: "#ffffff"
                             radius: 6

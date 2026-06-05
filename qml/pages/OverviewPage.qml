@@ -37,6 +37,8 @@ Page {
 
     property bool initializationCompleted: false;
     property bool loading: true;
+    // Tema Neon (cyberpunk) vs Silica base. In Silica niente glow/corsivo/sfondo neon.
+    readonly property bool neon: appSettings.useNeonTheme
     property bool logoutLoading: false;
     property int connectionState: TelegramAPI.WaitingForNetwork
     property int ownUserId;
@@ -510,9 +512,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Debug")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -521,9 +523,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Settings")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -535,9 +537,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Stories")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -549,9 +551,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("New Group")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -560,9 +562,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("New Channel")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -571,9 +573,9 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("New Chat")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -624,6 +626,7 @@ Page {
                 // Luce proiettata sullo SFONDO dietro la parola (come il muro illuminato dal neon)
                 RadialGradient {
                     id: neonBackglow
+                    visible: overviewPage.neon
                     anchors.centerIn: parent
                     width: neonCore.implicitWidth * 1.5
                     height: neonCore.implicitHeight * 2.6
@@ -639,12 +642,13 @@ Page {
                 // Alone largo e morbido: è il colore "del tubo" che diffonde nell'aria
                 Label {
                     id: neonHalo
+                    visible: overviewPage.neon
                     anchors.centerIn: parent
                     text: "R∞Telegram"
                     font.pixelSize: Theme.fontSizeHuge
-                    font.italic: true
+                    font.italic: overviewPage.neon
                     color: "#e65000"
-                    layer.enabled: true
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow {
                         color: "#e65000"
                         radius: 32
@@ -659,10 +663,10 @@ Page {
                     id: neonCore
                     anchors.centerIn: parent
                     text: "R∞Telegram"
-                    font.pixelSize: Theme.fontSizeHuge
-                    font.italic: true
-                    color: "#fff3e6"
-                    layer.enabled: true
+                    font.pixelSize: overviewPage.neon ? Theme.fontSizeHuge : Theme.fontSizeLarge
+                    font.italic: overviewPage.neon
+                    color: overviewPage.neon ? "#fff3e6" : Theme.highlightColor
+                    layer.enabled: overviewPage.neon
                     layer.effect: Glow {
                         color: "#ff9a3d"
                         radius: 8
@@ -699,11 +703,11 @@ Page {
             // Card "vetro appannato": bianco semi-opaco (lascia vagamente intravedere
             // ciò che c'è sotto ma resta leggibile) + bordo arancione sottile + angoli
             // stondati, coerente con le altre card neon (AccordionItem/NeonButton).
-            radius: Theme.paddingLarge
-            // Alternativa scelta dall'utente: sfondo ARANCIONE, scritte BIANCHE, cornice ROSSA.
-            // Arancione scurito del 50% (#ff6a00 -> #803500): meno acceso.
-            color: Theme.rgba("#803500", 0.82)
-            border.width: 4
+            // Tema Neon: card vetro arancione bordo rosso stondata. Tema Silica: pannello
+            // opaco piatto (niente trasparenza/bordo neon/angoli stondati).
+            radius: overviewPage.neon ? Theme.paddingLarge : 0
+            color: overviewPage.neon ? Theme.rgba("#803500", 0.82) : Theme.overlayBackgroundColor
+            border.width: overviewPage.neon ? 4 : 0
             border.color: "#ff2d2d"
             z: 100
             clip: true
@@ -756,10 +760,10 @@ Page {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: modelData.text
-                            font.italic: true
+                            font.italic: overviewPage.neon
                             // Scritte bianche al neon su sfondo arancione.
-                            color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                            layer.enabled: true
+                            color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                            layer.enabled: overviewPage.neon
                             layer.effect: Glow {
                                 color: "#ffffff"
                                 radius: 6
@@ -858,6 +862,7 @@ Page {
 
                 // alone neon dietro l'icona (icona nitida sopra)
                 Glow {
+                    visible: overviewPage.neon
                     anchors.fill: allIcon
                     source: allIcon
                     color: "#ffffff"
@@ -870,7 +875,7 @@ Page {
                 }
                 Image {
                     id: allIcon
-                    source: "image://theme/icon-m-chat?#ffffff"
+                    source: overviewPage.neon ? "image://theme/icon-m-chat?#ffffff" : "image://theme/icon-m-chat"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: Theme.paddingMedium
@@ -881,6 +886,7 @@ Page {
                 }
 
                 Glow {
+                    visible: overviewPage.neon
                     anchors.fill: allLabel
                     source: allLabel
                     color: "#ffffff"
@@ -895,13 +901,13 @@ Page {
                     id: allLabel
                     text: qsTr("All")
                     font.pixelSize: Theme.fontSizeExtraSmall
-                    font.italic: true
+                    font.italic: overviewPage.neon
                     anchors.top: allIcon.bottom
                     anchors.topMargin: Theme.paddingSmall
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: Theme.itemSizeMedium
                     horizontalAlignment: Text.AlignHCenter
-                    color: "#ffffff"
+                    color: overviewPage.neon ? "#ffffff" : (activeFolderId === 0 ? Theme.highlightColor : Theme.primaryColor)
                     opacity: activeFolderId === 0 ? 1.0 : 0.6
                 }
 
@@ -923,6 +929,7 @@ Page {
 
                 // alone neon dietro l'icona (icona nitida sopra)
                 Glow {
+                    visible: overviewPage.neon
                     anchors.fill: folderIcon
                     source: folderIcon
                     color: "#ffffff"
@@ -935,7 +942,7 @@ Page {
                 }
                 Image {
                     id: folderIcon
-                    source: "image://theme/icon-m-folder?#ffffff"
+                    source: overviewPage.neon ? "image://theme/icon-m-folder?#ffffff" : "image://theme/icon-m-folder"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
                     anchors.topMargin: Theme.paddingMedium
@@ -946,6 +953,7 @@ Page {
                 }
 
                 Glow {
+                    visible: overviewPage.neon
                     anchors.fill: folderLabel
                     source: folderLabel
                     color: "#ffffff"
@@ -960,7 +968,7 @@ Page {
                     id: folderLabel
                     text: folderName
                     font.pixelSize: Theme.fontSizeExtraSmall
-                    font.italic: true
+                    font.italic: overviewPage.neon
                     anchors.top: folderIcon.bottom
                     anchors.topMargin: Theme.paddingSmall
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -968,7 +976,7 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     lineHeight: 0.8
-                    color: "#ffffff"
+                    color: overviewPage.neon ? "#ffffff" : (activeFolderId === folderId ? Theme.highlightColor : Theme.primaryColor)
                     opacity: activeFolderId === folderId ? 1.0 : 0.6
                 }
 

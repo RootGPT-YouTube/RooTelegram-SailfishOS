@@ -2274,6 +2274,17 @@
     </message>
 </context>
 <context>
+    <name>MessageViewersPage</name>
+    <message>
+        <source>Seen by</source>
+        <translation>Visto da</translation>
+    </message>
+    <message>
+        <source>No views</source>
+        <translation>Nessuna visualizzazione</translation>
+    </message>
+</context>
+<context>
     <name>MessageVoiceNote</name>
     <message>
         <source>Voice Note</source>
@@ -3499,6 +3510,26 @@
         <source>Animate stickers</source>
         <translation>Riproduci sticker animati</translation>
     </message>
+    <message>
+        <source>Cyberpunk look (requires a dark and orange theme for the perfect experience)</source>
+        <translation>Look cyberpunk (richiede un tema scuro e arancione per un&apos;esperienza perfetta)</translation>
+    </message>
+    <message>
+        <source>Silica base theme (lighter, also good on light themes)</source>
+        <translation>Tema Silica base (più leggero, ottimo anche con i temi chiari)</translation>
+    </message>
+    <message>
+        <source>Choose RooTelegram&apos;s theme</source>
+        <translation>Scegli il tema di RooTelegram</translation>
+    </message>
+    <message>
+        <source>Silica (base theme)</source>
+        <translation>Silica (tema base)</translation>
+    </message>
+    <message>
+        <source>Neon (cyberpunk)</source>
+        <translation>Neon (cyberpunk)</translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -4431,6 +4462,45 @@
     <message>
         <source>User has been unbanned.</source>
         <translation>Utente sbannato.</translation>
+    </message>
+</context>
+<context>
+    <name>ThemeConfirmDialog</name>
+    <message>
+        <source>Apply now</source>
+        <translation>Applica ora</translation>
+    </message>
+    <message>
+        <source>No</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <source>Neon theme</source>
+        <translation>Tema Neon</translation>
+    </message>
+    <message>
+        <source>Silica theme</source>
+        <translation>Tema Silica</translation>
+    </message>
+    <message>
+        <source>Cyberpunk look</source>
+        <translation>Look cyberpunk</translation>
+    </message>
+    <message>
+        <source>Base theme</source>
+        <translation>Tema base</translation>
+    </message>
+    <message>
+        <source>Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.</source>
+        <translation>Sfondo a circuiti, bagliore neon su menù, pulsanti e titoli, avatar arrotondati e schede di vetro. Più pesante: richiede un tema scuro e arancione per un&apos;esperienza perfetta.</translation>
+    </message>
+    <message>
+        <source>Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.</source>
+        <translation>Menù piatti nativi, avatar quadrati, nessuno sfondo personalizzato, colori Silica standard. Più leggero e ben leggibile anche con i temi di sistema chiari.</translation>
+    </message>
+    <message>
+        <source>Apply this theme now?</source>
+        <translation>Applicare questo tema adesso?</translation>
     </message>
 </context>
 <context>

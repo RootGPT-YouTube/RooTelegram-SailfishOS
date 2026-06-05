@@ -10,6 +10,20 @@ import sys
 
 
 IT = {
+    # Selettore tema Silica/Neon (2.2)
+    "Choose RooTelegram's theme": "Scegli il tema di RooTelegram",
+    "Silica (base theme)": "Silica (tema base)",
+    "Neon (cyberpunk)": "Neon (cyberpunk)",
+    "Cyberpunk look (requires a dark and orange theme for the perfect experience)": "Look cyberpunk (richiede un tema scuro e arancione per un'esperienza perfetta)",
+    "Silica base theme (lighter, also good on light themes)": "Tema Silica base (più leggero, ottimo anche con i temi chiari)",
+    "Neon theme": "Tema Neon",
+    "Silica theme": "Tema Silica",
+    "Cyberpunk look": "Look cyberpunk",
+    "Base theme": "Tema base",
+    "Apply now": "Applica ora",
+    "Apply this theme now?": "Applicare questo tema adesso?",
+    "Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.": "Sfondo a circuiti, bagliore neon su menù, pulsanti e titoli, avatar arrotondati e schede di vetro. Più pesante: richiede un tema scuro e arancione per un'esperienza perfetta.",
+    "Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.": "Menù piatti nativi, avatar quadrati, nessuno sfondo personalizzato, colori Silica standard. Più leggero e ben leggibile anche con i temi di sistema chiari.",
     # Attribuzione librerie multimediali bundlate (compat 5.0/5.1)
     "For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg's multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.": "Per la compatibilità con SailfishOS 5.0/5.1 questo pacchetto include anche le dipendenze multimediali di FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) e OpenJPEG (BSD-2). Copyright dei rispettivi autori. I testi completi delle licenze sono in /usr/share/harbour-rootelegram/licenses/.",
     # Privacy chiamate (2.0 #1): rinominato da "Allow voice calls"
@@ -205,6 +219,21 @@ IT = {
 
 
 DE = {
+    # Themenauswahl Silica/Neon (2.2)
+    "Choose RooTelegram's theme": "RooTelegrams Thema wählen",
+    "Silica (base theme)": "Silica (Basisthema)",
+    "Neon (cyberpunk)": "Neon (Cyberpunk)",
+    "Cyberpunk look (requires a dark and orange theme for the perfect experience)": "Cyberpunk-Look (erfordert ein dunkles und oranges Thema für das perfekte Erlebnis)",
+    "Silica base theme (lighter, also good on light themes)": "Silica-Basisthema (leichter, auch gut bei hellen Themen)",
+    "Neon theme": "Neon-Thema",
+    "Silica theme": "Silica-Thema",
+    "Cyberpunk look": "Cyberpunk-Look",
+    "Base theme": "Basisthema",
+    "Apply now": "Jetzt anwenden",
+    "No": "Nein",
+    "Apply this theme now?": "Dieses Thema jetzt anwenden?",
+    "Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.": "Platinen-Hintergrund, Neon-Leuchten auf Menüs, Schaltflächen und Titeln, abgerundete Avatare und Glaskarten. Schwerer: erfordert ein dunkles und oranges Thema für das perfekte Erlebnis.",
+    "Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.": "Native flache Menüs, quadratische Avatare, kein eigener Hintergrund, Standard-Silica-Farben. Leichter und auch bei hellen Systemthemen gut lesbar.",
     # Zuordnung der gebündelten Multimedia-Bibliotheken (Kompat. 5.0/5.1)
     "For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg's multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.": "Für die Kompatibilität mit SailfishOS 5.0/5.1 bündelt dieses Paket auch die Multimedia-Abhängigkeiten von FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) und OpenJPEG (BSD-2). Copyright der jeweiligen Autoren. Die vollständigen Lizenztexte liegen in /usr/share/harbour-rootelegram/licenses/.",
     # Anrufe-Datenschutz (2.0 #1): umbenannt von "Allow voice calls"

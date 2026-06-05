@@ -31,8 +31,9 @@ Item {
 
     property alias photoData: file.fileInformation
     property string replacementStringHint: "X"
-    // 2.0 abbellimento (#3): angoli stondati (rounded-square) invece di cerchio/quadrato
-    property int radius: Math.round(width * 0.3)
+    // 2.0 abbellimento (#3): angoli stondati (rounded-square) nel tema Neon.
+    // Tema Silica: avatar quadrati (look base, più leggero).
+    property int radius: appSettings.useNeonTheme ? Math.round(width * 0.3) : 0
     property int imageStatus: -1
     property bool optimizeImageSize: true
     property bool highlighted

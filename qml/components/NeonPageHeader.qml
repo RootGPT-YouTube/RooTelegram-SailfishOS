@@ -13,6 +13,10 @@
 // + nucleo chiaro, corsivo, font heading. Stesso linguaggio del titolo home,
 // dell'header chat e della lista topic. Espone `text` (titolo) e `description`
 // (sottotitolo opzionale). Drop-in al posto di un PageHeader.
+//
+// Con il tema SILICA (appSettings.useNeonTheme == false) il titolo torna allo
+// stile header Silica nativo: niente alone/glow, colore highlight, non corsivo
+// (resta allineato a destra, come gli header Silica).
 
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
@@ -22,12 +26,15 @@ PageHeader {
     id: neonHeader
     property string text: ""
     property string description: ""
+    readonly property bool neon: appSettings.useNeonTheme
 
     title: ""
     height: Theme.itemSizeLarge
 
+    // Alone arancione: solo in tema Neon.
     Label {
         id: neonHalo
+        visible: neonHeader.neon
         anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; bottom: parent.verticalCenter }
         width: Math.min(implicitWidth, neonHeader.width - 2 * Theme.horizontalPageMargin)
         horizontalAlignment: Text.AlignRight
@@ -48,6 +55,7 @@ PageHeader {
             transparentBorder: true
         }
     }
+    // Nucleo: visibile in entrambi i temi, ma stile condizionale.
     Label {
         id: neonCore
         anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; bottom: parent.verticalCenter }
@@ -56,12 +64,12 @@ PageHeader {
         text: neonHeader.text
         textFormat: Text.StyledText
         font.pixelSize: Theme.fontSizeLarge
-        font.family: Theme.fontFamilyHeading
-        font.italic: true
+        font.family: neonHeader.neon ? Theme.fontFamilyHeading : Theme.fontFamily
+        font.italic: neonHeader.neon
         truncationMode: TruncationMode.Elide
         maximumLineCount: 1
-        color: "#fff3e6"
-        layer.enabled: true
+        color: neonHeader.neon ? "#fff3e6" : Theme.highlightColor
+        layer.enabled: neonHeader.neon
         layer.effect: Glow {
             color: "#ff9a3d"
             radius: 6

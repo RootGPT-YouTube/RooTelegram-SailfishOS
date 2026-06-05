@@ -46,6 +46,7 @@ namespace {
     const QString KEY_STORY_ALLOW_SCREENSHOTS("storyAllowScreenshots");
     const QString KEY_STORY_POST_TO_PROFILE("storyPostToProfile");
     const QString KEY_STORY_PRIVACY_MODE("storyPrivacyMode");
+    const QString KEY_USE_NEON_THEME("useNeonTheme");
     const QString KEY_STORY_CUSTOM_AUDIENCE_USER_IDS("storyCustomAudienceUserIds");
     // Chiave legacy: la prima iterazione del feature usava lo stesso storage per
     // i "Selected contacts" persistenti. Ora "Selected contacts" è ephemeral,
@@ -97,6 +98,22 @@ void AppSettings::setUseOpenWith(bool useOpenWith)
         LOG(KEY_USE_OPEN_WITH << useOpenWith);
         settings.setValue(KEY_USE_OPEN_WITH, useOpenWith);
         emit useOpenWithChanged();
+    }
+}
+
+// Tema Neon (cyberpunk) vs Silica nativo. Default false = Silica: look leggero,
+// niente sfondo circuiti né override neon (guadagno prestazioni su device scarsi).
+bool AppSettings::useNeonTheme() const
+{
+    return settings.value(KEY_USE_NEON_THEME, false).toBool();
+}
+
+void AppSettings::setUseNeonTheme(bool useNeonTheme)
+{
+    if (this->useNeonTheme() != useNeonTheme) {
+        LOG(KEY_USE_NEON_THEME << useNeonTheme);
+        settings.setValue(KEY_USE_NEON_THEME, useNeonTheme);
+        emit useNeonThemeChanged();
     }
 }
 

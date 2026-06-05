@@ -14,6 +14,9 @@
 // centrata (alone Glow + nucleo nitido), stesso linguaggio di AccordionItem
 // e dei fumetti glassmorphism delle chat.
 //
+// Con il tema SILICA (appSettings.useNeonTheme == false) ricade su una Button
+// Silica nativa, senza override.
+//
 // Drop-in al posto di una Silica `Button`: espone `text`, `enabled`,
 // il segnale `clicked()` e si auto-dimensiona (oppure imponi `width`).
 // Niente blur (CPU): solo Glow sul testo.
@@ -22,78 +25,108 @@ import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
-MouseArea {
+Item {
     id: neonButton
 
     property string text: ""
-    property bool down: pressed && containsMouse
     // colore base del bordo/alone: arancione brand, sovrascrivibile (es. azioni distruttive)
     property color accentColor: "#ff8a3d"
+    signal clicked()
 
     enabled: true
+    readonly property bool neon: appSettings.useNeonTheme
 
-    implicitHeight: Math.max(Theme.itemSizeSmall, labelCore.implicitHeight + 2 * Theme.paddingMedium)
-    implicitWidth: Math.min(
-                       Screen.width - 2 * Theme.horizontalPageMargin,
-                       labelCore.implicitWidth + 4 * Theme.paddingLarge)
+    implicitHeight: neon ? (neonLoader.item ? neonLoader.item.implicitHeight : 0)
+                         : (silicaLoader.item ? silicaLoader.item.implicitHeight : 0)
+    implicitWidth: neon ? (neonLoader.item ? neonLoader.item.implicitWidth : 0)
+                        : (silicaLoader.item ? silicaLoader.item.implicitWidth : 0)
     width: implicitWidth
     height: implicitHeight
 
     opacity: enabled ? 1.0 : 0.4
     Behavior on opacity { FadeAnimation {} }
 
-    Rectangle {
-        id: glassCard
+    // --- Tema Silica: Button nativa ---
+    Loader {
+        id: silicaLoader
         anchors.fill: parent
-        radius: Theme.paddingLarge
-        color: Theme.rgba("#ffffff", neonButton.down ? 0.14 : 0.06)
-        border.width: 2
-        border.color: Theme.rgba(neonButton.accentColor, neonButton.down ? 0.80 : 0.45)
-        Behavior on color { ColorAnimation { duration: 150 } }
-        Behavior on border.color { ColorAnimation { duration: 150 } }
+        active: !neonButton.neon
+        sourceComponent: Button {
+            text: neonButton.text
+            enabled: neonButton.enabled
+            onClicked: neonButton.clicked()
+        }
     }
 
-    // Scritta neon bianca: alone (Glow) + nucleo nitido.
-    Label {
-        id: labelHalo
-        anchors {
-            left: glassCard.left
-            right: glassCard.right
-            verticalCenter: glassCard.verticalCenter
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
+    // --- Tema Neon: cartello di vetro + scritta neon ---
+    Loader {
+        id: neonLoader
+        anchors.fill: parent
+        active: neonButton.neon
+        sourceComponent: MouseArea {
+            id: neonArea
+            enabled: neonButton.enabled
+            property bool down: pressed && containsMouse
+            implicitHeight: Math.max(Theme.itemSizeSmall, labelCore.implicitHeight + 2 * Theme.paddingMedium)
+            implicitWidth: Math.min(
+                               Screen.width - 2 * Theme.horizontalPageMargin,
+                               labelCore.implicitWidth + 4 * Theme.paddingLarge)
+            onClicked: neonButton.clicked()
+
+            Rectangle {
+                id: glassCard
+                anchors.fill: parent
+                radius: Theme.paddingLarge
+                color: Theme.rgba("#ffffff", neonArea.down ? 0.14 : 0.06)
+                border.width: 2
+                border.color: Theme.rgba(neonButton.accentColor, neonArea.down ? 0.80 : 0.45)
+                Behavior on color { ColorAnimation { duration: 150 } }
+                Behavior on border.color { ColorAnimation { duration: 150 } }
+            }
+
+            // Scritta neon bianca: alone (Glow) + nucleo nitido.
+            Label {
+                id: labelHalo
+                anchors {
+                    left: glassCard.left
+                    right: glassCard.right
+                    verticalCenter: glassCard.verticalCenter
+                    leftMargin: Theme.paddingMedium
+                    rightMargin: Theme.paddingMedium
+                }
+                horizontalAlignment: Text.AlignHCenter
+                truncationMode: TruncationMode.Fade
+                text: neonButton.text
+                font.family: Theme.fontFamilyHeading
+                font.italic: true
+                color: "#ffffff"
+                textFormat: Text.PlainText
+                layer.enabled: true
+                layer.effect: Glow {
+                    color: "#ffffff"
+                    radius: 12
+                    samples: 25
+                    spread: 0.20
+                    transparentBorder: true
+                }
+            }
+            Label {
+                id: labelCore
+                anchors {
+                    left: glassCard.left
+                    right: glassCard.right
+                    verticalCenter: glassCard.verticalCenter
+                    leftMargin: Theme.paddingMedium
+                    rightMargin: Theme.paddingMedium
+                }
+                horizontalAlignment: Text.AlignHCenter
+                truncationMode: TruncationMode.Fade
+                text: neonButton.text
+                font.family: Theme.fontFamilyHeading
+                font.italic: true
+                color: "#ffffff"
+                textFormat: Text.PlainText
+            }
         }
-        horizontalAlignment: Text.AlignHCenter
-        truncationMode: TruncationMode.Fade
-        text: neonButton.text
-        font.family: Theme.fontFamilyHeading
-        font.italic: true
-        color: "#ffffff"
-        textFormat: Text.PlainText
-        layer.enabled: true
-        layer.effect: Glow {
-            color: "#ffffff"
-            radius: 12
-            samples: 25
-            spread: 0.20
-            transparentBorder: true
-        }
-    }
-    Label {
-        id: labelCore
-        anchors {
-            left: glassCard.left
-            right: glassCard.right
-            verticalCenter: glassCard.verticalCenter
-            leftMargin: Theme.paddingMedium
-            rightMargin: Theme.paddingMedium
-        }
-        horizontalAlignment: Text.AlignHCenter
-        truncationMode: TruncationMode.Fade
-        text: neonButton.text
-        font.family: Theme.fontFamilyHeading
-        font.italic: true
-        color: "#ffffff"
-        textFormat: Text.PlainText
     }
 }

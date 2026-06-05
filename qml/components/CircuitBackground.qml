@@ -18,24 +18,30 @@ import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
-Image {
+// Tema Silica: lo sfondo non viene istanziato affatto (il Loader resta inattivo),
+// così non si paga né l'SVG né il FastBlur → è parte del guadagno prestazioni.
+Loader {
     id: circuitBackground
     z: -1
     anchors.fill: parent
-    source: Qt.resolvedUrl("../../images/bg_circuits.svg")
-    fillMode: Image.PreserveAspectCrop
+    active: appSettings.useNeonTheme
     asynchronous: true
-    cache: true
-    opacity: 0.12
-    // Render dell'SVG alla risoluzione di schermo (nitido).
-    sourceSize.width: width > 0 ? width : Screen.width
-    sourceSize.height: height > 0 ? height : Screen.height
-    // Forte sfocatura: i circuiti diventano una "foschia" blu diffusa, molto meno
-    // invadente (il blu sfocato fa anche da alone scintillante). One-time su
-    // immagine statica → nessun costo per-frame.
-    layer.enabled: true
-    layer.effect: FastBlur {
-        radius: 48
-        transparentBorder: true
+    sourceComponent: Image {
+        source: Qt.resolvedUrl("../../images/bg_circuits.svg")
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        cache: true
+        opacity: 0.12
+        // Render dell'SVG alla risoluzione di schermo (nitido).
+        sourceSize.width: width > 0 ? width : Screen.width
+        sourceSize.height: height > 0 ? height : Screen.height
+        // Forte sfocatura: i circuiti diventano una "foschia" blu diffusa, molto meno
+        // invadente (il blu sfocato fa anche da alone scintillante). One-time su
+        // immagine statica → nessun costo per-frame.
+        layer.enabled: true
+        layer.effect: FastBlur {
+            radius: 48
+            transparentBorder: true
+        }
     }
 }

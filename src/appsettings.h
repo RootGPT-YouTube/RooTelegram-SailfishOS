@@ -50,6 +50,7 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool storyAllowScreenshots READ storyAllowScreenshots WRITE setStoryAllowScreenshots NOTIFY storyAllowScreenshotsChanged)
     Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
     Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
+    Q_PROPERTY(bool useNeonTheme READ useNeonTheme WRITE setUseNeonTheme NOTIFY useNeonThemeChanged)
 
 public:
     enum SponsoredMess {
@@ -77,6 +78,9 @@ public:
 
     bool getUseOpenWith() const;
     void setUseOpenWith(bool useOpenWith);
+
+    bool useNeonTheme() const;
+    void setUseNeonTheme(bool useNeonTheme);
 
     bool showStickersAsEmojis() const;
     void setShowStickersAsEmojis(bool showAsEmojis);
@@ -191,6 +195,7 @@ signals:
     void storyAllowScreenshotsChanged();
     void storyPostToProfileChanged();
     void storyPrivacyModeChanged();
+    void useNeonThemeChanged();
     void storyCustomAudienceUserIdsChanged();
 
 private:
