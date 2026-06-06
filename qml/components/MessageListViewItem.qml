@@ -323,6 +323,12 @@ ListItem {
     // Traduzione del messaggio (API nativa TDLib, nessun servizio esterno).
     property string translatedText: ""
     property bool translating: false
+    // Traducibile se ha testo (messageText) OPPURE una didascalia (foto/video/
+    // ecc. → content.caption). Prima il gate guardava solo content.text.text,
+    // quindi le didascalie dei media non erano traducibili (#13).
+    readonly property bool hasTranslatableText: !!(myMessage && myMessage.content
+        && ((myMessage.content.text && myMessage.content.text.text)
+            || (myMessage.content.caption && myMessage.content.caption.text)))
 
     // Trascrizione vocale (Premium): letta direttamente dal messaggio (reattiva agli
     // updateMessageContent). Pending = in corso, Text = pronta.
@@ -452,7 +458,7 @@ ListItem {
         actions.push({ text: qsTr("Reply to Message"), visible: canReplyToMessage, callback: function() { replyToMessage(); }});
         actions.push({ text: qsTr("Copy Message to Clipboard"), visible: showCopyMessageToClipboardMenuItem, callback: function() { copyMessageToClipboard(); }});
         actions.push({ text: qsTr("Forward message"), visible: showForwardMessageMenuItem, callback: function() { forwardMessage(); }});
-        actions.push({ text: qsTr("Translate message"), visible: !!(myMessage && myMessage.content && myMessage.content.text && myMessage.content.text.text), callback: function() { messageListItem.translateMessage(); }});
+        actions.push({ text: qsTr("Translate message"), visible: hasTranslatableText, callback: function() { messageListItem.translateMessage(); }});
         actions.push({ text: (myMessage && myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message"), visible: canPinMessage, callback: function() { togglePinMessage(); }});
         actions.push({ text: qsTr("Edit Message"), visible: canEditMessage, callback: function() { requestEditMessage(); }});
         actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { requestDelete(false); }});
@@ -638,9 +644,13 @@ ListItem {
             // disponibile) → interroghiamo sempre; TDLib risponde con la lista (vuota
             // dove non disponibile, senza errori bloccanti).
             selectReactionBubble.visible = false;
+            // I "visti" (👁) esistono SOLO nei gruppi: in chat private/canali
+            // getMessageViewers darebbe l'errore "Can't get viewers of incoming
+            // messages" (#12). Quindi interroghiamo solo in basic/supergruppi.
             if (messageListItem.messageViewers) {
                 messageListItem.messageViewers = null;   // secondo tap richiude
-            } else if (!!messageListItem.messageId && messageListItem.messageId.toString() !== "0") {
+            } else if ((page.isBasicGroup || page.isSuperGroup)
+                       && !!messageListItem.messageId && messageListItem.messageId.toString() !== "0") {
                 tdLibWrapper.getMessageViewers(messageListItem.chatId, messageListItem.messageId);
                 elementSelected(index);
             }
@@ -759,7 +769,7 @@ ListItem {
                     text: qsTr("Forward message")
                 }
                 MenuItem {
-                    visible: myMessage && myMessage.content && myMessage.content.text && myMessage.content.text.text
+                    visible: hasTranslatableText
                     onClicked: messageListItem.translateMessage()
                     text: qsTr("Translate message")
                 }

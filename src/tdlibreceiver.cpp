@@ -134,6 +134,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateChatOrder", &TDLibReceiver::processUpdateChatOrder);
     handlers.insert("updateChatPosition", &TDLibReceiver::processUpdateChatPosition);
     handlers.insert("updateChatReadInbox", &TDLibReceiver::processUpdateChatReadInbox);
+    handlers.insert("updateChatAction", &TDLibReceiver::processUpdateChatAction);
     handlers.insert("updateChatReadOutbox", &TDLibReceiver::processUpdateChatReadOutbox);
     handlers.insert("updateChatAvailableReactions", &TDLibReceiver::processUpdateChatAvailableReactions);
     handlers.insert("updateBasicGroup", &TDLibReceiver::processUpdateBasicGroup);
@@ -426,6 +427,20 @@ void TDLibReceiver::processUpdateChatReadInbox(const QVariantMap &receivedInform
     const QString unread_count(receivedInformation.value(UNREAD_COUNT).toString());
     LOG("Chat read information updated for" << chat_id << "unread count:" << unread_count);
     emit chatReadInboxUpdated(chat_id, receivedInformation.value(LAST_READ_INBOX_MESSAGE_ID).toString(), unread_count.toInt());
+}
+
+void TDLibReceiver::processUpdateChatAction(const QVariantMap &receivedInformation)
+{
+    // "sta scrivendo…" (#2): chi compie un'azione (typing, recording, ...) in una
+    // chat. action @type == "chatActionCancel" significa azione terminata.
+    const QString chatId(receivedInformation.value(CHAT_ID).toString());
+    const QVariantMap senderId(receivedInformation.value("sender_id").toMap());
+    qlonglong userId = 0;
+    if (senderId.value(_TYPE).toString() == "messageSenderUser") {
+        userId = senderId.value("user_id").toLongLong();
+    }
+    const QString action(receivedInformation.value("action").toMap().value(_TYPE).toString());
+    emit chatActionUpdated(chatId, userId, action);
 }
 
 void TDLibReceiver::processUpdateChatReadOutbox(const QVariantMap &receivedInformation)

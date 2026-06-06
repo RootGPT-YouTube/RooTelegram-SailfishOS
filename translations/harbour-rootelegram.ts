@@ -1436,6 +1436,54 @@
         <source>Selected text copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>is recording a voice message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is recording a video message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is recording a video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is sending a voice message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is sending a video message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is sending a video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is sending a photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is sending a file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is choosing a sticker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is choosing a location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is choosing a contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is typing…</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1592,6 +1640,21 @@
     </message>
     <message>
         <source>Search in contacts...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ContactPickerPage</name>
+    <message>
+        <source>Send contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No contacts with a phone number</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2095,6 +2158,29 @@
     </message>
     <message>
         <source>Play/Pause</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MessageContact</name>
+    <message>
+        <source>Contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact saved to address book</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not save the contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add to contacts</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3237,6 +3323,69 @@
     </message>
     <message>
         <source>started a call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5075,6 +5224,69 @@
     </message>
     <message>
         <source>unhid topic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

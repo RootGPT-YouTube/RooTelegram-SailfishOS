@@ -190,6 +190,7 @@ public:
     Q_INVOKABLE void deleteChat(qlonglong chatId);
     Q_INVOKABLE void getChatHistory(qlonglong chatId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50, bool onlyLocal = false);
     Q_INVOKABLE void viewMessage(qlonglong chatId, qlonglong messageId, bool force);
+    Q_INVOKABLE void sendChatAction(qlonglong chatId, const QString &action = "chatActionTyping");
     Q_INVOKABLE void pinMessage(const QString &chatId, const QString &messageId, bool disableNotification = false, bool onlyForSelf = false);
     Q_INVOKABLE void unpinMessage(const QString &chatId, const QString &messageId);
     Q_INVOKABLE void sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId = 0);
@@ -203,6 +204,7 @@ public:
     Q_INVOKABLE void sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendStickerMessage(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption);
@@ -384,6 +386,7 @@ signals:
     void chatFolderPositionUpdated(const QString &chatId, int folderId, const QString &order, bool isPinned);
     void chatPinnedUpdated(qlonglong chatId, bool isPinned);
     void chatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
+    void chatActionUpdated(const QString &chatId, qlonglong userId, const QString &action);
     void chatReadOutboxUpdated(const QString &chatId, const QString &lastReadOutboxMessageId);
     void chatAvailableReactionsUpdated(const qlonglong &chatId, const QVariantMap &availableReactions);
     void userUpdated(const QString &userId, const QVariantMap &userInformation);

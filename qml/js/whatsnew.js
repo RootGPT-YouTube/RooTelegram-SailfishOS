@@ -15,6 +15,11 @@ var version = "2.3";
 var changelog = [
     "I link di invito ai gruppi (t.me/+…, tg://) ora si aprono in RooTelegram dal browser di Sailfish.",
     "Cancellazione messaggi: scelta «per tutti» o «solo per me», dove Telegram lo consente.",
+    "Indicatore «sta scrivendo…» nelle chat (in ricezione e in invio).",
+    "Invio e ricezione contatti, con salvataggio in rubrica Sailfish.",
+    "Traduzione anche delle didascalie di foto e video.",
+    "Apertura corretta dei messaggi letti dalle notifiche (niente più badge fantasma).",
+    "Nuovi messaggi di servizio gestiti (richiesta di ingresso, chiamate di gruppo, tema/sfondo).",
     "Tema Silica: nomi delle chat in grassetto e menù long-press nativo.",
     "Popup “Novità” una-tantum dopo ogni aggiornamento (questo!)."
 ];

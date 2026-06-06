@@ -237,6 +237,17 @@ Page {
         }
     }
 
+    // Apertura da notifica/esterno (#3): marca SUBITO la chat come letta fino
+    // all'ultimo messaggio (force_read=true), come fa "Segna tutti come letti".
+    // Senza questo, il read affidato alla ListView con force:false poteva non
+    // arrivare in fondo (deep-link a un messaggio non ultimo) → badge unread che
+    // restava in home dopo aver aperto la chat dalla notifica.
+    function markChatReadOnExternalOpen(chatInfo) {
+        if (chatInfo && chatInfo.id && chatInfo.last_message && chatInfo.last_message.id) {
+            tdLibWrapper.viewMessage(chatInfo.id, chatInfo.last_message.id, true);
+        }
+    }
+
     function openChat(chatId) {
         if(chatListCreated && chatId) {
             Debug.log("[OverviewPage] Opening Chat: ", chatId);
@@ -251,6 +262,7 @@ Page {
                 Debug.log("[OverviewPage] Chat unavailable, aborting open: ", chatId);
                 return;
             }
+            markChatReadOnExternalOpen(chatInfo);
             pageStack.pop(overviewPage, PageStackAction.Immediate);
             pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo }, PageStackAction.Immediate);
             chatToOpen = null;
@@ -263,8 +275,10 @@ Page {
         }
         if(chatListCreated && chatToOpen && chatToOpen.length === 2) {
             Debug.log("[OverviewPage] Opening Chat: ", chatToOpen[0], "message ID: " + chatToOpen[1]);
+            var chatInfo = tdLibWrapper.getChat(chatToOpen[0]);
+            markChatReadOnExternalOpen(chatInfo);
             pageStack.pop(overviewPage, PageStackAction.Immediate);
-            pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : tdLibWrapper.getChat(chatToOpen[0]), "messageIdToShow" : chatToOpen[1] }, PageStackAction.Immediate);
+            pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo, "messageIdToShow" : chatToOpen[1] }, PageStackAction.Immediate);
             chatToOpen = null;
         }
     }
@@ -275,8 +289,10 @@ Page {
         }
         if(chatListCreated && chatToOpen && chatToOpen.length === 2) {
             Debug.log("[OverviewPage] Opening Chat (with provided message): ", chatToOpen[0]);
+            var chatInfo = tdLibWrapper.getChat(chatToOpen[0]);
+            markChatReadOnExternalOpen(chatInfo);
             pageStack.pop(overviewPage, PageStackAction.Immediate);
-            pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : tdLibWrapper.getChat(chatToOpen[0]), "messageToShow" : chatToOpen[1] }, PageStackAction.Immediate);
+            pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo, "messageToShow" : chatToOpen[1] }, PageStackAction.Immediate);
             chatToOpen = null;
         }
     }

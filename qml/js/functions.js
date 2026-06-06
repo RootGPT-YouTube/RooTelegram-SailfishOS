@@ -136,11 +136,14 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         }
     case 'messageLocation':
         return simple ? (myself ? qsTr("sent a location", "myself") : qsTr("sent a location")) : "";
+    case 'messageContact':
+        return simple ? (myself ? qsTr("sent a contact", "myself") : qsTr("sent a contact")) : "";
     case 'messageVenue':
         return simple ? (myself ? qsTr("sent a venue", "myself") : qsTr("sent a venue")) : ( "<b>" + message.content.venue.title + "</b>, " + message.content.venue.address );
     case 'messageContactRegistered':
         return myself ? qsTr("have registered with Telegram") : qsTr("has registered with Telegram");
     case 'messageChatJoinByLink':
+    case 'messageChatJoinByRequest':
         return myself ? qsTr("joined this chat", "myself") : qsTr("joined this chat");
     case 'messageChatAddMembers':
         if (message.sender_id['@type'] === "messageSenderUser" && message.sender_id.user_id === message.content.member_user_ids[0]) {
@@ -205,6 +208,18 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
             return myself ? qsTr("cancelled a call", "myself") : qsTr("missed a call");
         }
         return myself ? qsTr("started a call", "myself") : qsTr("started a call");
+    case 'messageVideoChatStarted':
+        return myself ? qsTr("started a video chat", "myself") : qsTr("started a video chat");
+    case 'messageVideoChatEnded':
+        return myself ? qsTr("ended the video chat", "myself") : qsTr("ended the video chat");
+    case 'messageVideoChatScheduled':
+        return myself ? qsTr("scheduled a video chat", "myself") : qsTr("scheduled a video chat");
+    case 'messageInviteVideoChatParticipants':
+        return myself ? qsTr("invited participants to the video chat", "myself") : qsTr("invited participants to the video chat");
+    case 'messageChatSetTheme':
+        return myself ? qsTr("changed the chat theme", "myself") : qsTr("changed the chat theme");
+    case 'messageChatSetBackground':
+        return myself ? qsTr("changed the chat background", "myself") : qsTr("changed the chat background");
     case 'messageForumTopicCreated':
         return qsTr("created topic: %1").arg(message.content.name || "");
     case 'messageForumTopicEdited':
@@ -680,7 +695,13 @@ function handleErrorMessage(code, message) {
             || message === "Invalid value of parameter from_message_id specified"
             || message === "MSG_ID_INVALID"
             || message === "BROADCAST_FORBIDDEN"
+            || message === "Can't get viewers of incoming messages"
+            || message === "Message has no viewers"
+            || message === "Chat is too big"
             || message === "Not enough rights to get scheduled messages") {
+        // "Can't get viewers of incoming messages" / "Message has no viewers":
+        // errori benigni di getMessageViewers (feature 👁) dove i "visti" non
+        // esistono (chat private, messaggi non idonei). Nessun toast (#12).
         // MSG_ID_INVALID / BROADCAST_FORBIDDEN: errori benigni quando si
         // interrogano i reattori (getMessageAddedReactions) su messaggi che non
         // lo supportano — es. gruppi grandi (MSG_ID_INVALID) e canali, dove chi

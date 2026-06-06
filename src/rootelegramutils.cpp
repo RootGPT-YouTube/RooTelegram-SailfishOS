@@ -191,6 +191,9 @@ QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const 
     if (contentType == MESSAGE_CONTENT_TYPE_LOCATION) {
         return myself ? tr("sent a location", "myself") : tr("sent a location");
     }
+    if (contentType == "messageContact") {
+        return myself ? tr("sent a contact", "myself") : tr("sent a contact");
+    }
     if (contentType == MESSAGE_CONTENT_TYPE_VENUE) {
         return myself ? tr("sent a venue", "myself") : tr("sent a venue");
     }
@@ -203,7 +206,7 @@ QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const 
     if (contentType == "messageContactRegistered") {
         return myself ? tr("have registered with Telegram", "myself") : tr("has registered with Telegram");
     }
-    if (contentType == "messageChatJoinByLink") {
+    if (contentType == "messageChatJoinByLink" || contentType == "messageChatJoinByRequest") {
         return myself ? tr("joined this chat", "myself") : tr("joined this chat");
     }
     if (contentType == "messageChatAddMembers") {
@@ -257,6 +260,24 @@ QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const 
     }
     if (contentType == "messagePinMessage") {
         return myself ? tr("changed the pinned message", "myself") : tr("changed the pinned message");
+    }
+    if (contentType == "messageVideoChatStarted") {
+        return myself ? tr("started a video chat", "myself") : tr("started a video chat");
+    }
+    if (contentType == "messageVideoChatEnded") {
+        return myself ? tr("ended the video chat", "myself") : tr("ended the video chat");
+    }
+    if (contentType == "messageVideoChatScheduled") {
+        return myself ? tr("scheduled a video chat", "myself") : tr("scheduled a video chat");
+    }
+    if (contentType == "messageInviteVideoChatParticipants") {
+        return myself ? tr("invited participants to the video chat", "myself") : tr("invited participants to the video chat");
+    }
+    if (contentType == "messageChatSetTheme") {
+        return myself ? tr("changed the chat theme", "myself") : tr("changed the chat theme");
+    }
+    if (contentType == "messageChatSetBackground") {
+        return myself ? tr("changed the chat background", "myself") : tr("changed the chat background");
     }
     if (contentType == "messageExpiredPhoto") {
         return myself ? tr("sent a self-destructing photo that is expired", "myself") : tr("sent a self-destructing photo that is expired");

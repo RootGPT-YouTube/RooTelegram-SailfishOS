@@ -60,6 +60,7 @@ signals:
     void chatPinnedUpdated(qlonglong chatId, bool isPinned);
     void chatFolderPositionUpdated(const QString &chatId, int folderId, const QString &order, bool isPinned);
     void chatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
+    void chatActionUpdated(const QString &chatId, qlonglong userId, const QString &action);
     void chatReadOutboxUpdated(const QString &chatId, const QString &lastReadOutboxMessageId);
     void chatAvailableReactionsUpdated(const qlonglong &chatId, const QVariantMap &availableReactions);
     void basicGroupUpdated(qlonglong groupId, const QVariantMap &groupInformation);
@@ -270,6 +271,7 @@ private:
     void processStoryInteractions(const QVariantMap &receivedInformation);
     void processFormattedText(const QVariantMap &receivedInformation);
     void processMessageProperties(const QVariantMap &receivedInformation);
+    void processUpdateChatAction(const QVariantMap &receivedInformation);
 };
 
 #endif // TDLIBRECEIVER_H

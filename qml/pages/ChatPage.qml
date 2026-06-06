@@ -54,6 +54,9 @@ Page {
     property bool isInitialized: false;
     readonly property int myUserId: tdLibWrapper.getUserInformation().id;
     property var chatInformation;
+    // "sta scrivendo…" (#2): chatActionText (override) vs baseStatusText (stato normale).
+    property string baseStatusText: ""
+    property string chatActionText: ""
     property var secretChatDetails;
     property alias chatPicture: chatPictureThumbnail.photoData
     property bool isPrivateChat: false;
@@ -263,7 +266,7 @@ Page {
             }
         }
         if (statusText) {
-            chatStatusText.text = statusText;
+            chatPage.baseStatusText = statusText;
         }
         if (chatPartnerInformation.type['@type'] === "userTypeDeleted") {
             chatNameText.text = qsTr("Deleted User");
@@ -276,19 +279,96 @@ Page {
             return
         }
         if (chatOnlineMemberCount > 0) {
-            chatStatusText.text = qsTr("%1, %2", "combination of '[x members], [y online]', which are separate translations")
+            chatPage.baseStatusText = qsTr("%1, %2", "combination of '[x members], [y online]', which are separate translations")
                 .arg(qsTr("%1 members", "", chatGroupInformation.member_count)
                     .arg(Functions.getShortenedCount(chatGroupInformation.member_count)))
                 .arg(qsTr("%1 online", "", chatOnlineMemberCount)
                     .arg(Functions.getShortenedCount(chatOnlineMemberCount)));
         } else {
             if (isChannel) {
-                chatStatusText.text = qsTr("%1 subscribers", "", chatGroupInformation.member_count).arg(Functions.getShortenedCount(chatGroupInformation.member_count));
+                chatPage.baseStatusText = qsTr("%1 subscribers", "", chatGroupInformation.member_count).arg(Functions.getShortenedCount(chatGroupInformation.member_count));
             } else {
-                chatStatusText.text = qsTr("%1 members", "", chatGroupInformation.member_count).arg(Functions.getShortenedCount(chatGroupInformation.member_count));
+                chatPage.baseStatusText = qsTr("%1 members", "", chatGroupInformation.member_count).arg(Functions.getShortenedCount(chatGroupInformation.member_count));
             }
         }
         joinLeaveChatMenuItem.text = chatPage.userIsMember ? qsTr("Leave Chat") : qsTr("Join Chat");
+    }
+
+    // Testo per l'azione di chat ("sta scrivendo…", #2). Nei gruppi anteponiamo
+    // il nome di chi compie l'azione.
+    function chatActionToText(userId, action) {
+        var who = "";
+        if ((chatPage.isBasicGroup || chatPage.isSuperGroup) && userId && userId.toString() !== "0") {
+            who = Functions.getUserName(tdLibWrapper.getUserInformation(userId.toString()));
+        }
+        var verb;
+        switch (action) {
+        case "chatActionRecordingVoiceNote": verb = qsTr("is recording a voice message"); break;
+        case "chatActionRecordingVideoNote": verb = qsTr("is recording a video message"); break;
+        case "chatActionRecordingVideo":     verb = qsTr("is recording a video"); break;
+        case "chatActionUploadingVoiceNote": verb = qsTr("is sending a voice message"); break;
+        case "chatActionUploadingVideoNote": verb = qsTr("is sending a video message"); break;
+        case "chatActionUploadingVideo":     verb = qsTr("is sending a video"); break;
+        case "chatActionUploadingPhoto":     verb = qsTr("is sending a photo"); break;
+        case "chatActionUploadingDocument":  verb = qsTr("is sending a file"); break;
+        case "chatActionChoosingSticker":    verb = qsTr("is choosing a sticker"); break;
+        case "chatActionChoosingLocation":   verb = qsTr("is choosing a location"); break;
+        case "chatActionChoosingContact":    verb = qsTr("is choosing a contact"); break;
+        default:                             verb = qsTr("is typing…"); break;
+        }
+        return who !== "" ? (who + " " + verb) : verb;
+    }
+
+    Timer {
+        id: chatActionClearTimer
+        interval: 6000
+        onTriggered: chatPage.chatActionText = ""
+    }
+
+    // #17: invio della NOSTRA azione "sta scrivendo" mentre digitiamo. Throttle a
+    // 4s (TDLib vuole il refresh ~ogni 5s) + idle timer che manda "cancel" dopo
+    // 5s di inattività. stopTyping() anche all'invio o testo vuoto.
+    property bool selfTypingActive: false
+    Timer { id: selfTypingThrottle; interval: 4000 }
+    Timer { id: selfTypingIdle; interval: 5000; onTriggered: chatPage.stopTyping() }
+    function notifyTyping() {
+        if (newMessageTextField.text === "") {
+            stopTyping();
+            return;
+        }
+        if (!selfTypingThrottle.running) {
+            tdLibWrapper.sendChatAction(chatInformation.id, "chatActionTyping");
+            selfTypingActive = true;
+            selfTypingThrottle.restart();
+        }
+        selfTypingIdle.restart();
+    }
+    function stopTyping() {
+        selfTypingThrottle.stop();
+        selfTypingIdle.stop();
+        if (selfTypingActive) {
+            tdLibWrapper.sendChatAction(chatInformation.id, "chatActionCancel");
+            selfTypingActive = false;
+        }
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onChatActionUpdated: {
+            if (chatId !== String(chatInformation.id)) {
+                return;
+            }
+            if (userId && userId.toString() === String(chatPage.myUserId)) {
+                return; // ignora le proprie azioni
+            }
+            if (action === "chatActionCancel") {
+                chatPage.chatActionText = "";
+                chatActionClearTimer.stop();
+            } else {
+                chatPage.chatActionText = chatActionToText(userId, action);
+                chatActionClearTimer.restart(); // fallback se manca il cancel
+            }
+        }
     }
 
     function setPendingJoinRequests(pendingJoinRequests) {
@@ -510,6 +590,7 @@ Page {
     }
 
     function sendMessage(sendDate) {
+        chatPage.stopTyping();   // #17: ferma "sta scrivendo" all'invio
         var customEmojiEntities = getComposerCustomEmojiEntitiesForSend();
         tdLibWrapper.setPendingScheduledSendDate(sendDate ? Math.floor(sendDate) : 0);
         if (newMessageColumn.editMessageId !== "0") {
@@ -2198,11 +2279,13 @@ Page {
                                 right: parent.right
                                 bottom: parent.bottom
                             }
-                            text: ""
+                            // "sta scrivendo…" (#2) ha priorità sullo stato normale.
+                            text: chatPage.chatActionText !== "" ? chatPage.chatActionText : chatPage.baseStatusText
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeExtraSmall : Theme.fontSizeTiny
                             font.family: Theme.fontFamilyHeading
-                            color: headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                            color: chatPage.chatActionText !== "" ? Theme.highlightColor
+                                   : (headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor)
                             truncationMode: TruncationMode.Fade
                             maximumLineCount: 1
                         }
@@ -2561,7 +2644,7 @@ Page {
                             "messageAnimatedEmoji",
                             "messageAnimation",
                             "messageAudio",
-                            // "messageContact",
+                            "messageContact",
                             // "messageDice"
                             "messageDocument",
                             "messageGame",
@@ -2586,6 +2669,13 @@ Page {
                                                                        "messageChatDeleteMember",
                                                                        "messageChatDeletePhoto",
                                                                        "messageChatJoinByLink",
+                                                                       "messageChatJoinByRequest",
+                                                                       "messageVideoChatStarted",
+                                                                       "messageVideoChatEnded",
+                                                                       "messageVideoChatScheduled",
+                                                                       "messageInviteVideoChatParticipants",
+                                                                       "messageChatSetTheme",
+                                                                       "messageChatSetBackground",
                                                                        "messageChatSetTtl",
                                                                        "messageChatUpgradeFrom",
                                                                        "messageContactRegistered",
@@ -3288,6 +3378,27 @@ Page {
                                     attachmentPreviewRow.isLocation = true;
                                     attachmentPreviewRow.attachmentDescription = qsTr("Location: Obtaining position...");
                                     controlSendButton();
+                                }
+                            }
+                            IconButton {
+                                // Invia un contatto dalla rubrica di Sailfish (#7B).
+                                visible: newMessageTextField.text === ""
+                                width: newMessageColumn.compactAttachmentButtonSize
+                                height: width
+                                icon.source: "image://theme/icon-m-contact"
+                                icon.sourceSize {
+                                    width: Theme.iconSizeMedium
+                                    height: Theme.iconSizeMedium
+                                }
+                                onClicked: {
+                                    attachmentOptionsFlickable.isNeeded = false;
+                                    newMessageColumn.quickEmojiPickerVisible = false;
+                                    newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    var replyId = newMessageColumn.replyToMessageId;
+                                    var picker = pageStack.push(Qt.resolvedUrl("../pages/ContactPickerPage.qml"));
+                                    picker.contactPicked.connect(function(firstName, lastName, phoneNumber) {
+                                        tdLibWrapper.sendContactMessage(chatInformation.id, firstName, lastName, phoneNumber, replyId);
+                                    });
                                 }
                             }
                         }
@@ -4098,6 +4209,7 @@ Page {
                                 newMessageColumn.previousComposerText = newMessageTextField.text || "";
                                 controlSendButton();
                                 textReplacementTimer.restart();
+                                chatPage.notifyTyping();
                             }
                             onActiveFocusChanged: {
                                 if (activeFocus) {

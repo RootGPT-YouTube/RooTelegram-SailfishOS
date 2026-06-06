@@ -1436,6 +1436,54 @@
         <source>Selected text copied to clipboard</source>
         <translation>Markierter Text in die Zwischenablage kopiert</translation>
     </message>
+    <message>
+        <source>is recording a voice message</source>
+        <translation>nimmt eine Sprachnachricht auf</translation>
+    </message>
+    <message>
+        <source>is recording a video message</source>
+        <translation>nimmt eine Videonachricht auf</translation>
+    </message>
+    <message>
+        <source>is recording a video</source>
+        <translation>nimmt ein Video auf</translation>
+    </message>
+    <message>
+        <source>is sending a voice message</source>
+        <translation>sendet eine Sprachnachricht</translation>
+    </message>
+    <message>
+        <source>is sending a video message</source>
+        <translation>sendet eine Videonachricht</translation>
+    </message>
+    <message>
+        <source>is sending a video</source>
+        <translation>sendet ein Video</translation>
+    </message>
+    <message>
+        <source>is sending a photo</source>
+        <translation>sendet ein Foto</translation>
+    </message>
+    <message>
+        <source>is sending a file</source>
+        <translation>sendet eine Datei</translation>
+    </message>
+    <message>
+        <source>is choosing a sticker</source>
+        <translation>wählt einen Sticker aus</translation>
+    </message>
+    <message>
+        <source>is choosing a location</source>
+        <translation>wählt einen Ort aus</translation>
+    </message>
+    <message>
+        <source>is choosing a contact</source>
+        <translation>wählt einen Kontakt aus</translation>
+    </message>
+    <message>
+        <source>is typing…</source>
+        <translation>schreibt…</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1593,6 +1641,21 @@
     <message>
         <source>Search in contacts...</source>
         <translation>In Kontakten suchen…</translation>
+    </message>
+</context>
+<context>
+    <name>ContactPickerPage</name>
+    <message>
+        <source>Send contact</source>
+        <translation>Kontakt senden</translation>
+    </message>
+    <message>
+        <source>Search contact</source>
+        <translation>Kontakt suchen</translation>
+    </message>
+    <message>
+        <source>No contacts with a phone number</source>
+        <translation>Keine Kontakte mit Telefonnummer</translation>
     </message>
 </context>
 <context>
@@ -2098,6 +2161,29 @@ Nachrichten</numerusform>
     <message>
         <source>Play/Pause</source>
         <translation>Wiedergabe/Pause</translation>
+    </message>
+</context>
+<context>
+    <name>MessageContact</name>
+    <message>
+        <source>Contact</source>
+        <translation>Kontakt</translation>
+    </message>
+    <message>
+        <source>Contact saved to address book</source>
+        <translation>Kontakt im Adressbuch gespeichert</translation>
+    </message>
+    <message>
+        <source>Could not save the contact</source>
+        <translation>Kontakt konnte nicht gespeichert werden</translation>
+    </message>
+    <message>
+        <source>Message</source>
+        <translation>Nachricht senden</translation>
+    </message>
+    <message>
+        <source>Add to contacts</source>
+        <translation>Zu Kontakten hinzufügen</translation>
     </message>
 </context>
 <context>
@@ -3240,6 +3326,69 @@ Nachrichten</numerusform>
     <message>
         <source>started a call</source>
         <translation>hat einen Anruf gestartet</translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <comment>myself</comment>
+        <translation>hat einen Kontakt gesendet</translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <translation>hat einen Kontakt gesendet</translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <comment>myself</comment>
+        <translation>hat einen Gruppenanruf gestartet</translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <translation>hat einen Gruppenanruf gestartet</translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <comment>myself</comment>
+        <translation>hat den Gruppenanruf beendet</translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <translation>hat den Gruppenanruf beendet</translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <comment>myself</comment>
+        <translation>hat einen Gruppenanruf geplant</translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <translation>hat einen Gruppenanruf geplant</translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <comment>myself</comment>
+        <translation>hat Teilnehmer zum Gruppenanruf eingeladen</translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <translation>hat Teilnehmer zum Gruppenanruf eingeladen</translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <comment>myself</comment>
+        <translation>hat das Chat-Thema geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <translation>hat das Chat-Thema geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <comment>myself</comment>
+        <translation>hat den Chat-Hintergrund geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <translation>hat den Chat-Hintergrund geändert</translation>
     </message>
 </context>
 <context>
@@ -5078,6 +5227,69 @@ Nachrichten</numerusform>
     <message>
         <source>unhid topic</source>
         <translation>hat das Thema wieder eingeblendet</translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <comment>myself</comment>
+        <translation>hat einen Kontakt gesendet</translation>
+    </message>
+    <message>
+        <source>sent a contact</source>
+        <translation>hat einen Kontakt gesendet</translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <comment>myself</comment>
+        <translation>hat einen Gruppenanruf gestartet</translation>
+    </message>
+    <message>
+        <source>started a video chat</source>
+        <translation>hat einen Gruppenanruf gestartet</translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <comment>myself</comment>
+        <translation>hat den Gruppenanruf beendet</translation>
+    </message>
+    <message>
+        <source>ended the video chat</source>
+        <translation>hat den Gruppenanruf beendet</translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <comment>myself</comment>
+        <translation>hat einen Gruppenanruf geplant</translation>
+    </message>
+    <message>
+        <source>scheduled a video chat</source>
+        <translation>hat einen Gruppenanruf geplant</translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <comment>myself</comment>
+        <translation>hat Teilnehmer zum Gruppenanruf eingeladen</translation>
+    </message>
+    <message>
+        <source>invited participants to the video chat</source>
+        <translation>hat Teilnehmer zum Gruppenanruf eingeladen</translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <comment>myself</comment>
+        <translation>hat das Chat-Thema geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat theme</source>
+        <translation>hat das Chat-Thema geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <comment>myself</comment>
+        <translation>hat den Chat-Hintergrund geändert</translation>
+    </message>
+    <message>
+        <source>changed the chat background</source>
+        <translation>hat den Chat-Hintergrund geändert</translation>
     </message>
 </context>
 <context>

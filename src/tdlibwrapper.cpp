@@ -180,6 +180,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chatOrderUpdated(QString, QString)), this, SIGNAL(chatOrderUpdated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)), this, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)));
     connect(this->tdLibReceiver, SIGNAL(chatReadInboxUpdated(QString, QString, int)), this, SIGNAL(chatReadInboxUpdated(QString, QString, int)));
+    connect(this->tdLibReceiver, SIGNAL(chatActionUpdated(QString, qlonglong, QString)), this, SIGNAL(chatActionUpdated(QString, qlonglong, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatReadOutboxUpdated(QString, QString)), this, SIGNAL(chatReadOutboxUpdated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatAvailableReactionsUpdated(qlonglong, QVariantMap)), this, SLOT(handleAvailableReactionsUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(basicGroupUpdated(qlonglong, QVariantMap)), this, SLOT(handleBasicGroupUpdated(qlonglong, QVariantMap)));
@@ -599,6 +600,22 @@ void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force
     QVariantList messageIds;
     messageIds.append(messageId);
     requestObject.insert("message_ids", messageIds);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendChatAction(qlonglong chatId, const QString &action)
+{
+    // "sta scrivendo…" lato nostro (#17): informa l'altro che stiamo digitando
+    // (chatActionTyping) o un'altra azione; chatActionCancel per fermare.
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "sendChatAction");
+    requestObject.insert(CHAT_ID, chatId);
+    if (currentMessageThreadId > 0) {
+        requestObject.insert("message_thread_id", currentMessageThreadId);
+    }
+    QVariantMap actionObject;
+    actionObject.insert(_TYPE, action.isEmpty() ? QStringLiteral("chatActionTyping") : action);
+    requestObject.insert("action", actionObject);
     this->sendRequest(requestObject);
 }
 
@@ -1178,6 +1195,26 @@ void TDLibWrapper::sendLocationMessage(qlonglong chatId, double latitude, double
     inputMessageContent.insert("live_period", 0);
     inputMessageContent.insert("heading", 0);
     inputMessageContent.insert("proximity_alert_radius", 0);
+
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId)
+{
+    LOG("Sending contact message" << chatId << firstName << lastName << phoneNumber << replyToMessageId);
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageContact");
+
+    QVariantMap contact;
+    contact.insert(_TYPE, "contact");
+    contact.insert("phone_number", phoneNumber);
+    contact.insert("first_name", firstName);
+    contact.insert("last_name", lastName);
+    contact.insert("vcard", QString());
+    contact.insert("user_id", 0);
+    inputMessageContent.insert("contact", contact);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
