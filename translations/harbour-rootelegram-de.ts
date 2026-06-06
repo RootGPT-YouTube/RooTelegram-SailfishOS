@@ -1657,6 +1657,28 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>DeleteMessagesChoiceDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message numerus="yes">
+        <source>Delete %Ln message(s)?</source>
+        <translation>
+            <numerusform>%Ln Nachricht löschen?</numerusform>
+            <numerusform>%Ln Nachrichten löschen?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Delete for everyone</source>
+        <translation>Für alle löschen</translation>
+    </message>
+    <message>
+        <source>Delete for me</source>
+        <translation>Nur für mich löschen</translation>
+    </message>
+</context>
+<context>
     <name>EditGroupChatPermissionsColumn</name>
     <message>
         <source>Group Member Permissions</source>
@@ -4587,6 +4609,17 @@ Nachrichten</numerusform>
     <message>
         <source>Preview not supported for this link...</source>
         <translation>Vorschau für diesen Link nicht unterstützt…</translation>
+    </message>
+</context>
+<context>
+    <name>WhatsNewDialog</name>
+    <message>
+        <source>Continua</source>
+        <translation>Weiter</translation>
+    </message>
+    <message>
+        <source>Novità</source>
+        <translation>Neuigkeiten</translation>
     </message>
 </context>
 <context>

@@ -131,6 +131,7 @@ signals:
     void sessionsReceived(int inactive_session_ttl_days, const QVariantList &sessions);
     void availableReactionsReceived(qlonglong messageId, const QStringList &reactions);
     void messageAddedReactionsReceived(qlonglong messageId, const QVariantList &reactions, int totalCount);
+    void messageViewersReceived(qlonglong messageId, const QVariantList &viewers);
     void messageThreadInfoReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &threadInfo);
     void chatUnreadMentionCountUpdated(qlonglong chatId, int unreadMentionCount);
     void chatUnreadReactionCountUpdated(qlonglong chatId, int unreadReactionCount);
@@ -146,6 +147,7 @@ signals:
     void storyInteractionsReceived(int storyId, const QVariantList &interactions, int totalCount, int totalForwardCount, int totalReactionCount, const QString &nextOffset);
     void textTranslated(const QString &translatedText, const QString &toLanguageCode);
     void messageTextTranslated(qlonglong chatId, qlonglong messageId, const QString &translatedText);
+    void messagePropertiesReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &properties);
     void proxiesReceived(const QVariantList &proxies);
     void proxyAdded(const QVariantMap &proxy);
     void proxyPinged(const QString &extra, double seconds);
@@ -243,6 +245,7 @@ private:
     void processSessions(const QVariantMap &receivedInformation);
     void processAvailableReactions(const QVariantMap &receivedInformation);
     void processAddedReactions(const QVariantMap &receivedInformation);
+    void processMessageViewers(const QVariantMap &receivedInformation);
     void processMessageThreadInfo(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadMentionCount(const QVariantMap &receivedInformation);
     void processUpdateChatUnreadReactionCount(const QVariantMap &receivedInformation);
@@ -266,6 +269,7 @@ private:
     void processStoriesList(const QVariantMap &receivedInformation);
     void processStoryInteractions(const QVariantMap &receivedInformation);
     void processFormattedText(const QVariantMap &receivedInformation);
+    void processMessageProperties(const QVariantMap &receivedInformation);
 };
 
 #endif // TDLIBRECEIVER_H

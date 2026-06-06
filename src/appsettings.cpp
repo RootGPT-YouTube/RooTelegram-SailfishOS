@@ -47,6 +47,7 @@ namespace {
     const QString KEY_STORY_POST_TO_PROFILE("storyPostToProfile");
     const QString KEY_STORY_PRIVACY_MODE("storyPrivacyMode");
     const QString KEY_USE_NEON_THEME("useNeonTheme");
+    const QString KEY_LAST_SEEN_VERSION("lastSeenVersion");
     const QString KEY_STORY_CUSTOM_AUDIENCE_USER_IDS("storyCustomAudienceUserIds");
     // Chiave legacy: la prima iterazione del feature usava lo stesso storage per
     // i "Selected contacts" persistenti. Ora "Selected contacts" è ephemeral,
@@ -114,6 +115,20 @@ void AppSettings::setUseNeonTheme(bool useNeonTheme)
         LOG(KEY_USE_NEON_THEME << useNeonTheme);
         settings.setValue(KEY_USE_NEON_THEME, useNeonTheme);
         emit useNeonThemeChanged();
+    }
+}
+
+QString AppSettings::lastSeenVersion() const
+{
+    return settings.value(KEY_LAST_SEEN_VERSION, QString()).toString();
+}
+
+void AppSettings::setLastSeenVersion(const QString &version)
+{
+    if (lastSeenVersion() != version) {
+        LOG(KEY_LAST_SEEN_VERSION << version);
+        settings.setValue(KEY_LAST_SEEN_VERSION, version);
+        emit lastSeenVersionChanged();
     }
 }
 

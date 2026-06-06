@@ -289,11 +289,34 @@ ListItem {
         return true;
     }
 
-    function deleteMessage() {
+    // Cancellazione (#1). In TDLib 1.8.62 le capability (can_be_deleted_for_all_users
+    // / only_for_self) NON sono più inline nel messaggio: si ottengono async con
+    // getMessageProperties. Al tap su "Cancella" chiediamo le proprietà; alla
+    // risposta (onMessagePropertiesReceived) se entrambe possibili mostriamo la
+    // scelta "per tutti"/"solo per me", altrimenti cancelliamo diretto. Remorse sempre.
+    property bool deletePending: false
+    property bool deletePendingAlbum: false
+
+    function requestDelete(album) {
+        deletePendingAlbum = album;
+        deletePending = true;
+        tdLibWrapper.getMessageProperties(page.chatInformation.id, myMessage.id);
+    }
+
+    function performDelete(album, revoke) {
+        if (album) {
+            deleteAlbum(revoke);
+        } else {
+            deleteMessage(revoke);
+        }
+    }
+
+    // revoke=true → cancella per tutti; false → solo per me. Il Remorse resta.
+    function deleteMessage(revoke) {
         var chatId = page.chatInformation.id
         var messageId = myMessage.id
         Remorse.itemAction(messageListItem, qsTr("Message deleted"), function() {
-            tdLibWrapper.deleteMessages(chatId, [ messageId ]);
+            tdLibWrapper.deleteMessages(chatId, [ messageId ], revoke);
         })
     }
 
@@ -318,9 +341,9 @@ ListItem {
     // (più messaggi inviati in batch con stesso media_album_id).
     readonly property bool isPartOfAlbum: !!myMessage && !!myMessage.media_album_id && myMessage.media_album_id !== "0"
 
-    function deleteAlbum() {
+    function deleteAlbum(revoke) {
         if (!isPartOfAlbum) {
-            deleteMessage()
+            deleteMessage(revoke)
             return
         }
         var chatId = page.chatInformation.id
@@ -332,7 +355,7 @@ ListItem {
         }
         var stringIds = albumIds.map(function(id) { return id.toString() })
         Remorse.popupAction(page, qsTr("%Ln messages of album deleted", "", stringIds.length), function() {
-            tdLibWrapper.deleteMessages(chatId, stringIds);
+            tdLibWrapper.deleteMessages(chatId, stringIds, revoke);
         })
     }
 
@@ -432,8 +455,8 @@ ListItem {
         actions.push({ text: qsTr("Translate message"), visible: !!(myMessage && myMessage.content && myMessage.content.text && myMessage.content.text.text), callback: function() { messageListItem.translateMessage(); }});
         actions.push({ text: (myMessage && myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message"), visible: canPinMessage, callback: function() { togglePinMessage(); }});
         actions.push({ text: qsTr("Edit Message"), visible: canEditMessage, callback: function() { requestEditMessage(); }});
-        actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { deleteMessage(); }});
-        actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { deleteAlbum(); }});
+        actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { requestDelete(false); }});
+        actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { requestDelete(true); }});
         actions.push({ text: qsTr("Select Message"), visible: true, callback: function() { page.toggleMessageSelection(myMessage); }});
         actions.push({ text: qsTr("More Options..."), visible: (numberOfExtraOptionsOtherThanDeleteMessage > 0) || (canDeleteMessage && !haveSpaceForDeleteMessageMenuItem), callback: function() { openAdditionalOptionsDrawer(); }});
         return actions;
@@ -752,12 +775,12 @@ ListItem {
                 }
                 MenuItem {
                     visible: canDeleteMessage
-                    onClicked: deleteMessage()
+                    onClicked: requestDelete(false)
                     text: qsTr("Delete message")
                 }
                 MenuItem {
                     visible: canDeleteMessage && isPartOfAlbum
-                    onClicked: deleteAlbum()
+                    onClicked: requestDelete(true)
                     text: qsTr("Delete album")
                 }
                 MenuItem {
@@ -809,11 +832,41 @@ ListItem {
                 messageListItem.translatedText = translatedText
             }
         }
+        onMessagePropertiesReceived: {
+            if (!messageListItem.deletePending) {
+                return;
+            }
+            if (chatId !== page.chatInformation.id || messageId !== myMessage.id) {
+                return;
+            }
+            messageListItem.deletePending = false;
+            var album = messageListItem.deletePendingAlbum;
+            var forAll = !!properties.can_be_deleted_for_all_users;
+            var forSelf = !!properties.can_be_deleted_only_for_self;
+            if (forAll && forSelf) {
+                // Entrambe possibili → chiedi "per tutti" / "solo per me".
+                var cnt = album
+                    ? (chatModel.getMessageIdsForAlbum(myMessage.media_album_id) || [ myMessage.id ]).length
+                    : 1;
+                var dlg = pageStack.push(Qt.resolvedUrl("../components/DeleteMessagesChoiceDialog.qml"), { "count": cnt });
+                dlg.accepted.connect(function() { messageListItem.performDelete(album, dlg.revoke); });
+            } else {
+                // Una sola opzione: per tutti se consentito, altrimenti solo per me.
+                messageListItem.performDelete(album, forAll);
+            }
+        }
         onErrorReceived: {
             // extra == "translateMessage:<chatId>:<messageId>" della richiesta: se
             // la traduzione fallisce (FLOOD_WAIT, lingua non supportata) sblocca lo stato.
             if (extra === "translateMessage:" + page.chatInformation.id + ":" + myMessage.id) {
                 messageListItem.translating = false
+            }
+            // Fallback cancellazione: se getMessageProperties fallisce, cancella
+            // comunque (solo per me, sempre consentito) per non lasciare il tap a vuoto.
+            if (messageListItem.deletePending &&
+                    extra === "messageProperties:" + page.chatInformation.id + ":" + myMessage.id) {
+                messageListItem.deletePending = false;
+                messageListItem.performDelete(messageListItem.deletePendingAlbum, false);
             }
         }
         onMessageNotFound: {

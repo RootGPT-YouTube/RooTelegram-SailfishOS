@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.2
+RT_APP_VERSION = 2.3
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -290,11 +290,20 @@ ICONPATH = /usr/share/icons/hicolor
 rootelegram.desktop.path = /usr/share/applications/
 rootelegram.desktop.files = harbour-rootelegram.desktop
 
+# Handler degli schemi tg:/t.me in un .desktop SEPARATO e nascosto (NoDisplay),
+# NON nel launcher principale: metterlo nel desktop principale dirotta il tap
+# sull'icona verso il content-action (openUrl) e l'app non mostra la finestra.
+# Questo file replica quello che la vecchia initializeOpenWith() scriveva a
+# runtime in ~/.local/share/applications (funzionava su 5.0), ma spedito
+# dall'RPM funziona anche dentro il sandbox Sailjail di 5.1.
+openurl.desktop.path = /usr/share/applications/
+openurl.desktop.files = harbour-rootelegram-open-url.desktop
+
 database.files = db
 database.path = /usr/share/$${TARGET}
 
 INSTALLS += telegram 86.png 108.png 128.png 172.png 256.png \
-            rootelegram.desktop gui images sounds database
+            rootelegram.desktop openurl.desktop gui images sounds database
 
 HEADERS += \
     src/appsettings.h \

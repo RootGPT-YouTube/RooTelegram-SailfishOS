@@ -40,12 +40,14 @@ Page {
         var proxies = tdLibWrapper.getCachedProxies();
         for (var i = 0; i < proxies.length; i++) {
             var p = proxies[i];
+            // TDLib 1.8.62: ogni elemento è un addedProxy { id, is_enabled, comment, proxy:{ server, port, type } }
+            var inner = p.proxy || {};
             proxyModel.append({
                 proxyId: p.id,
-                server: p.server,
-                port: p.port,
+                server: inner.server,
+                port: inner.port,
                 isEnabled: p.is_enabled === true,
-                proxyTypeName: typeLabel(p.type),
+                proxyTypeName: typeLabel(inner.type),
                 pingText: ""
             });
         }

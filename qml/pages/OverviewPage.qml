@@ -91,6 +91,10 @@ Page {
                 }
             } else if (overviewPage.urlToOpen && overviewPage.urlToOpen.length > 1) {
                 overviewPage.openUrl(overviewPage.urlToOpen);
+            } else {
+                // Apertura normale (niente deep-link): mostra il popup "Novità"
+                // una-tantum dopo un aggiornamento di versione.
+                overviewPage.maybeShowWhatsNew();
             }
             chatListView.scrollToTop();
             updateSecondaryContentTimer.start();
@@ -275,6 +279,23 @@ Page {
             pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : tdLibWrapper.getChat(chatToOpen[0]), "messageToShow" : chatToOpen[1] }, PageStackAction.Immediate);
             chatToOpen = null;
         }
+    }
+
+    // Popup "Novità": mostrato una sola volta dopo ogni aggiornamento di versione.
+    // Confronta la versione corrente (appVersion) con l'ultima per cui è già stato
+    // mostrato (appSettings.lastSeenVersion). whatsNewChecked evita ri-tentativi
+    // nella stessa sessione (es. ritorno alla overview da una chat).
+    property bool whatsNewChecked: false
+    function maybeShowWhatsNew() {
+        if (whatsNewChecked) {
+            return;
+        }
+        whatsNewChecked = true;
+        if (appSettings.lastSeenVersion === appVersion) {
+            return;
+        }
+        appSettings.lastSeenVersion = appVersion;
+        pageStack.push(Qt.resolvedUrl("../pages/WhatsNewDialog.qml"));
     }
 
     function openUrl(url) {
@@ -1066,7 +1087,9 @@ Page {
             delegate: ChatListViewItem {
                 ownUserId: overviewPage.ownUserId
                 activeFolderId: overviewPage.activeFolderId
-                neonMenu: chatNeonMenu
+                // Tema Neon: menù long-press a comparsa (NeonMenuOverlay), invariato.
+                // Tema Silica: null → fallback al ContextMenu Silica nativo (2.3 #11b).
+                neonMenu: overviewPage.neon ? chatNeonMenu : null
                 isVerified: is_verified
                 onClicked: {
                     // Se è un supergruppo forum, mostra prima la lista dei topic

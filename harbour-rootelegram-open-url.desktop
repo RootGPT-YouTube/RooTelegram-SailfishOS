@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=RooTelegram
+Icon=harbour-rootelegram
+NoDisplay=true
+NotShowIn=X-MeeGo;
+Exec=harbour-rootelegram
+MimeType=x-scheme-handler/tg;x-url-handler/t.me;
+X-Maemo-Service=com.github.RootGPT_YouTube.rootelegram
+X-Maemo-Object-Path=/com/github/RootGPT_YouTube/rootelegram
+X-Maemo-Method=com.github.RootGPT_YouTube.rootelegram.openUrl

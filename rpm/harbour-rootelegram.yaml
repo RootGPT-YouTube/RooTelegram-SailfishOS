@@ -1,6 +1,6 @@
 Name: harbour-rootelegram
 Summary: RooTelegram is a Telegram client for Sailfish OS
-Version: 2.2
+Version: 2.3
 Release: 1
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
@@ -64,6 +64,7 @@ Files:
   - '%{_bindir}/%{name}'
   - '%{_datadir}/%{name}'
   - '%{_datadir}/applications/%{name}.desktop'
+  - '%{_datadir}/applications/%{name}-open-url.desktop'
   - '%{_datadir}/icons/hicolor/*/apps/%{name}.png'
 
 # For more information about yaml and what's supported in Sailfish OS

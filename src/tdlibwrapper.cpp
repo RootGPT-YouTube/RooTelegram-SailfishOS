@@ -213,6 +213,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)), this, SIGNAL(storyInteractionsReceived(int, QVariantList, int, int, int, QString)));
     connect(this->tdLibReceiver, SIGNAL(textTranslated(QString, QString)), this, SIGNAL(textTranslated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)), this, SIGNAL(messageTextTranslated(qlonglong, qlonglong, QString)));
+    connect(this->tdLibReceiver, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messagePropertiesReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(proxiesReceived(QVariantList)), this, SLOT(handleProxiesReceived(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(proxyAdded(QVariantMap)), this, SIGNAL(proxyAdded(QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(proxyPinged(QString, double)), this, SLOT(handleProxyPinged(QString, double)));
@@ -260,6 +261,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(sessionsReceived(int, QVariantList)), this, SIGNAL(sessionsReceived(int, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(availableReactionsReceived(qlonglong, QStringList)), this, SIGNAL(availableReactionsReceived(qlonglong, QStringList)));
     connect(this->tdLibReceiver, SIGNAL(messageAddedReactionsReceived(qlonglong, QVariantList, int)), this, SIGNAL(messageAddedReactionsReceived(qlonglong, QVariantList, int)));
+    connect(this->tdLibReceiver, SIGNAL(messageViewersReceived(qlonglong, QVariantList)), this, SIGNAL(messageViewersReceived(qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)), this, SIGNAL(messageThreadInfoReceived(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadMentionCountUpdated(qlonglong, int)));
     connect(this->tdLibReceiver, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)), this, SIGNAL(chatUnreadReactionCountUpdated(qlonglong, int)));
@@ -966,6 +968,17 @@ void TDLibWrapper::translateMessageText(qlonglong chatId, qlonglong messageId, c
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::getMessageProperties(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Getting message properties" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getMessageProperties");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    requestObject.insert(_EXTRA, QString("messageProperties:%1:%2").arg(chatId).arg(messageId));
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId)
 {
     LOG("Sending text message" << chatId << message << replyToMessageId);
@@ -1384,14 +1397,15 @@ void TDLibWrapper::sendTextMessageWithCustomEmoji(qlonglong chatId, const QStrin
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::deleteMessages(const QString &chatId, const QVariantList messageIds)
+void TDLibWrapper::deleteMessages(const QString &chatId, const QVariantList messageIds, bool revoke)
 {
-    LOG("Deleting some messages" << chatId << messageIds);
+    LOG("Deleting some messages" << chatId << messageIds << "revoke:" << revoke);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "deleteMessages");
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert("message_ids", messageIds);
-    requestObject.insert("revoke", true);
+    // revoke=true → "per tutti" (rimuove anche per gli altri); false → "solo per me".
+    requestObject.insert("revoke", revoke);
     this->sendRequest(requestObject);
 }
 void TDLibWrapper::deleteChatMessagesBySender(qlonglong chatId, qlonglong senderUserId)
@@ -2160,12 +2174,22 @@ void TDLibWrapper::setChatDraftMessage(qlonglong chatId, qlonglong threadId, qlo
     requestObject.insert(_TYPE, "setChatDraftMessage");
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(THREAD_ID, threadId);
+
+    // Bozza vuota = azzeramento: TDLib cancella la bozza SOLO se draft_message è
+    // assente (null). Mandare un draftMessage con testo vuoto lascia una bozza
+    // "fantasma" (spesso con reply_to) che continua a comparire nella lista chat
+    // e a ricomparire nel composer dopo l'invio.
+    if (draft.isEmpty()) {
+        this->sendRequest(requestObject);
+        return;
+    }
+
     QVariantMap draftMessage;
     QVariantMap inputMessageContent;
     QVariantMap formattedText;
 
     formattedText.insert("text", draft);
-    formattedText.insert("clear_draft", draft.isEmpty());
+    formattedText.insert("clear_draft", false);
     formattedText.insert(_TYPE, "formattedText");
     inputMessageContent.insert(_TYPE, "inputMessageText");
     inputMessageContent.insert("text", formattedText);
@@ -2516,6 +2540,17 @@ void TDLibWrapper::getMessageAddedReactions(qlonglong chatId, qlonglong messageI
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::getMessageViewers(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Get message viewers" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getMessageViewers");
+    requestObject.insert(_EXTRA, QStringLiteral("viewers:") + QString::number(messageId));
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::getMessageThread(qlonglong chatId, qlonglong messageId)
 {
     LOG("Get message thread" << chatId << messageId);
@@ -2649,13 +2684,18 @@ void TDLibWrapper::addProxyMtproto(const QString &server, int port, const QStrin
     QVariantMap type;
     type.insert(_TYPE, "proxyTypeMtproto");
     type.insert("secret", secret);
+    QVariantMap proxy;
+    proxy.insert(_TYPE, "proxy");
+    proxy.insert("server", server);
+    proxy.insert("port", port);
+    proxy.insert(TYPE, type);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "addProxy");
-    requestObject.insert("server", server);
-    requestObject.insert("port", port);
+    requestObject.insert("proxy", proxy);
     requestObject.insert("enable", enable);
-    requestObject.insert(TYPE, type);
+    requestObject.insert("comment", QString());
     this->sendRequest(requestObject);
+    this->getProxies();   // ricarica la lista con il nuovo proxy
 }
 
 void TDLibWrapper::addProxySocks5(const QString &server, int port, const QString &username, const QString &password, bool enable)
@@ -2665,13 +2705,18 @@ void TDLibWrapper::addProxySocks5(const QString &server, int port, const QString
     type.insert(_TYPE, "proxyTypeSocks5");
     type.insert("username", username);
     type.insert("password", password);
+    QVariantMap proxy;
+    proxy.insert(_TYPE, "proxy");
+    proxy.insert("server", server);
+    proxy.insert("port", port);
+    proxy.insert(TYPE, type);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "addProxy");
-    requestObject.insert("server", server);
-    requestObject.insert("port", port);
+    requestObject.insert("proxy", proxy);
     requestObject.insert("enable", enable);
-    requestObject.insert(TYPE, type);
+    requestObject.insert("comment", QString());
     this->sendRequest(requestObject);
+    this->getProxies();   // ricarica la lista con il nuovo proxy
 }
 
 void TDLibWrapper::addProxyHttp(const QString &server, int port, const QString &username, const QString &password, bool httpOnly, bool enable)
@@ -2682,13 +2727,18 @@ void TDLibWrapper::addProxyHttp(const QString &server, int port, const QString &
     type.insert("username", username);
     type.insert("password", password);
     type.insert("http_only", httpOnly);
+    QVariantMap proxy;
+    proxy.insert(_TYPE, "proxy");
+    proxy.insert("server", server);
+    proxy.insert("port", port);
+    proxy.insert(TYPE, type);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "addProxy");
-    requestObject.insert("server", server);
-    requestObject.insert("port", port);
+    requestObject.insert("proxy", proxy);
     requestObject.insert("enable", enable);
-    requestObject.insert(TYPE, type);
+    requestObject.insert("comment", QString());
     this->sendRequest(requestObject);
+    this->getProxies();   // ricarica la lista con il nuovo proxy
 }
 
 void TDLibWrapper::enableProxy(int proxyId)
@@ -2723,10 +2773,24 @@ void TDLibWrapper::removeProxy(int proxyId)
 void TDLibWrapper::pingProxy(int proxyId)
 {
     LOG("Pinging proxy" << proxyId);
+    // La nuova API pingProxy vuole l'oggetto proxy completo, non più il proxy_id:
+    // lo recuperiamo dalla cache (ogni addedProxy contiene il suo oggetto "proxy").
+    QVariantMap proxy;
+    for (const QVariant &p : this->proxies) {
+        const QVariantMap added = p.toMap();
+        if (added.value("id").toInt() == proxyId) {
+            proxy = added.value("proxy").toMap();
+            break;
+        }
+    }
+    if (proxy.isEmpty()) {
+        LOG("pingProxy: proxy id not found in cache" << proxyId);
+        return;
+    }
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "pingProxy");
     requestObject.insert(_EXTRA, QStringLiteral("pingProxy:") + QString::number(proxyId));
-    requestObject.insert("proxy_id", proxyId);
+    requestObject.insert("proxy", proxy);
     this->sendRequest(requestObject);
 }
 
@@ -2738,10 +2802,12 @@ QVariantList TDLibWrapper::getCachedProxies() const
 QVariantMap TDLibWrapper::enabledSocks5Proxy() const
 {
     for (const QVariant &p : this->proxies) {
-        const QVariantMap proxy = p.toMap();
-        if (proxy.value("is_enabled").toBool()
-                && proxy.value("type").toMap().value(_TYPE).toString() == QStringLiteral("proxyTypeSocks5")) {
-            return proxy;
+        const QVariantMap added = p.toMap();
+        // addedProxy = { id, is_enabled, comment, proxy:{ server, port, type } }
+        const QVariantMap proxy = added.value("proxy").toMap();
+        if (added.value("is_enabled").toBool()
+                && proxy.value(TYPE).toMap().value(_TYPE).toString() == QStringLiteral("proxyTypeSocks5")) {
+            return proxy;   // oggetto interno: il CallManager legge server/port/type
         }
     }
     return QVariantMap();
@@ -3750,76 +3816,37 @@ void TDLibWrapper::setLogVerbosityLevel()
 
 void TDLibWrapper::initializeOpenWith()
 {
-    LOG("Initialize open-with");
-
-    const QStringList sailfishOSVersion = QSysInfo::productVersion().split(".");
-    int sailfishOSMajorVersion = sailfishOSVersion.value(0).toInt();
-    int sailfishOSMinorVersion = sailfishOSVersion.value(1).toInt();
-
-    const QString applicationsLocation(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
-
-    // Niente gestione di sailfish-browser.desktop o open-url.desktop:
-    // appartengono al sistema o ad altre app, non a RooTelegram.
-
-    const QString desktopFilePath(applicationsLocation + "/harbour-rootelegram-open-url.desktop");
-    QFile desktopFile(desktopFilePath);
-    if (desktopFile.exists()) {
-        LOG("RooTelegram open-with file existing, removing...");
-        desktopFile.remove();
-        QProcess::startDetached("update-desktop-database " + applicationsLocation);
-    }
-    LOG("Creating RooTelegram open-with file at " << desktopFile.fileName());
-    if (desktopFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream fileOut(&desktopFile);
-        fileOut.setCodec("UTF-8");
-        fileOut << QString("[Desktop Entry]").toUtf8() << "\n";
-        fileOut << QString("Type=Application").toUtf8() << "\n";
-        fileOut << QString("Name=RooTelegram").toUtf8() << "\n";
-        fileOut << QString("Icon=harbour-rootelegram").toUtf8() << "\n";
-        fileOut << QString("NotShowIn=X-MeeGo;").toUtf8() << "\n";
-        if (sailfishOSMajorVersion < 4 || ( sailfishOSMajorVersion == 4 && sailfishOSMinorVersion < 1 )) {
-            fileOut << QString("MimeType=text/html;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/tg;").toUtf8() << "\n";
-        } else {
-            fileOut << QString("MimeType=x-url-handler/t.me;x-scheme-handler/tg;").toUtf8() << "\n";
-        }
-        fileOut << QString("X-Maemo-Service=com.github.RootGPT_YouTube.rootelegram").toUtf8() << "\n";
-        fileOut << QString("X-Maemo-Object-Path=/com/github/RootGPT_YouTube/rootelegram").toUtf8() << "\n";
-        fileOut << QString("X-Maemo-Method=com.github.RootGPT_YouTube.rootelegram.openUrl").toUtf8() << "\n";
-        fileOut << QString("Hidden=true;").toUtf8() << "\n";
-        fileOut.flush();
-        desktopFile.close();
-        QProcess::startDetached("update-desktop-database " + applicationsLocation);
-    }
-
-    QString dbusPathName = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/dbus-1/services";
-    QDir dbusPath(dbusPathName);
-    if (!dbusPath.exists()) {
-        LOG("Creating D-Bus directory" << dbusPathName);
-        dbusPath.mkpath(dbusPathName);
-    }
-    QString dbusServiceFileName = dbusPathName + "/com.github.RootGPT_YouTube.rootelegram.service";
-    QFile dbusServiceFile(dbusServiceFileName);
-    if (dbusServiceFile.exists()) {
-        LOG("D-BUS service file existing, removing to ensure proper re-creation...");
-        dbusServiceFile.remove();
-    }
-    LOG("Creating D-Bus service file at" << dbusServiceFile.fileName());
-    if (dbusServiceFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream fileOut(&dbusServiceFile);
-        fileOut.setCodec("UTF-8");
-        fileOut << QString("[D-BUS Service]").toUtf8() << "\n";
-        fileOut << QString("Name=com.github.RootGPT_YouTube.rootelegram").toUtf8() << "\n";
-        fileOut << QString("Exec=sailjail -- /usr/bin/harbour-rootelegram").toUtf8() << "\n";
-        fileOut.flush();
-        dbusServiceFile.close();
-    }
+    // L'handler degli schemi tg:/t.me è ora dichiarato direttamente in
+    // /usr/share/applications/harbour-rootelegram.desktop (MimeType + X-Maemo-*)
+    // ed è accompagnato dal servizio D-Bus /usr/share/dbus-1/services/
+    // com.github.RootGPT_YouTube.rootelegram.service, entrambi spediti dall'RPM.
+    //
+    // Il vecchio approccio scriveva questi file a runtime in
+    // ~/.local/share/applications (e .../dbus-1/services). Su SFOS 5.1 il
+    // sandbox Sailjail NON whitelista quella cartella, quindi la scrittura
+    // falliva in silenzio e i link di invito non si aprivano; su 5.0 funzionava
+    // ma creava un handler doppione. Qui ci limitiamo a ripulire eventuali file
+    // per-utente stale lasciati dalle versioni precedenti.
+    LOG("open-with handler now shipped by RPM, cleaning up stale per-user files");
+    removeOpenWith();
 }
 
 void TDLibWrapper::removeOpenWith()
 {
-    LOG("Remove open-with");
-    QFile::remove(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/harbour-rootelegram-open-url.desktop");
-    QProcess::startDetached("update-desktop-database " + QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
+    LOG("Remove stale per-user open-with files");
+    const QString applicationsLocation(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation));
+    bool removedSomething = false;
+    if (QFile::remove(applicationsLocation + "/harbour-rootelegram-open-url.desktop")) {
+        removedSomething = true;
+    }
+    const QString dbusServicesLocation(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/dbus-1/services");
+    QFile::remove(dbusServicesLocation + "/com.github.RootGPT_YouTube.rootelegram.service");
+    // Residuo storico: bus name ibrido de.ygriega.rootelegram di versioni
+    // pre-rinomina, che faceva fallire l'attivazione D-Bus al click sui link.
+    QFile::remove(dbusServicesLocation + "/de.ygriega.rootelegram.service");
+    if (removedSomething) {
+        QProcess::startDetached("update-desktop-database " + applicationsLocation);
+    }
 }
 
 void TDLibWrapper::loadActiveStories(const QString &listType)

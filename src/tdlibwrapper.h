@@ -196,6 +196,7 @@ public:
     Q_INVOKABLE void sendTextMessageWithCustomEmoji(qlonglong chatId, const QString &message, const QVariantList &customEmojiEntities, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void translateText(const QString &text, const QString &toLanguageCode);
     Q_INVOKABLE void translateMessageText(qlonglong chatId, qlonglong messageId, const QString &toLanguageCode);
+    Q_INVOKABLE void getMessageProperties(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void sendPhotoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths, const QString &caption, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, int duration = 0, int width = 0, int height = 0, const QString &thumbnailPath = QString(), int thumbnailWidth = 0, int thumbnailHeight = 0);
@@ -219,7 +220,7 @@ public:
     Q_INVOKABLE void editMessageTextWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &customEmojiEntities);
     Q_INVOKABLE void editMessageCaption(const QString &chatId, const QString &messageId, const QString &caption);
     Q_INVOKABLE void editMessageCaptionWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &customEmojiEntities);
-    Q_INVOKABLE void deleteMessages(const QString &chatId, const QVariantList messageIds);
+    Q_INVOKABLE void deleteMessages(const QString &chatId, const QVariantList messageIds, bool revoke = true);
     Q_INVOKABLE void deleteChatMessagesBySender(qlonglong chatId, qlonglong senderUserId);
     Q_INVOKABLE void banChatMember(qlonglong chatId, qlonglong userId, qlonglong bannedUntilDate = 0);
     Q_INVOKABLE void unbanChatMember(qlonglong chatId, qlonglong userId);
@@ -304,6 +305,7 @@ public:
     Q_INVOKABLE void terminateSession(const QString &sessionId);
     Q_INVOKABLE void getMessageAvailableReactions(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getMessageAddedReactions(qlonglong chatId, qlonglong messageId);
+    Q_INVOKABLE void getMessageViewers(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getMessageThread(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void getPageSource(const QString &address);
     Q_INVOKABLE void addMessageReaction(qlonglong chatId, qlonglong messageId, const QString &reaction);
@@ -404,6 +406,7 @@ signals:
     void messageSendSucceeded(qlonglong messageId, qlonglong oldMessageId, const QVariantMap &message);
     void textTranslated(const QString &translatedText, const QString &toLanguageCode);
     void messageTextTranslated(qlonglong chatId, qlonglong messageId, const QString &translatedText);
+    void messagePropertiesReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &properties);
     void activeNotificationsUpdated(const QVariantList notificationGroups);
     void notificationGroupUpdated(const QVariantMap notificationGroupUpdate);
     void notificationUpdated(const QVariantMap updatedNotification);
@@ -457,6 +460,7 @@ signals:
     void openFileExternally(const QString &filePath);
     void availableReactionsReceived(qlonglong messageId, const QStringList &reactions);
     void messageAddedReactionsReceived(qlonglong messageId, const QVariantList &reactions, int totalCount);
+    void messageViewersReceived(qlonglong messageId, const QVariantList &viewers);
     void messageThreadInfoReceived(qlonglong chatId, qlonglong messageId, const QVariantMap &threadInfo);
     void forumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId);
     void forumTopicReceived(qlonglong chatId, const QVariantMap &topic);

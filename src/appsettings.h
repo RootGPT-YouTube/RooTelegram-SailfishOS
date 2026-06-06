@@ -51,6 +51,9 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
     Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
     Q_PROPERTY(bool useNeonTheme READ useNeonTheme WRITE setUseNeonTheme NOTIFY useNeonThemeChanged)
+    // Ultima versione per cui è stato mostrato il popup "Novità". Vuota = mai
+    // mostrato (fresh install / pre-feature).
+    Q_PROPERTY(QString lastSeenVersion READ lastSeenVersion WRITE setLastSeenVersion NOTIFY lastSeenVersionChanged)
 
 public:
     enum SponsoredMess {
@@ -161,6 +164,9 @@ public:
     QString storyPrivacyMode() const;
     void setStoryPrivacyMode(const QString &mode);
 
+    QString lastSeenVersion() const;
+    void setLastSeenVersion(const QString &version);
+
     Q_INVOKABLE QStringList storyCustomAudienceUserIds() const;
     Q_INVOKABLE void setStoryCustomAudienceUserIds(const QStringList &ids);
 
@@ -196,6 +202,7 @@ signals:
     void storyPostToProfileChanged();
     void storyPrivacyModeChanged();
     void useNeonThemeChanged();
+    void lastSeenVersionChanged();
     void storyCustomAudienceUserIdsChanged();
 
 private:

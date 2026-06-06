@@ -10,6 +10,12 @@ import sys
 
 
 IT = {
+    # 2.3: cancella per me/per tutti (#1) + popup Novità (#9)
+    "Delete for everyone": "Elimina per tutti",
+    "Delete for me": "Elimina solo per me",
+    "Cancel": "Annulla",
+    "Novità": "Novità",
+    "Continua": "Continua",
     # Selettore tema Silica/Neon (2.2)
     "Choose RooTelegram's theme": "Scegli il tema di RooTelegram",
     "Silica (base theme)": "Silica (tema base)",
@@ -153,6 +159,7 @@ IT = {
     "Source video not found.": "Video sorgente non trovato.",
     "Could not start the video converter.": "Impossibile avviare il convertitore video.",
     # Plurali (Qt numerus="yes")
+    "Delete %Ln message(s)?": ("Eliminare %Ln messaggio?", "Eliminare %Ln messaggi?"),
     "%n new story(es)": ("%n nuova storia", "%n nuove storie"),
     "%n story(es)": ("%n storia", "%n storie"),
     "%n view(s)": ("%n visualizzazione", "%n visualizzazioni"),
@@ -219,6 +226,12 @@ IT = {
 
 
 DE = {
+    # 2.3: löschen für mich/für alle (#1) + "Neuigkeiten"-Popup (#9)
+    "Delete for everyone": "Für alle löschen",
+    "Delete for me": "Nur für mich löschen",
+    "Cancel": "Abbrechen",
+    "Novità": "Neuigkeiten",
+    "Continua": "Weiter",
     # Themenauswahl Silica/Neon (2.2)
     "Choose RooTelegram's theme": "RooTelegrams Thema wählen",
     "Silica (base theme)": "Silica (Basisthema)",
@@ -357,6 +370,7 @@ DE = {
     "Source video not found.": "Quellvideo nicht gefunden.",
     "Could not start the video converter.": "Video-Konverter konnte nicht gestartet werden.",
     # Plurali
+    "Delete %Ln message(s)?": ("%Ln Nachricht löschen?", "%Ln Nachrichten löschen?"),
     "%n new story(es)": ("%n neue Story", "%n neue Storys"),
     "%n story(es)": ("%n Story", "%n Storys"),
     "%n view(s)": ("%n Aufruf", "%n Aufrufe"),

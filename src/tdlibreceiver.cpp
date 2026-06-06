@@ -158,7 +158,9 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateRecentStickers", &TDLibReceiver::processUpdateRecentStickers);
     handlers.insert("stickers", &TDLibReceiver::processStickers);
     handlers.insert("proxy", &TDLibReceiver::processProxy);
+    handlers.insert("addedProxy", &TDLibReceiver::processProxy);     // TDLib 1.8.62: addProxy ritorna addedProxy
     handlers.insert("proxies", &TDLibReceiver::processProxies);
+    handlers.insert("addedProxies", &TDLibReceiver::processProxies); // TDLib 1.8.62: getProxies ritorna addedProxies
     handlers.insert("seconds", &TDLibReceiver::processSeconds);
     handlers.insert("updateInstalledStickerSets", &TDLibReceiver::processUpdateInstalledStickerSets);
     handlers.insert("stickerSets", &TDLibReceiver::processStickerSets);
@@ -198,6 +200,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("sessions", &TDLibReceiver::processSessions);
     handlers.insert("availableReactions", &TDLibReceiver::processAvailableReactions);
     handlers.insert("addedReactions", &TDLibReceiver::processAddedReactions);
+    handlers.insert("messageViewers", &TDLibReceiver::processMessageViewers);
     handlers.insert("messageThreadInfo", &TDLibReceiver::processMessageThreadInfo);
     handlers.insert("updateMessageMentionRead", &TDLibReceiver::processUpdateChatUnreadMentionCount);
     handlers.insert("updateChatUnreadMentionCount", &TDLibReceiver::processUpdateChatUnreadMentionCount);
@@ -224,6 +227,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("stories", &TDLibReceiver::processStoriesList);
     handlers.insert("storyInteractions", &TDLibReceiver::processStoryInteractions);
     handlers.insert("formattedText", &TDLibReceiver::processFormattedText);
+    handlers.insert("messageProperties", &TDLibReceiver::processMessageProperties);
 }
 
 void TDLibReceiver::setActive(bool active)
@@ -954,6 +958,16 @@ void TDLibReceiver::processAddedReactions(const QVariantMap &receivedInformation
     emit messageAddedReactionsReceived(messageId, reactions, totalCount);
 }
 
+void TDLibReceiver::processMessageViewers(const QVariantMap &receivedInformation)
+{
+    // messageViewers{ viewers:[messageViewer{user_id, view_date}] }; @extra = "viewers:<messageId>"
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    const qlonglong messageId = extra.mid(QString("viewers:").length()).toLongLong();
+    const QVariantList viewers = receivedInformation.value("viewers").toList();
+    LOG("Received message viewers for" << messageId << viewers.size());
+    emit messageViewersReceived(messageId, viewers);
+}
+
 void TDLibReceiver::processMessageThreadInfo(const QVariantMap &receivedInformation)
 {
     const QString extra = receivedInformation.value(_EXTRA).toString();
@@ -1381,6 +1395,23 @@ void TDLibReceiver::processFormattedText(const QVariantMap &receivedInformation)
             const qlonglong chatId = parts[0].toLongLong();
             const qlonglong messageId = parts[1].toLongLong();
             emit messageTextTranslated(chatId, messageId, translatedText);
+        }
+    }
+}
+
+void TDLibReceiver::processMessageProperties(const QVariantMap &receivedInformation)
+{
+    // TDLib 1.8.62: le capability del messaggio (can_be_deleted_*, ecc.) non sono
+    // più inline nel message, ma si ottengono con getMessageProperties. L'@extra
+    // trasporta chatId:messageId per correlare la risposta al messaggio.
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    LOG("Received message properties, extra:" << extra);
+    if (extra.startsWith("messageProperties:")) {
+        const QStringList parts = extra.mid(QString("messageProperties:").length()).split(":");
+        if (parts.size() >= 2) {
+            const qlonglong chatId = parts[0].toLongLong();
+            const qlonglong messageId = parts[1].toLongLong();
+            emit messagePropertiesReceived(chatId, messageId, receivedInformation);
         }
     }
 }

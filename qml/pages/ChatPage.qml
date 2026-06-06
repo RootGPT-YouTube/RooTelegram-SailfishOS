@@ -172,6 +172,82 @@ Page {
         selectedMessages = selectionArray;
     }
 
+    // Cancellazione multipla (#1): in TDLib 1.8.62 le capability (can_be_deleted_*)
+    // sono async (getMessageProperties). Raccogliamo le proprietà di tutti i
+    // messaggi selezionati, poi mostriamo la scelta "per tutti"/"solo per me" se
+    // tutti la supportano, altrimenti cancelliamo diretto. Il Remorse resta.
+    property var pendingBatchDelete: null
+
+    function startBatchDelete(messages) {
+        var ids = Functions.getMessagesArrayIds(messages);
+        var remaining = {};
+        var idNums = [];
+        for (var i = 0; i < messages.length; i++) {
+            remaining[messages[i].id] = true;
+            idNums.push(messages[i].id);
+        }
+        pendingBatchDelete = {
+            "chatId": chatInformation.id,
+            "ids": ids,
+            "count": ids.length,
+            "remaining": remaining,
+            "pending": messages.length,
+            "allForAll": true,
+            "allForSelf": true
+        };
+        for (var j = 0; j < idNums.length; j++) {
+            tdLibWrapper.getMessageProperties(chatInformation.id, idNums[j]);
+        }
+    }
+
+    function finalizeBatchDeleteIfReady() {
+        var b = pendingBatchDelete;
+        if (!b || b.pending > 0) {
+            return;
+        }
+        pendingBatchDelete = null;
+        var chatId = b.chatId, ids = b.ids, count = b.count;
+        var doDelete = function(revoke) {
+            Remorse.popupAction(chatPage, qsTr("%Ln Messages deleted", "", count), function() {
+                tdLibWrapper.deleteMessages(chatId, ids, revoke);
+            });
+        };
+        if (b.allForAll && b.allForSelf) {
+            var dlg = pageStack.push(Qt.resolvedUrl("../components/DeleteMessagesChoiceDialog.qml"), { "count": count });
+            dlg.accepted.connect(function() { doDelete(dlg.revoke); });
+        } else {
+            doDelete(b.allForAll);
+        }
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onMessagePropertiesReceived: {
+            var b = chatPage.pendingBatchDelete;
+            if (!b || chatId !== b.chatId || !b.remaining[messageId]) {
+                return;
+            }
+            delete b.remaining[messageId];
+            if (!properties.can_be_deleted_for_all_users) b.allForAll = false;
+            if (!properties.can_be_deleted_only_for_self) b.allForSelf = false;
+            b.pending--;
+            chatPage.finalizeBatchDeleteIfReady();
+        }
+        onErrorReceived: {
+            var b = chatPage.pendingBatchDelete;
+            if (!b || !extra || extra.indexOf("messageProperties:" + b.chatId + ":") !== 0) {
+                return;
+            }
+            var mid = extra.split(":")[2];
+            if (b.remaining[mid]) {
+                delete b.remaining[mid];
+                b.allForAll = false;   // in dubbio: niente "per tutti"
+                b.pending--;
+                chatPage.finalizeBatchDeleteIfReady();
+            }
+        }
+    }
+
     function updateChatPartnerStatusText() {
         if (chatPage.isSelecting) {
             return
@@ -1810,7 +1886,8 @@ Page {
                 name: qsTr("Delete message")
                 action: function() {
                     if (messageOptionsDrawer.sourceItem) {
-                        messageOptionsDrawer.sourceItem.deleteMessage()
+                        // Fetch async delle capability → scelta per tutti/per me o diretto (#1).
+                        messageOptionsDrawer.sourceItem.requestDelete(false)
                     }
                 }
             }
@@ -2526,7 +2603,7 @@ Page {
                                 id: messageListViewItemComponent
                                 MessageListViewItem {
                                     precalculatedValues: chatView.precalculatedValues
-                                    neonMenu: messageNeonMenu
+                                    neonMenu: chatPage.neon ? messageNeonMenu : null
                                     chatId: chatModel.chatId
                                     myMessage: model.display
                                     messageId: model.message_id
@@ -4222,12 +4299,9 @@ Page {
                         })
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
                         onClicked: {
-                            var ids = Functions.getMessagesArrayIds(selectedMessages);
-                            var chatId = chatInformation.id
-                            var wrapper = tdLibWrapper;
-                            Remorse.popupAction(chatPage, qsTr("%Ln Messages deleted", "", ids.length), function() {
-                                wrapper.deleteMessages(chatId, ids);
-                            });
+                            // Fetch async delle capability di tutti i selezionati, poi
+                            // scelta per tutti/per me o cancellazione diretta (#1).
+                            chatPage.startBatchDelete(chatPage.selectedMessages);
                             chatPage.selectedMessages = [];
                         }
                     }

@@ -79,8 +79,10 @@ PhotoTextsListItem {
 
     // chat title
     primaryText.text: title ? Emoji.emojify(title, Theme.fontSizeMedium) : qsTr("Unknown")
-    // 2.0 abbellimento: tutti i nomi chat in corsivo (#9); pinnate in rosso (#8)
-    primaryText.font.italic: true
+    // Nome chat: corsivo nel tema Neon (abbellimento 2.0); grassetto nel tema
+    // Silica nativo (2.3 #11a). Pinnate in rosso (#8).
+    primaryText.font.italic: appSettings.useNeonTheme
+    primaryText.font.bold: !appSettings.useNeonTheme
     primaryText.color: is_pinned
                        ? "#ff5252"
                        : ((appSettings.highlightUnreadConversations && (unread_count > 0)) ? Theme.highlightColor : Theme.primaryColor)
