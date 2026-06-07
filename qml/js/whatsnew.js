@@ -18,7 +18,11 @@ var changelog = [
     "Indicatore «sta scrivendo…» nelle chat (in ricezione e in invio).",
     "Invio e ricezione contatti, con salvataggio in rubrica Sailfish.",
     "Traduzione anche delle didascalie di foto e video.",
-    "Apertura corretta dei messaggi letti dalle notifiche (niente più badge fantasma).",
+    "GIF inviate come animazione e riprodotte per intero (niente più troncatura).",
+    "Scarica e condividi foto e video dalla preview, anche in gruppi e canali.",
+    "Chiamate e videochiamate in arrivo: lo schermo si accende a telefono bloccato.",
+    "Consumo di memoria ridotto (circa 40% di RAM in meno).",
+    "Apertura corretta dei messaggi letti dalle notifiche: il badge dei non letti si azzera sempre aprendo la chat.",
     "Nuovi messaggi di servizio gestiti (richiesta di ingresso, chiamate di gruppo, tema/sfondo).",
     "Tema Silica: nomi delle chat in grassetto e menù long-press nativo.",
     "Popup “Novità” una-tantum dopo ogni aggiornamento (questo!)."
