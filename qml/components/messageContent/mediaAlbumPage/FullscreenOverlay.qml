@@ -19,6 +19,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Share 1.0
+import WerkWolf.RooTelegram 1.0
 import "../../../js/functions.js" as Functions
 
 
@@ -34,19 +35,67 @@ Item {
     readonly property color gradientColor: '#bb000000'
     readonly property int gradientPadding: Theme.itemSizeMedium
 
-    readonly property string mediaPath: {
-        if (!message || !message.content) return "";
+    // fileInformation (QVariantMap) del media a piena risoluzione del messaggio
+    // corrente: foto = la size più grande, video = il file video.
+    readonly property var currentFileInfo: {
+        if (!message || !message.content) return ({});
         var t = message.content['@type'];
         if (t === 'messagePhoto' && message.content.photo && message.content.photo.sizes) {
             var sizes = message.content.photo.sizes;
             var best = sizes[sizes.length - 1];
-            return (best && best.photo && best.photo.local && best.photo.local.path) || "";
+            return (best && best.photo) || ({});
         }
         if (t === 'messageVideo' && message.content.video && message.content.video.video) {
-            return (message.content.video.video.local && message.content.video.video.local.path) || "";
+            return message.content.video.video || ({});
         }
-        return "";
+        return ({});
     }
+    // "ove non vietato esplicitamente": Telegram blocca il salvataggio quando
+    // can_be_saved è false (contenuto protetto). Se manca il campo, consenti.
+    readonly property bool canSave: !message || message.can_be_saved !== false
+    // Path REALE basato sullo stato di download DAL VIVO (non sullo snapshot del
+    // messaggio): così i tasti si attivano appena il viewer finisce di scaricare.
+    readonly property string mediaPath: mediaFile.isDownloadingCompleted ? mediaFile.path : ""
+    // Azione richiesta in attesa che il download finisca ('save' | 'share').
+    property string pendingAction: ""
+
+    function performSave() {
+        if (!mediaPath) return;
+        var t = message.content['@type'];
+        if (t === 'messageVideo') {
+            tdLibWrapper.copyFileToDownloads(mediaPath);
+        } else {
+            tdLibWrapper.copyFileToPictures(mediaPath);
+        }
+    }
+    function triggerAction(action) {
+        if (!canSave) return;
+        if (mediaFile.isDownloadingCompleted) {
+            if (action === 'share') shareAction.trigger();
+            else performSave();
+        } else {
+            pendingAction = action;
+            mediaFile.load();
+        }
+    }
+
+    // Cambiando media (swipe nell'album) annulla l'azione in sospeso.
+    onCurrentIndexChanged: pendingAction = ""
+
+    TDLibFile {
+        id: mediaFile
+        tdlib: tdLibWrapper
+        autoLoad: false
+        fileInformation: overlay.currentFileInfo
+        onDownloadingCompletedChanged: {
+            if (isDownloadingCompleted && overlay.pendingAction) {
+                if (overlay.pendingAction === 'share') shareAction.trigger();
+                else overlay.performSave();
+                overlay.pendingAction = "";
+            }
+        }
+    }
+
     readonly property string mediaMimeType: {
         if (!message || !message.content) return "application/octet-stream";
         var t = message.content['@type'];
@@ -60,10 +109,6 @@ Item {
     anchors.fill: parent
     opacity: active ? 1 : 0
     Behavior on opacity { FadeAnimator {} }
-
-    onActiveChanged: {
-        console.log('overlay active', active)
-    }
 
     Connections {
         target: tdLibWrapper
@@ -246,26 +291,27 @@ Item {
         height: Theme.itemSizeSmall
         width: childrenRect.width
         spacing:  Theme.paddingLarge
+        // Nascondi del tutto i tasti quando il salvataggio è vietato dal canale.
+        visible: overlay.canSave
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
             bottomMargin: Theme.paddingLarge
         }
 
-//        IconButton {
-//             icon.source: "image://theme/icon-m-cancel?" + (pressed
-//                          ? Theme.highlightColor
-//                          : Theme.lightPrimaryColor)
-//             onClicked: pageStack.pop()
-
-//         }
         IconButton {
-             enabled: overlay.mediaPath !== ""
-             opacity: enabled ? 1.0 : 0.2
+             id: downloadButton
              icon.source: "image://theme/icon-m-downloads?" + (pressed
                           ? Theme.highlightColor
                           : Theme.lightPrimaryColor)
-             onClicked: tdLibWrapper.copyFileToPictures(overlay.mediaPath)
+             // Sempre tappabile: se il media non è ancora scaricato, il tap avvia
+             // il download e salva al termine (vedi triggerAction).
+             onClicked: overlay.triggerAction('save')
+             BusyIndicator {
+                 anchors.centerIn: parent
+                 size: BusyIndicatorSize.Small
+                 running: mediaFile.isDownloadingActive && overlay.pendingAction === 'save'
+             }
          }
         Item {
             width: Theme.itemSizeSmall
@@ -273,12 +319,16 @@ Item {
         }
 
         IconButton {
-             enabled: overlay.mediaPath !== ""
-             opacity: enabled ? 1.0 : 0.2
+             id: shareButton
              icon.source: "image://theme/icon-m-share?" + (pressed
                           ? Theme.highlightColor
                           : Theme.lightPrimaryColor)
-             onClicked: shareAction.trigger()
+             onClicked: overlay.triggerAction('share')
+             BusyIndicator {
+                 anchors.centerIn: parent
+                 size: BusyIndicatorSize.Small
+                 running: mediaFile.isDownloadingActive && overlay.pendingAction === 'share'
+             }
          }
     }
     states: [

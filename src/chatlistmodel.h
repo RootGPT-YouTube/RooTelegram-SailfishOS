@@ -90,6 +90,7 @@ private slots:
     void handleChatLastMessageUpdated(const QString &chatId, const QString &order, const QVariantMap &lastMessage);
     void handleChatOrderUpdated(const QString &chatId, const QString &order);
     void handleChatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
+    void handleChatOpened(qlonglong chatId);
     void handleChatReadOutboxUpdated(const QString &chatId, const QString &lastReadOutboxMessageId);
     void handleChatPhotoUpdated(qlonglong chatId, const QVariantMap &photo);
     void handleChatPinnedMessageUpdated(qlonglong chatId, qlonglong pinnedMessageId);

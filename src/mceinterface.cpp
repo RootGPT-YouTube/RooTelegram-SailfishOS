@@ -52,3 +52,15 @@ void MceInterface::displayBlankingPause()
     LOG("Disabling display blanking");
     call(QStringLiteral("req_display_blanking_pause"));
 }
+
+void MceInterface::displayOn()
+{
+    LOG("Turning display on");
+    call(QStringLiteral("req_display_state_on"));
+}
+
+void MceInterface::tklockUnlock()
+{
+    LOG("Unlocking touchscreen lock");
+    call(QStringLiteral("req_tklock_mode_change"), QStringLiteral("unlocked"));
+}

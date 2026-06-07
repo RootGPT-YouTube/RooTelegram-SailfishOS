@@ -56,16 +56,6 @@ Video {
             }
         }
     }
-    Label {
-        anchors.centerIn: parent
-        text: 'dl: '+file.downloadedSize
-              + ' \ns: '+file.size
-              + ' \nes: '+file.expectedSize
-              + ' \nd:'+file.isDownloadingActive
-              + ' \nc:'+file.isDownloadingCompleted
-
-    }
-
     MouseArea {
         anchors.fill: parent
         onClicked: page.overlayActive = !page.overlayActive

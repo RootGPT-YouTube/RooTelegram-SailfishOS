@@ -52,6 +52,23 @@ Page {
 
     property bool loading: true;
     property bool isInitialized: false;
+    // Traccia lo stato open/close lato TDLib per non sbilanciare le chiamate:
+    // apriamo la chat quando la pagina è visibile e la chiudiamo quando viene
+    // coperta/distrutta. Così TDLib tiene "aperta" solo la chat in primo piano e
+    // scarica i messaggi delle chat in stack dopo message_unload_delay (anti-RAM).
+    property bool chatIsOpen: false;
+    function _openChatTracked() {
+        if (!chatIsOpen && chatInformation && chatInformation.id) {
+            tdLibWrapper.openChat(chatInformation.id);
+            chatIsOpen = true;
+        }
+    }
+    function _closeChatTracked() {
+        if (chatIsOpen && chatInformation && chatInformation.id) {
+            tdLibWrapper.closeChat(chatInformation.id);
+            chatIsOpen = false;
+        }
+    }
     readonly property int myUserId: tdLibWrapper.getUserInformation().id;
     property var chatInformation;
     // "sta scrivendo…" (#2): chatActionText (override) vs baseStatusText (stato normale).
@@ -564,6 +581,7 @@ Page {
     function clearAttachmentPreviewRow() {
         attachmentPreviewRow.isPicture = false;
         attachmentPreviewRow.isVideo = false;
+        attachmentPreviewRow.isAnimation = false;
         attachmentPreviewRow.isDocument = false;
         attachmentPreviewRow.isVoiceNote = false;
         attachmentPreviewRow.isLocation = false;
@@ -579,6 +597,7 @@ Page {
                 || attachmentPreviewRow.isPicture
                 || attachmentPreviewRow.isDocument
                 || attachmentPreviewRow.isVideo
+                || attachmentPreviewRow.isAnimation
                 || attachmentPreviewRow.isVoiceNote
                 || attachmentPreviewRow.isLocation;
         // Manteniamo il bottone sempre enabled per intercettare il long-press
@@ -657,6 +676,22 @@ Page {
                         }
                     }
                     tdLibWrapper.sendVideoMessage(chatInformation.id, vPath, newMessageTextField.text, newMessageColumn.replyToMessageId, vDuration, vWidth, vHeight, vThumbPath, vThumbW, vThumbH);
+                }
+                if (attachmentPreviewRow.isAnimation) {
+                    // GIF -> inputMessageAnimation (Telegram la converte in MP4 animato).
+                    // Sondiamo dimensioni/durata con ffmpeg così l'anteprima non nasce
+                    // con placeholder; se il probe fallisce, il server le deriva.
+                    var aDur = 0, aW = 0, aH = 0;
+                    var aPath = attachmentPreviewRow.fileProperties.filePath;
+                    if (typeof videoTranscoder !== "undefined" && videoTranscoder) {
+                        var aInfo = videoTranscoder.probeVideo(aPath);
+                        if (aInfo) {
+                            aDur = Math.round(aInfo.durationS ? aInfo.durationS : 0);
+                            aW = aInfo.width ? aInfo.width : 0;
+                            aH = aInfo.height ? aInfo.height : 0;
+                        }
+                    }
+                    tdLibWrapper.sendAnimationMessage(chatInformation.id, aPath, newMessageTextField.text, newMessageColumn.replyToMessageId, aDur, aW, aH);
                 }
                 if (attachmentPreviewRow.isDocument) {
                     tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
@@ -1132,6 +1167,12 @@ Page {
         return /\.(jpg|jpeg|png|gif|webp|bmp|heic|heif)$/i.test(filePath);
     }
 
+    // Le GIF vanno inviate come animazione (inputMessageAnimation), non come foto
+    // statica. Riconosciute per estensione .gif.
+    function isGifFile(filePath) {
+        return /\.gif$/i.test(filePath);
+    }
+
     function isSharedVideo(filePath) {
         return /\.(mp4|m4v|mov|mkv|webm|avi|3gp|mpeg|mpg)$/i.test(filePath);
     }
@@ -1148,7 +1189,9 @@ Page {
             mimeType: "",
             url: "file://" + encodeURI(normalizedPath)
         };
-        if (isSharedPicture(normalizedPath)) {
+        if (isGifFile(normalizedPath)) {
+            attachmentPreviewRow.isAnimation = true;
+        } else if (isSharedPicture(normalizedPath)) {
             attachmentPreviewRow.isPicture = true;
         } else if (isSharedVideo(normalizedPath)) {
             attachmentPreviewRow.isVideo = true;
@@ -1466,7 +1509,7 @@ Page {
     Component.onDestruction: {
         saveDraft();
         rootelegramUtils.stopGeoLocationUpdates();
-        tdLibWrapper.closeChat(chatInformation.id);
+        _closeChatTracked();
     }
 
     // Salva la bozza anche quando l'app passa in background: se il sistema poi
@@ -1484,7 +1527,7 @@ Page {
     onStatusChanged: {
         switch(status) {
         case PageStatus.Activating:
-            tdLibWrapper.openChat(chatInformation.id);
+            _openChatTracked();
             if(!chatPage.isInitialized) {
                 if(chatInformation.draft_message) {
                     if(chatInformation.draft_message && chatInformation.draft_message.input_message_text) {
@@ -1498,6 +1541,11 @@ Page {
             break;
         case PageStatus.Deactivating:
             messageOptionsDrawer.open = false
+            // Chiudi la chat lato TDLib quando la pagina viene coperta (push di una
+            // sotto-pagina o navigazione verso un'altra chat): le chat in stack non
+            // restano "aperte" e i loro messaggi vengono scaricati dalla RAM.
+            // Riaperta automaticamente su Activating al ritorno.
+            _closeChatTracked();
             break;
         case PageStatus.Active:
             // Imposta SEMPRE il messageThreadId corretto quando la pagina è attiva
@@ -1545,6 +1593,11 @@ Page {
                 tdLibWrapper.setCurrentMessageThreadId(0);
                 tdLibWrapper.setCurrentChatIsForum(false);
                 chatModel.clear();
+                // Reclama l'heap JS del motore V4: uscendo dalla chat il modello
+                // è stato svuotato, ma gli oggetti JS dei messaggi (conversione
+                // QVariant->JS) restano nell'heap V4 finché un gc non li libera.
+                // Senza questo l'Anonymous heap fa ratchet sessione dopo sessione.
+                gc();
             } else {
                 resetElements();
             }
@@ -3213,8 +3266,13 @@ Page {
                                         newMessageColumn.quickPremiumEmojiPickerVisible = false;
                                         Debug.log("Selected images: ", paths.length, paths[0]);
                                         attachmentPreviewRow.fileProperties = firstProps;
-                                        attachmentPreviewRow.imagePaths = paths;
-                                        attachmentPreviewRow.isPicture = true;
+                                        // GIF singola: inviala come animazione, non come foto statica.
+                                        if (paths.length === 1 && isGifFile(paths[0])) {
+                                            attachmentPreviewRow.isAnimation = true;
+                                        } else {
+                                            attachmentPreviewRow.imagePaths = paths;
+                                            attachmentPreviewRow.isPicture = true;
+                                        }
                                         controlSendButton();
                                     });
                                 }
@@ -3703,6 +3761,7 @@ Page {
 
                         property bool isPicture: false;
                         property bool isVideo: false;
+                        property bool isAnimation: false;
                         property bool isDocument: false;
                         property bool isVoiceNote: false;
                         property bool isLocation: false;
@@ -3822,7 +3881,7 @@ Page {
                             fillMode: Thumbnail.PreserveAspectCrop
                             mimeType: !!attachmentPreviewRow.fileProperties ? attachmentPreviewRow.fileProperties.mimeType || "" : ""
                             source: !!attachmentPreviewRow.fileProperties ? attachmentPreviewRow.getAttachmentFileUrl() : ""
-                            visible: attachmentPreviewRow.isPicture || attachmentPreviewRow.isVideo
+                            visible: attachmentPreviewRow.isPicture || attachmentPreviewRow.isVideo || attachmentPreviewRow.isAnimation
 
                             Rectangle {
                                 id: albumCountBadge

@@ -31,6 +31,13 @@ public:
     void ledPatternDeactivate(const QString &pattern);
     void displayCancelBlankingPause();
     void displayBlankingPause();
+    // Accende lo schermo se spento (req_display_state_on) — diverso da
+    // displayBlankingPause, che si limita a NON farlo spegnere.
+    void displayOn();
+    // Toglie il blocco-touch (lockscreen a scorrimento) così la UI di una
+    // chiamata in arrivo è subito usabile senza sbloccare prima. Non bypassa
+    // l'eventuale codice di sicurezza (gestito da lipstick, non da MCE).
+    void tklockUnlock();
 };
 
 #endif // MCE_INTERFACE_H

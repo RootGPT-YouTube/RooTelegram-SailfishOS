@@ -525,6 +525,9 @@ void TDLibWrapper::openChat(const QString &chatId)
     requestObject.insert(_TYPE, "openChat");
     requestObject.insert(CHAT_ID, chatId);
     this->sendRequest(requestObject);
+    // Aprire una chat (da home o da notifica) deve SEMPRE azzerare il badge dei
+    // non letti in home, subito: lo segnaliamo al ChatListModel.
+    emit chatOpened(chatId.toLongLong());
 }
 
 void TDLibWrapper::closeChat(const QString &chatId)
@@ -1158,6 +1161,32 @@ void TDLibWrapper::sendDocumentMessage(qlonglong chatId, const QString &filePath
     documentInputFile.insert(_TYPE, "inputFileLocal");
     documentInputFile.insert("path", filePath);
     inputMessageContent.insert("document", documentInputFile);
+
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendAnimationMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId, int duration, int width, int height)
+{
+    // Le GIF vanno inviate come inputMessageAnimation (non inputMessagePhoto/Document),
+    // altrimenti arrivano come immagine STATICA. Telegram converte la GIF in MP4
+    // animato lato server; durata/dimensioni sono opzionali ma aiutano l'anteprima.
+    LOG("Sending animation message" << chatId << filePath << message << replyToMessageId);
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageAnimation");
+    inputMessageContent.insert("caption", formattedTextFromMessage(message));
+    QVariantMap animationInputFile;
+    animationInputFile.insert(_TYPE, "inputFileLocal");
+    animationInputFile.insert("path", filePath);
+    inputMessageContent.insert("animation", animationInputFile);
+    if (duration > 0) {
+        inputMessageContent.insert("duration", duration);
+    }
+    if (width > 0 && height > 0) {
+        inputMessageContent.insert("width", width);
+        inputMessageContent.insert("height", height);
+    }
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);

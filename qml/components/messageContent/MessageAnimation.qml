@@ -19,59 +19,86 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
-import QtMultimedia 5.6
+import WerkWolf.RooTelegram 1.0
 import "../"
 import "../../js/functions.js" as Functions
 
-// GIF Telegram (messageAnimation): i file sono MP4, non GIF nativi.
-// AnimatedImage di Qt Quick non decodifica MP4 → mostrava solo il thumbnail
-// grigio. Serve GStreamer via Video/MediaPlayer.
+// GIF Telegram (messageAnimation): i file sono quasi sempre MP4 H.264.
+// Il decoder GStreamer di Sailfish (droidvdec, HW) NON svuota il reorder-buffer
+// dei B-frame all'EOS → perde gli ultimi ~0.5-1s ("si troncava"). AnimatedImage
+// non decodifica MP4 (i plugin Qt fanno solo gif/webp).
 //
-// Per evitare il crash scroll-multi-pipeline e i leak di GStreamer (memoria
-// project_gif_loop_unsupported):
-//   - Loader active=false: NESSUN pipeline finché l'utente non tappa.
-//     Lo scroll della chat non crea decoder, niente saturazione GPU/EGL.
-//   - autoLoad=true sul Video: il file MP4 entra nel buffer di MediaPlayer
-//     (cache effettiva — l'OS lo tiene in page cache, il MediaPlayer apre
-//     il pipeline una volta).
-//   - Play una volta sola: onStopped → active=false libera il pipeline.
-//     Niente loop (su GStreamer Sailfish: leak buffer dopo ~10 iter).
-//   - Tap successivo riattiva il Loader → nuovo pipeline pulito.
+// Soluzione: al primo play transcodifichiamo l'MP4 -> GIF animata con l'ffmpeg
+// bundlato (cache su disco per uniqueId) e la riproduciamo con AnimatedImage,
+// bypassando del tutto GStreamer: niente troncatura, niente leak (quindi può
+// anche ciclare). Le animazioni già image/gif/webp vanno dirette in AnimatedImage.
+//   - Loader active=false finché non si tappa: lo scroll non decodifica nulla.
+//   - onScreen=false → stop e teardown.
 MessageContentBase {
     id: animationComponent
 
     property var animationData: rawMessage.content.animation
-    property int animationFileId
-    property string animationUrl
-    property bool downloading: false
+    // Download REATTIVO via TDLibFile (come foto/video): una GIF che arriva mentre
+    // sei già nella chat si aggiorna da sola, senza dover uscire e rientrare.
+    readonly property string animationUrl: animFile.isDownloadingCompleted ? animFile.path : ""
+    readonly property string mimeType: animationData ? (animationData.mime_type || "") : ""
+    // AnimatedImage decodifica nativamente solo gif/webp; gli MP4 vanno transcodificati.
+    readonly property bool nativeAnimated: mimeType === "image/gif" || mimeType === "image/webp"
+    // Path effettivo dato ad AnimatedImage: il file stesso se nativo, altrimenti la
+    // GIF transcodificata (gifPath, valorizzata quando la conversione è pronta).
+    readonly property string playSource: nativeAnimated ? animationUrl : gifPath
+    property string gifPath: ""
+    property bool converting: false
+    // Chiave di cache stabile (content-based) letta dal messaggio grezzo:
+    // animFile.uniqueId risultava vuoto, qui il campo c'è sempre.
+    readonly property string fileUniqueId: (animationData && animationData.animation && animationData.animation.remote)
+                                           ? (animationData.animation.remote.unique_id || "") : ""
+
+    readonly property bool downloading: !!animationData && !animFile.isDownloadingCompleted
     property bool playing: false
     property bool onScreen: messageListItem ? messageListItem.page.status === PageStatus.Active : true
 
     height: Functions.getVideoHeight(width, animationData)
 
-    Component.onCompleted: {
-        if (!animationData) {
+    TDLibFile {
+        id: animFile
+        tdlib: tdLibWrapper
+        autoLoad: true
+        fileInformation: animationData ? animationData.animation : ({})
+    }
+
+    // Avvia la transcodifica MP4->GIF (se serve) e poi riproduce.
+    function startPlayback() {
+        if (animationUrl === "") {
             return;
         }
-        animationFileId = animationData.animation.id;
-        if (animationData.animation.local.is_downloading_completed) {
-            animationUrl = animationData.animation.local.path;
-        } else {
-            downloading = true;
-            tdLibWrapper.downloadFile(animationFileId);
+        if (nativeAnimated) {
+            playing = true;
+            return;
         }
+        if (gifPath !== "") {
+            playing = true;
+            return;
+        }
+        // MP4: serve la GIF. Se è già in cache la otteniamo subito (segnale sync),
+        // altrimenti parte la conversione e riprodurremo a conversione pronta.
+        converting = true;
+        playing = true;
+        videoTranscoder.requestGifConversion(animationUrl, fileUniqueId);
     }
 
     Connections {
-        target: tdLibWrapper
-        onFileUpdated: {
-            if (!animationData) {
-                return;
+        target: videoTranscoder
+        onGifConversionReady: {
+            if (uniqueId === animationComponent.fileUniqueId) {
+                animationComponent.gifPath = gifPath;
+                animationComponent.converting = false;
             }
-            if (!fileInformation.remote.is_uploading_active && fileInformation.local.is_downloading_completed && fileId === animationFileId) {
-                downloading = false;
-                animationData.animation = fileInformation;
-                animationUrl = fileInformation.local.path;
+        }
+        onGifConversionFailed: {
+            if (uniqueId === animationComponent.fileUniqueId) {
+                animationComponent.converting = false;
+                animationComponent.playing = false;
             }
         }
     }
@@ -94,58 +121,43 @@ MessageContentBase {
     BusyIndicator {
         anchors.centerIn: parent
         size: BusyIndicatorSize.Medium
-        running: animationComponent.downloading
+        running: animationComponent.downloading || animationComponent.converting
         visible: running
     }
 
-    // Lazy loading del pipeline GStreamer.
+    // Lazy loading: nessun decoder finché non si tappa play.
     Loader {
-        id: videoLoader
+        id: animationLoader
         anchors.fill: parent
         asynchronous: true
-        active: animationComponent.playing && animationUrl !== "" && animationComponent.onScreen
-        sourceComponent: videoComponent
+        active: animationComponent.playing && animationComponent.playSource !== "" && animationComponent.onScreen
+        sourceComponent: animatedImageComponent
     }
 
     Component {
-        id: videoComponent
-        Video {
-            id: animationVideo
+        id: animatedImageComponent
+        AnimatedImage {
             anchors.fill: parent
-            source: "file://" + animationUrl
-            autoLoad: true
-            muted: true
+            source: animationComponent.playSource
+            playing: true   // cicla mentre è in play (niente leak: è AnimatedImage, non GStreamer)
+            fillMode: Image.PreserveAspectFit
+            cache: false
+            asynchronous: true
+            smooth: true
             layer.enabled: animationComponent.highlighted
-            layer.effect: PressEffect { source: animationVideo }
-
-            // play() solo a media caricato. Se chiamato prima (in
-            // Component.onCompleted), GStreamer fa partire il pipeline mentre
-            // il VideoOutput non è ancora pronto e il timing scivola.
-            //
-            // Nota: con MP4 H.264 + B-frame (frequenti nelle GIF Telegram)
-            // il decoder di Sailfish/Qt5.6 NON flusha l'intero reorder buffer
-            // all'EOS: gli ultimi ~5-10 frame vanno persi (≈0.5-1s a 10fps).
-            // È un bug del plugin GStreamer, non fixabile da QML. Accettato
-            // come limite — vedi project_gif_loop_unsupported.
-            onStatusChanged: {
-                if ((status === MediaPlayer.Buffered || status === MediaPlayer.Loaded)
-                        && playbackState !== MediaPlayer.PlayingState) {
-                    play();
-                } else if (status === MediaPlayer.EndOfMedia) {
-                    animationComponent.playing = false;
-                }
-            }
+            layer.effect: PressEffect { source: parent }
         }
     }
 
-    // Icona play sovrapposta al thumbnail quando non sta riproducendo.
+    // Icona play sul thumbnail quando non sta riproducendo.
     Rectangle {
         anchors.centerIn: parent
         width: playIcon.width + Theme.paddingMedium * 2
         height: playIcon.height + Theme.paddingMedium * 2
         radius: width / 2
         color: Theme.rgba("black", 0.4)
-        visible: !animationComponent.playing && !animationComponent.downloading && animationUrl !== ""
+        visible: !animationComponent.playing && !animationComponent.downloading
+                 && !animationComponent.converting && animationUrl !== ""
 
         Icon {
             id: playIcon
@@ -154,14 +166,18 @@ MessageContentBase {
         }
     }
 
-    // Tap = play / pausa anticipata (libera subito il pipeline).
+    // Tap = play / pausa.
     MouseArea {
         anchors.fill: parent
         onClicked: {
             if (animationUrl === "") {
                 return;
             }
-            animationComponent.playing = !animationComponent.playing;
+            if (animationComponent.playing) {
+                animationComponent.playing = false;
+            } else {
+                animationComponent.startPlayback();
+            }
         }
     }
 }

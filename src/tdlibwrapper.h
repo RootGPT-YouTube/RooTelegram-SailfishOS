@@ -202,6 +202,7 @@ public:
     Q_INVOKABLE void sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths, const QString &caption, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendVideoMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, int duration = 0, int width = 0, int height = 0, const QString &thumbnailPath = QString(), int thumbnailWidth = 0, int thumbnailHeight = 0);
     Q_INVOKABLE void sendDocumentMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void sendAnimationMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, int duration = 0, int width = 0, int height = 0);
     Q_INVOKABLE void sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId = 0);
@@ -452,6 +453,9 @@ signals:
     void errorReceived(int code, const QString &message, const QString &extra);
     void contactsImported(const QVariantList &importerCount, const QVariantList &userIds);
     void messageNotFound(qlonglong chatId, qlonglong messageId);
+    // Emesso a OGNI apertura di chat (openChat): ChatListModel azzera subito il
+    // badge dei non letti della chat in home (vedi handleChatOpened).
+    void chatOpened(qlonglong chatId);
     void chatIsMarkedAsUnreadUpdated(qlonglong chatId, bool chatIsMarkedAsUnread);
     void chatDraftMessageUpdated(qlonglong chatId, const QVariantMap &draftMessage, const QString &order);
     void inlineQueryResults(const QString &inlineQueryId, const QString &nextOffset, const QVariantList &results, const QString &switchPmText, const QString &switchPmParameter, const QString &extra);

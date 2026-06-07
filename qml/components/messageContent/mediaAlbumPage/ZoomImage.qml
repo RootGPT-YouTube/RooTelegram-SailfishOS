@@ -40,8 +40,6 @@ ZoomArea {
                 image.sourceSize.width = photoData.sizes[biggestIndex].width
                 image.sourceSize.height = photoData.sizes[biggestIndex].height
                 image.fileInformation = photoData.sizes[biggestIndex].photo
-
-                console.log('loading photo', JSON.stringify(image.fileInformation))
             }
         }
     }

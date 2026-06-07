@@ -15,6 +15,7 @@
 #include <QProcess>
 #include <QString>
 #include <QVariantMap>
+#include <QSet>
 
 // Normalizza un video landscape in una storia verticale 9:16 (720x1280 H.264)
 // usando il binario ffmpeg bundlato. Serve perché le storie Telegram sono
@@ -58,10 +59,22 @@ public:
                                          int userRotation = 0, bool doCrop = true);
     Q_INVOKABLE void cancel();
 
+    // Path di cache della GIF derivata da un'animazione (per uniqueId del file
+    // TDLib). Usato dal QML per sapere se la conversione è già stata fatta.
+    Q_INVOKABLE QString gifCachePath(const QString &uniqueId) const;
+    // Converte ASINCRONO un MP4/animazione in GIF animata (cache), così la si
+    // riproduce con AnimatedImage evitando il decoder GStreamer che tronca la coda
+    // all'EOS (B-frame reorder non flushato su gst-droid). Più conversioni possono
+    // girare in parallelo (un QProcess per richiesta). Emette gifConversionReady /
+    // gifConversionFailed con lo stesso uniqueId.
+    Q_INVOKABLE void requestGifConversion(const QString &inputPath, const QString &uniqueId);
+
 signals:
     void progress(double percent);            // 0..100
     void finished(const QString &outputPath);
     void error(const QString &message);
+    void gifConversionReady(const QString &uniqueId, const QString &gifPath);
+    void gifConversionFailed(const QString &uniqueId);
 
 private slots:
     void onReadyReadProgress();
@@ -74,6 +87,7 @@ private:
     QString m_outputPath;
     QByteArray m_stderrTail;
     bool m_cancelled;
+    QSet<QString> m_activeGifJobs;   // uniqueId in conversione (dedup)
 };
 
 #endif // VIDEOTRANSCODER_H

@@ -46,6 +46,7 @@
 #include <QTimer>
 #include <QPixmapCache>
 #include <functional>
+#include <malloc.h>
 
 #include "appsettings.h"
 #include "debuglog.h"
@@ -161,6 +162,13 @@ bool activateRunningInstance()
 int main(int argc, char *argv[])
 {
     QLoggingCategory::setFilterRules(DEFAULT_LOG_FILTER);
+
+    // RAM: TDLib è pesantemente multi-thread e glibc crea fino a 8×n_core arene
+    // malloc da 64 MB ciascuna; su sessioni lunghe questo overhead/frammentazione
+    // fa salire la RSS (ratchet verso ~1 GB). Limitiamo le arene a 2: i thread
+    // condividono meno arene, l'overhead crolla con impatto trascurabile sulle
+    // performance. Va chiamato prima che vengano creati i thread (qui, all'avvio).
+    mallopt(M_ARENA_MAX, 2);
 
     // WEBM sticker (VP9): il decoder hardware msm_vidc (v4l2 vp9d) si incastra
     // dopo ripetuti open/close del pipeline e porta giù l'app (vedi

@@ -54,6 +54,11 @@ Page {
     navigationStyle: PageNavigation.Vertical
     backgroundColor: 'black'
     allowedOrientations: Orientation.All
+
+    // Chiudendo il viewer reclama subito l'heap JS V4 + il residuo dei media a
+    // piena risoluzione appena visualizzati, invece di aspettare il ritorno alla
+    // overview (vedi riduzione RAM #4).
+    Component.onDestruction: gc()
     // signal declarations
     // JavaScript functions
 

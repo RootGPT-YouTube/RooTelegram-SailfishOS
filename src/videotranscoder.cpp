@@ -166,6 +166,86 @@ QString VideoTranscoder::extractThumbnail(const QString &inputPath, int outWidth
     return QString();
 }
 
+QString VideoTranscoder::gifCachePath(const QString &uniqueId) const
+{
+    const QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    // uniqueId TDLib è base64-like: ripuliamo i caratteri non adatti al filesystem.
+    QString safe = uniqueId;
+    safe.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")), QStringLiteral("_"));
+    return cacheDir + QStringLiteral("/rt_gif_") + safe + QStringLiteral(".gif");
+}
+
+void VideoTranscoder::requestGifConversion(const QString &inputPath, const QString &uniqueId)
+{
+    if (uniqueId.isEmpty()) {
+        emit gifConversionFailed(uniqueId);
+        return;
+    }
+    if (!available()) {
+        emit gifConversionFailed(uniqueId);
+        return;
+    }
+    QString in = inputPath;
+    if (in.startsWith(QStringLiteral("file://"))) {
+        in = QUrl(in).toLocalFile();
+    }
+    if (!QFileInfo::exists(in)) {
+        emit gifConversionFailed(uniqueId);
+        return;
+    }
+    const QString out = gifCachePath(uniqueId);
+    if (QFileInfo::exists(out) && QFileInfo(out).size() > 0) {
+        emit gifConversionReady(uniqueId, out);   // già in cache
+        return;
+    }
+    if (m_activeGifJobs.contains(uniqueId)) {
+        return;   // conversione già in corso: il segnale arriverà al termine
+    }
+    m_activeGifJobs.insert(uniqueId);
+    QDir().mkpath(QFileInfo(out).absolutePath());
+    const QString tmpOut = out + QStringLiteral(".part");
+    QFile::remove(tmpOut);
+
+    // MP4 -> GIF animata con palette a 2 passaggi in un solo grafo: fps ridotto e
+    // larghezza cappata (le GIF di chat non servono enormi), lanczos + palettegen/
+    // paletteuse per una qualità decente. Dimensioni pari (-2) richieste dall'encoder.
+    QStringList args;
+    args << QStringLiteral("-y") << QStringLiteral("-hide_banner")
+         << QStringLiteral("-nostdin") << QStringLiteral("-nostats")
+         << QStringLiteral("-i") << in
+         << QStringLiteral("-filter_complex")
+         << QStringLiteral("fps=15,scale='min(420,iw)':-2:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse")
+         << QStringLiteral("-f") << QStringLiteral("gif") << tmpOut;
+
+    QProcess *p = new QProcess(this);
+    connect(p, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+            this, [this, p, uniqueId, out, tmpOut](int exitCode, QProcess::ExitStatus status) {
+        m_activeGifJobs.remove(uniqueId);
+        const bool ok = (status == QProcess::NormalExit) && (exitCode == 0)
+                        && QFileInfo::exists(tmpOut) && QFileInfo(tmpOut).size() > 0;
+        if (ok) {
+            QFile::remove(out);
+            if (QFile::rename(tmpOut, out)) {
+                emit gifConversionReady(uniqueId, out);
+            } else {
+                QFile::remove(tmpOut);
+                emit gifConversionFailed(uniqueId);
+            }
+        } else {
+            QFile::remove(tmpOut);
+            emit gifConversionFailed(uniqueId);
+        }
+        p->deleteLater();
+    });
+    connect(p, &QProcess::errorOccurred, this, [this, p, uniqueId, tmpOut](QProcess::ProcessError) {
+        m_activeGifJobs.remove(uniqueId);
+        QFile::remove(tmpOut);
+        emit gifConversionFailed(uniqueId);
+        p->deleteLater();
+    });
+    p->start(FFMPEG_BIN, args);
+}
+
 void VideoTranscoder::cropToVerticalStory(const QString &inputPath, double durationSec,
                                           int userRotation, bool doCrop)
 {

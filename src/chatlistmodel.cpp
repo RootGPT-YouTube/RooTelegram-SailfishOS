@@ -430,6 +430,7 @@ ChatListModel::ChatListModel(TDLibWrapper *tdLibWrapper, AppSettings *appSetting
     connect(tdLibWrapper, SIGNAL(chatOrderUpdated(QString, QString)), this, SLOT(handleChatOrderUpdated(QString, QString)));
     connect(tdLibWrapper, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)), this, SLOT(handleChatFolderPositionUpdated(QString, int, QString, bool)));
     connect(tdLibWrapper, SIGNAL(chatReadInboxUpdated(QString, QString, int)), this, SLOT(handleChatReadInboxUpdated(QString, QString, int)));
+    connect(tdLibWrapper, SIGNAL(chatOpened(qlonglong)), this, SLOT(handleChatOpened(qlonglong)));
     connect(tdLibWrapper, SIGNAL(chatReadOutboxUpdated(QString, QString)), this, SLOT(handleChatReadOutboxUpdated(QString, QString)));
     connect(tdLibWrapper, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatPhotoUpdated(qlonglong, QVariantMap)));
     connect(tdLibWrapper, SIGNAL(chatPinnedMessageUpdated(qlonglong, qlonglong)), this, SLOT(handleChatPinnedMessageUpdated(qlonglong, qlonglong)));
@@ -964,6 +965,63 @@ void ChatListModel::handleChatReadInboxUpdated(const QString &id, const QString 
                 chat->updateLastReadInboxMessageId(messageId);
             }
         }
+    }
+}
+
+void ChatListModel::handleChatOpened(qlonglong chatId)
+{
+    // Aprire una chat (da home o da notifica) azzera SEMPRE e SUBITO il badge dei
+    // non letti in home. Doppia mossa:
+    //  1) read OTTIMISTICO nel modello -> il badge sparisce all'istante, senza
+    //     dipendere dai tempi (o dall'assenza) di updateChatReadInbox di TDLib;
+    //  2) read FORZATO sul server fino all'ultimo messaggio -> non ritorna dopo
+    //     una sync/riavvio. TDLib poi confermerà con updateChatReadInbox(0).
+    // Cerchiamo la chat in tutti e tre i contenitori (visibile / fuori-cartella /
+    // nascosta), non solo in chatIndexMap.
+    ChatData *chat = nullptr;
+    int chatIndex = -1;
+    if (chatIndexMap.contains(chatId)) {
+        chatIndex = chatIndexMap.value(chatId);
+        chat = chatList.at(chatIndex);
+    } else if (folderFilteredChats.contains(chatId)) {
+        chat = folderFilteredChats.value(chatId);
+    } else if (hiddenChats.contains(chatId)) {
+        chat = hiddenChats.value(chatId);
+    }
+    if (!chat) {
+        return;
+    }
+
+    const qlonglong lastMsgId = chat->lastMessage(ID).toLongLong();
+    if (lastMsgId != 0) {
+        tdLibWrapper->viewMessage(chatId, lastMsgId, true);
+    }
+    if (chat->unreadMentionCount() > 0) {
+        tdLibWrapper->readAllChatMentions(chatId);
+    }
+    if (chat->unreadReactionCount() > 0) {
+        tdLibWrapper->readAllChatReactions(chatId);
+    }
+
+    QVector<int> changedRoles;
+    if (chat->updateUnreadCount(0)) {
+        changedRoles.append(ChatListModel::RoleUnreadCount);
+    }
+    if (chat->chatData.value(UNREAD_MENTION_COUNT).toInt() != 0) {
+        chat->chatData.insert(UNREAD_MENTION_COUNT, 0);
+        changedRoles.append(ChatListModel::RoleUnreadMentionCount);
+    }
+    if (chat->chatData.value(UNREAD_REACTION_COUNT).toInt() != 0) {
+        chat->chatData.insert(UNREAD_REACTION_COUNT, 0);
+        changedRoles.append(ChatListModel::RoleUnreadReactionCount);
+    }
+    if (!changedRoles.isEmpty()) {
+        changedRoles.append(ChatListModel::RoleDisplay);
+        if (chatIndex >= 0) {
+            const QModelIndex modelIndex(index(chatIndex));
+            emit dataChanged(modelIndex, modelIndex, changedRoles);
+        }
+        this->calculateUnreadState();
     }
 }
 

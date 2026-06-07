@@ -119,6 +119,17 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
     const QString callStateType = callState.value("@type").toString();
     LOG("Call update received" << callId << callStateType << "outgoing:" << currentIsOutgoing << "video:" << currentIsVideo);
 
+    if (callStateType == "callStatePending" && !currentIsOutgoing) {
+        // Chiamata IN ARRIVO: accendi lo schermo (anche se spento) e togli il
+        // blocco-touch, così la UI di risposta è visibile e usabile SUBITO sopra
+        // il lockscreen, senza dover sbloccare prima. Tieni acceso finché squilla.
+        if (mceInterface) {
+            mceInterface->displayOn();
+            mceInterface->tklockUnlock();
+        }
+        startKeepDisplayOn();
+    }
+
     if (callStateType == "callStateReady") {
         ensureInstanceForReadyCall(callState);
     } else if (callStateType == "callStateDiscarded" || callStateType == "callStateError") {
