@@ -69,7 +69,11 @@ Page {
             chatIsOpen = false;
         }
     }
-    readonly property int myUserId: tdLibWrapper.getUserInformation().id;
+    // NB: `var`, non `int`: in QML `int` è 32-bit e tronca gli user_id Telegram
+    // moderni (> 2^31). Con la troncatura `myUserId === sender_id.user_id` falliva
+    // sempre per gli utenti con id grande → isOwnMessage sempre falso → spariva
+    // "Modifica Messaggio" sui propri messaggi (#0 v2.4). Vedi anche chatId come var.
+    readonly property var myUserId: tdLibWrapper.getUserInformation().id;
     property var chatInformation;
     // "sta scrivendo…" (#2): chatActionText (override) vs baseStatusText (stato normale).
     property string baseStatusText: ""
@@ -1490,6 +1494,15 @@ Page {
 
     // Salva la bozza (testo + eventuale reply) sul server via TDLib.
     function saveDraft() {
+        // Quando è in corso una MODIFICA, il composer contiene il TESTO DEL
+        // MESSAGGIO da editare (non una nuova bozza): NON va salvato come bozza.
+        // Su SFOS l'app perde spesso lo stato attivo (menu a tendina, app switcher,
+        // blocco schermo) → onActiveChanged chiamava saveDraft a metà modifica e il
+        // messaggio "ricompariva come bozza" (#2 v2.4, frequente nei gruppi dove si
+        // modificano spesso i propri messaggi). Idem uscendo a metà (onDestruction).
+        if (newMessageColumn.editMessageId !== "0") {
+            return;
+        }
         if (chatPage.canSendMessages && !chatPage.isDeletedUser) {
             tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, newMessageTextField.text,
                 newMessageInReplyToRow.inReplyToMessage ? newMessageInReplyToRow.inReplyToMessage.id : 0);

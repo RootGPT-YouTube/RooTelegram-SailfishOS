@@ -324,6 +324,84 @@
     </message>
 </context>
 <context>
+    <name>ArchivedChatsPage</name>
+    <message>
+        <source>Photo</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Poll</source>
+        <translation type="unfinished">Poll</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archived chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%n chat(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation type="unfinished">Unknown</translation>
+    </message>
+    <message>
+        <source>Unarchive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No archived chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Long-press a chat in the main list and choose Archive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BackgroundProgressIndicator</name>
     <message>
         <source>%1 %</source>
@@ -1140,6 +1218,10 @@
     </message>
     <message>
         <source>Removed from folder: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archive chat</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2185,6 +2267,69 @@
     </message>
 </context>
 <context>
+    <name>MessageInfoPage</name>
+    <message>
+        <source>When the recipient comes online</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Edited</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scheduled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sender</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Author signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Via bot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forwarded from</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Original date</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Views</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Forwards</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reactions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Album ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageListViewItem</name>
     <message>
         <source>Reply to Message</source>
@@ -2302,6 +2447,10 @@
     </message>
     <message>
         <source>Someone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Message info</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4106,6 +4255,10 @@
     </message>
     <message>
         <source>Enable storage optimizer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Archived chats</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

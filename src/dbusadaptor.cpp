@@ -45,6 +45,11 @@ void DBusAdaptor::triggerOpenUrl(const QString &url)
     emit pleaseOpenUrl(url);
 }
 
+void DBusAdaptor::triggerOpenStories()
+{
+    emit pleaseOpenStories();
+}
+
 void DBusAdaptor::activateApp()
 {
     LOG("Activate app requested");
@@ -65,4 +70,11 @@ void DBusAdaptor::openUrl(const QStringList &arguments)
         triggerActivateApp();
         triggerOpenUrl(arguments.first());
     }
+}
+
+void DBusAdaptor::openStories()
+{
+    LOG("Open Stories requested");
+    triggerActivateApp();
+    triggerOpenStories();
 }

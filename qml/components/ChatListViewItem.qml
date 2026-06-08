@@ -47,6 +47,9 @@ PhotoTextsListItem {
         actions.push({ text: is_pinned ? qsTr("Unpin chat") : qsTr("Pin chat"), callback: function() {
             tdLibWrapper.toggleChatIsPinned(chat_id, !is_pinned);
         }});
+        actions.push({ text: qsTr("Archive chat"), callback: function() {
+            tdLibWrapper.setChatArchived(chat_id, true);
+        }});
         actions.push({ text: display.notification_settings.mute_for > 0 ? qsTr("Unmute chat") : qsTr("Mute chat"), visible: chat_id != listItem.ownUserId, callback: function() {
             var ns = display.notification_settings;
             ns.mute_for = ns.mute_for > 0 ? 0 : 6666666;
@@ -78,7 +81,12 @@ PhotoTextsListItem {
     }
 
     // chat title
-    primaryText.text: title ? Emoji.emojify(title, Theme.fontSizeMedium) : qsTr("Unknown")
+    // Dimensione titolo: nel tema Silica i nomi (in grassetto) sono ridotti di una
+    // misura (fontSizeSmall) su richiesta (#5/#6 v2.4); il neon resta fontSizeMedium.
+    // L'hint emoji segue la stessa misura per non disallineare le emoji nel titolo.
+    readonly property real chatTitleFontSize: appSettings.useNeonTheme ? Theme.fontSizeMedium : Theme.fontSizeSmall
+    primaryText.text: title ? Emoji.emojify(title, chatTitleFontSize) : qsTr("Unknown")
+    primaryText.font.pixelSize: chatTitleFontSize
     // Nome chat: corsivo nel tema Neon (abbellimento 2.0); grassetto nel tema
     // Silica nativo (2.3 #11a). Pinnate in rosso (#8).
     primaryText.font.italic: appSettings.useNeonTheme
@@ -146,6 +154,13 @@ PhotoTextsListItem {
                         tdLibWrapper.toggleChatIsPinned(chat_id, !is_pinned);
                     }
                     text: is_pinned ? qsTr("Unpin chat") : qsTr("Pin chat")
+                }
+
+                MenuItem {
+                    onClicked: {
+                        tdLibWrapper.setChatArchived(chat_id, true);
+                    }
+                    text: qsTr("Archive chat")
                 }
 
                 // Voce singola: apre una pagina con l'elenco delle cartelle (evita un

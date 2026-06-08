@@ -332,6 +332,9 @@ public:
     // Forum Topics (Telegram Supergroup Forums)
     Q_INVOKABLE void getForumTopics(qlonglong chatId, const QString &query = QString(), qlonglong offsetDate = 0, qlonglong offsetMessageId = 0, qlonglong offsetMessageThreadId = 0, int limit = 50);
     Q_INVOKABLE void switchChatList(int chatListType, int folderId = 0);
+    // Archivia (archive=true → chatListArchive) o disarchivia (false → chatListMain)
+    // una chat. #4 v2.4.
+    Q_INVOKABLE void setChatArchived(qlonglong chatId, bool archived);
     Q_INVOKABLE void getForumTopic(qlonglong chatId, int forumTopicId);
     Q_INVOKABLE void getMessageThreadHistory(qlonglong chatId, qlonglong messageThreadId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50);
     Q_INVOKABLE void setCurrentMessageThreadId(qlonglong threadId);
@@ -385,6 +388,7 @@ signals:
     void chatLastMessageUpdated(const QString &chatId, const QString &order, const QVariantMap &lastMessage);
     void chatOrderUpdated(const QString &chatId, const QString &order);
     void chatFolderPositionUpdated(const QString &chatId, int folderId, const QString &order, bool isPinned);
+    void chatArchivePositionUpdated(qlonglong chatId, const QString &order, bool isPinned);
     void chatPinnedUpdated(qlonglong chatId, bool isPinned);
     void chatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
     void chatActionUpdated(const QString &chatId, qlonglong userId, const QString &action);

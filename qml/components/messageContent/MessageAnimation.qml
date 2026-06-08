@@ -149,20 +149,26 @@ MessageContentBase {
         }
     }
 
-    // Icona play sul thumbnail quando non sta riproducendo.
+    // Icona play sul thumbnail quando non sta riproducendo. Lo scrim + l'icona si
+    // adattano all'ambiance SFOS (#7 v2.4): tema scuro → cerchio scuro + icona
+    // chiara; tema chiaro → cerchio chiaro + icona scura (prima era sempre cerchio
+    // nero tenue + icona bianca, poco visibile sui temi light).
     Rectangle {
+        readonly property bool lightAmbience: Theme.colorScheme === Theme.DarkOnLight
         anchors.centerIn: parent
         width: playIcon.width + Theme.paddingMedium * 2
         height: playIcon.height + Theme.paddingMedium * 2
         radius: width / 2
-        color: Theme.rgba("black", 0.4)
+        color: lightAmbience ? Theme.rgba("#ffffff", 0.7) : Theme.rgba("#000000", 0.5)
+        border.width: 1
+        border.color: lightAmbience ? Theme.rgba("#000000", 0.2) : Theme.rgba("#ffffff", 0.25)
         visible: !animationComponent.playing && !animationComponent.downloading
                  && !animationComponent.converting && animationUrl !== ""
 
         Icon {
             id: playIcon
             anchors.centerIn: parent
-            source: "image://theme/icon-l-play?white"
+            source: "image://theme/icon-l-play?" + (parent.lightAmbience ? Theme.darkPrimaryColor : "white")
         }
     }
 

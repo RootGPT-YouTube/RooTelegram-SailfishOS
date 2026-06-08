@@ -365,10 +365,10 @@ void NotificationManager::handleNewStory(qlonglong chatId)
     notification->setBody(body);
     notification->setHintValue(HINT_IMAGE_PATH, notificationIconFile);
 
-    // Tap = porta l'app in foreground (coerente con openMessage, che pure
-    // si limita ad attivare l'app).
-    notification->setRemoteAction(Notification::remoteAction("default", "activateApp",
-        APP_ORIGIN, "/com/github/RootGPT_YouTube/rootelegram", APP_ORIGIN, "activateApp"));
+    // Tap = apri l'app E naviga alla pagina Storie (deep-link openStories,
+    // gestito in OverviewPage.qml onPleaseOpenStories; pattern come openMessage).
+    notification->setRemoteAction(Notification::remoteAction("default", "openStories",
+        APP_ORIGIN, "/com/github/RootGPT_YouTube/rootelegram", APP_ORIGIN, "openStories"));
 
     if (appActive) {
         // L'utente sta già usando l'app: notifica silenziosa, niente popup.

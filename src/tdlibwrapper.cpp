@@ -179,6 +179,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chatLastMessageUpdated(QString, QString, QVariantMap)), this, SIGNAL(chatLastMessageUpdated(QString, QString, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(chatOrderUpdated(QString, QString)), this, SIGNAL(chatOrderUpdated(QString, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)), this, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)));
+    connect(this->tdLibReceiver, SIGNAL(chatArchivePositionUpdated(qlonglong, QString, bool)), this, SIGNAL(chatArchivePositionUpdated(qlonglong, QString, bool)));
     connect(this->tdLibReceiver, SIGNAL(chatReadInboxUpdated(QString, QString, int)), this, SIGNAL(chatReadInboxUpdated(QString, QString, int)));
     connect(this->tdLibReceiver, SIGNAL(chatActionUpdated(QString, qlonglong, QString)), this, SIGNAL(chatActionUpdated(QString, qlonglong, QString)));
     connect(this->tdLibReceiver, SIGNAL(chatReadOutboxUpdated(QString, QString)), this, SIGNAL(chatReadOutboxUpdated(QString, QString)));
@@ -4268,6 +4269,20 @@ void TDLibWrapper::switchChatList(int chatListType, int folderId)
         chatList.insert(_TYPE, "chatListMain");
         requestObject.insert("chat_list", chatList);
     }
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::setChatArchived(qlonglong chatId, bool archived)
+{
+    // Sposta la chat tra lista principale e archivio (#4 v2.4). TDLib genererà gli
+    // updateChatPosition per chatListMain (rimozione/aggiunta) e chatListArchive.
+    LOG("Set chat archived" << chatId << archived);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "addChatToList");
+    requestObject.insert(CHAT_ID, chatId);
+    QVariantMap chatListMap;
+    chatListMap.insert(_TYPE, archived ? "chatListArchive" : CHAT_LIST_MAIN);
+    requestObject.insert("chat_list", chatListMap);
     this->sendRequest(requestObject);
 }
 

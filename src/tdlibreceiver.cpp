@@ -416,6 +416,9 @@ void TDLibReceiver::processUpdateChatPosition(const QVariantMap &receivedInforma
     } else if (updateForChatList == "chatListFolder") {
         // Passa anche l'ordine per le cartelle
         emit chatFolderPositionUpdated(chat_id, folderId, order, is_pinned);
+    } else if (updateForChatList == "chatListArchive") {
+        // #4 v2.4: archivio. order vuoto = la chat è uscita dall'archivio.
+        emit chatArchivePositionUpdated(chat_id.toLongLong(), order, is_pinned);
     } else {
         LOG("Received chat position update for uninteresting list" << updateForChatList << "ID" << chat_id << "new order" << order << "is pinned" << is_pinned);
     }

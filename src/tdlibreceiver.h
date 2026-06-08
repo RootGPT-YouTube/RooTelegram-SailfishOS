@@ -59,6 +59,8 @@ signals:
     void chatOrderUpdated(const QString &chatId, const QString &order);
     void chatPinnedUpdated(qlonglong chatId, bool isPinned);
     void chatFolderPositionUpdated(const QString &chatId, int folderId, const QString &order, bool isPinned);
+    // #4 v2.4: posizione in archivio (chatListArchive). order vuoto = uscita dall'archivio.
+    void chatArchivePositionUpdated(qlonglong chatId, const QString &order, bool isPinned);
     void chatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
     void chatActionUpdated(const QString &chatId, qlonglong userId, const QString &action);
     void chatReadOutboxUpdated(const QString &chatId, const QString &lastReadOutboxMessageId);

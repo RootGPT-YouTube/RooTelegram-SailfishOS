@@ -35,10 +35,11 @@ Dialog {
     DialogHeader {
         id: dialogHeader
         title: ""
-        // Annulla/Accetta in bianco per coerenza neon (le label del DialogHeader
-        // usano palette.primaryColor; il glow non è aggiungibile su queste interne).
-        palette.primaryColor: "#ffffff"
-        palette.highlightColor: "#fff3e6"
+        // Annulla/Accetta in bianco SOLO per coerenza neon; nel tema Silica seguono
+        // i colori dell'ambiance SFOS (#5 v2.4 — prima erano bianchi fissi, poco
+        // visibili sulle ambiance chiare).
+        palette.primaryColor: appSettings.useNeonTheme ? "#ffffff" : Theme.primaryColor
+        palette.highlightColor: appSettings.useNeonTheme ? "#fff3e6" : Theme.highlightColor
     }
 
     SilicaFlickable {

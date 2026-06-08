@@ -55,6 +55,7 @@
 #include "tdlibwrapper.h"
 #include "chatpermissionfiltermodel.h"
 #include "chatlistmodel.h"
+#include "archivedchatsmodel.h"
 #include "chatmodel.h"
 #include "chatfoldersmodel.h"
 #include "namedaction.h"
@@ -226,6 +227,9 @@ int main(int argc, char *argv[])
     ChatListModel chatListModel(tdLibWrapper, appSettings);
     chatListModel.setParent(app.data());
 
+    ArchivedChatsModel archivedChatsModel(tdLibWrapper);
+    archivedChatsModel.setParent(app.data());
+
     ChatFoldersModel chatFoldersModel(tdLibWrapper, app.data());
 
     ChatModel chatModel(tdLibWrapper);
@@ -287,6 +291,7 @@ int main(int argc, char *argv[])
             context->setContextProperty("rootelegramUtils", rootelegramUtils);
             context->setContextProperty("dBusAdaptor", dBusAdaptor);
             context->setContextProperty("chatListModel", &chatListModel);
+            context->setContextProperty("archivedChatsModel", &archivedChatsModel);
             context->setContextProperty("chatFoldersModel", &chatFoldersModel);
             context->setContextProperty("chatModel", &chatModel);
             context->setContextProperty("notificationManager", &notificationManager);

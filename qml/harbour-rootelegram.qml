@@ -172,6 +172,9 @@ ApplicationWindow
         onPleaseOpenUrl: {
             appWindow.activate();
         }
+        onPleaseOpenStories: {
+            appWindow.activate();
+        }
     }
 
     Connections {

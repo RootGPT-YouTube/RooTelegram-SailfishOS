@@ -10,22 +10,20 @@
 // Testo libero (non passa da qsTr: i .pragma library non hanno contesto di
 // traduzione). Scrivilo nella lingua che preferisci.
 
-var version = "2.3";
+var version = "2.4";
 
 var changelog = [
-    "I link di invito ai gruppi (t.me/+…, tg://) ora si aprono in RooTelegram dal browser di Sailfish.",
-    "Cancellazione messaggi: scelta «per tutti» o «solo per me», dove Telegram lo consente.",
-    "Indicatore «sta scrivendo…» nelle chat (in ricezione e in invio).",
-    "Invio e ricezione contatti, con salvataggio in rubrica Sailfish.",
-    "Traduzione anche delle didascalie di foto e video.",
-    "GIF inviate come animazione e riprodotte per intero (niente più troncatura).",
-    "Scarica e condividi foto e video dalla preview, anche in gruppi e canali.",
-    "Chiamate e videochiamate in arrivo: lo schermo si accende a telefono bloccato.",
-    "Consumo di memoria ridotto (circa 40% di RAM in meno).",
-    "Apertura corretta dei messaggi letti dalle notifiche: il badge dei non letti si azzera sempre aprendo la chat.",
-    "Nuovi messaggi di servizio gestiti (richiesta di ingresso, chiamate di gruppo, tema/sfondo).",
-    "Tema Silica: nomi delle chat in grassetto e menù long-press nativo.",
-    "Popup “Novità” una-tantum dopo ogni aggiornamento (questo!)."
+    "Ripristinata la voce «Modifica» sui propri messaggi: era sparita per molti utenti (anche nei gruppi dove non sei amministratore).",
+    "Nuova voce «Info messaggio» nel menù del messaggio: data completa, mittente, inoltro, visualizzazioni e altri dettagli. Rimosso il vecchio tap sulla data/ora.",
+    "Risolti i messaggi che a volte ricomparivano come «bozze» dopo una modifica, soprattutto nei gruppi.",
+    "Storie: dalla lista di chi ha messo «Mi piace»/visualizzato ora puoi aprire il profilo dell’utente.",
+    "Nuova sezione «Chat archiviate» (Impostazioni → Memoria): archivia o disarchivia una chat con la pressione prolungata.",
+    "Tema Silica: titoli e testi (come l’intestazione delle info chat/gruppo/canale) seguono ora i colori dell’ambiance scelta, niente più arancione fisso.",
+    "Tema Silica: titolo «RooTelegram» in alto in grassetto corsivo e più grande; nomi delle chat leggermente più compatti.",
+    "Pulsante Play su GIF e video più visibile: ora si adatta ai temi chiari e scuri.",
+    "Link e nomi utente colorati in base al tema: rossi sui temi scuri, blu sui temi chiari.",
+    "Storie: toccando la notifica di una storia si apre direttamente la pagina Storie.",
+    "Storie: un pallino verde accanto a «Storie» segnala quando ci sono storie non ancora viste."
 ];
 
-var message = "Se i link di invito non si aprono in RooTelegram, riavvia una volta il dispositivo. Probabilmente è un problema di memoria cache.";
+var message = "Novità: tocca la notifica di una storia per aprire subito le Storie, e quando ci sono storie non viste compare un pallino verde accanto a «Storie» nel menu. Trovi inoltre le Chat archiviate in Impostazioni → Memoria: per archiviare o disarchiviare una chat tienila premuta e scegli «Archivia»/«Disarchivia».";

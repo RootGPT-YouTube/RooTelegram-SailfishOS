@@ -61,11 +61,14 @@ Video {
         onClicked: page.overlayActive = !page.overlayActive
     }
 
-    RadialGradient { // white videos = invisible button. I can't tell since which SFOS version the opaque button is available, so:
+    RadialGradient { // white videos = invisible button. Scrim + icona adattivi al tema (#7 v2.4):
         id: buttonBg
         anchors.centerIn: parent
         width: Theme.itemSizeLarge; height: Theme.itemSizeLarge
-        property color baseColor: Theme.rgba(palette.overlayBackgroundColor, 0.2)
+        // Tema scuro → alone scuro + icona chiara; tema chiaro → alone chiaro +
+        // icona scura, così il pulsante resta visibile anche su video/tema chiaro.
+        readonly property bool lightAmbience: Theme.colorScheme === Theme.DarkOnLight
+        property color baseColor: lightAmbience ? Theme.rgba("#ffffff", 0.7) : Theme.rgba("#000000", 0.55)
 
         enabled: videoUI.active || !file.isDownloadingCompleted
         opacity: enabled ? 1 : 0
@@ -81,7 +84,7 @@ Video {
             anchors.fill: parent
             icon.source: "image://theme/icon-l-"+(video.isPlaying || video.shouldPlay ? 'pause' : 'play')+"?" + (pressed
                          ? Theme.highlightColor
-                         : Theme.lightPrimaryColor)
+                         : (buttonBg.lightAmbience ? Theme.darkPrimaryColor : Theme.lightPrimaryColor))
             onClicked: {
                 if (!file.isDownloadingCompleted) {
                     video.shouldPlay = !video.shouldPlay;

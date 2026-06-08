@@ -324,6 +324,84 @@
     </message>
 </context>
 <context>
+    <name>ArchivedChatsPage</name>
+    <message>
+        <source>Photo</source>
+        <translation>Foto</translation>
+    </message>
+    <message>
+        <source>Video</source>
+        <translation>Video</translation>
+    </message>
+    <message>
+        <source>GIF</source>
+        <translation>GIF</translation>
+    </message>
+    <message>
+        <source>Voice message</source>
+        <translation>Messaggio vocale</translation>
+    </message>
+    <message>
+        <source>Video message</source>
+        <translation>Videomessaggio</translation>
+    </message>
+    <message>
+        <source>Audio</source>
+        <translation>Audio</translation>
+    </message>
+    <message>
+        <source>Document</source>
+        <translation>Documento</translation>
+    </message>
+    <message>
+        <source>Sticker</source>
+        <translation>Sticker</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Posizione</translation>
+    </message>
+    <message>
+        <source>Contact</source>
+        <translation>Contatto</translation>
+    </message>
+    <message>
+        <source>Poll</source>
+        <translation>Sondaggio</translation>
+    </message>
+    <message>
+        <source>Call</source>
+        <translation>Chiamata</translation>
+    </message>
+    <message>
+        <source>Archived chats</source>
+        <translation>Chat archiviate</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n chat(s)</source>
+        <translation>
+            <numerusform>%n chat</numerusform>
+            <numerusform>%n chat</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Sconosciuto</translation>
+    </message>
+    <message>
+        <source>Unarchive</source>
+        <translation>Disarchivia</translation>
+    </message>
+    <message>
+        <source>No archived chats</source>
+        <translation>Nessuna chat archiviata</translation>
+    </message>
+    <message>
+        <source>Long-press a chat in the main list and choose Archive.</source>
+        <translation>Tieni premuta una chat nell&apos;elenco principale e scegli «Archivia».</translation>
+    </message>
+</context>
+<context>
     <name>BackgroundProgressIndicator</name>
     <message>
         <source>%1 %</source>
@@ -1142,6 +1220,10 @@
         <source>Removed from folder: %1</source>
         <translation>Rimosso dalla cartella: %1</translation>
     </message>
+    <message>
+        <source>Archive chat</source>
+        <translation>Archivia chat</translation>
+    </message>
 </context>
 <context>
     <name>ChatPage</name>
@@ -1287,7 +1369,7 @@
     </message>
     <message>
         <source>Copy Message to Clipboard</source>
-        <translation>Copia messaggio nella clipboard</translation>
+        <translation>Copia messaggio</translation>
     </message>
     <message>
         <source>Message unpinned</source>
@@ -2185,6 +2267,69 @@
     </message>
 </context>
 <context>
+    <name>MessageInfoPage</name>
+    <message>
+        <source>When the recipient comes online</source>
+        <translation>Quando il destinatario è online</translation>
+    </message>
+    <message>
+        <source>Message info</source>
+        <translation>Info messaggio</translation>
+    </message>
+    <message>
+        <source>Sent</source>
+        <translation>Inviato</translation>
+    </message>
+    <message>
+        <source>Edited</source>
+        <translation>Modificato</translation>
+    </message>
+    <message>
+        <source>Scheduled</source>
+        <translation>Programmato</translation>
+    </message>
+    <message>
+        <source>Sender</source>
+        <translation>Mittente</translation>
+    </message>
+    <message>
+        <source>Author signature</source>
+        <translation>Firma autore</translation>
+    </message>
+    <message>
+        <source>Via bot</source>
+        <translation>Via bot</translation>
+    </message>
+    <message>
+        <source>Forwarded from</source>
+        <translation>Inoltrato da</translation>
+    </message>
+    <message>
+        <source>Original date</source>
+        <translation>Data originale</translation>
+    </message>
+    <message>
+        <source>Views</source>
+        <translation>Visualizzazioni</translation>
+    </message>
+    <message>
+        <source>Forwards</source>
+        <translation>Inoltri</translation>
+    </message>
+    <message>
+        <source>Reactions</source>
+        <translation>Reazioni</translation>
+    </message>
+    <message>
+        <source>Message ID</source>
+        <translation>ID messaggio</translation>
+    </message>
+    <message>
+        <source>Album ID</source>
+        <translation>ID album</translation>
+    </message>
+</context>
+<context>
     <name>MessageListViewItem</name>
     <message>
         <source>Reply to Message</source>
@@ -2216,7 +2361,7 @@
     </message>
     <message>
         <source>Copy Message to Clipboard</source>
-        <translation>Copia messaggio nella clipboard</translation>
+        <translation>Copia messaggio</translation>
     </message>
     <message>
         <source>Forward message</source>
@@ -2303,6 +2448,10 @@
     <message>
         <source>Someone</source>
         <translation>Qualcuno</translation>
+    </message>
+    <message>
+        <source>Message info</source>
+        <translation>Info messaggio</translation>
     </message>
 </context>
 <context>
@@ -4107,6 +4256,10 @@
     <message>
         <source>Enable storage optimizer</source>
         <translation>Abilita ottimizzazione memoria</translation>
+    </message>
+    <message>
+        <source>Archived chats</source>
+        <translation>Chat archiviate</translation>
     </message>
 </context>
 <context>

@@ -419,6 +419,12 @@ ListItem {
     function requestEditMessage() {
         editMessage();
     }
+    // Info messaggio (#1): apre la pagina con i metadati (date, mittente, inoltro,
+    // dati tecnici). Sostituisce il vecchio tap relativo/assoluto sulla data.
+    function showMessageInfo() {
+        pageStack.push(Qt.resolvedUrl("../pages/MessageInfoPage.qml"),
+                       { messageObject: myMessage, chatId: page.chatInformation.id });
+    }
     function togglePinMessage() {
         if (!canPinMessage) {
             return;
@@ -465,6 +471,7 @@ ListItem {
         actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { requestDelete(true); }});
         actions.push({ text: qsTr("Select Message"), visible: true, callback: function() { page.toggleMessageSelection(myMessage); }});
         actions.push({ text: qsTr("More Options..."), visible: (numberOfExtraOptionsOtherThanDeleteMessage > 0) || (canDeleteMessage && !haveSpaceForDeleteMessageMenuItem), callback: function() { openAdditionalOptionsDrawer(); }});
+        actions.push({ text: qsTr("Message info"), visible: myMessage && myMessage["@type"] !== "sponsoredMessage", callback: function() { showMessageInfo(); }});
         return actions;
     }
 
@@ -804,6 +811,11 @@ ListItem {
                         openAdditionalOptionsDrawer();
                     }
                     text: qsTr("More Options...")
+                }
+                MenuItem {
+                    visible: myMessage && myMessage["@type"] !== "sponsoredMessage"
+                    onClicked: showMessageInfo()
+                    text: qsTr("Message info")
                 }
             }
         }
@@ -1449,8 +1461,10 @@ ListItem {
                     text: (messageListItem.revealedSpoilersVersion, Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false, messageListItem.revealedSpoilers), Theme.fontSizeMedium))
                     font.pixelSize: Theme.fontSizeSmall
                     color: messageListItem.textColor
-                    // Link a siti esterni: ROSSO-ARANCIO in Neon, highlight Silica altrimenti.
-                    linkColor: appSettings.useNeonTheme ? "#ff6e40" : Theme.highlightColor
+                    // Link/username adattivi al tema (#8): ROSSO sui temi scuri, BLU
+                    // sui temi chiari (URL e menzioni hanno già il colore inline via
+                    // Functions.messageLinkColor; questo copre mailto/tel/botCommand).
+                    linkColor: Theme.colorScheme === Theme.DarkOnLight ? "#2481cc" : "#ff6e40"
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {
@@ -1524,6 +1538,10 @@ ListItem {
                 Text {
                     width: parent.width
 
+                    // Mostra sempre il tempo relativo ("5 minuti fa"): il tap che
+                    // alternava relativo/assoluto è stato rimosso (#1 v2.4). Le info
+                    // complete (data assoluta + metadati) sono in "Info messaggio"
+                    // nel menù long-press → MessageInfoPage.
                     property bool useElapsed: true
 
                     id: messageDateText
@@ -1531,14 +1549,6 @@ ListItem {
                     color: messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor
                     horizontalAlignment: messageListItem.textAlign
                     text: getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed)
-                    MouseArea {
-                        anchors.fill: parent
-                        enabled: !messageListItem.precalculatedValues.pageIsSelecting
-                        onClicked: {
-                            messageDateText.useElapsed = !messageDateText.useElapsed;
-                            messageDateText.text = getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed);
-                        }
-                    }
                 }
 
                 Loader {

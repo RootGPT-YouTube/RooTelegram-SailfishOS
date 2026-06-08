@@ -294,6 +294,12 @@ function getShortenedCount(count) {
     }
 }
 
+// Colore di link e username adattivo al tema (#8 v2.4): ROSSO sui temi scuri
+// (come da sempre i link), BLU sui temi chiari. Basato su Theme.colorScheme.
+function messageLinkColor() {
+    return (Silica.Theme.colorScheme === Silica.Theme.DarkOnLight) ? "#2481cc" : "#ff6e40";
+}
+
 function getDateTimeElapsed(timestamp) {
     return Silica.Format.formatDate(new Date(timestamp * 1000), Silica.Formatter.DurationElapsed);
 }
@@ -382,7 +388,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypeUrl":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a style=\"color:#ff6e40;\" href=\"" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -427,13 +433,13 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypeMention":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"user://" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"user://" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
             case "textEntityTypeMentionName":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"userId://" + entity.type.user_id + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"userId://" + entity.type.user_id + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -457,7 +463,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypeTextUrl":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a style=\"color:#ff6e40;\" href=\"" + entity.type.url + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + entity.type.url + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -581,7 +587,7 @@ function getVideoHeight(videoWidth, videoData) {
 }
 
 function replaceUrlsWithLinks(string) {
-    return string.replace(/((\w+):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, "<a style=\"color:#ff6e40;\" href=\"$1\">$1</a>");
+    return string.replace(/((\w+):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, "<a style=\"color:" + messageLinkColor() + ";\" href=\"$1\">$1</a>");
 }
 
 function sortMessagesArrayByDate(messages) {

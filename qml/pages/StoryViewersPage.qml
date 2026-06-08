@@ -106,6 +106,14 @@ Page {
             width: viewersList.width
             contentHeight: Theme.itemSizeMedium
 
+            // Tap → apre l'utente che ha visto/messo "Mi piace" alla storia (#3 v2.4).
+            // Stesso comportamento delle liste membri: createPrivateChat openDirectly.
+            onClicked: {
+                if (model.userId > 0) {
+                    tdLibWrapper.createPrivateChat("" + model.userId, "openDirectly");
+                }
+            }
+
             property var userInfo: model.userId > 0
                                    ? tdLibWrapper.getUserInformation("" + model.userId)
                                    : ({})

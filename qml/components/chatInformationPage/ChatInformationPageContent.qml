@@ -817,10 +817,12 @@ SilicaFlickable {
     PageHeader {
         id: headerItem
         z: 5
-        // Titolo info (gruppo/canale/utente/chat) in arancio neon-brand. NB: questo
-        // header è speciale (avatar che si rimpicciolisce allo scroll), quindi non si
-        // può usare NeonPageHeader; il glow non è aggiungibile sul title interno.
-        palette.highlightColor: "#ff9a3d"
+        // Titolo info (gruppo/canale/utente/chat): arancio neon-brand SOLO nel tema
+        // Neon; nel tema Silica segue il colore highlight dell'ambiance SFOS scelta
+        // (#5 v2.4 — prima era arancio bloccato anche in Silica). NB: questo header è
+        // speciale (avatar che si rimpicciolisce allo scroll), quindi non si può
+        // usare NeonPageHeader; il glow non è aggiungibile sul title interno.
+        palette.highlightColor: appSettings.useNeonTheme ? "#ff9a3d" : Theme.highlightColor
         Item {
             id: imageContainer
             property bool hasImage: typeof chatInformationPage.chatInformation.photo !== "undefined"

@@ -20,6 +20,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import ".."
 
 AccordionItem {
     text: qsTr("Storage")
@@ -45,6 +46,14 @@ AccordionItem {
                 onClicked: {
                     appSettings.storageOptimizer = !checked
                 }
+            }
+
+            // Scorciatoia alle chat archiviate (#4 v2.4). NeonButton: stile neon col
+            // tema Neon, fallback Button Silica nativo altrimenti.
+            NeonButton {
+                width: parent.columnWidth
+                text: qsTr("Archived chats")
+                onClicked: pageStack.push(Qt.resolvedUrl("../../pages/ArchivedChatsPage.qml"))
             }
         }
     }

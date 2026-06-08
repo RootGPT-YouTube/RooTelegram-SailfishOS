@@ -48,6 +48,8 @@ Page {
     // link handler:
     property string urlToOpen;
     property var chatToOpen: null; //null or [chatId, messageId]
+    // deep-link "apri Storie" da notifica storia (coda per il cold-start)
+    property bool openStoriesRequested: false;
 
     onStatusChanged: {
         if (status === PageStatus.Active && initializationCompleted && !chatListCreated && !logoutLoading) {
@@ -72,6 +74,10 @@ Page {
             Debug.log("[OverviewPage] Opening URL requested: ", url);
             openUrl(url);
         }
+        onPleaseOpenStories: {
+            Debug.log("[OverviewPage] Opening Stories from external requested");
+            openStories();
+        }
     }
 
     Timer {
@@ -83,7 +89,9 @@ Page {
             overviewPage.chatListCreated = true;
             // Deep-link messo in coda mentre la lista non era ancora pronta (tap
             // notifica ad app chiusa / da daemon): ora apriamo chat/messaggio/URL.
-            if (overviewPage.chatToOpen && overviewPage.chatToOpen.length === 2) {
+            if (overviewPage.openStoriesRequested) {
+                overviewPage.openStories();
+            } else if (overviewPage.chatToOpen && overviewPage.chatToOpen.length === 2) {
                 if (typeof overviewPage.chatToOpen[1] === "object") {
                     overviewPage.openChatWithMessage(overviewPage.chatToOpen[0], overviewPage.chatToOpen[1]);
                 } else {
@@ -267,6 +275,19 @@ Page {
             pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo }, PageStackAction.Immediate);
             chatToOpen = null;
         }
+    }
+
+    function openStories() {
+        // Se la lista chat non è ancora pronta (notifica ad app chiusa / da daemon)
+        // mettiamo in coda: ci ripensa il chatListCreatedTimer.
+        if (!chatListCreated) {
+            openStoriesRequested = true;
+            return;
+        }
+        Debug.log("[OverviewPage] Opening Stories page from external request");
+        pageStack.pop(overviewPage, PageStackAction.Immediate);
+        pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"), {}, PageStackAction.Immediate);
+        openStoriesRequested = false;
     }
 
     function openChatWithMessageId(chatId, messageId) {
@@ -572,12 +593,26 @@ Page {
             MenuItem {
                 onClicked: pageStack.push(Qt.resolvedUrl("../pages/StoriesPage.qml"))
                 Label {
+                    id: storiesMenuLabel
                     anchors.centerIn: parent
                     text: qsTr("Stories")
                     font.italic: overviewPage.neon
                     color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
+                }
+                // Pallino verde: presente quando ci sono storie non viste
+                Rectangle {
+                    visible: storiesModel.mainUnreadCount > 0
+                    width: Theme.paddingMedium
+                    height: width
+                    radius: width / 2
+                    color: "#4caf50"
+                    anchors.left: storiesMenuLabel.right
+                    anchors.leftMargin: Theme.paddingSmall
+                    anchors.verticalCenter: storiesMenuLabel.verticalCenter
+                    layer.enabled: overviewPage.neon
+                    layer.effect: Glow { color: "#4caf50"; radius: 8; samples: 17; spread: 0.3; transparentBorder: true }
                 }
             }
             NeonSeparator {
@@ -699,9 +734,16 @@ Page {
                 Label {
                     id: neonCore
                     anchors.centerIn: parent
-                    text: "R∞Telegram"
-                    font.pixelSize: overviewPage.neon ? Theme.fontSizeHuge : Theme.fontSizeLarge
-                    font.italic: overviewPage.neon
+                    // Silica: "RooTelegram" semplice in grassetto+corsivo e +4 "misure"
+                    // (4 step di font) più grande del Large (#6 v2.4). Neon: "R∞Telegram"
+                    // stilizzato invariato. Il colore in Silica segue il tema SFOS
+                    // (Theme.highlightColor), non è più bloccato.
+                    text: overviewPage.neon ? "R∞Telegram" : "RooTelegram"
+                    font.pixelSize: overviewPage.neon
+                                    ? Theme.fontSizeHuge
+                                    : (Theme.fontSizeLarge + 4 * (Theme.fontSizeLarge - Theme.fontSizeMedium))
+                    font.italic: true
+                    font.bold: !overviewPage.neon
                     color: overviewPage.neon ? "#fff3e6" : Theme.highlightColor
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow {
