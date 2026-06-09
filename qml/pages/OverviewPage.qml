@@ -367,6 +367,38 @@ Page {
         }
     }
 
+    // Colore SEMANTICO del puntino di connessione (Silica): VERDE = connesso,
+    // AMBRA = ricerca/instabile, ROSSO = nessuna connessione. Tinte mid-tone
+    // leggibili su qualunque ambiance (chiara o scura).
+    function connectionDotColor() {
+        switch (overviewPage.connectionState) {
+        case TelegramAPI.ConnectionReady:   return "#4caf50"; // verde
+        case TelegramAPI.WaitingForNetwork: return "#e53935"; // rosso
+        default:                            return "#ffb300"; // ambra
+        }
+    }
+
+    // Stati "in corso/instabile" (l'ambra lampeggia): connessione in corso, al proxy
+    // o aggiornamento contenuti.
+    function connectionIsConnecting() {
+        var s = overviewPage.connectionState;
+        return s === TelegramAPI.Connecting
+            || s === TelegramAPI.ConnectingToProxy
+            || s === TelegramAPI.Updating;
+    }
+
+    // Descrizione testuale dello stato (riusa le stesse stringhe già tradotte di
+    // setPageStatus). Vuota a connessione pronta (il verde non ha didascalia).
+    function connectionDescription() {
+        switch (overviewPage.connectionState) {
+        case TelegramAPI.WaitingForNetwork: return qsTr("Waiting for network...");
+        case TelegramAPI.Connecting:        return qsTr("Connecting to network...");
+        case TelegramAPI.ConnectingToProxy: return qsTr("Connecting to proxy...");
+        case TelegramAPI.Updating:          return qsTr("Updating content...");
+        default:                            return "";
+        }
+    }
+
     function updateContent() {
         tdLibWrapper.getChats();
     }
@@ -680,18 +712,129 @@ Page {
                 color: Theme.highlightColor
             }
 
+            // Icona connessione internet — SOLO Silica — all'estrema sinistra della
+            // riga del brand, a sinistra del puntino di stato: antenna che irradia =
+            // connessione a internet. Asset custom monocromatico (images/icon-m-rt-
+            // connection.png) tinto col colore del tema via ColorOverlay.
+            Image {
+                id: connectionIcon
+                visible: !overviewPage.neon
+                source: Qt.resolvedUrl("../../images/icon-m-rt-connection.png")
+                sourceSize.width: Theme.iconSizeSmall * 2
+                sourceSize.height: Theme.iconSizeSmall * 2
+                width: Theme.iconSizeSmall
+                height: width
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                anchors {
+                    left: parent.left
+                    leftMargin: Theme.horizontalPageMargin
+                    verticalCenter: parent.verticalCenter
+                }
+                layer.enabled: true
+                layer.effect: ColorOverlay { color: Theme.primaryColor }
+            }
+
+            // Puntino di stato connessione — SOLO Silica — subito a destra dell'icona,
+            // sulla stessa riga del brand. VERDE = connesso; AMBRA (lampeggiante) =
+            // ricerca/instabile; ROSSO = nessuna connessione. La binding chiama
+            // connectionDotColor() che legge connectionState → si riaggiorna al cambio.
+            // Nel Neon non compare.
+            Rectangle {
+                id: connectionDot
+                visible: !overviewPage.neon
+                width: Theme.paddingMedium * 1.3
+                height: width
+                radius: width / 2
+                anchors {
+                    left: connectionIcon.right
+                    leftMargin: Theme.paddingSmall
+                    verticalCenter: parent.verticalCenter
+                }
+                color: overviewPage.connectionDotColor()
+            }
+
+            // Alone pulsante "sfocato" sopra il puntino quando in ricerca/instabile
+            // (stato ambra): un Glow ambra che respira (raggio + opacità). L'Item è più
+            // grande del puntino così il glow ha margine trasparente e non viene tagliato.
+            // Il puntino sottostante resta solido → il pallino non sparisce, pulsa solo
+            // l'alone. Solo Silica e solo nello stato ambra.
+            Item {
+                id: connectionDotPulse
+                visible: !overviewPage.neon && overviewPage.connectionIsConnecting()
+                width: connectionDot.width * 2.8
+                height: width
+                anchors.centerIn: connectionDot
+                property real pulseRadius: 6
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: connectionDot.width
+                    height: width
+                    radius: width / 2
+                    color: "#ffb300"
+                }
+                layer.enabled: true
+                layer.effect: Glow {
+                    color: "#ffb300"
+                    radius: connectionDotPulse.pulseRadius
+                    samples: 25
+                    spread: 0.2
+                    transparentBorder: true
+                }
+                SequentialAnimation on pulseRadius {
+                    running: connectionDotPulse.visible
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 20; duration: 750; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 6;  duration: 750; easing.type: Easing.InOutSine }
+                }
+                SequentialAnimation on opacity {
+                    running: connectionDotPulse.visible
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.25; duration: 750; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0;  duration: 750; easing.type: Easing.InOutSine }
+                }
+            }
+
+            // Descrizione dello stato — SOLO Silica — a destra del puntino, per TUTTI gli
+            // stati tranne "connesso" (verde, senza didascalia). Colore del TEMA
+            // (Theme.highlightColor) per adattarsi all'ambiance SFOS. Si tronca con fade
+            // se non c'è spazio fino al brand.
+            Label {
+                id: connectionDescLabel
+                visible: !overviewPage.neon && overviewPage.connectionState !== TelegramAPI.ConnectionReady
+                text: overviewPage.connectionDescription()
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.highlightColor
+                truncationMode: TruncationMode.Fade
+                anchors {
+                    left: connectionDot.right
+                    leftMargin: Theme.paddingMedium
+                    right: brandNeon.left
+                    rightMargin: Theme.paddingMedium
+                    verticalCenter: parent.verticalCenter
+                }
+            }
+
             // Brand "R∞Telegram" in vero stile tubo al neon (nucleo chiaro brillante + alone
             // magenta che diffonde), mostrato solo a connessione pronta; negli altri stati il
             // titolo testuale del PageHeader mostra "Connecting…", ecc.
             Item {
                 id: brandNeon
-                visible: overviewPage.connectionState === TelegramAPI.ConnectionReady
+                // Neon: brand solo a connessione pronta (gli altri stati mostrano il
+                // testo "Connecting…"). Silica: brand SEMPRE visibile — lo stato di
+                // connessione è dato dal puntino verde/celeste a sinistra, quindi il
+                // testo "Connecting…" non serve (connectionLabel si nasconde da solo
+                // perché brandNeon.visible diventa true).
+                visible: overviewPage.neon ? (overviewPage.connectionState === TelegramAPI.ConnectionReady) : true
                 implicitWidth: neonCore.implicitWidth
                 implicitHeight: neonCore.implicitHeight
                 width: implicitWidth
                 height: implicitHeight
                 anchors {
-                    horizontalCenter: parent.horizontalCenter
+                    // Neon: centrato. Silica: allineato a destra dell'header.
+                    horizontalCenter: overviewPage.neon ? parent.horizontalCenter : undefined
+                    right: overviewPage.neon ? undefined : parent.right
+                    rightMargin: overviewPage.neon ? 0 : Theme.horizontalPageMargin
                     verticalCenter: parent.verticalCenter
                 }
 
@@ -734,14 +877,14 @@ Page {
                 Label {
                     id: neonCore
                     anchors.centerIn: parent
-                    // Silica: "RooTelegram" semplice in grassetto+corsivo e +4 "misure"
-                    // (4 step di font) più grande del Large (#6 v2.4). Neon: "R∞Telegram"
-                    // stilizzato invariato. Il colore in Silica segue il tema SFOS
-                    // (Theme.highlightColor), non è più bloccato.
-                    text: overviewPage.neon ? "R∞Telegram" : "RooTelegram"
+                    // Silica: "R∞Telegram" (col simbolo dell'infinito come il Neon) in
+                    // grassetto+corsivo, allineato a destra e +1 "misura" (1 step di
+                    // font) più grande del Large. Neon: "R∞Telegram" stilizzato invariato.
+                    // Il colore in Silica segue il tema SFOS (Theme.highlightColor).
+                    text: "R∞Telegram"
                     font.pixelSize: overviewPage.neon
                                     ? Theme.fontSizeHuge
-                                    : (Theme.fontSizeLarge + 4 * (Theme.fontSizeLarge - Theme.fontSizeMedium))
+                                    : (Theme.fontSizeLarge + (Theme.fontSizeLarge - Theme.fontSizeMedium))
                     font.italic: true
                     font.bold: !overviewPage.neon
                     color: overviewPage.neon ? "#fff3e6" : Theme.highlightColor
@@ -775,17 +918,20 @@ Page {
             id: titleMenuPanel
             property bool opened: false
             anchors.top: pageHeader.bottom
-            anchors.left: parent.left
+            // Neon: pannello a tutta larghezza (card vetro). Silica: box ALLINEATO A
+            // DESTRA come il brand, largo quanto basta alle voci. Sfondo: arancio
+            // bruciato Theme.rgba("#803500", 0.82) — lo STESSO del ContextMenu del
+            // long-press su una chat (e del menu Neon): highlightBackgroundColor pieno
+            // risultava troppo acceso sull'ambiance dell'utente.
             anchors.right: parent.right
-            anchors.leftMargin: Theme.horizontalPageMargin
             anchors.rightMargin: Theme.horizontalPageMargin
-            // Card "vetro appannato": bianco semi-opaco (lascia vagamente intravedere
-            // ciò che c'è sotto ma resta leggibile) + bordo arancione sottile + angoli
-            // stondati, coerente con le altre card neon (AccordionItem/NeonButton).
-            // Tema Neon: card vetro arancione bordo rosso stondata. Tema Silica: pannello
-            // opaco piatto (niente trasparenza/bordo neon/angoli stondati).
+            anchors.left: overviewPage.neon ? parent.left : undefined
+            anchors.leftMargin: Theme.horizontalPageMargin
+            width: overviewPage.neon
+                   ? undefined
+                   : Math.min(parent.width - 2 * Theme.horizontalPageMargin, Theme.itemSizeHuge * 2.4)
             radius: overviewPage.neon ? Theme.paddingLarge : 0
-            color: overviewPage.neon ? Theme.rgba("#803500", 0.82) : Theme.overlayBackgroundColor
+            color: Theme.rgba("#803500", 0.82)
             border.width: overviewPage.neon ? 4 : 0
             border.color: "#ff2d2d"
             z: 100
@@ -835,9 +981,14 @@ Page {
                             }
                         }
                         Label {
-                            anchors.centerIn: parent
-                            width: parent.width
-                            horizontalAlignment: Text.AlignHCenter
+                            // Neon: testo centrato. Silica: allineato a sinistra con
+                            // padding, come le voci dei ContextMenu nativi.
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: overviewPage.neon ? 0 : Theme.horizontalPageMargin
+                            anchors.rightMargin: overviewPage.neon ? 0 : Theme.horizontalPageMargin
+                            horizontalAlignment: overviewPage.neon ? Text.AlignHCenter : Text.AlignLeft
                             text: modelData.text
                             font.italic: overviewPage.neon
                             // Scritte bianche al neon su sfondo arancione.

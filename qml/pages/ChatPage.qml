@@ -1520,7 +1520,16 @@ Page {
     }
 
     Component.onDestruction: {
-        saveDraft();
+        // Salva la bozza SOLO se: (a) l'app è ancora attiva → l'utente sta uscendo
+        // davvero da QUESTA chat (pop / navigazione indietro) e il testo non inviato
+        // va persistito; oppure (b) questa è la chat in primo piano. Allo swipe-close
+        // dell'app, invece, onDestruction scatta su OGNI ChatPage ancora impilata:
+        // senza questo guard ognuna riscriverebbe la propria bozza → "bozza fantasma"
+        // in una chat diversa da quella in uso (gemello del bug già fixato su
+        // onActiveChanged). La chat in primo piano ha comunque già persistito lì.
+        if (Qt.application.active || chatPage.status === PageStatus.Active) {
+            saveDraft();
+        }
         rootelegramUtils.stopGeoLocationUpdates();
         _closeChatTracked();
     }
@@ -1531,7 +1540,14 @@ Page {
     Connections {
         target: Qt.application
         onActiveChanged: {
-            if (!Qt.application.active) {
+            // Solo la chat in PRIMO PIANO persiste la bozza quando l'app va in
+            // background/chiusura. Questo Connections vive in OGNI ChatPage ancora
+            // in memoria (es. una chat precedente impilata sotto quella corrente):
+            // senza il guard, alla disattivazione dell'app TUTTE salvavano la loro
+            // bozza → "bozza fantasma" in una chat diversa da quella in uso. Il
+            // testo non inviato della chat lasciata viene comunque salvato dal suo
+            // Component.onDestruction quando la si chiude davvero.
+            if (!Qt.application.active && chatPage.status === PageStatus.Active) {
                 chatPage.saveDraft();
             }
         }

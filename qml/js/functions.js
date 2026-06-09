@@ -84,13 +84,17 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
     if ( message['@type'] !== "sponsoredMessage" ) {
         myself = ( message.sender_id['@type'] === "messageSenderUser" && message.sender_id.user_id.toString() === currentUserId.toString() );
     }
+    // Colore del testo monospace (tap-to-copy): lo stesso colore del testo del
+    // messaggio — i propri messaggi usano highlightColor, gli altrui primaryColor —
+    // così il blocco "code" non assume il colore-link pur essendo un <a> tappabile.
+    var monoTextColor = myself ? Silica.Theme.highlightColor : Silica.Theme.primaryColor;
 
     switch(message.content['@type']) {
     case 'messageText':
         if (simple) {
             return censorSpoilersPlain(message.content.text);
         } else {
-            return enhanceMessageText(message.content.text, ignoreEntities, revealedSpoilers);
+            return enhanceMessageText(message.content.text, ignoreEntities, revealedSpoilers, monoTextColor);
         }
     case 'messageSticker':
         return simple ? message.content.sticker.emoji : ""
@@ -98,13 +102,13 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         return simple ? message.content.animated_emoji.sticker.emoji : ""
     case 'messagePhoto':
         if (message.content.caption.text !== "") {
-            return simple ? qsTr("Picture: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers)
+            return simple ? qsTr("Picture: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor)
         } else {
             return simple ? (myself ? qsTr("sent a picture", "myself") : qsTr("sent a picture")) : "";
         }
     case 'messageVideo':
         if (message.content.caption.text !== "") {
-            return simple ? qsTr("Video: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers)
+            return simple ? qsTr("Video: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor)
         } else {
             return simple ? (myself ? qsTr("sent a video", "myself") : qsTr("sent a video")) : "";
         }
@@ -112,25 +116,25 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         return simple ? (myself ? qsTr("sent a video note", "myself") : qsTr("sent a video note")) : "";
     case 'messageAnimation':
         if (message.content.caption.text !== "") {
-            return simple ? qsTr("Animation: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers)
+            return simple ? qsTr("Animation: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor)
         } else {
             return simple ? (myself ? qsTr("sent an animation", "myself") : qsTr("sent an animation")) : "";
         }
     case 'messageAudio':
         if (message.content.caption.text !== "") {
-            return simple ? qsTr("Audio: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers)
+            return simple ? qsTr("Audio: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor)
         } else {
             return simple ? (myself ? qsTr("sent an audio", "myself") : qsTr("sent an audio")) : "";
         }
     case 'messageVoiceNote':
         if (message.content.caption.text !== "") {
-            return simple ? qsTr("Voice Note: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers)
+            return simple ? qsTr("Voice Note: %1").arg(censorSpoilersPlain(message.content.caption)) : enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor)
         } else {
             return simple ? (myself ? qsTr("sent a voice note", "myself") : qsTr("sent a voice note")) : "";
         }
     case 'messageDocument':
         if (message.content.document.file_name !== "") {
-            return simple ? qsTr("Document: %1").arg(message.content.document.file_name) : (message.content.caption.text !== "" ? enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers) : "").trim();
+            return simple ? qsTr("Document: %1").arg(message.content.document.file_name) : (message.content.caption.text !== "" ? enhanceMessageText(message.content.caption, ignoreEntities, revealedSpoilers, monoTextColor) : "").trim();
         } else {
             return simple ? (myself ? qsTr("sent a document", "myself") : qsTr("sent a document")) : "";
         }
@@ -342,7 +346,7 @@ function getCustomEmojiRenderSize() {
     var baseSize = (Silica.Theme && Silica.Theme.fontSizeMedium) ? Silica.Theme.fontSizeMedium : 18;
     return Math.max(18, Math.round(baseSize * 1.15));
 }
-function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
+function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers, monoTextColor) {
 
     var messageInsertions = [];
     var messageText = formattedText.text;
@@ -393,9 +397,13 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
                 );
             break;
             case "textEntityTypeCode":
+                // Tap-to-copy (come Telegram): il blocco monospace è un link
+                // `rtcopy://OFFSET/LENGTH`; al tap MessageListViewItem copia in
+                // clipboard la sottostringa. text-decoration:none + colore esplicito
+                // del testo del messaggio così NON assume l'aspetto di un link.
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<span style='font-family: monospace;'>", removeLength: 0 },
-                    { offset: (entity.offset + entity.length), insertionString: "</span>", removeLength: 0 }
+                    { offset: entity.offset, insertionString: "<a href=\"rtcopy://" + entity.offset + "/" + entity.length + "\" style=\"text-decoration:none;\"><span style=\"font-family: monospace; color:" + monoTextColor + ";\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</span></a>", removeLength: 0 }
                 );
             break;
             case "textEntityTypeEmailAddress":
@@ -451,14 +459,14 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers) {
             break;
             case "textEntityTypePre":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<span style='font-family: monospace; white-space: pre-wrap;'>", removeLength: 0 },
-                    { offset: (entity.offset + entity.length), insertionString: "</span>", removeLength: 0 }
+                    { offset: entity.offset, insertionString: "<a href=\"rtcopy://" + entity.offset + "/" + entity.length + "\" style=\"text-decoration:none;\"><span style=\"font-family: monospace; white-space: pre-wrap; color:" + monoTextColor + ";\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</span></a>", removeLength: 0 }
                 );
             break;
             case "textEntityTypePreCode":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<span style='font-family: monospace; white-space: pre-wrap;'>", removeLength: 0 },
-                    { offset: (entity.offset + entity.length), insertionString: "</span>", removeLength: 0 }
+                    { offset: entity.offset, insertionString: "<a href=\"rtcopy://" + entity.offset + "/" + entity.length + "\" style=\"text-decoration:none;\"><span style=\"font-family: monospace; white-space: pre-wrap; color:" + monoTextColor + ";\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</span></a>", removeLength: 0 }
                 );
             break;
             case "textEntityTypeTextUrl":
@@ -704,7 +712,8 @@ function handleErrorMessage(code, message) {
             || message === "Can't get viewers of incoming messages"
             || message === "Message has no viewers"
             || message === "Chat is too big"
-            || message === "Not enough rights to get scheduled messages") {
+            || message === "Not enough rights to get scheduled messages"
+            || message === "Need administrator rights in the channel chat") {
         // "Can't get viewers of incoming messages" / "Message has no viewers":
         // errori benigni di getMessageViewers (feature 👁) dove i "visti" non
         // esistono (chat private, messaggi non idonei). Nessun toast (#12).
@@ -713,6 +722,10 @@ function handleErrorMessage(code, message) {
         // lo supportano — es. gruppi grandi (MSG_ID_INVALID) e canali, dove chi
         // ha messo la reaction è anonimo/non elencabile (BROADCAST_FORBIDDEN).
         // Le reaction funzionano comunque; qui evitiamo solo il toast grezzo.
+        // "Need administrator rights in the channel chat": errore benigno che TDLib
+        // emette a volte all'avvio per azioni di background (es. mark-as-read / fetch)
+        // su canali dove l'utente non è amministratore; l'app funziona regolarmente,
+        // niente toast all'apertura.
         return;
     }
     if (message === "USER_ALREADY_PARTICIPANT") {

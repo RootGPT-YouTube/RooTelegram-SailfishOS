@@ -10,20 +10,15 @@
 // Testo libero (non passa da qsTr: i .pragma library non hanno contesto di
 // traduzione). Scrivilo nella lingua che preferisci.
 
-var version = "2.4";
+var version = "2.5";
 
 var changelog = [
-    "Ripristinata la voce «Modifica» sui propri messaggi: era sparita per molti utenti (anche nei gruppi dove non sei amministratore).",
-    "Nuova voce «Info messaggio» nel menù del messaggio: data completa, mittente, inoltro, visualizzazioni e altri dettagli. Rimosso il vecchio tap sulla data/ora.",
-    "Risolti i messaggi che a volte ricomparivano come «bozze» dopo una modifica, soprattutto nei gruppi.",
-    "Storie: dalla lista di chi ha messo «Mi piace»/visualizzato ora puoi aprire il profilo dell’utente.",
-    "Nuova sezione «Chat archiviate» (Impostazioni → Memoria): archivia o disarchivia una chat con la pressione prolungata.",
-    "Tema Silica: titoli e testi (come l’intestazione delle info chat/gruppo/canale) seguono ora i colori dell’ambiance scelta, niente più arancione fisso.",
-    "Tema Silica: titolo «RooTelegram» in alto in grassetto corsivo e più grande; nomi delle chat leggermente più compatti.",
-    "Pulsante Play su GIF e video più visibile: ora si adatta ai temi chiari e scuri.",
-    "Link e nomi utente colorati in base al tema: rossi sui temi scuri, blu sui temi chiari.",
-    "Storie: toccando la notifica di una storia si apre direttamente la pagina Storie.",
-    "Storie: un pallino verde accanto a «Storie» segnala quando ci sono storie non ancora viste."
+    "Traduzioni complete in polacco (Polski), russo (Русский) e francese (Français). Lingue ora supportate: IT, EN, DE, PL, RU, FR.",
+    "Tema Silica: nuovo brand R∞Telegram, menu del titolo allineato a destra in stile ContextMenu nativo, e nuovo indicatore di connessione nella home — icona antenna + pallino tri-stato (verde = connesso, solo pallino senza descrizione; ambra lampeggiante = connessione in corso/instabile; rosso = nessuna rete). Per gli stati ambra e rosso la descrizione compare accanto al pallino. Icona e testi seguono il colore dell'ambiance.",
+    "Tap-to-copy sul testo mono: toccando un blocco mono lo si copia negli appunti, come su Telegram.",
+    "Consumo RAM: impostato il parametro TDLib message_unload_delay (60 s) — i messaggi delle chat chiuse vengono scaricati dalla memoria e ricaricati dal database su disco alla riapertura.",
+    "Fix bozze fantasma: le ChatPage non in primo piano non salvano più la propria bozza alla chiusura/swipe-close dell'app (guard su onActiveChanged e onDestruction), evitando bozze che comparivano in una chat diversa.",
+    "Soppresso il messaggio d'errore \"Need administrator rights in the channel chat\" che a volte compariva all'avvio per azioni in background su canali dove non si è amministratori."
 ];
 
-var message = "Novità: tocca la notifica di una storia per aprire subito le Storie, e quando ci sono storie non viste compare un pallino verde accanto a «Storie» nel menu. Trovi inoltre le Chat archiviate in Impostazioni → Memoria: per archiviare o disarchiviare una chat tienila premuta e scegli «Archivia»/«Disarchivia».";
+var message = "La RAM che cresceva di continuo durante l'uso (fino a superare 1 GB) era causata da TDLib: teneva in memoria i messaggi di tutte le chat aperte nella sessione, senza liberarli mai. Da questa versione viene impostato message_unload_delay — 60 secondi dopo aver chiuso una chat, i suoi messaggi vengono scaricati dalla RAM (e ricaricati al volo dal database su disco se la riapri). Così il consumo non sale più senza fermarsi.";

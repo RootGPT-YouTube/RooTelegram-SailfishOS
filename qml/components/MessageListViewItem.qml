@@ -289,6 +289,32 @@ ListItem {
         return true;
     }
 
+    // Intercetta i link "rtcopy://OFFSET/LENGTH" emessi dai render dei blocchi
+    // monospace (code/pre/preCode): al tap copia in clipboard quella sottostringa
+    // del testo del messaggio (come Telegram). Gli offset TDLib sono in unità UTF-16,
+    // coerenti con String.substring di JS. Ritorna true se gestito.
+    function handleCopyLink(link) {
+        if (typeof link !== "string" || link.indexOf("rtcopy://") !== 0) {
+            return false;
+        }
+        var parts = link.substring("rtcopy://".length).split("/");
+        if (parts.length < 2) {
+            return true;
+        }
+        var offset = parseInt(parts[0], 10);
+        var length = parseInt(parts[1], 10);
+        var ft = myMessage.content.text ? myMessage.content.text
+               : (myMessage.content.caption ? myMessage.content.caption : null);
+        if (ft && typeof ft.text === "string") {
+            var code = ft.text.substring(offset, offset + length);
+            if (code.length > 0) {
+                Clipboard.text = code;
+                appNotification.show(qsTr("Code copied to clipboard"));
+            }
+        }
+        return true;
+    }
+
     // Cancellazione (#1). In TDLib 1.8.62 le capability (can_be_deleted_for_all_users
     // / only_for_self) NON sono più inline nel messaggio: si ottengono async con
     // getMessageProperties. Al tap su "Cancella" chiediamo le proprietà; alla
@@ -1469,6 +1495,9 @@ ListItem {
                     textFormat: Text.RichText
                     onLinkActivated: {
                         if (messageListItem.handleSpoilerLink(link)) {
+                            return;
+                        }
+                        if (messageListItem.handleCopyLink(link)) {
                             return;
                         }
                         var chatCommand = Functions.handleLink(link);

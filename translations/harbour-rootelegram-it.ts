@@ -1778,7 +1778,7 @@
     </message>
     <message>
         <source>Updating content...</source>
-        <translation>Aggiorna contenuti...</translation>
+        <translation>Aggiornamento contenuti...</translation>
     </message>
     <message numerus="yes">
         <source>unread messages</source>
@@ -2453,6 +2453,10 @@
         <source>Message info</source>
         <translation>Info messaggio</translation>
     </message>
+    <message>
+        <source>Code copied to clipboard</source>
+        <translation>Codice copiato negli appunti</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -2677,7 +2681,7 @@
     </message>
     <message>
         <source>Updating content...</source>
-        <translation>Aggiorna contenuti...</translation>
+        <translation>Aggiornamento contenuti...</translation>
     </message>
     <message>
         <source>Loading chat list...</source>

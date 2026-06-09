@@ -107,6 +107,8 @@ IT = {
     "Someone": "Qualcuno",
     # Copia testo parziale del messaggio
     "Selected text copied to clipboard": "Testo selezionato copiato negli appunti",
+    # 2.5: tap-to-copy sui blocchi mono
+    "Code copied to clipboard": "Codice copiato negli appunti",
     # Videochiamate (stub)
     "Video call": "Videochiamata",
     "Video calls are not available in this build yet.": "Le videochiamate non sono ancora disponibili in questa versione.",
@@ -380,6 +382,8 @@ DE = {
     "Someone": "Jemand",
     # Teilweises Kopieren von Nachrichtentext
     "Selected text copied to clipboard": "Markierter Text in die Zwischenablage kopiert",
+    # 2.5: Tap-to-copy bei Mono-Blöcken
+    "Code copied to clipboard": "Code in die Zwischenablage kopiert",
     # Videoanrufe (Stub)
     "Video call": "Videoanruf",
     "Video calls are not available in this build yet.": "Videoanrufe sind in dieser Version noch nicht verfügbar.",

@@ -2453,6 +2453,10 @@
         <source>Message info</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Code copied to clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>

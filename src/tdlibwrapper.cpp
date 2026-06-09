@@ -148,6 +148,13 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
 
     this->setLogVerbosityLevel();
     this->setOptionInteger("notification_group_count_max", 5);
+    // ANTI-RAM (causa principale del consumo crescente): dopo closeChat, TDLib
+    // scarica i messaggi di quella chat dalla RAM solo se message_unload_delay è
+    // impostato a un valore positivo (e use_message_database è attivo, cosa già
+    // vera). Senza, i messaggi caricati restano in heap per tutta la sessione →
+    // crescita ~13 MB/min che non torna mai giù (misurato via smaps_rollup). 60s
+    // è un default prudente: riapri spesso la stessa chat → ricarica dal DB su disco.
+    this->setOptionInteger("message_unload_delay", 60);
 }
 
 TDLibWrapper::~TDLibWrapper()

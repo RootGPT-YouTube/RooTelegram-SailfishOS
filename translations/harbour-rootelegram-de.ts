@@ -2455,6 +2455,10 @@ Nachrichten</numerusform>
         <source>Message info</source>
         <translation>Nachrichteninfo</translation>
     </message>
+    <message>
+        <source>Code copied to clipboard</source>
+        <translation>Code in die Zwischenablage kopiert</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
