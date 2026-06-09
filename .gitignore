@@ -77,3 +77,6 @@ _ffmpeg_build/
 /debugsources.list
 /rpm/*.tar.bz2
 /debuglinks.list
+
+# Stamp del guard anti-stale APP_VERSION in build-rpm.sh (build state, non versionare)
+.last_built_app_version
