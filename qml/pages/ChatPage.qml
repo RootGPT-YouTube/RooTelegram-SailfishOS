@@ -613,6 +613,12 @@ Page {
     }
 
     function sendMessage(sendDate) {
+        // La posizione è ancora in fase di rilevamento: non c'è un fix da inviare
+        // (locationData null → invio fallirebbe). Avvisa e attendi il fix.
+        if (attachmentPreviewRow.isLocation && !attachmentPreviewRow.locationData) {
+            appNotification.show(qsTr("Still obtaining your position, please wait…"));
+            return;
+        }
         chatPage.stopTyping();   // #17: ferma "sta scrivendo" all'invio
         var customEmojiEntities = getComposerCustomEmojiEntitiesForSend();
         tdLibWrapper.setPendingScheduledSendDate(sendDate ? Math.floor(sendDate) : 0);
@@ -3257,6 +3263,10 @@ Page {
                                 height: width
                                 icon.source: "image://theme/icon-m-image"
                                 onClicked: {
+                                    if (!appSettings.isPermissionGranted("pictures")) {
+                                        appNotification.show(qsTr("Image access is turned off in RooTelegram settings."));
+                                        return;
+                                    }
                                     var picker = pageStack.push("Sailfish.Pickers.MultiImagePickerDialog", {
                                         allowedOrientations: chatPage.allowedOrientations
                                     })
@@ -3324,6 +3334,10 @@ Page {
                                 height: width
                                 icon.source: "image://theme/icon-m-video"
                                 onClicked: {
+                                    if (!appSettings.isPermissionGranted("videos")) {
+                                        appNotification.show(qsTr("Video access is turned off in RooTelegram settings."));
+                                        return;
+                                    }
                                     var picker = pageStack.push("Sailfish.Pickers.VideoPickerPage", {
                                         allowedOrientations: chatPage.allowedOrientations
                                     })
@@ -3349,6 +3363,10 @@ Page {
                                 }
                                 highlighted: down || voiceNoteOverlayLoader.active
                                 onClicked: {
+                                    if (!appSettings.isPermissionGranted("microphone")) {
+                                        appNotification.show(qsTr("Microphone is turned off in RooTelegram settings."));
+                                        return;
+                                    }
                                     voiceNoteOverlayLoader.active = !voiceNoteOverlayLoader.active;
                                     stickerPickerLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
@@ -3361,6 +3379,10 @@ Page {
                                 height: width
                                 icon.source: "image://theme/icon-m-document"
                                 onClicked: {
+                                    if (!appSettings.isPermissionGranted("documents")) {
+                                        appNotification.show(qsTr("File access is turned off in RooTelegram settings."));
+                                        return;
+                                    }
                                     var picker = pageStack.push("Sailfish.Pickers.FilePickerPage", {
                                         allowedOrientations: chatPage.allowedOrientations
                                     })
@@ -3449,7 +3471,7 @@ Page {
                                 }
                             }
                             IconButton {
-                                visible: rootelegramUtils.supportsGeoLocation() && newMessageTextField.text === ""
+                                visible: rootelegramUtils.supportsGeoLocation() && appSettings.isPermissionGranted("location") && newMessageTextField.text === ""
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
                                 icon.source: "image://theme/icon-m-location"
@@ -3478,6 +3500,10 @@ Page {
                                     height: Theme.iconSizeMedium
                                 }
                                 onClicked: {
+                                    if (!appSettings.isPermissionGranted("contacts")) {
+                                        appNotification.show(qsTr("Contacts are turned off in RooTelegram settings."));
+                                        return;
+                                    }
                                     attachmentOptionsFlickable.isNeeded = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
@@ -3782,7 +3808,10 @@ Page {
 
                     Row {
                         id: attachmentPreviewRow
-                        visible: (!!locationData || !!fileProperties || isVoiceNote) && !inlineQuery.userNameIsValid
+                        // isLocation incluso: la barra deve comparire SUBITO con
+                        // "ottengo posizione…", non solo quando arriva il fix GPS
+                        // (locationData si popola dopo, all'arrivo della posizione).
+                        visible: (!!locationData || isLocation || !!fileProperties || isVoiceNote) && !inlineQuery.userNameIsValid
                         spacing: Theme.paddingMedium
                         width: parent.width
                         layoutDirection: Qt.RightToLeft

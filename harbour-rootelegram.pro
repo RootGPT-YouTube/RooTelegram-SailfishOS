@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.5
+RT_APP_VERSION = 2.6
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -65,7 +65,9 @@ SOURCES += src/harbour-rootelegram.cpp \
     src/tdlibreceiver.cpp \
     src/tdlibwrapper.cpp \
     src/textfiltermodel.cpp \
-    src/tgsplugin.cpp
+    src/tgsplugin.cpp \
+    src/qrimageprovider.cpp \
+    src/qrcodegen/qrcodegen.cpp
 
 DISTFILES += qml/harbour-rootelegram.qml \
     qml/components/AudioPreview.qml \
@@ -205,7 +207,8 @@ TRANSLATIONS += translations/harbour-rootelegram-it.ts \
                 translations/harbour-rootelegram-de.ts \
                 translations/harbour-rootelegram-pl.ts \
                 translations/harbour-rootelegram-ru.ts \
-                translations/harbour-rootelegram-fr.ts
+                translations/harbour-rootelegram-fr.ts \
+                translations/harbour-rootelegram-sk.ts
 
 equals(QT_ARCH, arm) {
     message(Building ARM)
@@ -262,6 +265,11 @@ exists($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}) {
 licenses.files = $$PWD/LICENSE $$PWD/NOTICE
 licenses.path = /usr/share/$${TARGET}/licenses
 INSTALLS += licenses
+
+# QR Code generator library (Nayuki, MIT): compilata nell'app per il login QR.
+qrcodegenlicense.files = $$PWD/src/qrcodegen/LICENSE
+qrcodegenlicense.path = /usr/share/$${TARGET}/licenses/qrcodegen
+INSTALLS += qrcodegenlicense
 
 
 gui.files = qml
@@ -338,7 +346,9 @@ HEADERS += \
     src/tdlibsecrets.h \
     src/tdlibwrapper.h \
     src/textfiltermodel.h \
-    src/tgsplugin.h
+    src/tgsplugin.h \
+    src/qrimageprovider.h \
+    src/qrcodegen/qrcodegen.hpp
 
 # https://github.com/Samsung/rlottie.git
 

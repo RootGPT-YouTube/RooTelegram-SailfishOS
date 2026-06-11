@@ -121,3 +121,9 @@ SOURCE        : https://github.com/jdecked/twemoji
 COMPONENT     : OpenStreetMap Nominatim (reverse geocoding web service)
 LICENSE       : ODbL (data) — used as a network service, not bundled
 SOURCE        : https://wiki.openstreetmap.org/wiki/Nominatim
+
+--------------------------------------------------------------------------------
+COMPONENT     : QR Code generator library (C++) — used for QR-code login
+LICENSE       : MIT License
+COPYRIGHT     : Copyright (c) Project Nayuki
+SOURCE        : https://www.nayuki.io/page/qr-code-generator-library

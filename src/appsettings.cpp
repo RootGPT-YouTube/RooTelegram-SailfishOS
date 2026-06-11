@@ -47,6 +47,8 @@ namespace {
     const QString KEY_STORY_POST_TO_PROFILE("storyPostToProfile");
     const QString KEY_STORY_PRIVACY_MODE("storyPrivacyMode");
     const QString KEY_USE_NEON_THEME("useNeonTheme");
+    const QString KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE("keepCurrentChatOnMinimize");
+    const QString KEY_PERMISSION_PREFIX("permissions/");
     const QString KEY_LAST_SEEN_VERSION("lastSeenVersion");
     const QString KEY_STORY_CUSTOM_AUDIENCE_USER_IDS("storyCustomAudienceUserIds");
     // Chiave legacy: la prima iterazione del feature usava lo stesso storage per
@@ -115,6 +117,36 @@ void AppSettings::setUseNeonTheme(bool useNeonTheme)
         LOG(KEY_USE_NEON_THEME << useNeonTheme);
         settings.setValue(KEY_USE_NEON_THEME, useNeonTheme);
         emit useNeonThemeChanged();
+    }
+}
+
+bool AppSettings::keepCurrentChatOnMinimize() const
+{
+    return settings.value(KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE, false).toBool();
+}
+
+void AppSettings::setKeepCurrentChatOnMinimize(bool enable)
+{
+    if (this->keepCurrentChatOnMinimize() != enable) {
+        LOG(KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE << enable);
+        settings.setValue(KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE, enable);
+        emit keepCurrentChatOnMinimizeChanged();
+    }
+}
+
+bool AppSettings::isPermissionGranted(const QString &permission) const
+{
+    // Default true: chi non apre la pagina permessi mantiene il comportamento
+    // storico (tutto concesso, come dal sandbox Sailjail).
+    return settings.value(KEY_PERMISSION_PREFIX + permission, true).toBool();
+}
+
+void AppSettings::setPermissionGranted(const QString &permission, bool granted)
+{
+    if (this->isPermissionGranted(permission) != granted) {
+        LOG(KEY_PERMISSION_PREFIX + permission << granted);
+        settings.setValue(KEY_PERMISSION_PREFIX + permission, granted);
+        emit permissionsChanged(permission, granted);
     }
 }
 

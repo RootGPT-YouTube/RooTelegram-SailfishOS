@@ -45,6 +45,17 @@ AccordionItem {
 
             TextSwitch {
                 width: parent.columnWidth
+                checked: appSettings.keepCurrentChatOnMinimize
+                text: qsTr("Stay in chat when closing the app")
+                description: qsTr("When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn't lost when the app closes.")
+                automaticCheck: false
+                onClicked: {
+                    appSettings.keepCurrentChatOnMinimize = !checked
+                }
+            }
+
+            TextSwitch {
+                width: parent.columnWidth
                 checked: appSettings.focusTextAreaOnChatOpen
                 text: qsTr("Focus text input on chat open")
                 description: qsTr("Focus the text input area when entering a chat")

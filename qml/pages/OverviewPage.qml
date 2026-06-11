@@ -878,13 +878,13 @@ Page {
                     id: neonCore
                     anchors.centerIn: parent
                     // Silica: "R∞Telegram" (col simbolo dell'infinito come il Neon) in
-                    // grassetto+corsivo, allineato a destra e +1 "misura" (1 step di
-                    // font) più grande del Large. Neon: "R∞Telegram" stilizzato invariato.
-                    // Il colore in Silica segue il tema SFOS (Theme.highlightColor).
+                    // grassetto+corsivo, allineato a destra, di misura Large (un gradino
+                    // di font più piccolo di prima, su richiesta). Neon: "R∞Telegram"
+                    // stilizzato invariato. Il colore in Silica segue il tema SFOS.
                     text: "R∞Telegram"
                     font.pixelSize: overviewPage.neon
                                     ? Theme.fontSizeHuge
-                                    : (Theme.fontSizeLarge + (Theme.fontSizeLarge - Theme.fontSizeMedium))
+                                    : Theme.fontSizeLarge
                     font.italic: true
                     font.bold: !overviewPage.neon
                     color: overviewPage.neon ? "#fff3e6" : Theme.highlightColor

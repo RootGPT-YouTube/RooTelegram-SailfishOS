@@ -174,6 +174,7 @@ public:
     // Direct TDLib functions
     Q_INVOKABLE void sendRequest(const QVariantMap &requestObject);
     Q_INVOKABLE void setAuthenticationPhoneNumber(const QString &phoneNumber);
+    Q_INVOKABLE void requestQrCodeAuthentication();
     Q_INVOKABLE void setAuthenticationCode(const QString &authenticationCode);
     Q_INVOKABLE void setAuthenticationPassword(const QString &authenticationPassword);
     Q_INVOKABLE void registerUser(const QString &firstName, const QString &lastName);

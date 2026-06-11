@@ -107,6 +107,14 @@
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -320,6 +328,97 @@
     </message>
     <message>
         <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>AppPermissionsPage</name>
+    <message>
+        <source>App permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Turn off the resources you don&apos;t want RooTelegram to use. This only blocks the app internally — to fully revoke a system permission use the SailfishOS Settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sensors and personal data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Safe to turn off: only the related feature stops working, the rest of the app keeps running normally.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attaching your location and inline bots that request it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video during calls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Voice messages and audio during calls.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Synchronizing your address book with Telegram.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Photos, videos and files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Turn off with caution: these are needed to attach and send media. With one off you won&apos;t be able to pick that kind of file to send.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Images</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Picking photos to send or to set as profile/story.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Videos</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Picking videos to send or to post as a story.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Documents and files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Picking arbitrary files to send as documents.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>System permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internet access and other low-level permissions are required for the app to work at all and are managed by SailfishOS. To revoke them, open the system Settings → Apps → RooTelegram.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -959,6 +1058,10 @@
         <source>Block User</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1566,6 +1669,30 @@
         <source>is typing…</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Microphone is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Still obtaining your position, please wait…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1893,6 +2020,10 @@
     </message>
     <message>
         <source>Some permission changes were rejected by Telegram.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Telegram doesn&apos;t allow granting this permission to all members in this group.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2231,6 +2362,30 @@
         <source>About RooTelegram</source>
         <translation>About RooTelegram</translation>
     </message>
+    <message>
+        <source>— or —</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Log in by QR code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Scan this QR code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>On a phone already logged into Telegram, open Settings → Devices → Link Desktop Device and scan this code.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Generating QR code…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use phone number instead</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageAudio</name>
@@ -2263,6 +2418,10 @@
     </message>
     <message>
         <source>Add to contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2596,6 +2755,10 @@
     </message>
     <message>
         <source>No contacts found.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3807,6 +3970,14 @@
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsAppearance</name>
@@ -4001,6 +4172,14 @@
         <source>Notify when someone reacts to one of your messages.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Stay in chat when closing the app</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsConnection</name>
@@ -4180,6 +4359,18 @@
         <source>Everybody except</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>App permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Manage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose which device resources (location, camera, microphone, contacts, files) RooTelegram is allowed to use.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsSession</name>
@@ -4333,6 +4524,10 @@
     </message>
     <message>
         <source>Synchronize Contacts with Telegram</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4670,6 +4865,14 @@
     </message>
     <message>
         <source>Custom audience (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Video access is turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5524,6 +5727,10 @@
     <message>
         <source>Video not
 available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Camera is turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -10,15 +10,18 @@
 // Testo libero (non passa da qsTr: i .pragma library non hanno contesto di
 // traduzione). Scrivilo nella lingua che preferisci.
 
-var version = "2.5";
+var version = "2.6";
 
 var changelog = [
-    "Traduzioni complete in polacco (Polski), russo (Русский) e francese (Français). Lingue ora supportate: IT, EN, DE, PL, RU, FR.",
-    "Tema Silica: nuovo brand R∞Telegram, menu del titolo allineato a destra in stile ContextMenu nativo, e nuovo indicatore di connessione nella home — icona antenna + pallino tri-stato (verde = connesso, solo pallino senza descrizione; ambra lampeggiante = connessione in corso/instabile; rosso = nessuna rete). Per gli stati ambra e rosso la descrizione compare accanto al pallino. Icona e testi seguono il colore dell'ambiance.",
-    "Tap-to-copy sul testo mono: toccando un blocco mono lo si copia negli appunti, come su Telegram.",
-    "Consumo RAM: impostato il parametro TDLib message_unload_delay (60 s) — i messaggi delle chat chiuse vengono scaricati dalla memoria e ricaricati dal database su disco alla riapertura.",
-    "Fix bozze fantasma: le ChatPage non in primo piano non salvano più la propria bozza alla chiusura/swipe-close dell'app (guard su onActiveChanged e onDestruction), evitando bozze che comparivano in una chat diversa.",
-    "Soppresso il messaggio d'errore \"Need administrator rights in the channel chat\" che a volte compariva all'avvio per azioni in background su canali dove non si è amministratori."
+    "Accesso tramite QR code: oltre al numero + SMS, ora puoi accedere scansionando un codice QR da un dispositivo già connesso a Telegram (Impostazioni → Dispositivi → Collega dispositivo). Utile soprattutto su un secondo telefono.",
+    "Nuova pagina \"Permessi dell'app\" in Impostazioni → Privacy: attiva o disattiva singolarmente l'accesso a Posizione, Fotocamera, Microfono, Contatti, Immagini, Video e File. È un controllo interno all'app, diviso per livello di rischio.",
+    "Nuova opzione \"Resta nella chat alla chiusura dell'app\" in Impostazioni → Comportamento: riaprendo l'app ritrovi la chat aperta invece di tornare alla home.",
+    "Traduzione completa in slovacco (Slovenčina), grazie a okruhliak. Lingue ora supportate: IT, EN, DE, PL, RU, FR, SK.",
+    "Consumo RAM: la memoria liberata chiudendo le chat e mettendo l'app in background viene ora restituita al sistema, invece di restare occupata.",
+    "Tema Silica: la scritta R∞Telegram nella home è di una misura più piccola.",
+    "Correzione: l'allegato Posizione ora mostra subito \"ottengo posizione…\" mentre cerca il GPS (prima, al chiuso, non dava alcun riscontro).",
+    "Correzione: layout della pagina di creazione sondaggi (il pulsante non si sovrappone più alla domanda).",
+    "Correzione: i permessi di gruppo \"Modifica info\" e \"Fissa messaggi\" mostrano un messaggio chiaro quando Telegram non li consente per tutti i membri."
 ];
 
-var message = "La RAM che cresceva di continuo durante l'uso (fino a superare 1 GB) era causata da TDLib: teneva in memoria i messaggi di tutte le chat aperte nella sessione, senza liberarli mai. Da questa versione viene impostato message_unload_delay — 60 secondi dopo aver chiuso una chat, i suoi messaggi vengono scaricati dalla RAM (e ricaricati al volo dal database su disco se la riapri). Così il consumo non sale più senza fermarsi.";
+var message = "Due grandi novità: l'accesso tramite QR code (affianca il classico numero + SMS, comodo su un secondo dispositivo) e una nuova pagina \"Permessi dell'app\" in Impostazioni → Privacy, dove puoi negare a RooTelegram l'accesso a fotocamera, microfono, posizione, contatti e file, voce per voce. Inoltre la RAM rientra meglio quando chiudi le chat o metti l'app in background.";

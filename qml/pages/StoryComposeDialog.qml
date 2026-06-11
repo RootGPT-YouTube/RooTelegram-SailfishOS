@@ -95,6 +95,10 @@ Page {
     }
 
     function choosePhoto() {
+        if (!appSettings.isPermissionGranted("pictures")) {
+            appNotification.show(qsTr("Image access is turned off in RooTelegram settings."));
+            return;
+        }
         var picker = pageStack.push("Sailfish.Pickers.ImagePickerPage");
         picker.selectedContentPropertiesChanged.connect(function() {
             if (picker.selectedContentProperties && picker.selectedContentProperties.filePath) {
@@ -110,6 +114,10 @@ Page {
     }
 
     function chooseVideo() {
+        if (!appSettings.isPermissionGranted("videos")) {
+            appNotification.show(qsTr("Video access is turned off in RooTelegram settings."));
+            return;
+        }
         var picker = pageStack.push("Sailfish.Pickers.VideoPickerPage");
         picker.selectedContentPropertiesChanged.connect(function() {
             if (picker.selectedContentProperties && picker.selectedContentProperties.filePath) {

@@ -332,6 +332,19 @@ void TDLibWrapper::setAuthenticationPhoneNumber(const QString &phoneNumber)
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::requestQrCodeAuthentication()
+{
+    // Login alternativo via QR: TDLib passa allo stato
+    // authorizationStateWaitOtherDeviceConfirmation con un "link"
+    // (tg://login?token=...) da mostrare come QR. Affianca il login via SMS,
+    // non lo sostituisce: si può invocare allo stato WaitPhoneNumber.
+    LOG("Requesting QR code authentication");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "requestQrCodeAuthentication");
+    requestObject.insert("other_user_ids", QVariantList());
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::acceptVoiceCall(qlonglong callId, bool isVideo)
 {
     if (callId <= 0) {

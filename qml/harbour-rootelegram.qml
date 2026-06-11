@@ -691,7 +691,15 @@ ApplicationWindow
             IconButton {
                 icon.source: "image://theme/icon-m-video"
                 icon.color: callScreen.videoEnabled ? Theme.primaryColor : Theme.secondaryColor
-                onClicked: callScreen.toggleVideo()
+                onClicked: {
+                    // Gate soft fotocamera: se l'utente l'ha disattivata in
+                    // Impostazioni → Privacy, non attiviamo il video.
+                    if (!callScreen.videoEnabled && !appSettings.isPermissionGranted("camera")) {
+                        appNotification.show(qsTr("Camera is turned off in RooTelegram settings."));
+                        return;
+                    }
+                    callScreen.toggleVideo();
+                }
             }
             IconButton {
                 icon.source: "image://theme/icon-m-call"
@@ -717,7 +725,10 @@ ApplicationWindow
                                 || s === Qt.ApplicationHidden
                                 || (s === Qt.ApplicationInactive && !appWindow.visible));
             if (isBackground) {
-                if (pageStack && pageStack.depth > 1) {
+                // Se l'utente ha scelto di restare nella chat alla chiusura
+                // (Impostazioni → Comportamento), NON riportiamo lo stack alla
+                // Home: riaprendo l'app si ritrova la chat aperta.
+                if (pageStack && pageStack.depth > 1 && !appSettings.keepCurrentChatOnMinimize) {
                     pageStack.pop(null, PageStackAction.Immediate);
                 }
                 // Libera gli oggetti QML cache-ati dal motore JS: in modalità
@@ -727,6 +738,10 @@ ApplicationWindow
                 // messages, discussion threads, custom emoji) restano e vanno
                 // ripuliti separatamente.
                 gc();
+                // [RAM #1] Restituisci al kernel le pagine heap liberate dai
+                // MessageData (QVariantMap pesanti): senza trim la RSS resta
+                // gonfia anche dopo i delete. Logga anche le istanze vive.
+                chatModel.trimMemory();
             }
         }
     }

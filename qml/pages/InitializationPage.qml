@@ -34,6 +34,14 @@ Page {
         initializationPage.loading = false;
 
         switch (tdLibWrapper.authorizationState) {
+        case TelegramAPI.WaitOtherDeviceConfirmation:
+            initializationPage.loading = false;
+            welcomeColumn.visible = false;
+            qrColumn.visible = true;
+            enterPinColumn.visible = false;
+            enterPasswordColumn.visible = false;
+            waitRegistrationColumn.visible = false;
+            break;
         case TelegramAPI.WaitCode:
             initializationPage.loading = false;
             welcomeColumn.visible = false;
@@ -66,8 +74,26 @@ Page {
         target: tdLibWrapper
         onAuthorizationStateChanged: {
             switch (tdLibWrapper.authorizationState) {
+            case TelegramAPI.WaitPhoneNumber:
+                // QR annullato/scaduto lato TDLib: torniamo alla schermata iniziale.
+                initializationPage.loading = false;
+                qrColumn.visible = false;
+                welcomeColumn.visible = true;
+                enterPinColumn.visible = false;
+                enterPasswordColumn.visible = false;
+                waitRegistrationColumn.visible = false;
+                break;
+            case TelegramAPI.WaitOtherDeviceConfirmation:
+                initializationPage.loading = false;
+                welcomeColumn.visible = false;
+                qrColumn.visible = true;
+                enterPinColumn.visible = false;
+                enterPasswordColumn.visible = false;
+                waitRegistrationColumn.visible = false;
+                break;
             case TelegramAPI.WaitCode:
                 initializationPage.loading = false;
+                qrColumn.visible = false;
                 enterPinColumn.visible = true;
                 enterPinField.focus = true
                 enterPasswordColumn.visible = false;
@@ -75,12 +101,14 @@ Page {
                 break;
             case TelegramAPI.WaitPassword:
                 initializationPage.loading = false;
+                qrColumn.visible = false;
                 enterPinColumn.visible = false;
                 enterPasswordColumn.visible = true;
                 waitRegistrationColumn.visible = false;
                 break;
             case TelegramAPI.WaitRegistration:
                 initializationPage.loading = false;
+                qrColumn.visible = false;
                 enterPinColumn.visible = false;
                 enterPasswordColumn.visible = false;
                 waitRegistrationColumn.visible = true;
@@ -185,6 +213,94 @@ Page {
                         initializationPage.loading = true;
                         welcomeColumn.visible = false;
                         tdLibWrapper.setAuthenticationPhoneNumber(phoneNumberTextField.text);
+                    }
+                }
+
+                Label {
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                    color: Theme.secondaryColor
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    text: qsTr("— or —")
+                }
+
+                // Login alternativo via QR: non sostituisce il numero+SMS qui
+                // sopra, lo affianca. Utile su un secondo dispositivo già loggato.
+                NeonButton {
+                    text: qsTr("Log in by QR code")
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    onClicked: {
+                        initializationPage.loading = true;
+                        welcomeColumn.visible = false;
+                        tdLibWrapper.requestQrCodeAuthentication();
+                    }
+                }
+            }
+
+            Column {
+                id: qrColumn
+                width: parent.width
+                spacing: Theme.paddingLarge
+
+                Behavior on opacity { FadeAnimation {} }
+                opacity: visible ? 1.0 : 0.0
+                visible: false
+
+                readonly property string qrLink: (initializationPage.authorizationStateData
+                                                   && initializationPage.authorizationStateData.authorization_state
+                                                   && initializationPage.authorizationStateData.authorization_state.link)
+                                                  ? initializationPage.authorizationStateData.authorization_state.link : ""
+
+                InfoLabel {
+                    text: qsTr("Scan this QR code")
+                }
+
+                Label {
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    wrapMode: Text.WordWrap
+                    color: Theme.secondaryHighlightColor
+                    font.pixelSize: Theme.fontSizeSmall
+                    text: qsTr("On a phone already logged into Telegram, open Settings → Devices → Link Desktop Device and scan this code.")
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: Math.min(Screen.width, Screen.height) * 0.7
+                    height: width
+                    radius: Theme.paddingMedium
+                    color: "white"
+                    visible: qrColumn.qrLink !== ""
+                    Image {
+                        anchors.centerIn: parent
+                        width: parent.width - 2 * Theme.paddingMedium
+                        height: width
+                        smooth: false
+                        cache: false
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        source: qrColumn.qrLink !== "" ? "image://qr/" + Qt.btoa(qrColumn.qrLink) : ""
+                    }
+                }
+
+                BusyLabel {
+                    text: qsTr("Generating QR code…")
+                    running: qrColumn.qrLink === ""
+                    visible: running
+                }
+
+                NeonButton {
+                    text: qsTr("Use phone number instead")
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                    }
+                    onClicked: {
+                        qrColumn.visible = false;
+                        welcomeColumn.visible = true;
                     }
                 }
             }

@@ -107,6 +107,14 @@
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
         <translation>Dla zgodności z SailfishOS 5.0/5.1 pakiet dołącza też multimedialne zależności FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) oraz OpenJPEG (BSD-2). Copyright odpowiedni współtwórcy. Pełne teksty licencji znajdują się w /usr/share/harbour-rootelegram/licenses/.</translation>
     </message>
+    <message>
+        <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
+        <translation>Tłumaczenie słowackie: okruhliak. Dziękujemy wszystkim, którzy pomagają tłumaczyć RooTelegram!</translation>
+    </message>
+    <message>
+        <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
+        <translation>Ten projekt korzysta z biblioteki QR Code generator autorstwa Project Nayuki do logowania kodem QR. Dziękujemy za udostępnienie jej na warunkach licencji MIT!</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -322,6 +330,97 @@
     <message>
         <source>Delete</source>
         <translation>Usuń</translation>
+    </message>
+</context>
+<context>
+    <name>AppPermissionsPage</name>
+    <message>
+        <source>App permissions</source>
+        <translation>Uprawnienia aplikacji</translation>
+    </message>
+    <message>
+        <source>Turn off the resources you don&apos;t want RooTelegram to use. This only blocks the app internally — to fully revoke a system permission use the SailfishOS Settings.</source>
+        <translation>Wyłącz zasoby, z których RooTelegram nie ma korzystać. To blokuje tylko wewnątrz aplikacji — aby całkowicie cofnąć uprawnienie systemowe, użyj Ustawień SailfishOS.</translation>
+    </message>
+    <message>
+        <source>Sensors and personal data</source>
+        <translation>Czujniki i dane osobowe</translation>
+    </message>
+    <message>
+        <source>Safe to turn off: only the related feature stops working, the rest of the app keeps running normally.</source>
+        <translation>Bezpieczne do wyłączenia: przestaje działać tylko powiązana funkcja, reszta aplikacji działa normalnie.</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation>Lokalizacja</translation>
+    </message>
+    <message>
+        <source>Attaching your location and inline bots that request it.</source>
+        <translation>Załączanie Twojej lokalizacji oraz boty inline, które jej wymagają.</translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation>Aparat</translation>
+    </message>
+    <message>
+        <source>Video during calls.</source>
+        <translation>Wideo podczas połączeń.</translation>
+    </message>
+    <message>
+        <source>Microphone</source>
+        <translation>Mikrofon</translation>
+    </message>
+    <message>
+        <source>Voice messages and audio during calls.</source>
+        <translation>Wiadomości głosowe i dźwięk podczas połączeń.</translation>
+    </message>
+    <message>
+        <source>Contacts</source>
+        <translation>Kontakty</translation>
+    </message>
+    <message>
+        <source>Synchronizing your address book with Telegram.</source>
+        <translation>Synchronizacja książki adresowej z Telegramem.</translation>
+    </message>
+    <message>
+        <source>Photos, videos and files</source>
+        <translation>Zdjęcia, filmy i pliki</translation>
+    </message>
+    <message>
+        <source>Turn off with caution: these are needed to attach and send media. With one off you won&apos;t be able to pick that kind of file to send.</source>
+        <translation>Wyłączaj ostrożnie: są potrzebne do załączania i wysyłania multimediów. Po wyłączeniu nie wybierzesz tego typu pliku do wysłania.</translation>
+    </message>
+    <message>
+        <source>Images</source>
+        <translation>Obrazy</translation>
+    </message>
+    <message>
+        <source>Picking photos to send or to set as profile/story.</source>
+        <translation>Wybieranie zdjęć do wysłania lub ustawienia jako profil/relacja.</translation>
+    </message>
+    <message>
+        <source>Videos</source>
+        <translation>Filmy</translation>
+    </message>
+    <message>
+        <source>Picking videos to send or to post as a story.</source>
+        <translation>Wybieranie filmów do wysłania lub opublikowania jako relacja.</translation>
+    </message>
+    <message>
+        <source>Documents and files</source>
+        <translation>Dokumenty i pliki</translation>
+    </message>
+    <message>
+        <source>Picking arbitrary files to send as documents.</source>
+        <translation>Wybieranie dowolnych plików do wysłania jako dokumenty.</translation>
+    </message>
+    <message>
+        <source>System permissions</source>
+        <translation>Uprawnienia systemowe</translation>
+    </message>
+    <message>
+        <source>Internet access and other low-level permissions are required for the app to work at all and are managed by SailfishOS. To revoke them, open the system Settings → Apps → RooTelegram.</source>
+        <translation>Dostęp do internetu i inne uprawnienia niskiego poziomu są niezbędne do działania aplikacji i są zarządzane przez SailfishOS. Aby je cofnąć, otwórz Ustawienia systemu → Aplikacje → RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -965,6 +1064,10 @@
         <source>Block User</source>
         <translation>Zablokuj użytkownika</translation>
     </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do obrazów jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1580,6 +1683,30 @@
         <source>is typing…</source>
         <translation>pisze…</translation>
     </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do obrazów jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Video access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do filmów jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Microphone is turned off in RooTelegram settings.</source>
+        <translation>Mikrofon jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>File access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do plików jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Still obtaining your position, please wait…</source>
+        <translation>Wciąż ustalam Twoją lokalizację, czekaj…</translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
+        <translation>Kontakty są wyłączone w ustawieniach RooTelegram.</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -1911,6 +2038,10 @@
     <message>
         <source>Some permission changes were rejected by Telegram.</source>
         <translation>Część zmian uprawnień została odrzucona przez Telegram.</translation>
+    </message>
+    <message>
+        <source>Telegram doesn&apos;t allow granting this permission to all members in this group.</source>
+        <translation>Telegram nie pozwala nadać tego uprawnienia wszystkim członkom tej grupy.</translation>
     </message>
 </context>
 <context>
@@ -2248,6 +2379,30 @@
         <source>About RooTelegram</source>
         <translation>O RooTelegram</translation>
     </message>
+    <message>
+        <source>— or —</source>
+        <translation>— lub —</translation>
+    </message>
+    <message>
+        <source>Log in by QR code</source>
+        <translation>Zaloguj się kodem QR</translation>
+    </message>
+    <message>
+        <source>Scan this QR code</source>
+        <translation>Zeskanuj ten kod QR</translation>
+    </message>
+    <message>
+        <source>On a phone already logged into Telegram, open Settings → Devices → Link Desktop Device and scan this code.</source>
+        <translation>Na telefonie już zalogowanym do Telegrama otwórz Ustawienia → Urządzenia → Podłącz urządzenie i zeskanuj ten kod.</translation>
+    </message>
+    <message>
+        <source>Generating QR code…</source>
+        <translation>Generowanie kodu QR…</translation>
+    </message>
+    <message>
+        <source>Use phone number instead</source>
+        <translation>Użyj zamiast tego numeru telefonu</translation>
+    </message>
 </context>
 <context>
     <name>MessageAudio</name>
@@ -2281,6 +2436,10 @@
     <message>
         <source>Add to contacts</source>
         <translation>Dodaj do kontaktów</translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
+        <translation>Kontakty są wyłączone w ustawieniach RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -2620,6 +2779,10 @@
     <message>
         <source>No contacts found.</source>
         <translation>Nie znaleziono kontaktów.</translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
+        <translation>Kontakty są wyłączone w ustawieniach RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -3841,6 +4004,14 @@
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
         <translation>Dla zgodności z SailfishOS 5.0/5.1 pakiet dołącza też multimedialne zależności FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) oraz OpenJPEG (BSD-2). Copyright odpowiedni współtwórcy. Pełne teksty licencji znajdują się w /usr/share/harbour-rootelegram/licenses/.</translation>
     </message>
+    <message>
+        <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
+        <translation>Tłumaczenie słowackie: okruhliak. Dziękujemy wszystkim, którzy pomagają tłumaczyć RooTelegram!</translation>
+    </message>
+    <message>
+        <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
+        <translation>Ten projekt korzysta z biblioteki QR Code generator autorstwa Project Nayuki do logowania kodem QR. Dziękujemy za udostępnienie jej na warunkach licencji MIT!</translation>
+    </message>
 </context>
 <context>
     <name>SettingsAppearance</name>
@@ -4035,6 +4206,14 @@
         <source>Notify when someone reacts to one of your messages.</source>
         <translation>Powiadamiaj, gdy ktoś zareaguje na jedną z Twoich wiadomości.</translation>
     </message>
+    <message>
+        <source>Stay in chat when closing the app</source>
+        <translation>Pozostań w czacie po zamknięciu aplikacji</translation>
+    </message>
+    <message>
+        <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
+        <translation>Po zamknięciu lub zminimalizowaniu aplikacji zachowaj otwarty czat zamiast wracać do ekranu głównego. Zostaw włączone, aby niedokończona wersja robocza nie przepadła przy zamknięciu aplikacji.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsConnection</name>
@@ -4216,6 +4395,18 @@
         <source>Everybody except</source>
         <translation>Wszyscy oprócz</translation>
     </message>
+    <message>
+        <source>App permissions</source>
+        <translation>Uprawnienia aplikacji</translation>
+    </message>
+    <message>
+        <source>Manage</source>
+        <translation>Zarządzaj</translation>
+    </message>
+    <message>
+        <source>Choose which device resources (location, camera, microphone, contacts, files) RooTelegram is allowed to use.</source>
+        <translation>Wybierz, z których zasobów urządzenia (lokalizacja, aparat, mikrofon, kontakty, pliki) może korzystać RooTelegram.</translation>
+    </message>
 </context>
 <context>
     <name>SettingsSession</name>
@@ -4371,6 +4562,10 @@
     <message>
         <source>Synchronize Contacts with Telegram</source>
         <translation>Synchronizuj kontakty z Telegramem</translation>
+    </message>
+    <message>
+        <source>Contacts are turned off in RooTelegram settings.</source>
+        <translation>Kontakty są wyłączone w ustawieniach RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -4714,6 +4909,14 @@
     <message>
         <source>Custom audience (%1)</source>
         <translation>Własna grupa odbiorców (%1)</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do obrazów jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Video access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do filmów jest wyłączony w ustawieniach RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -5572,6 +5775,10 @@
 available</source>
         <translation>Wideo
 niedostępne</translation>
+    </message>
+    <message>
+        <source>Camera is turned off in RooTelegram settings.</source>
+        <translation>Aparat jest wyłączony w ustawieniach RooTelegram.</translation>
     </message>
 </context>
 </TS>

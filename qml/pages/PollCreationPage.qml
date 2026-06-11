@@ -292,14 +292,14 @@ Dialog {
                     }
                 }
             }
-            ButtonLayout {
-                NeonButton {
-                    enabled: pollCreationPage.options.count < 10
-                    text: qsTr("Add an answer")
-                    onClicked: {
-                        pollCreationPage.createNewOption();
-                        validate();
-                    }
+            Item { width: 1; height: Theme.paddingMedium }
+            NeonButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                enabled: pollCreationPage.options.count < 10
+                text: qsTr("Add an answer")
+                onClicked: {
+                    pollCreationPage.createNewOption();
+                    validate();
                 }
             }
             Timer {

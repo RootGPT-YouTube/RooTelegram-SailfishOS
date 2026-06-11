@@ -385,6 +385,16 @@ AccordionItem {
                     pageStack.push(Qt.resolvedUrl("../../pages/BlacklistPage.qml"));
                 }
             }
+
+            ValueButton {
+                width: parent.width
+                label: qsTr("App permissions")
+                value: qsTr("Manage")
+                description: qsTr("Choose which device resources (location, camera, microphone, contacts, files) RooTelegram is allowed to use.")
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("../../pages/AppPermissionsPage.qml"));
+                }
+            }
         }
     }
 }

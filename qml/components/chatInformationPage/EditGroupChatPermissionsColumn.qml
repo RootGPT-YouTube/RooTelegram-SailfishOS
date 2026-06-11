@@ -157,6 +157,12 @@ Column {
     function clearPendingPermissionState() {
         pendingPermissionValues = ({})
     }
+    // Permessi che Telegram NON consente come default "per tutti i membri" in
+    // certi tipi di gruppo (es. forum con Topic): li capa silenziosamente a
+    // false. Per questi mostriamo un messaggio chiaro invece del generico
+    // "rifiutate", e il toggle torna da solo allo stato reale.
+    readonly property var restrictableDefaultKeys: ["can_change_info", "can_pin_messages", "can_invite_users", "can_create_topics"]
+
     function verifyPendingPermissionState(currentPermissions) {
         var pendingKeys = Object.keys(pendingPermissionValues)
         if (pendingKeys.length === 0) {
@@ -164,6 +170,7 @@ Column {
         }
         var checkedCount = 0
         var accepted = true
+        var rejectedKnownOnly = true
         for (var i = 0; i < pendingKeys.length; i += 1) {
             var permissionKey = pendingKeys[i]
             if (typeof currentPermissions[permissionKey] !== "boolean") {
@@ -172,13 +179,21 @@ Column {
             checkedCount += 1
             if (currentPermissions[permissionKey] !== pendingPermissionValues[permissionKey]) {
                 accepted = false
-                break
+                if (restrictableDefaultKeys.indexOf(permissionKey) === -1) {
+                    rejectedKnownOnly = false
+                }
             }
         }
         if (checkedCount === 0) {
             return
         }
-        appNotification.show(accepted ? qsTr("Group permissions updated.") : qsTr("Some permission changes were rejected by Telegram."))
+        if (accepted) {
+            appNotification.show(qsTr("Group permissions updated."))
+        } else if (rejectedKnownOnly) {
+            appNotification.show(qsTr("Telegram doesn't allow granting this permission to all members in this group."))
+        } else {
+            appNotification.show(qsTr("Some permission changes were rejected by Telegram."))
+        }
         clearPendingPermissionState()
     }
 

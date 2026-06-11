@@ -98,7 +98,7 @@ Loader {
         } else {
             queued = false;
             var location = null;
-            if(inlineBotInformation.type.need_location && rootelegramUtils.supportsGeoLocation()) {
+            if(inlineBotInformation.type.need_location && rootelegramUtils.supportsGeoLocation() && appSettings.isPermissionGranted("location")) {
                 rootelegramUtils.startGeoLocationUpdates();
                 if(!attachmentPreviewRow.locationData.latitude) {
                     queued = true;

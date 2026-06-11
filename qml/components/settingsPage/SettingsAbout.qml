@@ -150,6 +150,15 @@ AccordionItem {
                 x: Theme.horizontalPageMargin
                 width: parent.width - (2 * Theme.horizontalPageMargin)
                 wrapMode: Text.Wrap
+                text: qsTr("Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                wrapMode: Text.Wrap
                 text: qsTr("This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!")
                 font.pixelSize: Theme.fontSizeExtraSmall
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -255,6 +264,15 @@ AccordionItem {
                 font.pixelSize: Theme.fontSizeSmall
                 linkColor: Theme.highlightColor
                 onLinkActivated: Qt.openUrlExternally("https://wiki.openstreetmap.org/wiki/Nominatim")
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - (2 * Theme.horizontalPageMargin)
+                wrapMode: Text.Wrap
+                text: qsTr("This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                anchors.horizontalCenter: parent.horizontalCenter
             }
         }
     }

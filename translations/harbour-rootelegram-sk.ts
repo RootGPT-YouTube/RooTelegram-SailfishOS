@@ -1,503 +1,505 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en">
+<TS version="2.1" language="sk_SK">
 <context>
     <name>AboutPage</name>
     <message>
         <source>About RooTelegram</source>
-        <translation>About RooTelegram</translation>
+        <translation>O aplikácii RooTelegram</translation>
     </message>
     <message>
         <source>A Telegram client for Sailfish OS</source>
-        <translation>A Telegram client for Sailfish OS</translation>
+        <translation>Klient Telegram-pre Sailfish OS</translation>
     </message>
     <message>
         <source>Licensed under GNU GPLv3</source>
-        <translation>Licensed under GNU GPLv3</translation>
+        <translation>Licencované pod GNU GPLv3</translation>
     </message>
     <message>
         <source>Terms of Service</source>
-        <translation>Terms of Service</translation>
+        <translation>Zmluvné podmienky</translation>
     </message>
     <message>
         <source>Privacy Policy</source>
-        <translation>Privacy Policy</translation>
+        <translation>Zásady ochrany osobných údajov</translation>
     </message>
     <message>
         <source>Credits</source>
-        <translation>Credits</translation>
+        <translation>Prispievatelia</translation>
     </message>
     <message>
         <source>This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!</source>
-        <translation>This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!</translation>
+        <translation>Tento projekt využíva Telegram Database Library (TDLib). Ďakujeme, že ste ju sprístupnili za podmienok licencie Boost Software License 1.0!</translation>
     </message>
     <message>
         <source>Open Telegram Database Library on GitHub</source>
-        <translation>Open Telegram Database Library on GitHub</translation>
+        <translation>Open Telegram Database Library v GitHub</translation>
     </message>
     <message>
         <source>About Telegram</source>
-        <translation>About Telegram</translation>
+        <translation>O aplikácii Telegram</translation>
     </message>
     <message>
         <source>This product uses the Telegram API but is not endorsed or certified by Telegram.</source>
-        <translation>This product uses the Telegram API but is not endorsed or certified by Telegram.</translation>
+        <translation>Tento produkt používa Telegram API, ale nie je schválený ani certifikovaný spoločnosťou Telegram.</translation>
     </message>
     <message>
         <source>TDLib version %1</source>
-        <translation>TDLib version %1</translation>
+        <translation>Verzia TDLib %1</translation>
     </message>
     <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
-        <translation>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</translation>
+        <translation>Tento projekt používa rlottie. Copyright 2020 Samsung Electronics Co., Ltd. a ďalší prispievatelia. Ďakujeme, že ste ho sprístupnili za podmienok licencie MIT!</translation>
     </message>
     <message>
         <source>Open rlottie on GitHub</source>
-        <translation>Open rlottie on GitHub</translation>
+        <translation>Otvoriť rlottie v GitHub</translation>
     </message>
     <message>
         <source>This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!</source>
-        <translation>This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!</translation>
+        <translation>Tento projekt používa OpenStreetMap Nominatim na dekódovanie polohy príloh. Ďakujeme, že ste ju sprístupnili ako webovú službu!</translation>
     </message>
     <message>
         <source>Open OSM Nominatim Wiki</source>
-        <translation>Open OSM Nominatim Wiki</translation>
+        <translation>Otvoriť OSM Nominatim Wiki</translation>
     </message>
     <message>
         <source>Fernschreiber</source>
-        <translation type="unfinished"></translation>
+        <translation>Fernschreiber</translation>
     </message>
     <message>
         <source>Yottagram</source>
-        <translation type="unfinished"></translation>
+        <translation>Yottagram</translation>
     </message>
     <message>
         <source>Source code on GitHub</source>
-        <translation type="unfinished"></translation>
+        <translation>Zdrojový kód v GitHub</translation>
     </message>
     <message>
         <source>Fork by RootGPT - based on Fernschreiber by Sebastian J. Wolf and Yottagram by Michal Szczepaniak.</source>
-        <translation type="unfinished"></translation>
+        <translation>Odnož RootGPT – založené na Fernschreiber od Sebastiana J. Wolfa a Yottagram od Michala Szczepaniaka.</translation>
     </message>
     <message>
         <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento projekt používa Twemoji (odnož jdecked). Autorské práva na prispievateľov Twemoji. Ďakujeme, že ste ho sprístupnili za podmienok licencie MIT (kódovanie) a CC-BY 4.0 (grafika)!</translation>
     </message>
     <message>
         <source>Open Twemoji on GitHub</source>
-        <translation type="unfinished"></translation>
+        <translation>Otvoriť Twemoji v GitHub</translation>
     </message>
     <message>
         <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
-        <translation>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+        <translation>Tento projekt spája FFmpeg, vytvorený s libx264, na normalizáciu videí pred poskytnitím. Ďakujeme, že ste ho sprístupnili za podmienok LGPL v2.1 / GPL v2 (libx264)!</translation>
     </message>
     <message>
         <source>Open FFmpeg website</source>
-        <translation>Open FFmpeg website</translation>
+        <translation>Webová stránka Open FFmpeg</translation>
     </message>
     <message>
         <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
-        <translation>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</translation>
+        <translation>Tento projekt používa tgcalls a tg_owt (WebRTC) na hlasové hovory a videohovory. Ďakujeme, že ste ich sprístupnili za podmienok GPL v2!</translation>
     </message>
     <message>
         <source>Open tgcalls on GitHub</source>
-        <translation>Open tgcalls on GitHub</translation>
+        <translation>Otvoriť tgcalls v GitHub</translation>
     </message>
     <message>
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pre kompatibilitu so SailfishOS 5.0/5.1 tento balík obsahuje aj multimediálne závislosti FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) a OpenJPEG (BSD-2). Autorské práva ich príslušných prispievateľov. Úplné texty licencií sa dodávajú v /usr/share/harbour-rootelegram/licenses/.</translation>
     </message>
     <message>
         <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
-        <translation type="unfinished"></translation>
+        <translation>Slovenský preklad: okruhliak. Ďakujeme všetkým, ktorí pomáhajú prekladať RooTelegram!</translation>
     </message>
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento projekt používa knižnicu QR Code generator od Project Nayuki na prihlásenie QR kódom. Ďakujeme za jej sprístupnenie za podmienok licencie MIT!</translation>
     </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Add Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať člena</translation>
     </message>
     <message>
         <source>Search a contact...</source>
-        <translation type="unfinished">Search a contact...</translation>
+        <translation>Hľadať kontakt…</translation>
     </message>
     <message>
         <source>No contacts found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nebol nájdený žiaden kontakt.</translation>
     </message>
     <message>
         <source>You don&apos;t have any contacts.</source>
-        <translation type="unfinished">You don&apos;t have any contacts.</translation>
+        <translation>Nemáte žiadne kontakty.</translation>
     </message>
     <message>
         <source>Added</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridané</translation>
     </message>
     <message>
         <source>Adding…</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridávanie…</translation>
     </message>
     <message>
         <source>Loading contacts...</source>
-        <translation type="unfinished">Loading contacts...</translation>
+        <translation>Načítavanie kontaktov…</translation>
     </message>
     <message>
         <source>Member added.</source>
-        <translation type="unfinished"></translation>
+        <translation>Člen bol pridaný.</translation>
     </message>
 </context>
 <context>
     <name>AddProxyDialog</name>
     <message>
         <source>Proxy added and enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy bol pridaný a povolený</translation>
     </message>
     <message>
         <source>Add proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať proxy</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať</translation>
     </message>
     <message>
         <source>Paste a proxy link (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vložiť odkaz na proxy (voliteľné)</translation>
     </message>
     <message>
         <source>tg://proxy?server=…  or  https://t.me/proxy?…</source>
-        <translation type="unfinished"></translation>
+        <translation>tg://proxy?server=…  alebo  https://t.me/proxy?…</translation>
     </message>
     <message>
         <source>Link recognised</source>
-        <translation type="unfinished"></translation>
+        <translation>Odkaz bol rozpoznaný</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ</translation>
     </message>
     <message>
         <source>MTProto (recommended)</source>
-        <translation type="unfinished"></translation>
+        <translation>MTProto (odporúčané)</translation>
     </message>
     <message>
         <source>SOCKS5 (also for calls)</source>
-        <translation type="unfinished"></translation>
+        <translation>SOCKS5 (tiež pre volania)</translation>
     </message>
     <message>
         <source>HTTP</source>
-        <translation type="unfinished"></translation>
+        <translation>HTTP</translation>
     </message>
     <message>
         <source>Server</source>
-        <translation type="unfinished"></translation>
+        <translation>Server</translation>
     </message>
     <message>
         <source>Server (host or IP)</source>
-        <translation type="unfinished"></translation>
+        <translation>Server (Host alebor IP)</translation>
     </message>
     <message>
         <source>Port</source>
-        <translation type="unfinished"></translation>
+        <translation>Port</translation>
     </message>
     <message>
         <source>Secret</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajné</translation>
     </message>
     <message>
         <source>Secret (supports dd… and ee… Fake-TLS)</source>
-        <translation type="unfinished"></translation>
+        <translation>Tajné (podporuje dd… a ee… Fake-TLS)</translation>
     </message>
     <message>
         <source>Username (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľské meno (voliteľné)</translation>
     </message>
     <message>
         <source>Username</source>
-        <translation type="unfinished">Username</translation>
+        <translation>Používateľské meno</translation>
     </message>
     <message>
         <source>Password (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Heslo (voliteľné)</translation>
     </message>
     <message>
         <source>Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Heslo</translation>
     </message>
     <message>
         <source>HTTP only</source>
-        <translation type="unfinished"></translation>
+        <translation>Iba HTTP</translation>
     </message>
     <message>
         <source>The proxy supports only HTTP requests (no HTTPS tunnelling).</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy podporuje iba HTTP-požiadavku (nie HTTPS-tunneling).</translation>
     </message>
 </context>
 <context>
     <name>AddToFolderPage</name>
     <message>
         <source>Add to folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať do zložky</translation>
     </message>
     <message>
         <source>Added to folder: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridané do zložky: %1</translation>
     </message>
     <message>
         <source>No folders</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne zložky</translation>
     </message>
 </context>
 <context>
     <name>AllScheduledMessagesPage</name>
     <message>
         <source>Photo</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotografia</translation>
     </message>
     <message>
         <source>Video</source>
-        <translation type="unfinished"></translation>
+        <translation>Video</translation>
     </message>
     <message>
         <source>Document</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokument</translation>
     </message>
     <message>
         <source>Voice</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlas</translation>
     </message>
     <message>
         <source>GIF</source>
-        <translation type="unfinished"></translation>
+        <translation>GIF</translation>
     </message>
     <message>
         <source>Sticker</source>
-        <translation type="unfinished"></translation>
+        <translation>Nálepka</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translation>Poloha</translation>
     </message>
     <message>
         <source>Unknown chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Neznámy čet</translation>
     </message>
     <message>
         <source>Scheduled messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Plánované správy</translation>
     </message>
     <message numerus="yes">
         <source>%n scheduled message(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n plánovaná správa</numerusform>
+            <numerusform>%n plánované správy</numerusform>
+            <numerusform>%n plánovaných správ</numerusform>
         </translation>
     </message>
     <message>
         <source>Loading…</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítavanie…</translation>
     </message>
     <message>
         <source>No scheduled messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne plánované správy</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Long-press the send button in a chat to schedule a new message.</source>
-        <translation type="unfinished"></translation>
+        <translation>Stlačiť a podržať tlačidlo odoslania v čete na plánovanie novej správy.</translation>
     </message>
     <message>
         <source>Deleting</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstraňovanie</translation>
     </message>
     <message>
         <source>Reschedule</source>
-        <translation type="unfinished"></translation>
+        <translation>Preplánovanie</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstránenie</translation>
     </message>
 </context>
 <context>
     <name>AppPermissionsPage</name>
     <message>
         <source>App permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>Povolenia aplikácie</translation>
     </message>
     <message>
         <source>Turn off the resources you don&apos;t want RooTelegram to use. This only blocks the app internally — to fully revoke a system permission use the SailfishOS Settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vypnite zdroje, ktoré RooTelegram nemá používať. Toto blokuje len v rámci aplikácie — na úplné odobratie systémového povolenia použite Nastavenia SailfishOS.</translation>
     </message>
     <message>
         <source>Sensors and personal data</source>
-        <translation type="unfinished"></translation>
+        <translation>Senzory a osobné údaje</translation>
     </message>
     <message>
         <source>Safe to turn off: only the related feature stops working, the rest of the app keeps running normally.</source>
-        <translation type="unfinished"></translation>
+        <translation>Bezpečné vypnúť: prestane fungovať len súvisiaca funkcia, zvyšok aplikácie beží normálne.</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translation>Poloha</translation>
     </message>
     <message>
         <source>Attaching your location and inline bots that request it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pripájanie vašej polohy a inline boty, ktoré ju vyžadujú.</translation>
     </message>
     <message>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotoaparát</translation>
     </message>
     <message>
         <source>Video during calls.</source>
-        <translation type="unfinished"></translation>
+        <translation>Video počas hovorov.</translation>
     </message>
     <message>
         <source>Microphone</source>
-        <translation type="unfinished"></translation>
+        <translation>Mikrofón</translation>
     </message>
     <message>
         <source>Voice messages and audio during calls.</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlasové správy a zvuk počas hovorov.</translation>
     </message>
     <message>
         <source>Contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakty</translation>
     </message>
     <message>
         <source>Synchronizing your address book with Telegram.</source>
-        <translation type="unfinished"></translation>
+        <translation>Synchronizácia adresára s Telegramom.</translation>
     </message>
     <message>
         <source>Photos, videos and files</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotky, videá a súbory</translation>
     </message>
     <message>
         <source>Turn off with caution: these are needed to attach and send media. With one off you won&apos;t be able to pick that kind of file to send.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vypínajte opatrne: sú potrebné na pripájanie a odosielanie médií. Po vypnutí nebudete môcť vybrať tento typ súboru na odoslanie.</translation>
     </message>
     <message>
         <source>Images</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrázky</translation>
     </message>
     <message>
         <source>Picking photos to send or to set as profile/story.</source>
-        <translation type="unfinished"></translation>
+        <translation>Výber fotiek na odoslanie alebo nastavenie ako profil/príbeh.</translation>
     </message>
     <message>
         <source>Videos</source>
-        <translation type="unfinished"></translation>
+        <translation>Videá</translation>
     </message>
     <message>
         <source>Picking videos to send or to post as a story.</source>
-        <translation type="unfinished"></translation>
+        <translation>Výber videí na odoslanie alebo zverejnenie ako príbeh.</translation>
     </message>
     <message>
         <source>Documents and files</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumenty a súbory</translation>
     </message>
     <message>
         <source>Picking arbitrary files to send as documents.</source>
-        <translation type="unfinished"></translation>
+        <translation>Výber ľubovoľných súborov na odoslanie ako dokumenty.</translation>
     </message>
     <message>
         <source>System permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>Systémové povolenia</translation>
     </message>
     <message>
         <source>Internet access and other low-level permissions are required for the app to work at all and are managed by SailfishOS. To revoke them, open the system Settings → Apps → RooTelegram.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup na internet a ďalšie nízkoúrovňové povolenia sú nevyhnutné pre chod aplikácie a spravuje ich SailfishOS. Na ich odobratie otvorte Nastavenia systému → Aplikácie → RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>ArchivedChatsPage</name>
     <message>
         <source>Photo</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotka</translation>
     </message>
     <message>
         <source>Video</source>
-        <translation type="unfinished"></translation>
+        <translation>Video</translation>
     </message>
     <message>
         <source>GIF</source>
-        <translation type="unfinished"></translation>
+        <translation>GIF</translation>
     </message>
     <message>
         <source>Voice message</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlasová správa</translation>
     </message>
     <message>
         <source>Video message</source>
-        <translation type="unfinished"></translation>
+        <translation>Videospráva</translation>
     </message>
     <message>
         <source>Audio</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvuk</translation>
     </message>
     <message>
         <source>Document</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokument</translation>
     </message>
     <message>
         <source>Sticker</source>
-        <translation type="unfinished"></translation>
+        <translation>Nálepka</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translation>Poloha</translation>
     </message>
     <message>
         <source>Contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakt</translation>
     </message>
     <message>
         <source>Poll</source>
-        <translation type="unfinished">Poll</translation>
+        <translation>Anketa</translation>
     </message>
     <message>
         <source>Call</source>
-        <translation type="unfinished"></translation>
+        <translation>Hovor</translation>
     </message>
     <message>
         <source>Archived chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Archivované konverzácie</translation>
     </message>
     <message numerus="yes">
         <source>%n chat(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n konverzácia</numerusform>
+            <numerusform>%n konverzácie</numerusform>
+            <numerusform>%n konverzácií</numerusform>
         </translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished">Unknown</translation>
+        <translation>Neznáme</translation>
     </message>
     <message>
         <source>Unarchive</source>
-        <translation type="unfinished"></translation>
+        <translation>Zrušiť archiváciu</translation>
     </message>
     <message>
         <source>No archived chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne archivované konverzácie</translation>
     </message>
     <message>
         <source>Long-press a chat in the main list and choose Archive.</source>
-        <translation type="unfinished"></translation>
+        <translation>Podržte konverzáciu v hlavnom zozname a vyberte Archivovať.</translation>
     </message>
 </context>
 <context>
@@ -515,168 +517,169 @@
     <name>BlacklistPage</name>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Čierna listina</translation>
     </message>
     <message numerus="yes">
         <source>%1 blocked</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%1 blokovaný</numerusform>
+            <numerusform>%1 blokovaní</numerusform>
+            <numerusform>%1 blokovaných</numerusform>
         </translation>
     </message>
     <message>
         <source>No blocked users.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadni blokovaní používatelia.</translation>
     </message>
     <message>
         <source>Block a user from their profile to see them here.</source>
-        <translation type="unfinished"></translation>
+        <translation>Blokovať používateľa v jeho profile aby to bolo vidieť tu.</translation>
     </message>
     <message>
         <source>Unblocking…</source>
-        <translation type="unfinished"></translation>
+        <translation>Odblokovanie…</translation>
     </message>
     <message>
         <source>Unblock</source>
-        <translation type="unfinished"></translation>
+        <translation>Odblokovať</translation>
     </message>
     <message>
         <source>Load more</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítať viac</translation>
     </message>
     <message>
         <source>Loading blocked users...</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítanie blokovaných používateľov…</translation>
     </message>
     <message>
         <source>User has been unblocked.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ bol odblokovaný.</translation>
     </message>
 </context>
 <context>
     <name>ChannelAppearancePage</name>
     <message>
         <source>Theme cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola vymazaná</translation>
     </message>
     <message>
         <source>Theme set: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavená téma: %1</translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished">Appearance</translation>
+        <translation>Vzhľad</translation>
     </message>
     <message>
         <source>Pick a chat theme. The selected preset is applied to every member viewing this channel.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať tému četu. Vybraná predvoľba je aplikovaná pre všetkých členov tohto kanála.</translation>
     </message>
     <message>
         <source>Default (no theme)</source>
-        <translation type="unfinished"></translation>
+        <translation>Predvoléné (žiadna téma)</translation>
     </message>
     <message>
         <source>No themes available yet</source>
-        <translation type="unfinished"></translation>
+        <translation>Nie je k dispozícii žiadna téma</translation>
     </message>
     <message>
         <source>Themes are pushed by Telegram after sign-in. Try again in a moment.</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy sú poskytované Telegramom po prihlásení. Skúste to znova o chvíľu.</translation>
     </message>
 </context>
 <context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložka bola vytvorená.</translation>
     </message>
     <message>
         <source>Unable to create folder %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložku %1 nemožno vytvoriť</translation>
     </message>
     <message>
         <source>Unable to update folder order.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno aktualizovať usporiadanie zložiek.</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Edit folders</source>
-        <translation type="unfinished"></translation>
+        <translation>Upraviť zložky</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetky</translation>
     </message>
     <message>
         <source>Custom folders</source>
-        <translation type="unfinished"></translation>
+        <translation>Vlasné zložky</translation>
     </message>
     <message>
         <source>Create new folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť novú zložku</translation>
     </message>
     <message>
         <source>Folder name</source>
-        <translation type="unfinished"></translation>
+        <translation>Názov zložky</translation>
     </message>
     <message>
         <source>Enter the folder name</source>
-        <translation type="unfinished"></translation>
+        <translation>Zadať názov zložky</translation>
     </message>
     <message>
         <source>Create folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť zložku</translation>
     </message>
     <message>
         <source>Deleting folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť zložku</translation>
     </message>
     <message>
         <source>Folder deleted.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložka bola zmazaná.</translation>
     </message>
     <message>
         <source>Unable to delete folder %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložku %1 nemožno zmazať</translation>
     </message>
     <message>
         <source>Unable to delete folder.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložku nemožno odstrániť.</translation>
     </message>
     <message>
         <source>Folder name must be at most 12 characters.</source>
-        <translation type="unfinished"></translation>
+        <translation>Názov zložky môže mať najviac 12 znakov.</translation>
     </message>
     <message>
         <source>Unable to create folder %1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Zložku %1 nemožno vytvoriť: %2</translation>
     </message>
     <message>
         <source>Unable to create folder.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno vytvoriť zložku.</translation>
     </message>
     <message>
         <source>Creating folder...</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytváranie zložky…</translation>
     </message>
     <message>
         <source>Retrying creation...</source>
-        <translation type="unfinished"></translation>
+        <translation>Znovuvytváranie…</translation>
     </message>
     <message>
         <source>Error creating folder: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Chyba vytvorila zložku: %1</translation>
     </message>
     <message>
         <source>Internal error while creating folder.</source>
-        <translation type="unfinished"></translation>
+        <translation>Interná chyba pri vytváraní zložky.</translation>
     </message>
 </context>
 <context>
@@ -684,59 +687,61 @@
     <message numerus="yes">
         <source>%1 subscribers</source>
         <translation>
-            <numerusform>%1 subscriber</numerusform>
-            <numerusform>%1 subscribers</numerusform>
+            <numerusform>%1 predplatiteľ</numerusform>
+            <numerusform>%1 predplatitelia</numerusform>
+            <numerusform>%1 predplatiteľov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%1 members</source>
         <translation>
-            <numerusform>%1 member</numerusform>
-            <numerusform>%1 members</numerusform>
+            <numerusform>%1 člen</numerusform>
+            <numerusform>%1 členovia</numerusform>
+            <numerusform>%1 členov</numerusform>
         </translation>
     </message>
     <message>
         <source>Leave Chat</source>
-        <translation>Leave Chat</translation>
+        <translation>Opustiť čet</translation>
     </message>
     <message>
         <source>Join Chat</source>
-        <translation>Join Chat</translation>
+        <translation>Pripojiť sa k četu</translation>
     </message>
     <message>
         <source>Leaving chat</source>
-        <translation>Leaving chat</translation>
+        <translation>Opúšťanie četu</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation>Unknown</translation>
+        <translation>Neznáme</translation>
     </message>
     <message>
         <source>Chat Title</source>
         <comment>group title header</comment>
-        <translation>Chat Title</translation>
+        <translation>Názov četu</translation>
     </message>
     <message>
         <source>Enter 1-128 characters</source>
-        <translation>Enter 1-128 characters</translation>
+        <translation>Zadať 1–128 znakov</translation>
     </message>
     <message>
         <source>There is no information text available, yet.</source>
-        <translation>There is no information text available, yet.</translation>
+        <translation>Momentálne nie dostupná žiadna textová informácia.</translation>
     </message>
     <message>
         <source>Info</source>
         <comment>group or user infotext header</comment>
-        <translation>Info</translation>
+        <translation>Informácia</translation>
     </message>
     <message>
         <source>Phone Number</source>
         <comment>user phone number header</comment>
-        <translation>Phone Number</translation>
+        <translation>Telefónne číslo</translation>
     </message>
     <message>
         <source>The Invite Link has been copied to the clipboard.</source>
-        <translation>The Invite Link has been copied to the clipboard.</translation>
+        <translation>Pozývací odkaz bol skopírovaný do schránky.</translation>
     </message>
     <message>
         <source>%1, %2</source>
@@ -746,328 +751,329 @@
     <message numerus="yes">
         <source>%1 online</source>
         <translation>
-            <numerusform>%1 online</numerusform>
-            <numerusform>%1 online</numerusform>
+            <numerusform>%1 pripojený</numerusform>
+            <numerusform>%1 pripojení</numerusform>
+            <numerusform>%1 pripojených</numerusform>
         </translation>
     </message>
     <message>
         <source>New Secret Chat</source>
-        <translation>New Secret Chat</translation>
+        <translation>Nový utajený čet</translation>
     </message>
     <message>
         <source>Unmute Chat</source>
-        <translation>Unmute Chat</translation>
+        <translation>Ozvučený čet</translation>
     </message>
     <message>
         <source>Mute Chat</source>
-        <translation>Mute Chat</translation>
+        <translation>Stlmený čet</translation>
     </message>
     <message>
         <source>ID has been copied to the clipboard.</source>
-        <translation type="unfinished"></translation>
+        <translation>ID bolo skopírované do schránky.</translation>
     </message>
     <message>
         <source>Join Requests</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadosť o pripojenie</translation>
     </message>
     <message>
         <source>Unable to start the call.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno spustiť volanie.</translation>
     </message>
     <message>
         <source>Public</source>
-        <translation type="unfinished"></translation>
+        <translation>Verejný</translation>
     </message>
     <message>
         <source>Private</source>
-        <translation type="unfinished"></translation>
+        <translation>Súkromný</translation>
     </message>
     <message>
         <source>Visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Viditeľný</translation>
     </message>
     <message>
         <source>Hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>Skrytý</translation>
     </message>
     <message>
         <source>Off</source>
-        <translation type="unfinished">Off</translation>
+        <translation>Vypnúť</translation>
     </message>
     <message>
         <source>On</source>
-        <translation type="unfinished"></translation>
+        <translation>Zapnúť</translation>
     </message>
     <message>
         <source>%1 selected</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 vybrané</translation>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished">None</translation>
+        <translation>Žiadne</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetko</translation>
     </message>
     <message>
         <source>Added</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridané</translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished">No</translation>
+        <translation>Nie</translation>
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Predvolené</translation>
     </message>
     <message>
         <source>Available</source>
-        <translation type="unfinished"></translation>
+        <translation>Dostupné</translation>
     </message>
     <message>
         <source>Unavailable</source>
-        <translation type="unfinished">Unavailable</translation>
+        <translation>Nedostupné</translation>
     </message>
     <message>
         <source>%1 is not available yet.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 je teraz nedostupný.</translation>
     </message>
     <message>
         <source>No invite link available yet.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pozývací odkaz nie je teraz dostupný.</translation>
     </message>
     <message>
         <source>Deleting channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstaňovanie kanála</translation>
     </message>
     <message>
         <source>Channel Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavenia kanála</translation>
     </message>
     <message>
         <source>Group Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavenia skupiny</translation>
     </message>
     <message>
         <source>Channel Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ kanála</translation>
     </message>
     <message>
         <source>Group Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ skupiny</translation>
     </message>
     <message>
         <source>Chat History</source>
-        <translation type="unfinished"></translation>
+        <translation>História četu</translation>
     </message>
     <message>
         <source>Only administrators can change chat history visibility.</source>
-        <translation type="unfinished"></translation>
+        <translation>Viditeľnosť histórie četu môžu zmeniť iba správcovia.</translation>
     </message>
     <message>
         <source>Topics</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy</translation>
     </message>
     <message>
         <source>Discussion</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskusia</translation>
     </message>
     <message>
         <source>Direct Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Priama správa</translation>
     </message>
     <message>
         <source>Appearance</source>
-        <translation type="unfinished">Appearance</translation>
+        <translation>Vzhľad</translation>
     </message>
     <message>
         <source>Auto-Translate Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Automaticky prekladať správy</translation>
     </message>
     <message>
         <source>Reactions</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpovede</translation>
     </message>
     <message>
         <source>Permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>Oprávnenia</translation>
     </message>
     <message>
         <source>Invite Link</source>
-        <translation type="unfinished">Invite Link</translation>
+        <translation>Pozývaci odkaz</translation>
     </message>
     <message>
         <source>Administrators</source>
-        <translation type="unfinished"></translation>
+        <translation>Správcovia</translation>
     </message>
     <message>
         <source>Subscribers</source>
-        <translation type="unfinished"></translation>
+        <translation>Prispievatelia</translation>
     </message>
     <message>
         <source>Members</source>
-        <translation type="unfinished">Members</translation>
+        <translation>Členovia</translation>
     </message>
     <message>
         <source>Removed Users</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstránení používatelia</translation>
     </message>
     <message>
         <source>Statistics</source>
-        <translation type="unfinished"></translation>
+        <translation>Štatistiky</translation>
     </message>
     <message>
         <source>Statistics are unavailable for this chat.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pre tento čet nie sú dostupné štatistiky.</translation>
     </message>
     <message>
         <source>Recent Actions</source>
-        <translation type="unfinished"></translation>
+        <translation>Minulé akcie</translation>
     </message>
     <message>
         <source>Affiliate Programs</source>
-        <translation type="unfinished"></translation>
+        <translation>Afilačné programy</translation>
     </message>
     <message>
         <source>Delete channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť kanál</translation>
     </message>
     <message>
         <source>Delete and leave group</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť, ale ponechať skupinu</translation>
     </message>
     <message>
         <source>Reactions can only be changed in supergroups and channels.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakcie môžu byť zmenenéiba v superskupinách a kanáloch.</translation>
     </message>
     <message>
         <source>Only administrators can change reactions.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakcie môžu zmeniť iba správcovia.</translation>
     </message>
     <message>
         <source>Topics enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy sú povolené.</translation>
     </message>
     <message>
         <source>Topics disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy sú zakázané.</translation>
     </message>
     <message>
         <source>All reactions enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetky reakcie sú povolené.</translation>
     </message>
     <message>
         <source>Reactions disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakcie sú zakázané.</translation>
     </message>
     <message>
         <source>Basic groups are private.</source>
-        <translation type="unfinished"></translation>
+        <translation>Základné skupiny sú súkromné.</translation>
     </message>
     <message>
         <source>Only administrators can change the group type.</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ skupiny môžu zmeniť iba administrátori.</translation>
     </message>
     <message>
         <source>Add Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať členov</translation>
     </message>
     <message>
         <source>Only the group owner can change topics.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tému môže zmeniť iba vlastník skupiny.</translation>
     </message>
     <message>
         <source>Chat history is now visible.</source>
-        <translation type="unfinished"></translation>
+        <translation>História četu je viditeľná.</translation>
     </message>
     <message>
         <source>Chat history is now hidden.</source>
-        <translation type="unfinished"></translation>
+        <translation>História četu je skrytá.</translation>
     </message>
     <message>
         <source>Message history can&apos;t be hidden while topics are enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>História správy nemôže byť skrytá ak je téma povolená.</translation>
     </message>
     <message>
         <source>Manage Topics</source>
-        <translation type="unfinished"></translation>
+        <translation>Spravovať témy</translation>
     </message>
     <message>
         <source>Only administrators can manage topics.</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy môže spravovať iba správca.</translation>
     </message>
     <message>
         <source>Only administrators can change the group picture.</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrázok skupiny môžu zmeniť iba administrátori.</translation>
     </message>
     <message>
         <source>Uploading group picture...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nahráva sa obrázok skupiny…</translation>
     </message>
     <message>
         <source>Group picture updated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrázok skupiny bol aktualizovaný.</translation>
     </message>
     <message>
         <source>Channel Picture</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrázok kanála</translation>
     </message>
     <message>
         <source>Group Picture</source>
-        <translation type="unfinished"></translation>
+        <translation>Obrázok skupiny</translation>
     </message>
     <message>
         <source>Only the channel owner can change the discussion group.</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskusnú skupinu môže zmeniť iba jej vlastník.</translation>
     </message>
     <message>
         <source>Only administrators can change the appearance.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vzhľad môžu zmeniť iba administrátori.</translation>
     </message>
     <message>
         <source>Convert to supergroup</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmeniť na superskupinu</translation>
     </message>
     <message>
         <source>Converting to supergroup</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmena na superskupinu</translation>
     </message>
     <message>
         <source>Conversion in progress…</source>
-        <translation type="unfinished"></translation>
+        <translation>Prebieha zmena…</translation>
     </message>
     <message>
         <source>User has been blocked.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ bol zablokovaný.</translation>
     </message>
     <message>
         <source>User has been unblocked.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ bol odblokovaný.</translation>
     </message>
     <message>
         <source>Unblock User</source>
-        <translation type="unfinished"></translation>
+        <translation>Odblokovať používateľa</translation>
     </message>
     <message>
         <source>Block User</source>
-        <translation type="unfinished"></translation>
+        <translation>Zablokovať používateľa</translation>
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k obrázkom je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
     <message>
         <source>Unable to load content.</source>
-        <translation type="unfinished"></translation>
+        <translation>Obsah nemožno načítať.</translation>
     </message>
 </context>
 <context>
@@ -1075,63 +1081,63 @@
     <message>
         <source>Loading common chats…</source>
         <comment>chats you have in common with a user</comment>
-        <translation>Loading common chats…</translation>
+        <translation>Načítanie bežných četov…</translation>
     </message>
     <message>
         <source>Loading group members…</source>
-        <translation>Loading group members…</translation>
+        <translation>Načítanie členov skupiny...</translation>
     </message>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>You don&apos;t have any groups in common with this user.</source>
-        <translation>You don&apos;t have any groups in common with this user.</translation>
+        <translation>S týmto používateľom nemáte žiadne spoločné skupiny.</translation>
     </message>
     <message>
         <source>This group is empty.</source>
-        <translation>This group is empty.</translation>
+        <translation>Táto skupina je prázdna.</translation>
     </message>
     <message>
         <source>Channel members are anonymous.</source>
-        <translation>Channel members are anonymous.</translation>
+        <translation>Členovia kanála sú anonymní.</translation>
     </message>
     <message>
         <source>Processing…</source>
-        <translation type="unfinished"></translation>
+        <translation>Spracovanie…</translation>
     </message>
     <message>
         <source>Promote to Admin</source>
-        <translation>Promote to Admin</translation>
+        <translation>Povýšiť na správcu</translation>
     </message>
     <message>
         <source>Remove Admin</source>
-        <translation>Remove Admin</translation>
+        <translation>Odstrániť správcu</translation>
     </message>
     <message>
         <source>Removing Admin</source>
-        <translation>Removing Admin</translation>
+        <translation>Odstraňovanie správcu</translation>
     </message>
     <message>
         <source>Admin demoted to member.</source>
-        <translation>Admin demoted to member.</translation>
+        <translation>Administrátor bol ponížený na člena.</translation>
     </message>
     <message>
         <source>Remove from group</source>
-        <translation>Remove from group</translation>
+        <translation>Odstrániť zo skupiny</translation>
     </message>
     <message>
         <source>Removing user</source>
-        <translation>Removing user</translation>
+        <translation>Odstraňovanie používateľa</translation>
     </message>
     <message>
         <source>Member removed from group.</source>
-        <translation>Member removed from group.</translation>
+        <translation>Člen bol odstránený zo skupiny.</translation>
     </message>
     <message>
         <source>Member promoted to Admin.</source>
-        <translation>Member promoted to Admin.</translation>
+        <translation>Člen bol povýšený na správcu.</translation>
     </message>
 </context>
 <context>
@@ -1139,295 +1145,301 @@
     <message>
         <source>Groups</source>
         <comment>Button: groups in common (short)</comment>
-        <translation>Groups</translation>
+        <translation>Skupiny</translation>
     </message>
     <message>
         <source>Members</source>
         <comment>Button: Group Members</comment>
-        <translation>Members</translation>
+        <translation>Členovia</translation>
     </message>
     <message>
         <source>Settings</source>
         <comment>Button: Chat Settings</comment>
-        <translation>Settings</translation>
+        <translation>Nastavenia</translation>
     </message>
     <message>
         <source>Voice calls are not available in this build yet.</source>
-        <translation type="unfinished"></translation>
+        <translation>V tomto vydaní nie sú dostupné hlasové volania.</translation>
     </message>
     <message>
         <source>Media</source>
-        <translation type="unfinished"></translation>
+        <translation>Média</translation>
     </message>
     <message>
         <source>No media available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne média.</translation>
     </message>
     <message>
         <source>Audio</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvuk</translation>
     </message>
     <message>
         <source>Documents</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumenty</translation>
     </message>
     <message>
         <source>No documents available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne dokumenty.</translation>
     </message>
     <message>
         <source>Link</source>
-        <translation type="unfinished"></translation>
+        <translation>Odkaz</translation>
     </message>
     <message>
         <source>No links available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne odkazy.</translation>
     </message>
     <message>
         <source>No audio available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne zvuky.</translation>
     </message>
     <message>
         <source>Call</source>
         <comment>Button: start voice call</comment>
-        <translation type="unfinished"></translation>
+        <translation>Volať</translation>
     </message>
     <message>
         <source>Video call</source>
         <comment>Button: start video call</comment>
-        <translation type="unfinished"></translation>
+        <translation>Video-hovor</translation>
     </message>
     <message>
         <source>Video calls are not available in this build yet.</source>
-        <translation type="unfinished"></translation>
+        <translation>V tomto vydaní nie sú dostupné video-hovory.</translation>
     </message>
 </context>
 <context>
     <name>ChatJoinRequestsPage</name>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Join Requests</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadosť o pripojenie</translation>
     </message>
     <message>
         <source>Search requests</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadosť o hľadanie</translation>
     </message>
     <message>
         <source>There are no pending join requests.</source>
-        <translation type="unfinished"></translation>
+        <translation>Neexistujú žiadne čakajúce žiadosti o pripojenie.</translation>
     </message>
     <message>
         <source>No bio</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadna biografia</translation>
     </message>
     <message>
         <source>Requested %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadané %1</translation>
     </message>
     <message>
         <source>Approving…</source>
-        <translation type="unfinished"></translation>
+        <translation>Schvaľovanie…</translation>
     </message>
     <message>
         <source>Approve</source>
-        <translation type="unfinished"></translation>
+        <translation>Schváliť</translation>
     </message>
     <message>
         <source>Rejecting…</source>
-        <translation type="unfinished"></translation>
+        <translation>Odmieta sa...</translation>
     </message>
     <message>
         <source>Reject</source>
-        <translation type="unfinished"></translation>
+        <translation>Odmietnuť</translation>
     </message>
     <message>
         <source>Load more</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítať viac</translation>
     </message>
 </context>
 <context>
     <name>ChatListViewItem</name>
     <message>
         <source>Unknown</source>
-        <translation>Unknown</translation>
+        <translation>Neznámy</translation>
     </message>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>User Info</source>
-        <translation>User Info</translation>
+        <translation>Informácie o používateľovi</translation>
     </message>
     <message>
         <source>Group Info</source>
-        <translation>Group Info</translation>
+        <translation>Informácie o skupine</translation>
     </message>
     <message>
         <source>Mark all messages as read</source>
-        <translation>Mark all messages as read</translation>
+        <translation>Všetky správy označiť ako prečítané</translation>
     </message>
     <message>
         <source>No message in this chat.</source>
-        <translation>No message in this chat.</translation>
+        <translation>Žiadna správa v tomto čete.</translation>
     </message>
     <message>
         <source>Mark chat as unread</source>
-        <translation>Mark chat as unread</translation>
+        <translation>Čet označiť ako neprečítaný</translation>
     </message>
     <message>
         <source>Mark chat as read</source>
-        <translation>Mark chat as read</translation>
+        <translation>Čet označiť ako prečítaný</translation>
     </message>
     <message>
         <source>Draft</source>
-        <translation>Draft</translation>
+        <translation>Koncept</translation>
     </message>
     <message>
         <source>Unpin chat</source>
-        <translation>Unpin chat</translation>
+        <translation>Odopnúť čet</translation>
     </message>
     <message>
         <source>Pin chat</source>
-        <translation>Pin chat</translation>
+        <translation>Pripnúť čet</translation>
     </message>
     <message>
         <source>Unmute chat</source>
-        <translation>Unmute chat</translation>
+        <translation>Ozvučiť čet</translation>
     </message>
     <message>
         <source>Mute chat</source>
-        <translation>Mute chat</translation>
+        <translation>Stlmiť čet</translation>
     </message>
     <message>
         <source>Delete Chat</source>
-        <translation type="unfinished">Delete Chat</translation>
+        <translation>Odstrániť čet</translation>
     </message>
     <message>
         <source>Deleting chat</source>
-        <translation type="unfinished">Deleting chat</translation>
+        <translation>Odstraňovanie četu</translation>
     </message>
     <message>
         <source>Add to folder...</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať do zložky...</translation>
     </message>
     <message>
         <source>Remove from folder: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť zo zložky: %1</translation>
     </message>
     <message>
         <source>Removed from folder: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstránené zo zložky: %1</translation>
     </message>
     <message>
         <source>Archive chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Archivovať konverzáciu</translation>
     </message>
 </context>
 <context>
     <name>ChatPage</name>
     <message>
         <source>Unknown</source>
-        <translation>Unknown</translation>
+        <translation>Neznáme</translation>
     </message>
     <message>
         <source>Your message</source>
-        <translation>Your message</translation>
+        <translation>Vaša správa</translation>
     </message>
     <message numerus="yes">
         <source>%1 members</source>
         <translation>
-            <numerusform>%1 member</numerusform>
-            <numerusform>%1 members</numerusform>
+            <numerusform>%1 člen</numerusform>
+            <numerusform>%1 členovia</numerusform>
+            <numerusform>%1 členov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%1 subscribers</source>
         <translation>
-            <numerusform>%1 subscriber</numerusform>
-            <numerusform>%1 subscribers</numerusform>
+            <numerusform>%1 predplatiteľ</numerusform>
+            <numerusform>%1 predplatitelia</numerusform>
+            <numerusform>%1 predplatiteľov</numerusform>
         </translation>
     </message>
     <message>
         <source>Loading messages...</source>
-        <translation>Loading messages...</translation>
+        <translation>Načítavanie správ…</translation>
     </message>
     <message>
         <source>Unmute Chat</source>
-        <translation>Unmute Chat</translation>
+        <translation>Zrušiť stlmenie konverzácie</translation>
     </message>
     <message>
         <source>Mute Chat</source>
-        <translation>Mute Chat</translation>
+        <translation>Stlmiť konverzáciu</translation>
     </message>
     <message>
         <source>Edit Message</source>
-        <translation>Edit Message</translation>
+        <translation>Upraviť správu</translation>
     </message>
     <message>
         <source>edited</source>
-        <translation>edited</translation>
+        <translation>upravené</translation>
     </message>
     <message>
         <source>Uploading...</source>
-        <translation>Uploading...</translation>
+        <translation>Nahrávanie…</translation>
     </message>
     <message>
         <source>This chat is empty.</source>
-        <translation>This chat is empty.</translation>
+        <translation>Táto konverzácia je prázdna.</translation>
     </message>
     <message>
         <source>Leave Chat</source>
-        <translation>Leave Chat</translation>
+        <translation>Opustiť konverzáciu</translation>
     </message>
     <message>
         <source>Join Chat</source>
-        <translation>Join Chat</translation>
+        <translation>Pripojiť sa ku konverzácii</translation>
     </message>
     <message>
         <source>Leaving chat</source>
-        <translation>Leaving chat</translation>
+        <translation>Opúšťanie konverzácie</translation>
     </message>
     <message>
         <source>You joined the chat %1</source>
-        <translation>You joined the chat %1</translation>
+        <translation>Pripojili ste sa ku konverzácii %1</translation>
     </message>
     <message>
         <source>Select Messages</source>
-        <translation>Select Messages</translation>
+        <translation>Vybrať správy</translation>
     </message>
     <message numerus="yes">
         <source>%Ln Messages deleted</source>
         <translation>
-            <numerusform>%Ln Message deleted</numerusform>
-            <numerusform>%Ln Messages deleted</numerusform>
+            <numerusform>%Ln Nachricht gelöscht</numerusform>
+            <numerusform>%Ln Nachrichten gelöscht</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%Ln messages have been copied</source>
         <translation>
-            <numerusform>%Ln message has been copied</numerusform>
-            <numerusform>%Ln messages have been copied</numerusform>
+            <numerusform>%Ln Nachricht wurde kopiert</numerusform>
+            <numerusform>%Ln Nachrichten wurden kopiert</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Forward %Ln messages</source>
         <comment>dialog header</comment>
         <translation>
-            <numerusform>Forward %Ln message</numerusform>
-            <numerusform>Forward %Ln messages</numerusform>
+            <numerusform>%Ln Nachricht weiterleiten</numerusform>
+            <numerusform>%Ln Nachrichten weiterleiten</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%Ln messages selected</source>
         <comment>number of messages selected</comment>
         <translation>
-            <numerusform>%Ln message selected</numerusform>
-            <numerusform>%Ln messages selected</numerusform>
+            <numerusform>%Ln Nachricht ausgewählt</numerusform>
+            <numerusform>%Ln Nachrichten ausgewählt</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
@@ -1440,480 +1452,482 @@
         <translation>
             <numerusform>%1 online</numerusform>
             <numerusform>%1 online</numerusform>
+            <numerusform></numerusform>
         </translation>
     </message>
     <message>
         <source>This secret chat is not yet ready. Your chat partner needs to go online first.</source>
-        <translation>This secret chat is not yet ready. Your chat partner needs to go online first.</translation>
+        <translation>Tento tajný čet ešte nie je pripravený. Váš partner v konverzácii musí najprv prejsť do režimu online.</translation>
     </message>
     <message>
         <source>Closing chat</source>
-        <translation>Closing chat</translation>
+        <translation>Zatváranie konverzácie</translation>
     </message>
     <message>
         <source>Close Chat</source>
-        <translation>Close Chat</translation>
+        <translation>Zavrieť konverzáciu</translation>
     </message>
     <message>
         <source>Search in Chat</source>
-        <translation>Search in Chat</translation>
+        <translation>Hľadať v konverzácii</translation>
     </message>
     <message>
         <source>Search in chat...</source>
-        <translation>Search in chat...</translation>
+        <translation>Hľadať v konverzácii…</translation>
     </message>
     <message>
         <source>Location: Obtaining position...</source>
-        <translation>Location: Obtaining position...</translation>
+        <translation>Poloha: Zisťuje sa pozícia…</translation>
     </message>
     <message>
         <source>Location (%1/%2)</source>
-        <translation>Location (%1/%2)</translation>
+        <translation>Poloha (%1/%2)</translation>
     </message>
     <message>
         <source>Copy Message to Clipboard</source>
-        <translation>Copy Message to Clipboard</translation>
+        <translation>Kopírovať správu do schránky</translation>
     </message>
     <message>
         <source>Message unpinned</source>
-        <translation>Message unpinned</translation>
+        <translation>Správa odopnutá</translation>
     </message>
     <message>
         <source>Unpin Message</source>
-        <translation>Unpin Message</translation>
+        <translation>Odopnúť správu</translation>
     </message>
     <message>
         <source>Pin Message</source>
-        <translation>Pin Message</translation>
+        <translation>Pripnúť správu</translation>
     </message>
     <message>
         <source>Additional Options</source>
-        <translation>Additional Options</translation>
+        <translation>Ďalšie možnosti</translation>
     </message>
     <message>
         <source>Unknown address</source>
-        <translation>Unknown address</translation>
+        <translation>Neznáma adresa</translation>
     </message>
     <message>
         <source>Accuracy: %1m</source>
-        <translation>Accuracy: %1m</translation>
+        <translation>Presnosť: %1 m</translation>
     </message>
     <message>
         <source>Sponsored Message</source>
-        <translation>Sponsored Message</translation>
+        <translation>Sponzorovaná správa</translation>
     </message>
     <message>
         <source>Deleting chat</source>
-        <translation>Deleting chat</translation>
+        <translation>Odstraňovanie konverzácie</translation>
     </message>
     <message>
         <source>Delete Chat</source>
-        <translation>Delete Chat</translation>
+        <translation>Odstrániť konverzáciu</translation>
     </message>
     <message>
         <source>Deleted User</source>
-        <translation>Deleted User</translation>
+        <translation>Odstránený používateľ</translation>
     </message>
     <message>
         <source>Double-tap on a message to choose a reaction</source>
-        <translation type="unfinished"></translation>
+        <translation>Dvojitým ťuknutím na správu vyberiete reakciu</translation>
     </message>
     <message>
         <source>Forward message</source>
-        <translation type="unfinished"></translation>
+        <translation>Preposlať správu</translation>
     </message>
     <message>
         <source>Delete message</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť správu</translation>
     </message>
     <message>
         <source>Topic is closed</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma je uzavretá</translation>
     </message>
     <message>
         <source>Copy Selected Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Kopírovať vybraný text</translation>
     </message>
     <message>
         <source>Quote Selected Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Citovať vybraný text</translation>
     </message>
     <message>
         <source>Premium set</source>
-        <translation type="unfinished"></translation>
+        <translation>Prémiová súprava</translation>
     </message>
     <message>
         <source>No premium emoji set available</source>
-        <translation type="unfinished"></translation>
+        <translation>Nie je dostupná žiadna prémiová súprava emoji</translation>
     </message>
     <message>
         <source>Only the first shared file has been prepared.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pripravený bol iba prvý zdieľaný súbor.</translation>
     </message>
     <message>
         <source>Unable to send this sticker.</source>
-        <translation type="unfinished"></translation>
+        <translation>Túto nálepku sa nepodarilo odoslať.</translation>
     </message>
     <message numerus="yes">
         <source>%Ln join requests</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln Beitrittsanfrage</numerusform>
+            <numerusform>%Ln Beitrittsanfragen</numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
         <source>Telegram allows up to %1 images per album.</source>
-        <translation type="unfinished"></translation>
+        <translation>Telegram povoľuje až %1 obrázkov v albume.</translation>
     </message>
     <message>
         <source>Scheduled for %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Naplánované na %1</translation>
     </message>
     <message>
         <source>Recent</source>
-        <translation type="unfinished"></translation>
+        <translation>Nedávne</translation>
     </message>
     <message>
         <source>Sticker set</source>
-        <translation type="unfinished"></translation>
+        <translation>Súprava nálepiek</translation>
     </message>
     <message>
         <source>No recent stickers</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne nedávne nálepky</translation>
     </message>
     <message>
         <source>No stickers in this set</source>
-        <translation type="unfinished"></translation>
+        <translation>V tejto súprave nie sú žiadne nálepky</translation>
     </message>
     <message>
         <source>Do you want to delete &quot;%1&quot;?</source>
-        <translation type="unfinished"></translation>
+        <translation>Chcete odstrániť „%1“?</translation>
     </message>
     <message>
         <source>Do you want to delete this set?</source>
-        <translation type="unfinished"></translation>
+        <translation>Chcete odstrániť túto súpravu?</translation>
     </message>
     <message>
         <source>Deleting &quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstraňuje sa „%1“</translation>
     </message>
     <message>
         <source>Deleting set</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstraňovanie súpravy</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation type="unfinished">Yes</translation>
+        <translation>Áno</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished">No</translation>
+        <translation>Nie</translation>
     </message>
     <message>
         <source>Type your message first, then tap this button to translate it to English!</source>
-        <translation type="unfinished"></translation>
+        <translation>Najprv napíšte správu, potom ťuknite na toto tlačidlo, aby ste ju preložili do angličtiny!</translation>
     </message>
     <message>
         <source>RooTelegram couldn&apos;t detect the language of the text — maybe you wrote a multilingual message?</source>
-        <translation type="unfinished"></translation>
+        <translation>RooTelegram nedokázal rozpoznať jazyk textu — možno ste napísali viacjazyčnú správu?</translation>
     </message>
     <message>
         <source>Selected text copied to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybraný text skopírovaný do schránky</translation>
     </message>
     <message>
         <source>is recording a voice message</source>
-        <translation type="unfinished"></translation>
+        <translation>nahráva hlasovú správu</translation>
     </message>
     <message>
         <source>is recording a video message</source>
-        <translation type="unfinished"></translation>
+        <translation>nahráva videosprávu</translation>
     </message>
     <message>
         <source>is recording a video</source>
-        <translation type="unfinished"></translation>
+        <translation>nahráva video</translation>
     </message>
     <message>
         <source>is sending a voice message</source>
-        <translation type="unfinished"></translation>
+        <translation>odosiela hlasovú správu</translation>
     </message>
     <message>
         <source>is sending a video message</source>
-        <translation type="unfinished"></translation>
+        <translation>odosiela videosprávu</translation>
     </message>
     <message>
         <source>is sending a video</source>
-        <translation type="unfinished"></translation>
+        <translation>odosiela video</translation>
     </message>
     <message>
         <source>is sending a photo</source>
-        <translation type="unfinished"></translation>
+        <translation>odosiela fotku</translation>
     </message>
     <message>
         <source>is sending a file</source>
-        <translation type="unfinished"></translation>
+        <translation>odosiela súbor</translation>
     </message>
     <message>
         <source>is choosing a sticker</source>
-        <translation type="unfinished"></translation>
+        <translation>vyberá nálepku</translation>
     </message>
     <message>
         <source>is choosing a location</source>
-        <translation type="unfinished"></translation>
+        <translation>vyberá polohu</translation>
     </message>
     <message>
         <source>is choosing a contact</source>
-        <translation type="unfinished"></translation>
+        <translation>vyberá kontakt</translation>
     </message>
     <message>
         <source>is typing…</source>
-        <translation type="unfinished"></translation>
+        <translation>píše…</translation>
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k obrázkom je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
     <message>
         <source>Video access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k videám je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
     <message>
         <source>Microphone is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Mikrofón je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
     <message>
         <source>File access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k súborom je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
     <message>
         <source>Still obtaining your position, please wait…</source>
-        <translation type="unfinished"></translation>
+        <translation>Stále zisťujem vašu polohu, počkajte…</translation>
     </message>
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakty sú vypnuté v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
     <message>
         <source>Unknown user</source>
-        <translation type="unfinished"></translation>
+        <translation>Nznámy používateľ</translation>
     </message>
     <message>
         <source>edited a message</source>
-        <translation type="unfinished"></translation>
+        <translation>upravená správa</translation>
     </message>
     <message>
         <source>deleted a message</source>
-        <translation type="unfinished"></translation>
+        <translation>odstránená správa</translation>
     </message>
     <message>
         <source>pinned a message</source>
-        <translation type="unfinished"></translation>
+        <translation>pripnutá správa</translation>
     </message>
     <message>
         <source>joined the chat</source>
-        <translation type="unfinished"></translation>
+        <translation>pripojený k četu</translation>
     </message>
     <message>
         <source>joined via invite link</source>
-        <translation type="unfinished"></translation>
+        <translation>pripojený cez pozývací odkaz</translation>
     </message>
     <message>
         <source>left the chat</source>
-        <translation type="unfinished"></translation>
+        <translation>opustiť čet</translation>
     </message>
     <message>
         <source>invited a member</source>
-        <translation type="unfinished"></translation>
+        <translation>pozvaný člen</translation>
     </message>
     <message>
         <source>updated administrator rights</source>
-        <translation type="unfinished"></translation>
+        <translation>aktualizované práva správcu</translation>
     </message>
     <message>
         <source>updated member permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>aktualizované oprávnenia člena</translation>
     </message>
     <message>
         <source>changed the chat title</source>
-        <translation type="unfinished">changed the chat title</translation>
+        <translation>zmenený nadpis četu</translation>
     </message>
     <message>
         <source>changed the description</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenený popis</translation>
     </message>
     <message>
         <source>changed the public username</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenené verejné meno používateľa</translation>
     </message>
     <message>
         <source>changed the photo</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenená fotografia</translation>
     </message>
     <message>
         <source>changed invite link permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenené oprávnenia pozývacieho odkazu</translation>
     </message>
     <message>
         <source>changed message signing</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenený podpis správy</translation>
     </message>
     <message>
         <source>changed sticker set</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenená sada nálepiek</translation>
     </message>
     <message>
         <source>changed linked chat</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenený prepojený čet</translation>
     </message>
     <message>
         <source>changed slow mode</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenený pomalý režim</translation>
     </message>
     <message>
         <source>started a video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>spustený video-čet</translation>
     </message>
     <message>
         <source>ended the video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>ukončený video-čet</translation>
     </message>
     <message>
         <source>changed video chat permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenené oprávnenia video-četu</translation>
     </message>
     <message>
         <source>edited an invite link</source>
-        <translation type="unfinished"></translation>
+        <translation>upravený pozývací odkaz</translation>
     </message>
     <message>
         <source>revoked an invite link</source>
-        <translation type="unfinished"></translation>
+        <translation>zrušený pozývací odkaz</translation>
     </message>
     <message>
         <source>deleted an invite link</source>
-        <translation type="unfinished"></translation>
+        <translation>odstránený pozývací odkaz</translation>
     </message>
     <message>
         <source>performed an action</source>
-        <translation type="unfinished"></translation>
+        <translation>vykonaná akcia</translation>
     </message>
     <message>
         <source>Description cleared</source>
-        <translation type="unfinished"></translation>
+        <translation>Popis zmazaný</translation>
     </message>
     <message>
         <source>Username removed</source>
-        <translation type="unfinished"></translation>
+        <translation>Meno pužívateľa odstránené</translation>
     </message>
     <message>
         <source>Slow mode: %1s</source>
-        <translation type="unfinished"></translation>
+        <translation>Pomalý režim: %1 s</translation>
     </message>
     <message>
         <source>Slow mode disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Pomalý režim zakázaný</translation>
     </message>
     <message>
         <source>Linked chat removed</source>
-        <translation type="unfinished"></translation>
+        <translation>Prepojený čet odstránený</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Recent Actions</source>
-        <translation type="unfinished"></translation>
+        <translation>Nedávne akcie</translation>
     </message>
     <message>
         <source>No recent actions found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne nedávne akcie.</translation>
     </message>
     <message>
         <source>Load more</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítať viac</translation>
     </message>
 </context>
 <context>
     <name>ChatSelectionPage</name>
     <message>
         <source>Select Chat</source>
-        <translation>Select Chat</translation>
+        <translation>Vybrať čet</translation>
     </message>
     <message>
         <source>You don&apos;t have any chats yet.</source>
-        <translation>You don&apos;t have any chats yet.</translation>
+        <translation>Nemáte žiadne čety.</translation>
     </message>
     <message>
         <source>Search in contacts...</source>
-        <translation type="unfinished"></translation>
+        <translation>Hľadať v kontaktoch…</translation>
     </message>
 </context>
 <context>
     <name>ContactPickerPage</name>
     <message>
         <source>Send contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Poslať kontakt</translation>
     </message>
     <message>
         <source>Search contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyhľadať kontakt</translation>
     </message>
     <message>
         <source>No contacts with a phone number</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiaden kontakt s telefónnym číslom</translation>
     </message>
 </context>
 <context>
     <name>ContactSync</name>
     <message>
         <source>Could not synchronize your contacts with Telegram.</source>
-        <translation type="unfinished">Could not synchronize your contacts with Telegram.</translation>
+        <translation>Nemožno synchronizovať kontakty s Telegramom.</translation>
     </message>
 </context>
 <context>
     <name>CoverPage</name>
     <message>
         <source>in</source>
-        <translation>in</translation>
+        <translation>v</translation>
     </message>
     <message>
         <source>Waiting for network...</source>
-        <translation>Waiting for network...</translation>
+        <translation>Čakanie na sieť...</translation>
     </message>
     <message>
         <source>Connecting to network...</source>
-        <translation>Connecting to network...</translation>
+        <translation>Pripájanie k sieti...</translation>
     </message>
     <message>
         <source>Connecting to proxy...</source>
-        <translation>Connecting to proxy...</translation>
+        <translation>Pripájanie k proxy...</translation>
     </message>
     <message>
         <source>Connected</source>
-        <translation>Connected</translation>
+        <translation>Pripojené</translation>
     </message>
     <message>
         <source>Updating content...</source>
-        <translation>Updating content...</translation>
+        <translation>Aktualizovať obsah...</translation>
     </message>
     <message numerus="yes">
         <source>chats</source>
         <translation>
-            <numerusform>chat</numerusform>
-            <numerusform>chats</numerusform>
+            <numerusform>čet</numerusform>
+            <numerusform>čety</numerusform>
+            <numerusform>četov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>unread messages</source>
         <translation>
-            <numerusform>unread
-message</numerusform>
-            <numerusform>unread
-messages</numerusform>
+            <numerusform>neprečítaná správa</numerusform>
+            <numerusform>neprečítané správy</numerusform>
+            <numerusform>neprečítaných správ</numerusform>
         </translation>
     </message>
 </context>
@@ -1921,33 +1935,34 @@ messages</numerusform>
     <name>CreateSupergroupPage</name>
     <message>
         <source>New Channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Nový kanál</translation>
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Nová skupina</translation>
     </message>
 </context>
 <context>
     <name>DeleteMessagesChoiceDialog</name>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">Cancel</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message numerus="yes">
         <source>Delete %Ln message(s)?</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Zamazať %Ln správu?</numerusform>
+            <numerusform>Zamazať %Ln správy?</numerusform>
+            <numerusform>Zamazať %Ln správ?</numerusform>
         </translation>
     </message>
     <message>
         <source>Delete for everyone</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť pre všetkých</translation>
     </message>
     <message>
         <source>Delete for me</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť pre mňa</translation>
     </message>
 </context>
 <context>
@@ -1955,689 +1970,693 @@ messages</numerusform>
     <message>
         <source>Group Member Permissions</source>
         <comment>what can normal group members do</comment>
-        <translation>Group Member Permissions</translation>
+        <translation>Oprávnenia člena skupiny</translation>
     </message>
     <message>
         <source>Send Messages</source>
         <comment>member permission</comment>
-        <translation>Send Messages</translation>
+        <translation>Odoslané správy</translation>
     </message>
     <message>
         <source>Send Media Messages</source>
         <comment>member permission</comment>
-        <translation>Send Media Messages</translation>
+        <translation>Odoslané mediálne správy</translation>
     </message>
     <message>
         <source>Send Other Messages</source>
         <comment>member permission</comment>
-        <translation>Send Other Messages</translation>
+        <translation>Odoslané ostatné správy</translation>
     </message>
     <message>
         <source>Add Web Page Previews</source>
         <comment>member permission</comment>
-        <translation>Add Web Page Previews</translation>
+        <translation>Pridať náhľad webovej stránky</translation>
     </message>
     <message>
         <source>Change Chat Info</source>
         <comment>member permission</comment>
-        <translation>Change Chat Info</translation>
+        <translation>Zmeniť informácie o čete</translation>
     </message>
     <message>
         <source>Invite Users</source>
         <comment>member permission</comment>
-        <translation>Invite Users</translation>
+        <translation>Pozvať používateľov</translation>
     </message>
     <message>
         <source>Pin Messages</source>
         <comment>member permission</comment>
-        <translation>Pin Messages</translation>
+        <translation>Pripnúť správy</translation>
     </message>
     <message>
         <source>New Members</source>
         <comment>what can new group members do</comment>
-        <translation>New Members</translation>
+        <translation>Noví členovia</translation>
     </message>
     <message>
         <source>New members can see older messages</source>
         <comment>member permission</comment>
-        <translation>New members can see older messages</translation>
+        <translation>Noví členovia môžu vidieť staršie správy</translation>
     </message>
     <message>
         <source>Send Polls</source>
         <comment>member permission</comment>
-        <translation type="unfinished"></translation>
+        <translation>Poslať ankety</translation>
     </message>
     <message>
         <source>Create Topics</source>
         <comment>member permission</comment>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť témy</translation>
     </message>
     <message>
         <source>Message history can&apos;t be hidden while topics are enabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>História správy nemôže byť skrytá ak je téma povolená.</translation>
     </message>
     <message>
         <source>Group permissions updated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Oprávnenia skupiny boli zmenené.</translation>
     </message>
     <message>
         <source>Some permission changes were rejected by Telegram.</source>
-        <translation type="unfinished"></translation>
+        <translation>Telegram zamietol niektoré zmeny oprávnení.</translation>
     </message>
     <message>
         <source>Telegram doesn&apos;t allow granting this permission to all members in this group.</source>
-        <translation type="unfinished"></translation>
+        <translation>Telegram neumožňuje udeliť toto povolenie všetkým členom tejto skupiny.</translation>
     </message>
 </context>
 <context>
     <name>EditSuperGroupSlowModeColumn</name>
     <message>
         <source>Slow Mode</source>
-        <translation>Slow Mode</translation>
+        <translation>Pomalý režim</translation>
     </message>
     <message>
         <source>Off</source>
-        <translation>Off</translation>
+        <translation>Vypnúť</translation>
     </message>
     <message>
         <source>Set how long every chat member has to wait between Messages</source>
-        <translation>Set how long every chat member has to wait between Messages</translation>
+        <translation>Nastaviť ako dlho musí každý člen četu čakať medzi správami</translation>
     </message>
 </context>
 <context>
     <name>EmojiPicker</name>
     <message>
         <source>Search emoji</source>
-        <translation type="unfinished"></translation>
+        <translation>Hľadať emoji</translation>
     </message>
     <message>
         <source>No results</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne výsledky</translation>
     </message>
     <message>
         <source>No emoji</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne emoji</translation>
     </message>
 </context>
 <context>
     <name>ForumTopicsPage</name>
     <message>
         <source>Topics</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy</translation>
     </message>
     <message>
         <source>Loading topics...</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítať témy…</translation>
     </message>
     <message>
         <source>No topics found</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne témy nenájdené</translation>
     </message>
     <message>
         <source>This group has no topics yet.</source>
-        <translation type="unfinished"></translation>
+        <translation>Táto skupina nemá žiadne témy.</translation>
     </message>
     <message>
         <source>You</source>
-        <translation type="unfinished">You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>Only administrators can manage topics.</source>
-        <translation type="unfinished"></translation>
+        <translation>Témy môžu spravovať iba správcovia.</translation>
     </message>
     <message>
         <source>Topic name must be between 1 and 128 characters.</source>
-        <translation type="unfinished"></translation>
+        <translation>Názov témy musí ma 1 až 128 znakov.</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Create Topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť tému</translation>
     </message>
     <message>
         <source>Disable Topics</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať témy</translation>
     </message>
     <message>
         <source>Topic created.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola vytvorená.</translation>
     </message>
     <message>
         <source>Topic renamed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola premenovaná.</translation>
     </message>
     <message>
         <source>Topic deleted.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola odstránená.</translation>
     </message>
     <message>
         <source>Topic closed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola uzavretá.</translation>
     </message>
     <message>
         <source>Topic reopened.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola znovu otvorená.</translation>
     </message>
     <message>
         <source>Topics disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma bola zakázaná.</translation>
     </message>
     <message>
         <source>Topic name</source>
-        <translation type="unfinished"></translation>
+        <translation>Názov témy</translation>
     </message>
     <message>
         <source>New topic name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nový názov témy</translation>
     </message>
     <message>
         <source>Enter topic name</source>
-        <translation type="unfinished"></translation>
+        <translation>Zadať názov témy</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">Cancel</translation>
+        <translation>zrušiť</translation>
     </message>
     <message>
         <source>Saving…</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukladanie...</translation>
     </message>
     <message>
         <source>Create</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť</translation>
     </message>
     <message>
         <source>Rename</source>
-        <translation type="unfinished"></translation>
+        <translation>Premenovať</translation>
     </message>
     <message>
         <source>Rename topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Premenovať tému</translation>
     </message>
     <message>
         <source>Reopen topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Znovu otvoriť tému</translation>
     </message>
     <message>
         <source>Close topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Zatvoriť tému</translation>
     </message>
     <message>
         <source>Delete topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť tému</translation>
     </message>
     <message>
         <source>Deleting topic</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstraňovanie témy</translation>
     </message>
     <message>
         <source>Closed</source>
-        <translation type="unfinished"></translation>
+        <translation>Uzatvorené</translation>
     </message>
     <message>
         <source>You don&apos;t have permission to create topics.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemáte oprávnenie na vytváranie tém.</translation>
     </message>
 </context>
 <context>
     <name>FullscreenOverlay</name>
     <message>
         <source>Saved %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložené %1</translation>
     </message>
     <message>
         <source>Save failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukladanie zlyhalo.</translation>
     </message>
 </context>
 <context>
     <name>GroupTypePage</name>
     <message>
         <source>Username must be 5-32 characters.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľské meno musí mať 5 až 32 znakov.</translation>
     </message>
     <message>
         <source>Username can only use letters, numbers and underscores.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľské meno môže obsahovať iba písmená, číslice a podčiarkovníky.</translation>
     </message>
     <message>
         <source>Saving…</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukladanie...</translation>
     </message>
     <message>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Uložiť</translation>
     </message>
     <message>
         <source>Channel Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ kanála</translation>
     </message>
     <message>
         <source>Group Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Typ skupiny</translation>
     </message>
     <message>
         <source>Public Channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Verejný kanál</translation>
     </message>
     <message>
         <source>Public Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Verejná skupina</translation>
     </message>
     <message>
         <source>Public chats can be found via username.</source>
-        <translation type="unfinished"></translation>
+        <translation>Verejné čety je možné vyhľadať podľa mena používateľa.</translation>
     </message>
     <message>
         <source>Private chats can only be joined through invite links.</source>
-        <translation type="unfinished"></translation>
+        <translation>K súkromným četom je možné sa pripojiť iba pomocou pozývacieho odkazu.</translation>
     </message>
     <message>
         <source>Username</source>
-        <translation type="unfinished">Username</translation>
+        <translation>Meno používateľa</translation>
     </message>
     <message>
         <source>Set public username</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastaviť verejné meno používateľa</translation>
     </message>
     <message>
         <source>Use 5-32 letters, numbers or underscores.</source>
-        <translation type="unfinished"></translation>
+        <translation>Použite 5-32 písmen, čísiel alebo podčiarkovníkov.</translation>
     </message>
     <message>
         <source>Approve new members</source>
-        <translation type="unfinished"></translation>
+        <translation>Schváliť nových členov</translation>
     </message>
     <message>
         <source>New members must be approved by an administrator.</source>
-        <translation type="unfinished"></translation>
+        <translation>Noví členovia musia byť schválení správcom.</translation>
     </message>
     <message>
         <source>Forbid content saving</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať ukladanie obsahu</translation>
     </message>
     <message>
         <source>Prevents forwarding, copying and saving of chat contents.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zabrániť preposielanie, kopírovanie a ukladanie obsahov četu.</translation>
     </message>
     <message>
         <source>Options saved</source>
-        <translation type="unfinished"></translation>
+        <translation>Možnosti uložené</translation>
     </message>
 </context>
 <context>
     <name>ImagePage</name>
     <message>
         <source>Download Picture</source>
-        <translation>Download Picture</translation>
+        <translation>Prevziať obrázok</translation>
     </message>
     <message>
         <source>Download of %1 successful.</source>
-        <translation>Download of %1 successful.</translation>
+        <translation>Prevzatie %1 bolo úspešné.</translation>
     </message>
     <message>
         <source>Download failed.</source>
-        <translation>Download failed.</translation>
+        <translation>Prevzatie zlyhalo.</translation>
     </message>
 </context>
 <context>
     <name>InReplyToRow</name>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation>Unknown</translation>
+        <translation>Neznámy</translation>
     </message>
     <message>
         <source>This message was deleted</source>
-        <translation>This message was deleted</translation>
+        <translation>Táto správa bola odstránená</translation>
     </message>
 </context>
 <context>
     <name>InitializationPage</name>
     <message>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation>Potvrdiť</translation>
     </message>
     <message>
         <source>Welcome to RooTelegram!</source>
-        <translation>Welcome to RooTelegram!</translation>
+        <translation>Vitajte v RooTelegram!</translation>
     </message>
     <message>
         <source>Please enter your phone number to continue.</source>
-        <translation>Please enter your phone number to continue.</translation>
+        <translation>Zadajte Vaše telefónne číslo pre pokračovanie.</translation>
     </message>
     <message>
         <source>Continue</source>
-        <translation>Continue</translation>
+        <translation>Pokračovať</translation>
     </message>
     <message>
         <source>Please enter the code that you received:</source>
-        <translation>Please enter the code that you received:</translation>
+        <translation>Zadajte kód ktorý ste dostali:</translation>
     </message>
     <message>
         <source>Loading...</source>
-        <translation>Loading...</translation>
+        <translation>Načítanie…</translation>
     </message>
     <message>
         <source>Unable to authenticate you with the entered code.</source>
-        <translation>Unable to authenticate you with the entered code.</translation>
+        <translation>Vloženým kódom Vás nemožno overiť.</translation>
     </message>
     <message>
         <source>Enter code again</source>
-        <translation>Enter code again</translation>
+        <translation>Vložte kód znova</translation>
     </message>
     <message>
         <source>Restart authentication</source>
-        <translation>Restart authentication</translation>
+        <translation>Zopakovať overenie</translation>
     </message>
     <message>
         <source>Please enter your password:</source>
-        <translation>Please enter your password:</translation>
+        <translation>Zadajte Vaše heslo:</translation>
     </message>
     <message>
         <source>User Registration</source>
-        <translation>User Registration</translation>
+        <translation>Registrácia používateľa</translation>
     </message>
     <message>
         <source>Enter your First Name</source>
-        <translation>Enter your First Name</translation>
+        <translation>Zadajte Vaše meno</translation>
     </message>
     <message>
         <source>Enter your Last Name</source>
-        <translation>Enter your Last Name</translation>
+        <translation>Zadajte Vaše priezvisko</translation>
     </message>
     <message>
         <source>Register User</source>
-        <translation>Register User</translation>
+        <translation>Registrovať používateľa</translation>
     </message>
     <message>
         <source>Use the international format, e.g. %1</source>
-        <translation>Use the international format, e.g. %1</translation>
+        <translation>Použite medzinárodný formát, napr %1</translation>
     </message>
     <message>
         <source>About RooTelegram</source>
-        <translation>About RooTelegram</translation>
+        <translation>O aplikácii RooTelegram</translation>
     </message>
     <message>
         <source>— or —</source>
-        <translation type="unfinished"></translation>
+        <translation>— alebo —</translation>
     </message>
     <message>
         <source>Log in by QR code</source>
-        <translation type="unfinished"></translation>
+        <translation>Prihlásiť sa QR kódom</translation>
     </message>
     <message>
         <source>Scan this QR code</source>
-        <translation type="unfinished"></translation>
+        <translation>Naskenujte tento QR kód</translation>
     </message>
     <message>
         <source>On a phone already logged into Telegram, open Settings → Devices → Link Desktop Device and scan this code.</source>
-        <translation type="unfinished"></translation>
+        <translation>Na telefóne, ktorý je už prihlásený v Telegrame, otvorte Nastavenia → Zariadenia → Pripojiť zariadenie a naskenujte tento kód.</translation>
     </message>
     <message>
         <source>Generating QR code…</source>
-        <translation type="unfinished"></translation>
+        <translation>Generujem QR kód…</translation>
     </message>
     <message>
         <source>Use phone number instead</source>
-        <translation type="unfinished"></translation>
+        <translation>Použiť radšej telefónne číslo</translation>
     </message>
 </context>
 <context>
     <name>MessageAudio</name>
     <message>
         <source>Transcribe</source>
-        <translation type="unfinished"></translation>
+        <translation>Prepisovať</translation>
     </message>
     <message>
         <source>Play/Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>Prehrať/Pozastaviť</translation>
     </message>
 </context>
 <context>
     <name>MessageContact</name>
     <message>
         <source>Contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakt</translation>
     </message>
     <message>
         <source>Contact saved to address book</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakt bol uložený do adresára</translation>
     </message>
     <message>
         <source>Could not save the contact</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakt nemožno uložiť</translation>
     </message>
     <message>
         <source>Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Správa</translation>
     </message>
     <message>
         <source>Add to contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať do kontaktov</translation>
     </message>
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakty sú vypnuté v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>MessageInfoPage</name>
     <message>
         <source>When the recipient comes online</source>
-        <translation type="unfinished"></translation>
+        <translation>Keď príjemca prejde do režimu online</translation>
     </message>
     <message>
         <source>Message info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informácie o správe</translation>
     </message>
     <message>
         <source>Sent</source>
-        <translation type="unfinished"></translation>
+        <translation>Odoslané</translation>
     </message>
     <message>
         <source>Edited</source>
-        <translation type="unfinished"></translation>
+        <translation>Upravené</translation>
     </message>
     <message>
         <source>Scheduled</source>
-        <translation type="unfinished"></translation>
+        <translation>Naplánované</translation>
     </message>
     <message>
         <source>Sender</source>
-        <translation type="unfinished"></translation>
+        <translation>Odosielateľ</translation>
     </message>
     <message>
         <source>Author signature</source>
-        <translation type="unfinished"></translation>
+        <translation>Podpis autora</translation>
     </message>
     <message>
         <source>Via bot</source>
-        <translation type="unfinished"></translation>
+        <translation>Cez bota</translation>
     </message>
     <message>
         <source>Forwarded from</source>
-        <translation type="unfinished"></translation>
+        <translation>Preposlané od</translation>
     </message>
     <message>
         <source>Original date</source>
-        <translation type="unfinished"></translation>
+        <translation>Pôvodný dátum</translation>
     </message>
     <message>
         <source>Views</source>
-        <translation type="unfinished"></translation>
+        <translation>Zobrazenia</translation>
     </message>
     <message>
         <source>Forwards</source>
-        <translation type="unfinished"></translation>
+        <translation>Preposlania</translation>
     </message>
     <message>
         <source>Reactions</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakcie</translation>
     </message>
     <message>
         <source>Message ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID správy</translation>
     </message>
     <message>
         <source>Album ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID albumu</translation>
     </message>
 </context>
 <context>
     <name>MessageListViewItem</name>
     <message>
         <source>Reply to Message</source>
-        <translation>Reply to Message</translation>
+        <translation>Odpovedať na správu</translation>
     </message>
     <message>
         <source>Edit Message</source>
-        <translation>Edit Message</translation>
+        <translation>Upraviť správu</translation>
     </message>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>Forwarded Message</source>
-        <translation>Forwarded Message</translation>
+        <translation>Preposlaná správa</translation>
     </message>
     <message>
         <source>Select Message</source>
-        <translation>Select Message</translation>
+        <translation>Vybrať správu</translation>
     </message>
     <message>
         <source>More Options...</source>
-        <translation>More Options...</translation>
+        <translation>Viac možností…</translation>
     </message>
     <message>
         <source>Message deleted</source>
-        <translation>Message deleted</translation>
+        <translation>Správa bola vymazaná</translation>
     </message>
     <message>
         <source>Copy Message to Clipboard</source>
-        <translation>Copy Message to Clipboard</translation>
+        <translation>Kopírovať správu do schránky</translation>
     </message>
     <message>
         <source>Forward message</source>
-        <translation type="unfinished"></translation>
+        <translation>Postúpiť správu</translation>
     </message>
     <message>
         <source>Delete message</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmazať správu</translation>
     </message>
     <message>
         <source>Delete all messages from %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť všetky správy z %1</translation>
     </message>
     <message>
         <source>Delete all messages from this user</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť všetky správy tohto používateľa</translation>
     </message>
     <message>
         <source>Ban %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať %1</translation>
     </message>
     <message>
         <source>Ban user</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázaný používateľ</translation>
     </message>
     <message>
         <source>Report as spam</source>
-        <translation type="unfinished"></translation>
+        <translation>Vykázať ako spam</translation>
     </message>
     <message>
         <source>Deletion of messages started</source>
-        <translation type="unfinished"></translation>
+        <translation>Začalo odstraňovanie správ</translation>
     </message>
     <message>
         <source>User banned</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ je zakázaný</translation>
     </message>
     <message>
         <source>Report submitted</source>
-        <translation type="unfinished"></translation>
+        <translation>Správa bola predložená</translation>
     </message>
     <message>
         <source>Unpin Message</source>
-        <translation type="unfinished">Unpin Message</translation>
+        <translation>Odopnúť správu</translation>
     </message>
     <message>
         <source>Pin Message</source>
-        <translation type="unfinished">Pin Message</translation>
+        <translation>Pripnúť správu</translation>
     </message>
     <message numerus="yes">
         <source>%Ln messages of album deleted</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%Ln správa z albumu bola zmazaná</numerusform>
+            <numerusform>%Ln správy z albumu boli zmazané</numerusform>
+            <numerusform>%Ln správ z albumu bolo zmazaných</numerusform>
         </translation>
     </message>
     <message>
         <source>Delete album</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť album</translation>
     </message>
     <message>
         <source>Hide spoiler</source>
-        <translation type="unfinished"></translation>
+        <translation>Skryť spojler</translation>
     </message>
     <message>
         <source>Reveal spoiler</source>
-        <translation type="unfinished"></translation>
+        <translation>Odhaliť spojler</translation>
     </message>
     <message numerus="yes">
         <source>%n comment(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n komentár</numerusform>
+            <numerusform>%n komentáre</numerusform>
+            <numerusform>%n komentárov</numerusform>
         </translation>
     </message>
     <message>
         <source>In reply to a story</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpoveď na príbeh</translation>
     </message>
     <message>
         <source>Translate message</source>
-        <translation type="unfinished"></translation>
+        <translation>Preložiť správu</translation>
     </message>
     <message>
         <source>Someone</source>
-        <translation type="unfinished"></translation>
+        <translation>Niekto</translation>
     </message>
     <message>
         <source>Message info</source>
-        <translation type="unfinished"></translation>
+        <translation>Informácie o správe</translation>
     </message>
     <message>
         <source>Code copied to clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Kód skopírovaný do schránky</translation>
     </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points in %2</source>
         <comment>myself</comment>
         <translation>
-            <numerusform>scored %Ln point in %2</numerusform>
-            <numerusform>scored %Ln points in %2</numerusform>
+            <numerusform>získal %Ln bod v %2</numerusform>
+            <numerusform>získal %Ln body v %2</numerusform>
+            <numerusform>získal %Ln bodov v %2</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points in %2</source>
         <translation>
-            <numerusform>scored %Ln point in %2</numerusform>
-            <numerusform>scored %Ln points in %2</numerusform>
+            <numerusform>získal %Ln bod v %2</numerusform>
+            <numerusform>získal %Ln body v %2</numerusform>
+            <numerusform>získal %Ln bodov v %2</numerusform>
         </translation>
     </message>
 </context>
@@ -2645,45 +2664,47 @@ messages</numerusform>
     <name>MessageOverlayFlickable</name>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>This message was forwarded. Original author: %1</source>
-        <translation>This message was forwarded. Original author: %1</translation>
+        <translation>Táto správa bola postúpená. Pôvodný autor: %1</translation>
     </message>
 </context>
 <context>
     <name>MessagePoll</name>
     <message>
         <source>Close Poll</source>
-        <translation>Close Poll</translation>
+        <translation>Zatvoriť anketu</translation>
     </message>
     <message>
         <source>Reset Answer</source>
-        <translation>Reset Answer</translation>
+        <translation>Resetovať odpoveď</translation>
     </message>
     <message>
         <source>Final Result:</source>
-        <translation>Final Result:</translation>
+        <translation>Konečný výsledok:</translation>
     </message>
     <message>
         <source>Multiple Answers are allowed.</source>
-        <translation>Multiple Answers are allowed.</translation>
+        <translation>Sú povolené vicnásobné odpovede.</translation>
     </message>
     <message numerus="yes">
         <source>%Ln%</source>
         <comment>% of votes for option</comment>
         <translation>
-            <numerusform>%Ln%</numerusform>
-            <numerusform>%Ln%</numerusform>
+            <numerusform>%Ln %</numerusform>
+            <numerusform>%Ln %</numerusform>
+            <numerusform>%Ln %</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%Ln vote(s) total</source>
         <comment>number of total votes</comment>
         <translation>
-            <numerusform>%Ln vote total</numerusform>
-            <numerusform>%Ln votes total</numerusform>
+            <numerusform>%Ln volič</numerusform>
+            <numerusform>%Ln voliči</numerusform>
+            <numerusform>%Ln voličov</numerusform>
         </translation>
     </message>
 </context>
@@ -2692,76 +2713,76 @@ messages</numerusform>
     <message>
         <source>via %1</source>
         <comment>message posted via bot user</comment>
-        <translation>via %1</translation>
+        <translation>cez %1</translation>
     </message>
 </context>
 <context>
     <name>MessageViewersPage</name>
     <message>
         <source>Seen by</source>
-        <translation>Seen by</translation>
+        <translation>Videné kým</translation>
     </message>
     <message>
         <source>No views</source>
-        <translation>No views</translation>
+        <translation>Žiadne prezerania</translation>
     </message>
 </context>
 <context>
     <name>MessageVoiceNote</name>
     <message>
         <source>Voice Note</source>
-        <translation>Voice Note</translation>
+        <translation>Hlasová poznámka</translation>
     </message>
 </context>
 <context>
     <name>NewChatPage</name>
     <message>
         <source>Your Contacts</source>
-        <translation>Your Contacts</translation>
+        <translation>Vaše kontakty</translation>
     </message>
     <message>
         <source>You don&apos;t have any contacts.</source>
-        <translation>You don&apos;t have any contacts.</translation>
+        <translation>Nemáte žiadne kontakty.</translation>
     </message>
     <message>
         <source>Private Chat</source>
-        <translation>Private Chat</translation>
+        <translation>Súkromný čet</translation>
     </message>
     <message>
         <source>Secret Chat</source>
-        <translation>Secret Chat</translation>
+        <translation>Utajený čet</translation>
     </message>
     <message>
         <source>End-to-end-encrypted, accessible on this device only</source>
-        <translation>End-to-end-encrypted, accessible on this device only</translation>
+        <translation>Šifrované koniec-koniec, dostupné iba na tomto zariadení</translation>
     </message>
     <message>
         <source>Search a contact...</source>
-        <translation>Search a contact...</translation>
+        <translation>Hľadať kontakt…</translation>
     </message>
     <message>
         <source>Loading contacts...</source>
-        <translation>Loading contacts...</translation>
+        <translation>Načítať kontakty…</translation>
     </message>
     <message>
         <source>Transport-encrypted, uses Telegram Cloud, sharable across devices</source>
-        <translation>Transport-encrypted, uses Telegram Cloud, sharable across devices</translation>
+        <translation>Šifrovaný prenos, využíva Telegram Cloud, použiteľné naprieč zariadeniami</translation>
     </message>
     <message>
         <source>Synchronize Contacts with Telegram</source>
-        <translation>Synchronize Contacts with Telegram</translation>
+        <translation>Synchronizovať kontakty s Telegramom</translation>
     </message>
     <message>
         <source>Contacts successfully synchronized with Telegram.</source>
-        <translation>Contacts successfully synchronized with Telegram.</translation>
+        <translation>Kontakty boli úspešne synchronizované s Telegramom.</translation>
     </message>
     <message>
         <source>No contacts found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nenašli sa žiadne kontakty.</translation>
     </message>
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakty sú vypnuté v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
@@ -2769,360 +2790,367 @@ messages</numerusform>
     <message numerus="yes">
         <source>%Ln unread messages</source>
         <translation>
-            <numerusform>%Ln unread message</numerusform>
-            <numerusform>%Ln unread messages</numerusform>
+            <numerusform>%Ln neprečítaná správa</numerusform>
+            <numerusform>%Ln neprečítané správy</numerusform>
+            <numerusform>%Ln neprečítaných správ</numerusform>
         </translation>
     </message>
     <message>
         <source>posted a new story</source>
-        <translation type="unfinished"></translation>
+        <translation>zverejnený nový príbeh</translation>
     </message>
     <message>
         <source>reacted to your message</source>
-        <translation type="unfinished"></translation>
+        <translation>reagované na Vašu správu</translation>
     </message>
     <message>
         <source>reacted %1 to your message</source>
-        <translation type="unfinished"></translation>
+        <translation>reagované %1 na Vašu správu</translation>
     </message>
 </context>
 <context>
     <name>OverviewPage</name>
     <message>
         <source>My chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Moje čety</translation>
     </message>
     <message>
         <source>Global results</source>
-        <translation type="unfinished"></translation>
+        <translation>Celkové výsledky</translation>
     </message>
     <message>
         <source>User</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ</translation>
     </message>
     <message>
         <source>Group</source>
-        <translation type="unfinished">Group</translation>
+        <translation>Skupina</translation>
     </message>
     <message>
         <source>Channel</source>
-        <translation type="unfinished">Channel</translation>
+        <translation>Kanál</translation>
     </message>
     <message>
         <source>No public users, groups or channels found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Neboli nájdené žiadni verejní používatelia, skupiny ani kanály.</translation>
     </message>
     <message>
         <source>Waiting for network...</source>
-        <translation>Waiting for network...</translation>
+        <translation>Čakanie na sieť…</translation>
     </message>
     <message>
         <source>Connecting to network...</source>
-        <translation>Connecting to network...</translation>
+        <translation>Pripájanie do siete…</translation>
     </message>
     <message>
         <source>Connecting to proxy...</source>
-        <translation>Connecting to proxy...</translation>
+        <translation>Pripájanie k proxy…</translation>
     </message>
     <message>
         <source>Updating content...</source>
-        <translation>Updating content...</translation>
+        <translation>Aktualizovať obsah…</translation>
     </message>
     <message>
         <source>Loading chat list...</source>
-        <translation>Loading chat list...</translation>
+        <translation>Načítať zoznam četov…</translation>
     </message>
     <message>
         <source>Settings</source>
-        <translation>Settings</translation>
+        <translation>Nastavenia</translation>
     </message>
     <message>
         <source>You don&apos;t have any chats yet.</source>
-        <translation>You don&apos;t have any chats yet.</translation>
+        <translation>Nemáte žiadne čety.</translation>
     </message>
     <message>
         <source>New Chat</source>
-        <translation>New Chat</translation>
+        <translation>Nový čet</translation>
     </message>
     <message>
         <source>Download of %1 successful.</source>
-        <translation>Download of %1 successful.</translation>
+        <translation>Prevzaté %1 úspešne.</translation>
     </message>
     <message>
         <source>Download failed.</source>
-        <translation>Download failed.</translation>
+        <translation>Prevzatie zlyhalo.</translation>
     </message>
     <message>
         <source>Tap on the title bar to filter your chats</source>
-        <translation>Tap on the title bar to filter your chats</translation>
+        <translation>Klepnutím na záhlavie filtrujte svoje čety</translation>
     </message>
     <message>
         <source>No matching chats found.</source>
-        <translation>No matching chats found.</translation>
+        <translation>Nenašli sa vyhovujúce čety.</translation>
     </message>
     <message>
         <source>You can search public chats or create a new chat via the pull-down menu.</source>
-        <translation>You can search public chats or create a new chat via the pull-down menu.</translation>
+        <translation>Pomocou rozbaľovacej ponuky môžete vyhľadávať vo verejných četoch alebo vytvoriť nový čet.</translation>
     </message>
     <message>
         <source>Logging out</source>
-        <translation>Logging out</translation>
+        <translation>Odhlasovanie</translation>
     </message>
     <message>
         <source>Unable to open link.</source>
-        <translation>Unable to open link.</translation>
+        <translation>Nemožno otvoriť odkaz.</translation>
     </message>
     <message>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetko</translation>
     </message>
     <message>
         <source>All chats marked as read.</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetky čety označiť ako prečítané.</translation>
     </message>
     <message>
         <source>Mark all as read</source>
-        <translation type="unfinished"></translation>
+        <translation>Označiť všetko ako prečítané</translation>
     </message>
     <message>
         <source>Edit folders</source>
-        <translation type="unfinished"></translation>
+        <translation>Upraviť zložky</translation>
     </message>
     <message>
         <source>Search chat...</source>
-        <translation type="unfinished"></translation>
+        <translation>Hľadať čet…</translation>
     </message>
     <message>
         <source>Stories</source>
-        <translation>Stories</translation>
+        <translation>Príbehy</translation>
     </message>
     <message>
         <source>Reorder Pinned Chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Preusporiadať pripnuté čety</translation>
     </message>
     <message>
         <source>Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Ladiť</translation>
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Nová skupina</translation>
     </message>
     <message>
         <source>New Channel</source>
-        <translation type="unfinished"></translation>
+        <translation>Nový kanál</translation>
     </message>
     <message>
         <source>Scheduled messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Plánované správy</translation>
     </message>
     <message>
         <source>Search...</source>
-        <translation type="unfinished"></translation>
+        <translation>Hľadať...</translation>
     </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
     <message>
         <source>Pin</source>
-        <translation>Pin</translation>
+        <translation>Pripnúť</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Cancel</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>Pin message</source>
-        <translation>Pin message</translation>
+        <translation>Pripnutá správa</translation>
     </message>
     <message>
         <source>Choose where to pin this message in the chat with %1.</source>
-        <translation>Choose where to pin this message in the chat with %1.</translation>
+        <translation>Zvoľte kam v čete pripnúť túto správu s %1.</translation>
     </message>
     <message>
         <source>Choose where to pin this message.</source>
-        <translation>Choose where to pin this message.</translation>
+        <translation>Zvoľte kam v čete pripnúť túto správu.</translation>
     </message>
     <message>
         <source>Pin for</source>
-        <translation>Pin for</translation>
+        <translation>Pripnúť k</translation>
     </message>
     <message>
         <source>Both users</source>
-        <translation>Both users</translation>
+        <translation>Obaja používatelia</translation>
     </message>
     <message>
         <source>Only me</source>
-        <translation>Only me</translation>
+        <translation>Iba ja</translation>
     </message>
 </context>
 <context>
     <name>PinnedMessageItem</name>
     <message>
         <source>You</source>
-        <translation>You</translation>
+        <translation>Ja</translation>
     </message>
     <message>
         <source>Pinned Message</source>
-        <translation>Pinned Message</translation>
+        <translation>Pripnutá správa</translation>
     </message>
     <message>
         <source>Message unpinned</source>
-        <translation>Message unpinned</translation>
+        <translation>Správu odopnúť</translation>
     </message>
 </context>
 <context>
     <name>PollCreationPage</name>
     <message>
         <source>All answers have to contain 1-100 characters.</source>
-        <translation>All answers have to contain 1-100 characters.</translation>
+        <translation>Všetky odpovede musia obsahovať 1-100 znakov.</translation>
     </message>
     <message>
         <source>To send a quiz, you have to specify the right answer.</source>
-        <translation>To send a quiz, you have to specify the right answer.</translation>
+        <translation>Pre odoslanie súťaže musíte určiť správnu odpoveď.</translation>
     </message>
     <message>
         <source>You have to enter a question.</source>
-        <translation>You have to enter a question.</translation>
+        <translation>Musíte zadať otázku.</translation>
     </message>
     <message>
         <source>The question has to be shorter than 256 characters.</source>
-        <translation>The question has to be shorter than 256 characters.</translation>
+        <translation>Otázka musí byť kratšia ako 256 znakov.</translation>
     </message>
     <message>
         <source>A poll requires 2-10 answers.</source>
-        <translation>A poll requires 2-10 answers.</translation>
+        <translation>Anketa musí mať 2-10 odpovedí.</translation>
     </message>
     <message>
         <source>Create a Poll</source>
         <comment>Dialog Header</comment>
-        <translation>Create a Poll</translation>
+        <translation>Vytvoriť anketu</translation>
     </message>
     <message>
         <source>in %1</source>
         <comment>After dialog header… Create a Poll in [group name]</comment>
-        <translation>in %1</translation>
+        <translation>v %1</translation>
     </message>
     <message>
         <source>Enter your question here</source>
-        <translation>Enter your question here</translation>
+        <translation>Tu zadajte Vašu otázku</translation>
     </message>
     <message numerus="yes">
         <source>Question (%Ln characters left)</source>
         <translation>
-            <numerusform>Question (%Ln character left)</numerusform>
-            <numerusform>Question (%Ln characters left)</numerusform>
+            <numerusform>Otázka (%Ln znak ostáva)</numerusform>
+            <numerusform>Otázka (%Ln znaky ostávajú)</numerusform>
+            <numerusform>Otázka (%Ln znakov ostáva)</numerusform>
         </translation>
     </message>
     <message>
         <source>Answers</source>
         <comment>Section header</comment>
-        <translation>Answers</translation>
+        <translation>Odpovede</translation>
     </message>
     <message>
         <source>Enter an answer here</source>
-        <translation>Enter an answer here</translation>
+        <translation>Tu zadajte odpoveď</translation>
     </message>
     <message numerus="yes">
         <source>Answer (%Ln characters left)</source>
         <translation>
-            <numerusform>Answer (%Ln character left)</numerusform>
-            <numerusform>Answer (%Ln characters left)</numerusform>
+            <numerusform>Odpoveď (%Ln znak ostáva)</numerusform>
+            <numerusform>Odpoveď (%Ln znaky ostávajú)</numerusform>
+            <numerusform>Odpoveď (%Ln znakov ostáva)</numerusform>
         </translation>
     </message>
     <message>
         <source>Add an answer</source>
-        <translation>Add an answer</translation>
+        <translation>Pridať odpoveď</translation>
     </message>
     <message>
         <source>Poll Options</source>
         <comment>Section header</comment>
-        <translation>Poll Options</translation>
+        <translation>Možnosti ankety</translation>
     </message>
     <message>
         <source>Anonymous answers</source>
-        <translation>Anonymous answers</translation>
+        <translation>Anonymná odpoveď</translation>
     </message>
     <message>
         <source>Multiple answers allowed</source>
-        <translation>Multiple answers allowed</translation>
+        <translation>Viac odpovedí je možných</translation>
     </message>
     <message>
         <source>Quiz Mode</source>
-        <translation>Quiz Mode</translation>
+        <translation>Režim kvízu</translation>
     </message>
     <message>
         <source>Quizzes have one correct answer. Participants can&apos;t revoke their responses.</source>
-        <translation>Quizzes have one correct answer. Participants can&apos;t revoke their responses.</translation>
+        <translation>Kvíz má iba jednu správnu odpoveď. Účastníci nemôžu svoje odpovede odvolať.</translation>
     </message>
     <message>
         <source>Enter an optional explanation</source>
-        <translation>Enter an optional explanation</translation>
+        <translation>Zadajte voliteľné vysvetlenie</translation>
     </message>
     <message>
         <source>Shown when the user selects a wrong answer.</source>
-        <translation>Shown when the user selects a wrong answer.</translation>
+        <translation>Ukázať ak používateľ zvolí nesprávnu odpoveď.</translation>
     </message>
     <message>
         <source>An explanation can be up to 200 characters long.</source>
-        <translation>An explanation can be up to 200 characters long.</translation>
+        <translation>Vysvetlenie môže mať najviac 200 znakov.</translation>
     </message>
 </context>
 <context>
     <name>PollResultsPage</name>
     <message>
         <source>Quiz Results</source>
-        <translation>Quiz Results</translation>
+        <translation>Výsledky kvízu</translation>
     </message>
     <message>
         <source>Poll Results</source>
-        <translation>Poll Results</translation>
+        <translation>Výsledky ankety</translation>
     </message>
     <message numerus="yes">
         <source>%Ln vote(s) total</source>
         <comment>number of total votes</comment>
         <translation>
-            <numerusform>%Ln vote total</numerusform>
-            <numerusform>%Ln votes total</numerusform>
+            <numerusform>%Ln hlas celkom</numerusform>
+            <numerusform>%Ln hlasy celkom</numerusform>
+            <numerusform>%Ln hlasov celkom</numerusform>
         </translation>
     </message>
     <message>
         <source>Question</source>
         <comment>section header</comment>
-        <translation>Question</translation>
+        <translation>Otázka</translation>
     </message>
     <message>
         <source>Results</source>
         <comment>section header</comment>
-        <translation>Results</translation>
+        <translation>Výsledky</translation>
     </message>
     <message numerus="yes">
         <source>%Ln vote(s)</source>
         <comment>number of votes for option</comment>
         <translation>
-            <numerusform>%Ln vote</numerusform>
-            <numerusform>%Ln votes</numerusform>
+            <numerusform>%Ln hlas</numerusform>
+            <numerusform>%Ln hlasy</numerusform>
+            <numerusform>%Ln hlasov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%Ln%</source>
         <comment>% of votes for option</comment>
         <translation>
-            <numerusform>%Ln%</numerusform>
-            <numerusform>%Ln%</numerusform>
+            <numerusform>%Ln %</numerusform>
+            <numerusform>%Ln %</numerusform>
+            <numerusform>%Ln %</numerusform>
         </translation>
     </message>
     <message>
         <source>Chosen by:</source>
         <comment>This answer has been chosen by the following users</comment>
-        <translation>Chosen by:</translation>
+        <translation>Zvolili:</translation>
     </message>
     <message numerus="yes">
         <source>%Ln vote(s) including yours</source>
         <comment>number of votes for option</comment>
         <translation>
-            <numerusform>%Ln vote including yours</numerusform>
-            <numerusform>%Ln votes including yours</numerusform>
+            <numerusform>%Ln hlas vrátane Vášho</numerusform>
+            <numerusform>%Ln hlasy vrátane Vášho</numerusform>
+            <numerusform>%Ln hlasov vrátane Vášho</numerusform>
         </translation>
     </message>
 </context>
@@ -3130,212 +3158,212 @@ messages</numerusform>
     <name>PromoteAdminDialog</name>
     <message>
         <source>Promote</source>
-        <translation>Promote</translation>
+        <translation>Povýšiť</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>Cancel</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>Promote %1 to Admin</source>
-        <translation>Promote %1 to Admin</translation>
+        <translation>Povýšiť %1 na správcu</translation>
     </message>
     <message>
         <source>Promote to Admin</source>
-        <translation>Promote to Admin</translation>
+        <translation>Povýšiť na správcu</translation>
     </message>
     <message>
         <source>Custom title (max 16 characters)</source>
-        <translation>Custom title (max 16 characters)</translation>
+        <translation>Vlastný titulok (max. 16 znakov)</translation>
     </message>
     <message>
         <source>e.g. Moderator</source>
-        <translation>e.g. Moderator</translation>
+        <translation>napr. moderátor</translation>
     </message>
     <message>
         <source>Privileges</source>
-        <translation>Privileges</translation>
+        <translation>Privilégia</translation>
     </message>
     <message>
         <source>Manage chat</source>
         <comment>admin privilege</comment>
-        <translation>Manage chat</translation>
+        <translation>Spravovať čet</translation>
     </message>
     <message>
         <source>View admin log and chat statistics.</source>
-        <translation>View admin log and chat statistics.</translation>
+        <translation>Zobraziť protokol správcu a štatistiku četu.</translation>
     </message>
     <message>
         <source>Change group info</source>
         <comment>admin privilege</comment>
-        <translation>Change group info</translation>
+        <translation>Zmeniť informácie o skupine</translation>
     </message>
     <message>
         <source>Title, photo and description.</source>
-        <translation>Title, photo and description.</translation>
+        <translation>Titulok, fotografia a popis.</translation>
     </message>
     <message>
         <source>Delete messages</source>
         <comment>admin privilege</comment>
-        <translation>Delete messages</translation>
+        <translation>Mazať správy</translation>
     </message>
     <message>
         <source>Ban users</source>
         <comment>admin privilege</comment>
-        <translation>Ban users</translation>
+        <translation>Zakázať používateľov</translation>
     </message>
     <message>
         <source>Invite users</source>
         <comment>admin privilege</comment>
-        <translation>Invite users</translation>
+        <translation>Pozvať používateľov</translation>
     </message>
     <message>
         <source>Pin messages</source>
         <comment>admin privilege</comment>
-        <translation>Pin messages</translation>
+        <translation>Pripnúť správy</translation>
     </message>
     <message>
         <source>Manage topics</source>
         <comment>admin privilege</comment>
-        <translation>Manage topics</translation>
+        <translation>Spravovať témy</translation>
     </message>
     <message>
         <source>Manage video chats</source>
         <comment>admin privilege</comment>
-        <translation>Manage video chats</translation>
+        <translation>Spravovať video čety</translation>
     </message>
     <message>
         <source>Post messages</source>
         <comment>admin privilege (channels)</comment>
-        <translation>Post messages</translation>
+        <translation>Zverejňovať správy</translation>
     </message>
     <message>
         <source>Edit messages of others</source>
         <comment>admin privilege (channels)</comment>
-        <translation>Edit messages of others</translation>
+        <translation>Upravovať správy iných</translation>
     </message>
     <message>
         <source>Post stories</source>
         <comment>admin privilege (channels)</comment>
-        <translation>Post stories</translation>
+        <translation>Zverejňovať príbehy</translation>
     </message>
     <message>
         <source>Edit stories</source>
         <comment>admin privilege (channels)</comment>
-        <translation>Edit stories</translation>
+        <translation>Upravovať príbehy</translation>
     </message>
     <message>
         <source>Delete stories</source>
         <comment>admin privilege (channels)</comment>
-        <translation>Delete stories</translation>
+        <translation>Odstraňovať príbehy</translation>
     </message>
     <message>
         <source>Add new admins</source>
         <comment>admin privilege</comment>
-        <translation>Add new admins</translation>
+        <translation>Pridávať nových správcov</translation>
     </message>
     <message>
         <source>With the rights this user already has.</source>
-        <translation>With the rights this user already has.</translation>
+        <translation>S právami, ktoré tento používateľ už má.</translation>
     </message>
     <message>
         <source>Anonymous</source>
         <comment>admin privilege</comment>
-        <translation>Anonymous</translation>
+        <translation>Anonymne</translation>
     </message>
     <message>
         <source>Send messages as the group itself.</source>
-        <translation>Send messages as the group itself.</translation>
+        <translation>Posielať správy ako samotná skupina.</translation>
     </message>
 </context>
 <context>
     <name>ProxyListPage</name>
     <message>
         <source>MTProto</source>
-        <translation type="unfinished"></translation>
+        <translation>MTProto</translation>
     </message>
     <message>
         <source>SOCKS5</source>
-        <translation type="unfinished"></translation>
+        <translation>SOCKS5</translation>
     </message>
     <message>
         <source>HTTP</source>
-        <translation type="unfinished"></translation>
+        <translation>HTTP</translation>
     </message>
     <message>
         <source>%1 ms</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 ms</translation>
     </message>
     <message>
         <source>Proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy</translation>
     </message>
     <message>
         <source>Add proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať proxy</translation>
     </message>
     <message>
         <source>Disable proxy (direct connection)</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať proxy (priame pripojenie)</translation>
     </message>
     <message>
         <source>Proxy disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy zakázaný</translation>
     </message>
     <message>
         <source>No proxies</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne proxy</translation>
     </message>
     <message>
         <source>Pull down to add a proxy, or paste a tg://proxy link.</source>
-        <translation type="unfinished"></translation>
+        <translation>Potiahnutím nadol pridajte server proxy alebo prilepte odkaz tg://proxy.</translation>
     </message>
     <message>
         <source>Disable</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať</translation>
     </message>
     <message>
         <source>Enable</source>
-        <translation type="unfinished"></translation>
+        <translation>Povoliť</translation>
     </message>
     <message>
         <source>Test connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Skúška pripojenia</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť</translation>
     </message>
     <message>
         <source>Removing proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť proxy</translation>
     </message>
 </context>
 <context>
     <name>ReorderPinnedChatsPage</name>
     <message>
         <source>Unable to update pinned chat order.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno upraviť usporiadanie pripnutých četov.</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Reorder Pinned Chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Preusporiadať pripnuré čety</translation>
     </message>
     <message>
         <source>No pinned chats.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne pripnuté čety.</translation>
     </message>
     <message>
         <source>Pin a chat from home to reorder it here.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pripnúť čet doma s možnosťou preusporiadať ho tu.</translation>
     </message>
     <message>
         <source>Unknown</source>
-        <translation type="unfinished">Unknown</translation>
+        <translation>Neznámy</translation>
     </message>
 </context>
 <context>
@@ -3343,1416 +3371,1428 @@ messages</numerusform>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
-        <translation>sent a picture</translation>
+        <translation>poslal(a) obrázok</translation>
     </message>
     <message>
         <source>sent a picture</source>
-        <translation>sent a picture</translation>
+        <translation>poslal(a) obrázok</translation>
     </message>
     <message>
         <source>sent a video</source>
         <comment>myself</comment>
-        <translation>sent a video</translation>
+        <translation>poslal(a) video</translation>
     </message>
     <message>
         <source>sent a video</source>
-        <translation>sent a video</translation>
+        <translation>poslal(a) video</translation>
     </message>
     <message>
         <source>sent an animation</source>
         <comment>myself</comment>
-        <translation>sent an animation</translation>
+        <translation>poslal(a) animáciu</translation>
     </message>
     <message>
         <source>sent an animation</source>
-        <translation>sent an animation</translation>
+        <translation>poslal(a) animáciu</translation>
     </message>
     <message>
         <source>sent a voice note</source>
-        <translation>sent a voice note</translation>
+        <translation>som poslal hlasovú poznámku</translation>
     </message>
     <message>
         <source>sent a document</source>
         <comment>myself</comment>
-        <translation>sent a document</translation>
+        <translation>poslal(a) dokument</translation>
     </message>
     <message>
         <source>sent a document</source>
-        <translation>sent a document</translation>
+        <translation>poslal(a) dokument</translation>
     </message>
     <message>
         <source>sent a location</source>
         <comment>myself</comment>
-        <translation>sent a location</translation>
+        <translation>poslal(a) polohu</translation>
     </message>
     <message>
         <source>sent a location</source>
-        <translation>sent a location</translation>
+        <translation>poslal(a) polohu</translation>
     </message>
     <message>
         <source>have registered with Telegram</source>
         <comment>myself</comment>
-        <translation>have registered with Telegram</translation>
+        <translation>zaregistroval som sa v Telegrame</translation>
     </message>
     <message>
         <source>has registered with Telegram</source>
-        <translation>has registered with Telegram</translation>
+        <translation>zaregistroval(a) sa v Telegrame</translation>
     </message>
     <message>
         <source>joined this chat</source>
         <comment>myself</comment>
-        <translation>joined this chat</translation>
+        <translation>pripojil(a) sa k tomuto četu</translation>
     </message>
     <message>
         <source>joined this chat</source>
-        <translation>joined this chat</translation>
+        <translation>pripojil(a) sa k tomuto četu</translation>
     </message>
     <message>
         <source>were added to this chat</source>
         <comment>myself</comment>
-        <translation>were added to this chat</translation>
+        <translation>som bol pridaný k tomuto četu</translation>
     </message>
     <message>
         <source>was added to this chat</source>
-        <translation>was added to this chat</translation>
+        <translation>bola(a) pridaný(á) k tomuto četu</translation>
     </message>
     <message>
         <source>left this chat</source>
         <comment>myself</comment>
-        <translation>left this chat</translation>
+        <translation>opustil(a) tento čet</translation>
     </message>
     <message>
         <source>left this chat</source>
-        <translation>left this chat</translation>
+        <translation>opustil(a) tento čet</translation>
     </message>
     <message>
         <source>sent a voice note</source>
         <comment>myself</comment>
-        <translation>sent a voice note</translation>
+        <translation>som poslal hlasovú poznámku</translation>
     </message>
     <message>
         <source>sent a venue</source>
         <comment>myself</comment>
-        <translation>sent a venue</translation>
+        <translation>poslal(a) miesto konania</translation>
     </message>
     <message>
         <source>sent a venue</source>
-        <translation>sent a venue</translation>
+        <translation>poslal(a) miesto konania</translation>
     </message>
     <message>
         <source>changed the chat title</source>
         <comment>myself</comment>
-        <translation>changed the chat title</translation>
+        <translation>zmenil(a) titulok četu</translation>
     </message>
     <message>
         <source>changed the chat title</source>
-        <translation>changed the chat title</translation>
+        <translation>zmenil(a) titulok četu</translation>
     </message>
     <message>
         <source>sent a poll</source>
         <comment>myself</comment>
-        <translation>sent a poll</translation>
+        <translation>poslal(a) anketu</translation>
     </message>
     <message>
         <source>sent a poll</source>
-        <translation>sent a poll</translation>
+        <translation>poslal(a) anketu</translation>
     </message>
     <message>
         <source>sent a quiz</source>
         <comment>myself</comment>
-        <translation>sent a quiz</translation>
+        <translation>poslal(a) kvíz</translation>
     </message>
     <message>
         <source>sent a quiz</source>
-        <translation>sent a quiz</translation>
+        <translation>poslal(a) kvíz</translation>
     </message>
     <message>
         <source>created this group</source>
         <comment>myself</comment>
-        <translation>created this group</translation>
+        <translation>vytvoril(a) túto skupinu</translation>
     </message>
     <message>
         <source>created this group</source>
-        <translation>created this group</translation>
+        <translation>vytvoril(a) túto skupinu</translation>
     </message>
     <message>
         <source>changed the chat photo</source>
         <comment>myself</comment>
-        <translation>changed the chat photo</translation>
+        <translation>zmenil(a) fotografiu četu</translation>
     </message>
     <message>
         <source>changed the chat photo</source>
-        <translation>changed the chat photo</translation>
+        <translation>zmenil(a) fotografiu četu</translation>
     </message>
     <message>
         <source>deleted the chat photo</source>
         <comment>myself</comment>
-        <translation>deleted the chat photo</translation>
+        <translation>odstránil(a) fotografiu četu</translation>
     </message>
     <message>
         <source>deleted the chat photo</source>
-        <translation>deleted the chat photo</translation>
+        <translation>odstránil(a) fotografiu četu</translation>
     </message>
     <message>
         <source>changed the secret chat TTL setting</source>
         <comment>myself</comment>
-        <translation>changed the secret chat TTL setting</translation>
+        <translation>zmenil(a) nastavenie TTL utajeného četu</translation>
     </message>
     <message>
         <source>changed the secret chat TTL setting</source>
-        <translation>changed the secret chat TTL setting</translation>
+        <translation>zmenil(a) nastavenie TTL utajeného četu</translation>
     </message>
     <message>
         <source>upgraded this group to a supergroup</source>
         <comment>myself</comment>
-        <translation>upgraded this group to a supergroup</translation>
+        <translation>aktualizoval(a) túto skupinu na superskupinu</translation>
     </message>
     <message>
         <source>changed the pinned message</source>
         <comment>myself</comment>
-        <translation>changed the pinned message</translation>
+        <translation>zmenil(a) pripnutú správu</translation>
     </message>
     <message>
         <source>changed the pinned message</source>
-        <translation>changed the pinned message</translation>
+        <translation>zmenil(a) pripnutú správu</translation>
     </message>
     <message>
         <source>created a screenshot in this chat</source>
         <comment>myself</comment>
-        <translation>created a screenshot in this chat</translation>
+        <translation>vytvoril(a) snímku obrazovky v tomto čete</translation>
     </message>
     <message>
         <source>created a screenshot in this chat</source>
-        <translation>created a screenshot in this chat</translation>
+        <translation>vytvoril(a) snímku obrazovky v tomto čete</translation>
     </message>
     <message>
         <source>sent an unsupported message</source>
         <comment>myself</comment>
-        <translation>sent an unsupported message</translation>
+        <translation>poslal(a) nepodporovanú správu</translation>
     </message>
     <message>
         <source>sent an unsupported message</source>
-        <translation>sent an unsupported message</translation>
+        <translation>poslal(a) nepodporovanú správu</translation>
     </message>
     <message>
         <source>sent an unsupported message: %1</source>
-        <translation>sent an unsupported message: %1</translation>
+        <translation>som poslal nepodporovanú správu: %1</translation>
     </message>
     <message>
         <source>upgraded this group to a supergroup</source>
-        <translation>upgraded this group to a supergroup</translation>
+        <translation>aktualizoval(a) túto skupinu na superskupinu</translation>
     </message>
     <message>
         <source>sent a self-destructing photo that is expired</source>
         <comment>myself</comment>
-        <translation>sent a self-destructing photo that is expired</translation>
+        <translation>poslal(a) samodeštrukčnú fotografiu ktorej platnosť vypršala</translation>
     </message>
     <message>
         <source>sent a self-destructing video that is expired</source>
         <comment>myself</comment>
-        <translation>sent a self-destructing video that is expired</translation>
+        <translation>poslal(a) samodeštrukčné video ktorého platnosť vypršala</translation>
     </message>
     <message>
         <source>sent a self-destructing video that is expired</source>
-        <translation>sent a self-destructing video that is expired</translation>
+        <translation>poslal(a) samodeštrukčné video ktorého platnosť vypršala</translation>
     </message>
     <message>
         <source>sent an unsupported message: %1</source>
         <comment>myself</comment>
-        <translation>sent an unsupported message: %1</translation>
+        <translation>som poslal nepodporovanú správu: %1</translation>
     </message>
     <message>
         <source>sent a self-destructing photo that is expired</source>
-        <translation>sent a self-destructing photo that is expired</translation>
+        <translation>poslal(a) samodeštrukčnú fotografiu ktorej platnosť vypršala</translation>
     </message>
     <message>
         <source>sent an audio</source>
         <comment>myself</comment>
-        <translation>sent an audio</translation>
+        <translation>poslal(a) zvukový záznam</translation>
     </message>
     <message>
         <source>sent an audio</source>
-        <translation>sent an audio</translation>
+        <translation>poslal(a) zvukový záznam</translation>
     </message>
     <message>
         <source>has added %1 to the chat</source>
-        <translation>has added %1 to the chat</translation>
+        <translation>pridal(a) %1 do četu</translation>
     </message>
     <message>
         <source>has removed %1 from the chat</source>
-        <translation>has removed %1 from the chat</translation>
+        <translation>odstránil(a) %1 z četu</translation>
     </message>
     <message>
         <source>have added %1 to the chat</source>
         <comment>myself</comment>
-        <translation>have added %1 to the chat</translation>
+        <translation>som pridal %1 do četu</translation>
     </message>
     <message>
         <source>have removed %1 from the chat</source>
         <comment>myself</comment>
-        <translation>have removed %1 from the chat</translation>
+        <translation>som odstránil %1 z četu</translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points</source>
         <comment>myself</comment>
         <translation>
-            <numerusform>scored %Ln point</numerusform>
-            <numerusform>scored %Ln points</numerusform>
+            <numerusform>získal(a) %Ln bod</numerusform>
+            <numerusform>získal(a) %Ln body</numerusform>
+            <numerusform>získal(a) %Ln bodov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points</source>
         <translation>
-            <numerusform>scored %Ln point</numerusform>
-            <numerusform>scored %Ln points</numerusform>
+            <numerusform>získal(a) %Ln bod</numerusform>
+            <numerusform>získal(a) %Ln body</numerusform>
+            <numerusform>získal(a) %Ln bodov</numerusform>
         </translation>
     </message>
     <message>
         <source>sent a game</source>
         <comment>myself</comment>
-        <translation>sent a game</translation>
+        <translation>poslal(a) hru</translation>
     </message>
     <message>
         <source>sent a game</source>
-        <translation>sent a game</translation>
+        <translation>poslal(a) hru</translation>
     </message>
     <message>
         <source>sent a video note</source>
         <comment>myself</comment>
-        <translation>sent a video note</translation>
+        <translation>poslal(a) video poznámku</translation>
     </message>
     <message>
         <source>sent a video note</source>
-        <translation>sent a video note</translation>
+        <translation>poslal(a) video poznámku</translation>
     </message>
     <message>
         <source>cancelled a call</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>som zrušil hovor</translation>
     </message>
     <message>
         <source>missed a call</source>
-        <translation type="unfinished"></translation>
+        <translation>zmeškal(a) hovor</translation>
     </message>
     <message>
         <source>started a call</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>začal(a) hovor</translation>
     </message>
     <message>
         <source>started a call</source>
-        <translation type="unfinished"></translation>
+        <translation>začal(a) hovor</translation>
     </message>
     <message>
         <source>sent a contact</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>poslal(a) kontakt</translation>
     </message>
     <message>
         <source>sent a contact</source>
-        <translation type="unfinished"></translation>
+        <translation>poslal(a) kontakt</translation>
     </message>
     <message>
         <source>started a video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>začal(a) video čet</translation>
     </message>
     <message>
         <source>started a video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>začal(a) video čet</translation>
     </message>
     <message>
         <source>ended the video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>ukončil(a) video čet</translation>
     </message>
     <message>
         <source>ended the video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>ukončil(a) video čet</translation>
     </message>
     <message>
         <source>scheduled a video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>naplánoval(a) video čet</translation>
     </message>
     <message>
         <source>scheduled a video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>naplánoval(a) video čet</translation>
     </message>
     <message>
         <source>invited participants to the video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>pozval(a) účastníkov do video četu</translation>
     </message>
     <message>
         <source>invited participants to the video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>pozval(a) účastníkov do video četu</translation>
     </message>
     <message>
         <source>changed the chat theme</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>zmenil(a) tému četu</translation>
     </message>
     <message>
         <source>changed the chat theme</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenil(a) tému četu</translation>
     </message>
     <message>
         <source>changed the chat background</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>zmenil(a) pozadie četu</translation>
     </message>
     <message>
         <source>changed the chat background</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenil(a) pozadie četu</translation>
     </message>
 </context>
 <context>
     <name>ScheduleMessageDialog</name>
     <message>
         <source>Schedule</source>
-        <translation type="unfinished"></translation>
+        <translation>Plánovať</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">Cancel</translation>
+        <translation>Zrušiť</translation>
     </message>
     <message>
         <source>Message will be sent at the selected time.</source>
-        <translation type="unfinished"></translation>
+        <translation>správa bude poslaná v určenom čase.</translation>
     </message>
     <message>
         <source>Pick a time in the future.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvoľte budúci čas.</translation>
     </message>
     <message>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Dátum</translation>
     </message>
     <message>
         <source>Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Čas</translation>
     </message>
     <message>
         <source>Photo</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotografia</translation>
     </message>
     <message>
         <source>Video</source>
-        <translation type="unfinished"></translation>
+        <translation>Video</translation>
     </message>
     <message>
         <source>Document</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokument</translation>
     </message>
     <message>
         <source>Voice</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlas</translation>
     </message>
     <message>
         <source>GIF</source>
-        <translation type="unfinished"></translation>
+        <translation>GIF</translation>
     </message>
     <message>
         <source>Sticker</source>
-        <translation type="unfinished"></translation>
+        <translation>Nálepka</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation type="unfinished"></translation>
+        <translation>Poloha</translation>
     </message>
     <message>
         <source>Already scheduled in this chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Už je naplánované v tomto čete</translation>
     </message>
     <message>
         <source>No other scheduled messages in this chat.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadna ďalšia správa nie je naplánovaná v tomto čete.</translation>
     </message>
     <message>
         <source>Deleting scheduled message</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť naplánovanú správu</translation>
     </message>
     <message>
         <source>Reschedule</source>
-        <translation type="unfinished"></translation>
+        <translation>Preplánovať</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť</translation>
     </message>
 </context>
 <context>
     <name>SearchChatsPage</name>
     <message>
         <source>No chats found.</source>
-        <translation>No chats found.</translation>
+        <translation>Nenašli sa žiadne čety.</translation>
     </message>
     <message>
         <source>Searching chats...</source>
-        <translation>Searching chats...</translation>
+        <translation>Hľadanie četov…</translation>
     </message>
     <message>
         <source>Private Chat</source>
-        <translation>Private Chat</translation>
+        <translation>Súkromný čet</translation>
     </message>
     <message>
         <source>Group</source>
-        <translation>Group</translation>
+        <translation>Skupina</translation>
     </message>
     <message>
         <source>Channel</source>
-        <translation>Channel</translation>
+        <translation>Kanál</translation>
     </message>
     <message numerus="yes">
         <source>%1 members</source>
         <translation>
-            <numerusform>%1 member</numerusform>
-            <numerusform>%1 members</numerusform>
+            <numerusform>%1 člen</numerusform>
+            <numerusform>%1 členovia</numerusform>
+            <numerusform>%1 členov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%1 subscribers</source>
         <translation>
-            <numerusform>%1 subscriber</numerusform>
-            <numerusform>%1 subscribers</numerusform>
+            <numerusform>%1 predplatiteľ</numerusform>
+            <numerusform>%1 predplatitelia</numerusform>
+            <numerusform>%1 predplatiteľov</numerusform>
         </translation>
     </message>
     <message>
         <source>Search Chats</source>
-        <translation>Search Chats</translation>
+        <translation>Hľadať čety</translation>
     </message>
     <message>
         <source>Search a chat...</source>
-        <translation>Search a chat...</translation>
+        <translation>Hľadanie četu…</translation>
     </message>
     <message>
         <source>Enter your query to start searching (at least 5 characters needed)</source>
-        <translation>Enter your query to start searching (at least 5 characters needed)</translation>
+        <translation>Zadajte požiadavku pre spustenie hľadania (treba najmenej 5 znakov)</translation>
     </message>
 </context>
 <context>
     <name>SelectDiscussionGroupPage</name>
     <message>
         <source>Discussion group updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskusná skupina bola aktualizovaná</translation>
     </message>
     <message>
         <source>Discussion group removed</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskusná skupina bola odstránená</translation>
     </message>
     <message>
         <source>Error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Cyba: %1</translation>
     </message>
     <message>
         <source>Discussion</source>
-        <translation type="unfinished"></translation>
+        <translation>Diskusia</translation>
     </message>
     <message>
         <source>Remove discussion group</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť diskusnú skupinu</translation>
     </message>
     <message>
         <source>Choose a group that will host discussion of channel posts.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať skupinu, ktorá bude hostiť diskusiu o príspevkoch kanála.</translation>
     </message>
     <message>
         <source>No suitable groups</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne vhodné skupiny</translation>
     </message>
     <message>
         <source>Create a public supergroup or convert an existing one to use as discussion.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vytvoriť verejnú superskupinu alebo zmeniť jestvujúcu pre použitie na diskusiu.</translation>
     </message>
     <message>
         <source>Reload</source>
-        <translation type="unfinished"></translation>
+        <translation>Znovu načítať</translation>
     </message>
 </context>
 <context>
     <name>SettingsAbout</name>
     <message>
         <source>A Telegram client for Sailfish OS</source>
-        <translation type="unfinished">A Telegram client for Sailfish OS</translation>
+        <translation>Klient pre Telegram Sailfish OS</translation>
     </message>
     <message>
         <source>Fork by RootGPT - based on Fernschreiber by Sebastian J. Wolf and Yottagram by Michal Szczepaniak.</source>
-        <translation type="unfinished"></translation>
+        <translation>Odnož RootGPT – založené na Fernschreiber od Sebastiana J. Wolfa a Yottagram od Michala Szczepaniaka.</translation>
     </message>
     <message>
         <source>Fernschreiber</source>
-        <translation type="unfinished"></translation>
+        <translation>Fernschreiber</translation>
     </message>
     <message>
         <source>Yottagram</source>
-        <translation type="unfinished"></translation>
+        <translation>Yottagram</translation>
     </message>
     <message>
         <source>Source code on GitHub</source>
-        <translation type="unfinished"></translation>
+        <translation>Zdrojový kód v GitHub</translation>
     </message>
     <message>
         <source>Licensed under GNU GPLv3</source>
-        <translation type="unfinished">Licensed under GNU GPLv3</translation>
+        <translation>licencované pod GNU GPLv3</translation>
     </message>
     <message>
         <source>About Telegram</source>
-        <translation type="unfinished">About Telegram</translation>
+        <translation>O aplikácii Telegram</translation>
     </message>
     <message>
         <source>This product uses the Telegram API but is not endorsed or certified by Telegram.</source>
-        <translation type="unfinished">This product uses the Telegram API but is not endorsed or certified by Telegram.</translation>
+        <translation>Tento produkt používa Telegram API, ale nie je schválený ani certifikovaný spoločnosťou Telegram.</translation>
     </message>
     <message>
         <source>TDLib version %1</source>
-        <translation type="unfinished">TDLib version %1</translation>
+        <translation>Verzia TDLib %1</translation>
     </message>
     <message>
         <source>Terms of Service</source>
-        <translation type="unfinished">Terms of Service</translation>
+        <translation>Zmluvné podmienky</translation>
     </message>
     <message>
         <source>Privacy Policy</source>
-        <translation type="unfinished">Privacy Policy</translation>
+        <translation>Zásady ochrany osobných údajov</translation>
     </message>
     <message>
         <source>Credits</source>
-        <translation type="unfinished">Credits</translation>
+        <translation>Prispievatelia</translation>
     </message>
     <message>
         <source>This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!</source>
-        <translation type="unfinished">This project uses the Telegram Database Library (TDLib). Thanks for making it available under the conditions of the Boost Software License 1.0!</translation>
+        <translation>Tento projekt využíva Telegram Database Library (TDLib). Ďakujeme, že ste ju sprístupnili za podmienok licencie Boost Software License 1.0!</translation>
     </message>
     <message>
         <source>Open Telegram Database Library on GitHub</source>
-        <translation type="unfinished">Open Telegram Database Library on GitHub</translation>
+        <translation>Otvoriť Telegram Database Library v GitHub</translation>
     </message>
     <message>
         <source>This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</source>
-        <translation type="unfinished">This project uses rlottie. Copyright 2020 Samsung Electronics Co., Ltd. and other contributors. Thanks for making it available under the conditions of the MIT License!</translation>
+        <translation>Tento projekt používa rlottie. Copyright 2020 Samsung Electronics Co., Ltd. a ďalší prispievatelia. Ďakujeme, že ste ho sprístupnili za podmienok licencie MIT!</translation>
     </message>
     <message>
         <source>Open rlottie on GitHub</source>
-        <translation type="unfinished">Open rlottie on GitHub</translation>
+        <translation>Otvoriť rlottie v GitHub</translation>
     </message>
     <message>
         <source>This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!</source>
-        <translation type="unfinished">This project uses OpenStreetMap Nominatim for reverse geocoding of location attachments. Thanks for making it available as web service!</translation>
+        <translation>Tento projekt používa OpenStreetMap Nominatim na dekódovanie polohy príloh. Ďakujeme, že ste ju sprístupnili ako webovú službu!</translation>
     </message>
     <message>
         <source>Open OSM Nominatim Wiki</source>
-        <translation type="unfinished">Open OSM Nominatim Wiki</translation>
+        <translation>Otvoriť OSM Nominatim Wiki</translation>
     </message>
     <message>
         <source>This project uses Twemoji (jdecked fork). Copyright the Twemoji contributors. Thanks for making it available under the conditions of the MIT License (coding) and CC-BY 4.0 (graphics)!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento projekt používa Twemoji (odnož jdecked). Autorské práva na prispievateľov Twemoji. Ďakujeme, že ste ho sprístupnili za podmienok licencie MIT (kódovanie) a CC-BY 4.0 (grafika)!</translation>
     </message>
     <message>
         <source>Open Twemoji on GitHub</source>
-        <translation type="unfinished"></translation>
+        <translation>Otvoriť Twemoji v GitHub</translation>
     </message>
     <message>
         <source>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</source>
-        <translation>This project bundles FFmpeg, built with libx264, to normalize videos before upload. Thanks for making it available under the conditions of the LGPL v2.1+ / GPL v2+ (libx264)!</translation>
+        <translation>Tento projekt spája FFmpeg, vytvorený s libx264, na normalizáciu videí pred poskytnitím. Ďakujeme, že ste ho sprístupnili za podmienok LGPL v2.1 / GPL v2 (libx264)!</translation>
     </message>
     <message>
         <source>Open FFmpeg website</source>
-        <translation>Open FFmpeg website</translation>
+        <translation>Webová stránka Open FFmpeg</translation>
     </message>
     <message>
         <source>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</source>
-        <translation>This project uses tgcalls and tg_owt (WebRTC) for voice and video calls. Thanks for making them available under the conditions of the GPL v2+!</translation>
+        <translation>Tento projekt používa tgcalls a tg_owt (WebRTC) na hlasové hovory a videohovory. Ďakujeme, že ste ich sprístupnili za podmienok GPL v2!</translation>
     </message>
     <message>
         <source>Open tgcalls on GitHub</source>
-        <translation>Open tgcalls on GitHub</translation>
+        <translation>Otvoriť tgcalls v GitHub</translation>
     </message>
     <message>
         <source>For SailfishOS 5.0/5.1 compatibility this package also bundles FFmpeg&apos;s multimedia dependencies: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) and OpenJPEG (BSD-2). Copyright their respective contributors. The full license texts are shipped in /usr/share/harbour-rootelegram/licenses/.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pre kompatibilitu so SailfishOS 5.0/5.1 tento balík obsahuje aj multimediálne závislosti FFmpeg: libvpx, Opus, Ogg, Vorbis, Theora, Speex, WebP, libsharpyuv (BSD) a OpenJPEG (BSD-2). Autorské práva ich príslušných prispievateľov. Úplné texty licencií sa dodávajú v /usr/share/harbour-rootelegram/licenses/.</translation>
     </message>
     <message>
         <source>Slovak translation by okruhliak. Thanks to everyone helping translate RooTelegram!</source>
-        <translation type="unfinished"></translation>
+        <translation>Slovenský preklad: okruhliak. Ďakujeme všetkým, ktorí pomáhajú prekladať RooTelegram!</translation>
     </message>
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento projekt používa knižnicu QR Code generator od Project Nayuki na prihlásenie QR kódom. Ďakujeme za jej sprístupnenie za podmienok licencie MIT!</translation>
     </message>
 </context>
 <context>
     <name>SettingsAppearance</name>
     <message>
         <source>Appearance</source>
-        <translation>Appearance</translation>
+        <translation>Vzhľad</translation>
     </message>
     <message>
         <source>Show stickers as emojis</source>
-        <translation>Show stickers as emojis</translation>
+        <translation>Zobraziť nálepky a emoji</translation>
     </message>
     <message>
         <source>Only display emojis instead of the actual stickers</source>
-        <translation>Only display emojis instead of the actual stickers</translation>
+        <translation>Zobraziť iba emoji namiesto aktuálnych nálepiek</translation>
     </message>
     <message>
         <source>Show stickers as images</source>
-        <translation>Show stickers as images</translation>
+        <translation>Zobraziť nálepky a obrázky</translation>
     </message>
     <message>
         <source>Show background for stickers and align them centrally like images</source>
-        <translation>Show background for stickers and align them centrally like images</translation>
+        <translation>Zobraziť pozadie pre nálepky a vycentrovať ich na obrázkoch</translation>
     </message>
     <message>
         <source>Animate stickers</source>
-        <translation>Animate stickers</translation>
+        <translation>Animované nálepky</translation>
     </message>
     <message>
         <source>Cyberpunk look (requires a dark and orange theme for the perfect experience)</source>
-        <translation type="unfinished"></translation>
+        <translation>Cyberpunkový vzhľad (pre dokonalý zážitok vyžaduje tmavý a oranžový motív)</translation>
     </message>
     <message>
         <source>Silica base theme (lighter, also good on light themes)</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma na báze Silica (ľahšia, vhodná aj na svetlé témy)</translation>
     </message>
     <message>
         <source>Choose RooTelegram&apos;s theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať tému RooTelegram</translation>
     </message>
     <message>
         <source>Silica (base theme)</source>
-        <translation type="unfinished"></translation>
+        <translation>Silica (základná téma)</translation>
     </message>
     <message>
         <source>Neon (cyberpunk)</source>
-        <translation type="unfinished"></translation>
+        <translation>Neon (cyberpunk)</translation>
     </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
     <message>
         <source>Behavior</source>
-        <translation>Behavior</translation>
+        <translation>Správanie</translation>
     </message>
     <message>
         <source>Send message by enter</source>
-        <translation>Send message by enter</translation>
+        <translation>Správu odoslať klávesou Enter</translation>
     </message>
     <message>
         <source>Send your message by pressing the enter key</source>
-        <translation>Send your message by pressing the enter key</translation>
+        <translation>Správu odoslať stlačením klávesy Enter</translation>
     </message>
     <message>
         <source>Focus text input on chat open</source>
-        <translation>Focus text input on chat open</translation>
+        <translation>Aktívny textový vstup pri otvorení četu</translation>
     </message>
     <message>
         <source>Focus the text input area when entering a chat</source>
-        <translation>Focus the text input area when entering a chat</translation>
+        <translation>Aktívny textový vstup pri zadaní četu</translation>
     </message>
     <message>
         <source>Focus text input area after send</source>
-        <translation>Focus text input area after send</translation>
+        <translation>Aktívny textový vstup po odoslaní</translation>
     </message>
     <message>
         <source>Focus the text input area after sending a message</source>
-        <translation>Focus the text input area after sending a message</translation>
+        <translation>Aktívny textový vstup po odoslaní správy</translation>
     </message>
     <message>
         <source>Delay before marking messages as read</source>
-        <translation>Delay before marking messages as read</translation>
+        <translation>Oneskorenie pred označením správy ako prečítanej</translation>
     </message>
     <message>
         <source>RooTelegram will wait a bit before messages are marked as read</source>
-        <translation>RooTelegram will wait a bit before messages are marked as read</translation>
+        <translation>RooTelegram trochu počká pred označením správy ako prečítanej</translation>
     </message>
     <message>
         <source>Open-with menu integration</source>
-        <translation>Open-with menu integration</translation>
+        <translation>Integrovať s ponukou „Otvoriť s&quot;</translation>
     </message>
     <message>
         <source>Integrate RooTelegram into open-with menu of Sailfish OS</source>
-        <translation>Integrate RooTelegram into open-with menu of Sailfish OS</translation>
+        <translation>Integrovať RooTelegram s ponukou-Sailfish OS „Otvoriť s&quot;</translation>
     </message>
     <message>
         <source>Notification feedback</source>
-        <translation>Notification feedback</translation>
+        <translation>Spätnoväzobné upozornenia</translation>
     </message>
     <message>
         <source>Use non-graphical feedback (sound, vibration) for notifications</source>
-        <translation>Use non-graphical feedback (sound, vibration) for notifications</translation>
+        <translation>Použiť negrafickú spätnú väzbu (zvuk, vibrovanie) pre upozornenia</translation>
     </message>
     <message>
         <source>All events</source>
-        <translation>All events</translation>
+        <translation>Všetky udalosti</translation>
     </message>
     <message>
         <source>Only new events</source>
-        <translation>Only new events</translation>
+        <translation>Iba nové udalosti</translation>
     </message>
     <message>
         <source>None</source>
-        <translation>None</translation>
+        <translation>Žiadne</translation>
     </message>
     <message>
         <source>Notification turns on the display</source>
-        <translation>Notification turns on the display</translation>
+        <translation>Upozornenie zapne displej</translation>
     </message>
     <message>
         <source>Enable notification sounds</source>
-        <translation>Enable notification sounds</translation>
+        <translation>Povoliť zvukové upozornenia</translation>
     </message>
     <message>
         <source>When sounds are enabled, RooTelegram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</source>
-        <translation>When sounds are enabled, RooTelegram will use the current Sailfish OS notification sound for chats, which can be configured in the system settings.</translation>
+        <translation>Keď sú zvuky povolené, RooTelegram použije aktuálne nastavené zvuky Sailfish OS pre upozornenia pre čety, ktoré môžu byť zvolené v nastaveniach systému.</translation>
     </message>
     <message>
         <source>Always append message preview to notifications</source>
-        <translation>Always append message preview to notifications</translation>
+        <translation>K upozorneniam vždy pripojiť ukážku správy</translation>
     </message>
     <message>
         <source>In addition to showing the number of unread messages, the latest message will also be appended to notifications.</source>
-        <translation>In addition to showing the number of unread messages, the latest message will also be appended to notifications.</translation>
+        <translation>Okrem zobrazenia počtu neprečítaných správ sa k upozorneniam pripojí aj najnovšia správa.</translation>
     </message>
     <message>
         <source>Highlight unread messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvýrazniť neprečítané správy</translation>
     </message>
     <message>
         <source>Highlight Conversations with unread messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Zvýrazniť konverzácie z neprečítanými správami</translation>
     </message>
     <message>
         <source>Hide content in notifications</source>
-        <translation type="unfinished"></translation>
+        <translation>Skryť obsah v upozorneniach</translation>
     </message>
     <message>
         <source>Go to quoted message</source>
-        <translation type="unfinished"></translation>
+        <translation>Prejsť na citovanú správu</translation>
     </message>
     <message>
         <source>When tapping a quoted message, open it in chat instead of showing it in an overlay.</source>
-        <translation type="unfinished"></translation>
+        <translation>Po klepnutí na citovanú správu sa otvorí v čete namiesto zobrazenia v prekrytí.</translation>
     </message>
     <message>
         <source>Cover: only private chats in unread count</source>
-        <translation type="unfinished"></translation>
+        <translation>Obal: iba súkromné čety v počte neprečítaných</translation>
     </message>
     <message>
         <source>Exclude groups and channels from the unread message and chat counts shown on the cover preview</source>
-        <translation type="unfinished"></translation>
+        <translation>Vylúčiť skupiny a kanály z neprečítaných správ a četov zobrazených v náhľade na obale</translation>
     </message>
     <message>
         <source>Disable video preloading</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať predbežné načítanie videa</translation>
     </message>
     <message>
         <source>Disables automatic video preloading to reduce RAM/GPU and mobile data usage. Photos are still downloaded automatically.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zakázať predbežné načítanie videa pre zníženie RAM/GPU a mobilných dát. Fotografie budú načítané naďalej automaticky.</translation>
     </message>
     <message>
         <source>Notifications</source>
-        <translation type="unfinished"></translation>
+        <translation>Upozornenia</translation>
     </message>
     <message>
         <source>Show desktop notifications for new messages. The app always stays in background; this toggle controls only notification publishing.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zobrazovať upozornenia nových správ na ploche. Aplikácia vždy zostáva na pozadí; tento prepínač ovláda iba zverejňovanie upozornení.</translation>
     </message>
     <message>
         <source>Stories</source>
-        <translation type="unfinished">Stories</translation>
+        <translation>Príbehy</translation>
     </message>
     <message>
         <source>Notify when a contact posts a new story.</source>
-        <translation type="unfinished"></translation>
+        <translation>Upozorniť keď kontakt pošle nový príbeh.</translation>
     </message>
     <message>
         <source>Reactions</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakcie</translation>
     </message>
     <message>
         <source>Notify when someone reacts to one of your messages.</source>
-        <translation type="unfinished"></translation>
+        <translation>Upozorniť keď niekto reaguje na niektorú Vašu správu.</translation>
     </message>
     <message>
         <source>Stay in chat when closing the app</source>
-        <translation type="unfinished"></translation>
+        <translation>Zostať v konverzácii po zatvorení aplikácie</translation>
     </message>
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pri zatvorení alebo minimalizovaní aplikácie ponechať otvorenú konverzáciu namiesto návratu na domovskú obrazovku. Nechajte zapnuté, aby sa nedokončený koncept pri zatvorení aplikácie nestratil.</translation>
     </message>
 </context>
 <context>
     <name>SettingsConnection</name>
     <message>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Pripojenie</translation>
     </message>
     <message>
         <source>Proxies route your Telegram traffic through another server to bypass censorship. MTProto proxies (especially with Fake-TLS) are the most resistant to blocking. SOCKS5 proxies also cover voice and video calls.</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy smerujú váš telegramový prenos cez iný server, aby obišli cenzúru. Proxy MTProto (najmä s falošným-TLS) sú najodolnejšie voči blokovaniu. Proxy SOCKS5 pokrývajú aj hlasové hovory a videohovory.</translation>
     </message>
     <message>
         <source>Proxy</source>
-        <translation type="unfinished"></translation>
+        <translation>Proxy</translation>
     </message>
     <message numerus="yes">
         <source>On (%n configured)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Zapnúť (%n nastavený)</numerusform>
+            <numerusform>Zapnúť (%n nastavené)</numerusform>
+            <numerusform>Zapnúť (%n nastavených)</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>Off (%n configured)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Vypnúť (%n nastavený)</numerusform>
+            <numerusform>Vypnúť (%n nastavené)</numerusform>
+            <numerusform>Vypnúť (%n nastavených)</numerusform>
         </translation>
     </message>
     <message>
         <source>Off</source>
-        <translation type="unfinished">Off</translation>
+        <translation>Vypnúť</translation>
     </message>
     <message>
         <source>Add, enable and test connection proxies.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať, povoliť a vyskúšať pripojenie proxy.</translation>
     </message>
 </context>
 <context>
     <name>SettingsPage</name>
     <message>
         <source>Settings</source>
-        <translation>Settings</translation>
+        <translation>Nastavenia</translation>
     </message>
 </context>
 <context>
     <name>SettingsPrivacy</name>
     <message>
         <source>Privacy</source>
-        <translation>Privacy</translation>
+        <translation>Súkromie</translation>
     </message>
     <message>
         <source>Allow adding me to groups and channels</source>
-        <translation>Allow adding me to groups and channels</translation>
+        <translation>Povoliť pridať ma do skupín a kanálov</translation>
     </message>
     <message>
         <source>Privacy setting for managing who can add you to groups and channels.</source>
-        <translation>Privacy setting for managing who can add you to groups and channels.</translation>
+        <translation>Nastavenie súkromia pre správu, kto vás môže pridať do skupín a kanálov.</translation>
     </message>
     <message>
         <source>Yes</source>
-        <translation>Yes</translation>
+        <translation>Áno</translation>
     </message>
     <message>
         <source>Your contacts only</source>
-        <translation>Your contacts only</translation>
+        <translation>Iba vaše kontakty</translation>
     </message>
     <message>
         <source>No</source>
-        <translation>No</translation>
+        <translation>Nie</translation>
     </message>
     <message>
         <source>Allow finding by phone number</source>
-        <translation>Allow finding by phone number</translation>
+        <translation>Umožniť hľadanie podľa telefónneho čísla</translation>
     </message>
     <message>
         <source>Privacy setting for managing whether you can be found by your phone number.</source>
-        <translation>Privacy setting for managing whether you can be found by your phone number.</translation>
+        <translation>Nastavenie súkromia na správu toho, či vás možno nájsť podľa vášho telefónneho čísla.</translation>
     </message>
     <message>
         <source>Show link in forwarded messages</source>
-        <translation>Show link in forwarded messages</translation>
+        <translation>Zobraziť odkaz v postúpených správach</translation>
     </message>
     <message>
         <source>Privacy setting for managing whether a link to your account is included in forwarded messages.</source>
-        <translation>Privacy setting for managing whether a link to your account is included in forwarded messages.</translation>
+        <translation>Nastavenie ochrany osobných údajov na správu toho, či je odkaz na váš účet zahrnutý do postúpených správ.</translation>
     </message>
     <message>
         <source>Show phone number</source>
-        <translation>Show phone number</translation>
+        <translation>Zobraziť telefónne číslo</translation>
     </message>
     <message>
         <source>Privacy setting for managing whether your phone number is visible.</source>
-        <translation>Privacy setting for managing whether your phone number is visible.</translation>
+        <translation>Nastavenie ochrany osobných údajov na správu toho, či je vaše telefónne číslo viditeľné.</translation>
     </message>
     <message>
         <source>Show profile photo</source>
-        <translation>Show profile photo</translation>
+        <translation>Zobraziť profilovú fotografiu</translation>
     </message>
     <message>
         <source>Privacy setting for managing whether your profile photo is visible.</source>
-        <translation>Privacy setting for managing whether your profile photo is visible.</translation>
+        <translation>Nastavenie ochrany osobných údajov na správu toho, či je vaša profilová fotografia viditeľná.</translation>
     </message>
     <message>
         <source>Show status</source>
-        <translation>Show status</translation>
+        <translation>Zobraziť status</translation>
     </message>
     <message>
         <source>Privacy setting for managing whether your online status is visible.</source>
-        <translation>Privacy setting for managing whether your online status is visible.</translation>
+        <translation>Nastavenie ochrany osobných údajov na správu toho, či je váš status viditeľný.</translation>
     </message>
     <message>
         <source>Allow sending Location to inline bots</source>
-        <translation>Allow sending Location to inline bots</translation>
+        <translation>Povoliť odosielanie polohy pre pripojené roboty</translation>
     </message>
     <message>
         <source>Some inline bots request location data when using them</source>
-        <translation>Some inline bots request location data when using them</translation>
+        <translation>Niektoré pripojené roboty žiadajú údaje o polohe keď ich používate</translation>
     </message>
     <message>
         <source>Blocklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Čierna listina</translation>
     </message>
     <message>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Zobrazenie</translation>
     </message>
     <message>
         <source>Show the list of Telegram users you have blocked.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zobraziť zoznam blokovaných používateľov v Telegrame.</translation>
     </message>
     <message>
         <source>Privacy setting for managing who can call you.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nastavenie ochrany osobných údajov na správu kto vám môže volať.</translation>
     </message>
     <message>
         <source>Everybody</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetci</translation>
     </message>
     <message>
         <source>Nobody</source>
-        <translation type="unfinished"></translation>
+        <translation>Nikto</translation>
     </message>
     <message>
         <source>Allow calls</source>
-        <translation type="unfinished"></translation>
+        <translation>Povoliť volania</translation>
     </message>
     <message>
         <source>This is a Premium-only feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Toto je prémiová vlastnosť.</translation>
     </message>
     <message>
         <source>Only selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Iba označené</translation>
     </message>
     <message>
         <source>Privacy updated</source>
-        <translation type="unfinished"></translation>
+        <translation>Ochrana osobných údajov bola aktualizovaná</translation>
     </message>
     <message>
         <source>Voice and video messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlasové a video správy</translation>
     </message>
     <message>
         <source>Who can send you voice messages and video notes (round videos). Premium feature.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kto vám môže poslať správu a video poznámky (okrúhle videá). Prémiová vlastnosť.</translation>
     </message>
     <message>
         <source>Choose who can send you voice messages and video notes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať, kto vám môže poslať hlasové správy a video poznámky.</translation>
     </message>
     <message>
         <source>Choose who cannot send you voice messages and video notes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať, kto vám nemôže poslať hlasové správy a video poznámky.</translation>
     </message>
     <message>
         <source>Everybody except</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetci okrem</translation>
     </message>
     <message>
         <source>App permissions</source>
-        <translation type="unfinished"></translation>
+        <translation>Povolenia aplikácie</translation>
     </message>
     <message>
         <source>Manage</source>
-        <translation type="unfinished"></translation>
+        <translation>Spravovať</translation>
     </message>
     <message>
         <source>Choose which device resources (location, camera, microphone, contacts, files) RooTelegram is allowed to use.</source>
-        <translation type="unfinished"></translation>
+        <translation>Vyberte, ktoré zdroje zariadenia (poloha, fotoaparát, mikrofón, kontakty, súbory) môže RooTelegram používať.</translation>
     </message>
 </context>
 <context>
     <name>SettingsSession</name>
     <message>
         <source>Sessions</source>
-        <translation>Sessions</translation>
+        <translation>Relácie</translation>
     </message>
     <message>
         <source>Session was terminated</source>
-        <translation>Session was terminated</translation>
+        <translation>Relácia bola ukončená</translation>
     </message>
     <message>
         <source>Terminating session</source>
-        <translation>Terminating session</translation>
+        <translation>Ukončovanie relácie</translation>
     </message>
     <message>
         <source>Terminate Session</source>
-        <translation>Terminate Session</translation>
+        <translation>Ukončiť reláciu</translation>
     </message>
     <message>
         <source>This app</source>
-        <translation>This app</translation>
+        <translation>Táto aplikácia</translation>
     </message>
     <message>
         <source>Active since: %1, last online: %2</source>
-        <translation>Active since: %1, last online: %2</translation>
+        <translation>Aktívné od: %1, naposledy pripojené: %2</translation>
     </message>
     <message numerus="yes">
         <source>%1 day(s)</source>
         <translation>
-            <numerusform>%1 day</numerusform>
-            <numerusform>%1 days</numerusform>
+            <numerusform>%1 deň</numerusform>
+            <numerusform>%1 dni</numerusform>
+            <numerusform>%1 dní</numerusform>
         </translation>
     </message>
     <message>
         <source>1 week</source>
-        <translation type="unfinished"></translation>
+        <translation>1 týždeň</translation>
     </message>
     <message>
         <source>1 month</source>
-        <translation type="unfinished"></translation>
+        <translation>1 mesiac</translation>
     </message>
     <message>
         <source>3 months</source>
-        <translation type="unfinished"></translation>
+        <translation>3 mesiace</translation>
     </message>
     <message>
         <source>6 months</source>
-        <translation type="unfinished"></translation>
+        <translation>6 mesiacov</translation>
     </message>
     <message>
         <source>1 year</source>
-        <translation type="unfinished"></translation>
+        <translation>1 rok</translation>
     </message>
     <message>
         <source>Session Timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Časový limit relácie</translation>
     </message>
     <message>
         <source>Inactive sessions will be terminated after this timeframe</source>
-        <translation type="unfinished"></translation>
+        <translation>Neaktívne relácie budú po tomto časovom rámci ukončené</translation>
     </message>
 </context>
 <context>
     <name>SettingsStorage</name>
     <message>
         <source>Storage</source>
-        <translation>Storage</translation>
+        <translation>Sklad</translation>
     </message>
     <message>
         <source>Enable online-only mode</source>
-        <translation>Enable online-only mode</translation>
+        <translation>Povolený iba režim naživo</translation>
     </message>
     <message>
         <source>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of RooTelegram to take effect.</source>
-        <translation>Disables offline caching. Certain features may be limited or missing in this mode. Changes require a restart of RooTelegram to take effect.</translation>
+        <translation>Zakáže ukladanie do vyrovnávacej pamäte offline. Niektoré funkcie môžu byť v tomto režime obmedzené alebo môžu chýbať. Zmeny vyžadujú reštartovanie RooTelegramu, aby sa prejavili.</translation>
     </message>
     <message>
         <source>Enable storage optimizer</source>
-        <translation>Enable storage optimizer</translation>
+        <translation>Povoliť optimalizátor ukladania</translation>
     </message>
     <message>
         <source>Archived chats</source>
-        <translation type="unfinished"></translation>
+        <translation>Archivované konverzácie</translation>
     </message>
 </context>
 <context>
     <name>SettingsUserProfile</name>
     <message>
         <source>User Profile</source>
-        <translation>User Profile</translation>
+        <translation>Profil používateľa</translation>
     </message>
     <message>
         <source>First Name</source>
         <comment>first name of the logged-in profile - header</comment>
-        <translation>First Name</translation>
+        <translation>Meno</translation>
     </message>
     <message>
         <source>Enter 1-64 characters</source>
-        <translation>Enter 1-64 characters</translation>
+        <translation>Zadať 1–64 znakov</translation>
     </message>
     <message>
         <source>Last Name</source>
         <comment>last name of the logged-in profile - header</comment>
-        <translation>Last Name</translation>
+        <translation>Priezvisko</translation>
     </message>
     <message>
         <source>Enter 0-64 characters</source>
-        <translation>Enter 0-64 characters</translation>
+        <translation>Zadať 0–64 znakov</translation>
     </message>
     <message>
         <source>Username</source>
         <comment>user name of the logged-in profile - header</comment>
-        <translation>Username</translation>
+        <translation>Mno používateľa</translation>
     </message>
     <message>
         <source>Profile Pictures</source>
-        <translation>Profile Pictures</translation>
+        <translation>Profilový obrázok</translation>
     </message>
     <message>
         <source>Add Picture</source>
-        <translation>Add Picture</translation>
+        <translation>Pridať obrázok</translation>
     </message>
     <message>
         <source>Delete Picture</source>
-        <translation>Delete Picture</translation>
+        <translation>Odstrániť obrázok</translation>
     </message>
     <message>
         <source>Deleting profile picture</source>
-        <translation>Deleting profile picture</translation>
+        <translation>Odstrániť profilový obrázok</translation>
     </message>
     <message>
         <source>Uploading...</source>
-        <translation>Uploading...</translation>
+        <translation>Nahráva sa…</translation>
     </message>
     <message>
         <source>Log Out</source>
-        <translation>Log Out</translation>
+        <translation>Odhlásiť</translation>
     </message>
     <message>
         <source>Logged out</source>
-        <translation>Logged out</translation>
+        <translation>Odhlásený</translation>
     </message>
     <message>
         <source>Phone number: +%1</source>
-        <translation>Phone number: +%1</translation>
+        <translation>Telefónne číslo: +%1</translation>
     </message>
     <message>
         <source>Contacts successfully synchronized with Telegram.</source>
-        <translation type="unfinished">Contacts successfully synchronized with Telegram.</translation>
+        <translation>Kontakty boli úspešne synchronizované s Telegramom.</translation>
     </message>
     <message>
         <source>Synchronize Contacts with Telegram</source>
-        <translation type="unfinished">Synchronize Contacts with Telegram</translation>
+        <translation>Synchronizovať kontakty s Telegramom</translation>
     </message>
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontakty sú vypnuté v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>SponsoredMessage</name>
     <message>
         <source>Go to Channel</source>
-        <translation>Go to Channel</translation>
+        <translation>Ísť na kanál</translation>
     </message>
     <message>
         <source>Go to Message</source>
-        <translation>Go to Message</translation>
+        <translation>Ísť na správu</translation>
     </message>
     <message>
         <source>Start Bot</source>
-        <translation>Start Bot</translation>
+        <translation>Štartovací robot</translation>
     </message>
 </context>
 <context>
     <name>StickerPicker</name>
     <message>
         <source>Sticker set successfully removed!</source>
-        <translation>Sticker set successfully removed!</translation>
+        <translation>Sada nálepiek bola úspešne odstránená!</translation>
     </message>
     <message>
         <source>Recent</source>
-        <translation type="unfinished"></translation>
+        <translation>Minulé</translation>
     </message>
     <message>
         <source>Sticker set</source>
-        <translation type="unfinished"></translation>
+        <translation>Sada nálepiek</translation>
     </message>
     <message>
         <source>No recent stickers</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne minulé nálepky</translation>
     </message>
     <message>
         <source>No stickers in this set</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne nálepky v tejto sade</translation>
     </message>
 </context>
 <context>
     <name>StickerSetOverlay</name>
     <message>
         <source>Sticker set successfully installed!</source>
-        <translation>Sticker set successfully installed!</translation>
+        <translation>Sada nálepiek bola úspešne inštalovaná!</translation>
     </message>
     <message>
         <source>Sticker set successfully removed!</source>
-        <translation>Sticker set successfully removed!</translation>
+        <translation>Sada nálepiek bola úspešne odstránená!</translation>
     </message>
 </context>
 <context>
     <name>StoriesPage</name>
     <message>
         <source>Stories</source>
-        <translation>Stories</translation>
+        <translation>Príbehy</translation>
     </message>
     <message>
         <source>Main</source>
-        <translation type="unfinished"></translation>
+        <translation>Hlavný</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>Unknown chat</source>
-        <translation type="unfinished"></translation>
+        <translation>Neznámy čet</translation>
     </message>
     <message numerus="yes">
         <source>%n new story(es)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n nový príbeh</numerusform>
+            <numerusform>%n nový príbehy</numerusform>
+            <numerusform>%n nových príbehov</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n story(es)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n príbeh</numerusform>
+            <numerusform>%n príbehy</numerusform>
+            <numerusform>%n príbehov</numerusform>
         </translation>
     </message>
     <message>
         <source>No stories from your contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne príbehy od vašich kontaktov</translation>
     </message>
     <message>
         <source>Pull down to refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Potiahnuť nadol pre obnovenie</translation>
     </message>
     <message>
         <source>My Archive</source>
-        <translation type="unfinished"></translation>
+        <translation>Môj archív</translation>
     </message>
     <message>
         <source>You have no archived stories</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemáte žiadne archivované príbehy</translation>
     </message>
     <message>
         <source>(no caption)</source>
-        <translation type="unfinished"></translation>
+        <translation>(bez nadpisu)</translation>
     </message>
     <message>
         <source>New story</source>
-        <translation type="unfinished"></translation>
+        <translation>Nový príbeh</translation>
     </message>
     <message>
         <source>Delete story</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť príbeh</translation>
     </message>
     <message>
         <source>Blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Čierna listina</translation>
     </message>
     <message>
         <source>Blacklist is empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Čierna listina je prázdna</translation>
     </message>
     <message>
         <source>Remove from blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstrániť z čiernej listiny</translation>
     </message>
     <message>
         <source>Add to blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať na čiernu listinu</translation>
     </message>
     <message>
         <source>Added to blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridané na čiernu listinu</translation>
     </message>
     <message>
         <source>Removed from blacklist</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstránené z čiernej listiny</translation>
     </message>
     <message>
         <source>My Profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Môj profil</translation>
     </message>
     <message>
         <source>You have no stories on your profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Vo vašom profile nemáte žiadne príbehy</translation>
     </message>
     <message>
         <source>Archive</source>
         <comment>Short label for the My Archive tab</comment>
-        <translation type="unfinished"></translation>
+        <translation>Archív</translation>
     </message>
     <message>
         <source>Profile</source>
         <comment>Short label for the My Profile tab</comment>
-        <translation type="unfinished"></translation>
+        <translation>Profil</translation>
     </message>
 </context>
 <context>
     <name>StoriesViewerPage</name>
     <message>
         <source>Story</source>
-        <translation type="unfinished"></translation>
+        <translation>Príbeh</translation>
     </message>
     <message>
         <source>This story type is not supported yet</source>
-        <translation type="unfinished"></translation>
+        <translation>Tento typ príbehu nie je v súčasnosti podporovaný</translation>
     </message>
     <message>
         <source>Deleting story</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstraňovanie príbehu</translation>
     </message>
     <message>
         <source>Could not set reaction.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reakciu sa nepodarilo nastaviť.</translation>
     </message>
     <message>
         <source>Story not available</source>
-        <translation type="unfinished"></translation>
+        <translation>Príbeh nie je dostupný</translation>
     </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>
     <message>
         <source>Audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Cieľová skupina</translation>
     </message>
     <message>
         <source>Done</source>
-        <translation type="unfinished"></translation>
+        <translation>Hotovo</translation>
     </message>
     <message numerus="yes">
         <source>Choose who will see your next story (%n selected).</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Vybrať, kto môže vidieť váš ďalší príbeh (%n označený).</numerusform>
+            <numerusform>Vybrať, kto môže vidieť váš ďalší príbeh (%n označené).</numerusform>
+            <numerusform>Vybrať, kto môže vidieť váš ďalší príbeh (%n označených).</numerusform>
         </translation>
     </message>
     <message>
         <source>Search...</source>
-        <translation type="unfinished"></translation>
+        <translation>Hľadať...</translation>
     </message>
     <message>
         <source>No contacts or private chats.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne kontakty alebo utajené čety.</translation>
     </message>
     <message>
         <source>Loading contacts...</source>
-        <translation type="unfinished">Loading contacts...</translation>
+        <translation>Načítanie kontaktov...</translation>
     </message>
     <message>
         <source>Custom audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Vlastná cieľová skupina</translation>
     </message>
     <message numerus="yes">
         <source>Members of your custom audience (%n selected). Saved across stories.</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Členovia vašej vlastnej cieľovej skupiny (%n označený). Uložené naprieč príbehmi.</numerusform>
+            <numerusform>Členovia vašej vlastnej cieľovej skupiny (%n označení). Uložené naprieč príbehmi.</numerusform>
+            <numerusform>Členovia vašej vlastnej cieľovej skupiny (%n označených). Uložené naprieč príbehmi.</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>(%n selected)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>(%n označený)</numerusform>
+            <numerusform>(%n označení)</numerusform>
+            <numerusform>(%n označených)</numerusform>
         </translation>
     </message>
 </context>
@@ -4760,375 +4800,378 @@ messages</numerusform>
     <name>StoryComposeDialog</name>
     <message>
         <source>Publish</source>
-        <translation type="unfinished"></translation>
+        <translation>Zverejniť</translation>
     </message>
     <message>
         <source>New story</source>
-        <translation type="unfinished"></translation>
+        <translation>Nový príbeh</translation>
     </message>
     <message>
         <source>Tap to change</source>
-        <translation type="unfinished"></translation>
+        <translation>Klepnúť pre zmenu</translation>
     </message>
     <message>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Popis</translation>
     </message>
     <message>
         <source>Add a caption (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Pridať popis (voliteľné)</translation>
     </message>
     <message>
         <source>Reading video…</source>
-        <translation type="unfinished"></translation>
+        <translation>Čítanie videa…</translation>
     </message>
     <message>
         <source>Video too long: %1 (max %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Video je príliš dlhé: %1 (max %2)</translation>
     </message>
     <message>
         <source>Duration: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Trvanie: %1</translation>
     </message>
     <message>
         <source>Cannot determine your account.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nie je možné určiť váš účet.</translation>
     </message>
     <message>
         <source>Posting story…</source>
-        <translation type="unfinished"></translation>
+        <translation>Uverejňovanie príbehu…</translation>
     </message>
     <message>
         <source>Video conversion failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konverzia videa zlyhala.</translation>
     </message>
     <message>
         <source>Story posted</source>
-        <translation type="unfinished"></translation>
+        <translation>Príbeh bol zverejnený</translation>
     </message>
     <message>
         <source>Could not post story.</source>
-        <translation type="unfinished"></translation>
+        <translation>Príbeh nemožno zverejniť.</translation>
     </message>
     <message>
         <source>Telegram stories are vertical (9:16). Your landscape video is being adapted before publishing.</source>
-        <translation type="unfinished"></translation>
+        <translation>Príbehy Tegramu sú zvislé (9:16). Vaše video naležato bude pred zverejnením prispôsobené.</translation>
     </message>
     <message>
         <source>Converting video</source>
-        <translation type="unfinished"></translation>
+        <translation>Konvertovanie videa</translation>
     </message>
     <message>
         <source>Uploading video</source>
-        <translation type="unfinished"></translation>
+        <translation>Nahrávanie videa</translation>
     </message>
     <message>
         <source>Audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Cieľová skupina</translation>
     </message>
     <message>
         <source>Everyone</source>
-        <translation type="unfinished"></translation>
+        <translation>Všetci</translation>
     </message>
     <message>
         <source>Selected contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybraté kontakty</translation>
     </message>
     <message numerus="yes">
         <source>%n contact(s) selected</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n vybratý kontakt</numerusform>
+            <numerusform>%n vybraté kontakty</numerusform>
+            <numerusform>%n vybratých kontaktov</numerusform>
         </translation>
     </message>
     <message>
         <source>Choose contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Vybrať kontakty</translation>
     </message>
     <message>
         <source>Allow screenshots</source>
-        <translation type="unfinished"></translation>
+        <translation>Povoliť snímku obrazovky</translation>
     </message>
     <message>
         <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ak je vypnuté, príbeh je označený ako chránený: oficiálni klienti blokujú snímky obrazovky a preposielanie.</translation>
     </message>
     <message>
         <source>Post to my profile</source>
-        <translation type="unfinished"></translation>
+        <translation>Zverejniť v mojom profile</translation>
     </message>
     <message>
         <source>Keep the story visible on your profile after the 24h expiration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nechať príbeh viditeľný vo svojom profile po uplynutí 24 hodín.</translation>
     </message>
     <message>
         <source>Custom audience</source>
-        <translation type="unfinished"></translation>
+        <translation>Vlastná cieľová skupina</translation>
     </message>
     <message>
         <source>Custom audience (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Vlastná cieľová skupina (%1)</translation>
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k obrázkom je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
     <message>
         <source>Video access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prístup k videám je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 <context>
     <name>StoryReplyDialog</name>
     <message>
         <source>Reply sent</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpoveď poslaná</translation>
     </message>
     <message>
         <source>Send</source>
-        <translation type="unfinished"></translation>
+        <translation>Poslať</translation>
     </message>
     <message>
         <source>Reply to %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpovedať na %1</translation>
     </message>
     <message>
         <source>Reply to story</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpovedať na príbeh</translation>
     </message>
     <message>
         <source>Reply</source>
-        <translation type="unfinished"></translation>
+        <translation>Odpovedať</translation>
     </message>
     <message>
         <source>Write a reply…</source>
-        <translation type="unfinished"></translation>
+        <translation>Napísať odpoveď…</translation>
     </message>
 </context>
 <context>
     <name>StoryViewersPage</name>
     <message>
         <source>Viewers</source>
-        <translation type="unfinished"></translation>
+        <translation>Zobrazenia</translation>
     </message>
     <message numerus="yes">
         <source>%n view(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n zobrazenie</numerusform>
+            <numerusform>%n zobrazenia</numerusform>
+            <numerusform>%n zobrazení</numerusform>
         </translation>
     </message>
     <message numerus="yes">
         <source>%n reaction(s)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>%n reakcia</numerusform>
+            <numerusform>%n reakcie</numerusform>
+            <numerusform>%n reakcií</numerusform>
         </translation>
     </message>
     <message>
         <source>Telegram user</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ Telegramu</translation>
     </message>
     <message>
         <source>Forwarded</source>
-        <translation type="unfinished"></translation>
+        <translation>Postúpené</translation>
     </message>
     <message>
         <source>Reposted</source>
-        <translation type="unfinished"></translation>
+        <translation>Znovu zverejnené</translation>
     </message>
     <message>
         <source>No viewers yet</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadne zobrazenia</translation>
     </message>
 </context>
 <context>
     <name>SupergroupMembersPage</name>
     <message>
         <source>Removed Users</source>
-        <translation type="unfinished"></translation>
+        <translation>Odstránení používatelia</translation>
     </message>
     <message>
         <source>Administrators</source>
-        <translation type="unfinished"></translation>
+        <translation>Správcovia</translation>
     </message>
     <message>
         <source>Banned until %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Blokované do %1</translation>
     </message>
     <message>
         <source>Banned</source>
-        <translation type="unfinished">Banned</translation>
+        <translation>Blokované</translation>
     </message>
     <message>
         <source>Unable to load members for this chat.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno načítať členov tohto četu.</translation>
     </message>
     <message>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation>Obnoviť</translation>
     </message>
     <message>
         <source>There are no removed users.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadni odstránení používatelia.</translation>
     </message>
     <message>
         <source>No administrators found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Žiadni správcovia.</translation>
     </message>
     <message>
         <source>Joined %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Pripojení %1</translation>
     </message>
     <message>
         <source>Unbanning…</source>
-        <translation type="unfinished"></translation>
+        <translation>Odblokovanie…</translation>
     </message>
     <message>
         <source>Unban</source>
-        <translation type="unfinished"></translation>
+        <translation>Odblokovať</translation>
     </message>
     <message>
         <source>Load more</source>
-        <translation type="unfinished"></translation>
+        <translation>Načítať viac</translation>
     </message>
     <message>
         <source>User has been unbanned.</source>
-        <translation type="unfinished"></translation>
+        <translation>Používateľ bol odblokovaný.</translation>
     </message>
 </context>
 <context>
     <name>ThemeConfirmDialog</name>
     <message>
         <source>Apply now</source>
-        <translation type="unfinished"></translation>
+        <translation>Použiť teraz</translation>
     </message>
     <message>
         <source>No</source>
-        <translation type="unfinished">No</translation>
+        <translation>Nie</translation>
     </message>
     <message>
         <source>Neon theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma Neón</translation>
     </message>
     <message>
         <source>Silica theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Téma Silica</translation>
     </message>
     <message>
         <source>Cyberpunk look</source>
-        <translation type="unfinished"></translation>
+        <translation>Vzhľad cyberpunk</translation>
     </message>
     <message>
         <source>Base theme</source>
-        <translation type="unfinished"></translation>
+        <translation>Základná téma</translation>
     </message>
     <message>
         <source>Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.</source>
-        <translation type="unfinished"></translation>
+        <translation>Pozadie obvodu, neónové svetlo na ponukách, tlačidlách a názvoch, zaoblené avatary a sklenené karty. Ťažšie: vyžaduje tmavú a oranžovú tému pre dokonalý zážitok.</translation>
     </message>
     <message>
         <source>Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Prirodzené ploché menu, štvorcové avatary, žiadne vlastné pozadie, štandardné farby Silica. Ľahšie a jasne čitateľné aj na svetlých systémových témach.</translation>
     </message>
     <message>
         <source>Apply this theme now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Použiť túto tému?</translation>
     </message>
 </context>
 <context>
     <name>VideoPage</name>
     <message>
         <source>Download of %1 successful.</source>
-        <translation>Download of %1 successful.</translation>
+        <translation>Prevzatie %1 bolo úspešné.</translation>
     </message>
     <message>
         <source>Download failed.</source>
-        <translation>Download failed.</translation>
+        <translation>Prevzatie zlyhalo.</translation>
     </message>
     <message>
         <source>Copy video to gallery</source>
-        <translation>Copy video to gallery</translation>
+        <translation>Kopírovať video do galérie</translation>
     </message>
 </context>
 <context>
     <name>VideoTranscoder</name>
     <message>
         <source>A video conversion is already in progress.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konverzia videa práve prebieha.</translation>
     </message>
     <message>
         <source>Video converter not available.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konvertor videa nie je dostupný.</translation>
     </message>
     <message>
         <source>Source video not found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Zdrojové video sa nenašlo.</translation>
     </message>
     <message>
         <source>Video conversion failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Konverzia videa zlyhala.</translation>
     </message>
     <message>
         <source>Could not start the video converter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Nemožno spustiť konvertor videa.</translation>
     </message>
 </context>
 <context>
     <name>VoiceNoteOverlay</name>
     <message>
         <source>Record a Voice Note</source>
-        <translation>Record a Voice Note</translation>
+        <translation>Zaznamenať hlasovú poznámku</translation>
     </message>
     <message>
         <source>Press the button to start recording</source>
-        <translation>Press the button to start recording</translation>
+        <translation>Stlačiť tlačidlo na začatie záznamu</translation>
     </message>
     <message>
         <source>Unavailable</source>
-        <translation>Unavailable</translation>
+        <translation>Nedostupné</translation>
     </message>
     <message>
         <source>Starting</source>
-        <translation>Starting</translation>
+        <translation>Spustené</translation>
     </message>
     <message>
         <source>Recording</source>
-        <translation>Recording</translation>
+        <translation>Záznam</translation>
     </message>
     <message>
         <source>Stopping</source>
-        <translation>Stopping</translation>
+        <translation>Zastavenie</translation>
     </message>
     <message>
         <source>Use recording</source>
-        <translation>Use recording</translation>
+        <translation>Použiť záznam</translation>
     </message>
     <message>
         <source>Voice Note (%1)</source>
-        <translation>Voice Note (%1)</translation>
+        <translation>Hlasová poznámka (%1)</translation>
     </message>
     <message>
         <source>Ready</source>
-        <translation>Ready</translation>
+        <translation>Pripravené</translation>
     </message>
 </context>
 <context>
     <name>WebPagePreview</name>
     <message>
         <source>Preview not supported for this link...</source>
-        <translation>Preview not supported for this link...</translation>
+        <translation>Náhľad nepodporuje tento odkaz…</translation>
     </message>
 </context>
 <context>
     <name>WhatsNewDialog</name>
     <message>
         <source>Continua</source>
-        <translation type="unfinished"></translation>
+        <translation>Pokračovať</translation>
     </message>
     <message>
         <source>Novità</source>
-        <translation type="unfinished"></translation>
+        <translation>Správy</translation>
     </message>
 </context>
 <context>
@@ -5139,602 +5182,602 @@ messages</numerusform>
     </message>
     <message>
         <source>has registered with Telegram</source>
-        <translation>has registered with Telegram</translation>
+        <translation>registrované Telegramom</translation>
     </message>
     <message>
         <source>Picture: %1</source>
-        <translation>Picture: %1</translation>
+        <translation>Obrázok: %1</translation>
     </message>
     <message>
         <source>Audio: %1</source>
-        <translation>Audio: %1</translation>
+        <translation>Zvukový záznam: %1</translation>
     </message>
     <message>
         <source>Voice Note: %1</source>
-        <translation>Voice Note: %1</translation>
+        <translation>Hlasová poznámka: %1</translation>
     </message>
     <message>
         <source>Animation: %1</source>
-        <translation>Animation: %1</translation>
+        <translation>Animácia: %1</translation>
     </message>
     <message>
         <source>Document: %1</source>
-        <translation>Document: %1</translation>
+        <translation>Dokument: %1</translation>
     </message>
     <message>
         <source>sent a picture</source>
-        <translation>sent a picture</translation>
+        <translation>som poslal obrázok</translation>
     </message>
     <message>
         <source>sent a video</source>
-        <translation>sent a video</translation>
+        <translation>som poslal video</translation>
     </message>
     <message>
         <source>sent an animation</source>
-        <translation>sent an animation</translation>
+        <translation>som poslal animáciu</translation>
     </message>
     <message>
         <source>sent an audio</source>
-        <translation>sent an audio</translation>
+        <translation>som poslal zvukový záznam</translation>
     </message>
     <message>
         <source>sent a voice note</source>
-        <translation>sent a voice note</translation>
+        <translation>som poslal hlasovú poznámku</translation>
     </message>
     <message>
         <source>sent a document</source>
-        <translation>sent a document</translation>
+        <translation>som poslal dokument</translation>
     </message>
     <message>
         <source>sent a location</source>
-        <translation>sent a location</translation>
+        <translation>som poslal polohu</translation>
     </message>
     <message>
         <source>joined this chat</source>
-        <translation>joined this chat</translation>
+        <translation>som sa pripojil k tomuto četu</translation>
     </message>
     <message>
         <source>was added to this chat</source>
-        <translation>was added to this chat</translation>
+        <translation>bol pridaný k tomuto četu</translation>
     </message>
     <message>
         <source>left this chat</source>
-        <translation>left this chat</translation>
+        <translation>som opustil tento čet</translation>
     </message>
     <message>
         <source>%1M</source>
-        <translation>%1M</translation>
+        <translation>%1 mil.</translation>
     </message>
     <message>
         <source>%1K</source>
-        <translation>%1K</translation>
+        <translation>%1 tis.</translation>
     </message>
     <message>
         <source>sent a venue</source>
-        <translation>sent a venue</translation>
+        <translation>som poslal miesto konania</translation>
     </message>
     <message>
         <source>sent a picture</source>
         <comment>myself</comment>
-        <translation>sent a picture</translation>
+        <translation>som poslal obrázok</translation>
     </message>
     <message>
         <source>sent a video</source>
         <comment>myself</comment>
-        <translation>sent a video</translation>
+        <translation>som poslal video</translation>
     </message>
     <message>
         <source>sent an animation</source>
         <comment>myself</comment>
-        <translation>sent an animation</translation>
+        <translation>som poslal animáciu</translation>
     </message>
     <message>
         <source>sent an audio</source>
         <comment>myself</comment>
-        <translation>sent an audio</translation>
+        <translation>som poslal zvukový záznam</translation>
     </message>
     <message>
         <source>sent a voice note</source>
         <comment>myself</comment>
-        <translation>sent a voice note</translation>
+        <translation>som poslal hlasovú poznámku</translation>
     </message>
     <message>
         <source>sent a document</source>
         <comment>myself</comment>
-        <translation>sent a document</translation>
+        <translation>som poslal dokument</translation>
     </message>
     <message>
         <source>sent a location</source>
         <comment>myself</comment>
-        <translation>sent a location</translation>
+        <translation>som poslal polohu</translation>
     </message>
     <message>
         <source>sent a venue</source>
         <comment>myself</comment>
-        <translation>sent a venue</translation>
+        <translation>som poslal miesto konania</translation>
     </message>
     <message>
         <source>have registered with Telegram</source>
-        <translation>have registered with Telegram</translation>
+        <translation>sa zaregistroval v Telegrame</translation>
     </message>
     <message>
         <source>joined this chat</source>
         <comment>myself</comment>
-        <translation>joined this chat</translation>
+        <translation>som sa pripojil k tomuto četu</translation>
     </message>
     <message>
         <source>were added to this chat</source>
         <comment>myself</comment>
-        <translation>were added to this chat</translation>
+        <translation>som bol pridaný do tohto četu</translation>
     </message>
     <message>
         <source>left this chat</source>
         <comment>myself</comment>
-        <translation>left this chat</translation>
+        <translation>som opustil tento čet</translation>
     </message>
     <message>
         <source>was never online</source>
-        <translation>was never online</translation>
+        <translation>nebol nikdy pripojený</translation>
     </message>
     <message>
         <source>last online: last month</source>
-        <translation>last online: last month</translation>
+        <translation>naposledy pripojený: minulý mesiac</translation>
     </message>
     <message>
         <source>last online: last week</source>
-        <translation>last online: last week</translation>
+        <translation>naposledy pripojený: minulý týždeň</translation>
     </message>
     <message>
         <source>last online: %1</source>
-        <translation>last online: %1</translation>
+        <translation>naposledy pripojený: %1</translation>
     </message>
     <message>
         <source>online</source>
-        <translation>online</translation>
+        <translation>pripojený</translation>
     </message>
     <message>
         <source>was recently online</source>
-        <translation>was recently online</translation>
+        <translation>bol naposledy pripojený</translation>
     </message>
     <message>
         <source>Admin</source>
         <comment>channel user role</comment>
-        <translation>Admin</translation>
+        <translation>Správca</translation>
     </message>
     <message>
         <source>Banned</source>
         <comment>channel user role</comment>
-        <translation>Banned</translation>
+        <translation>Blokovaný</translation>
     </message>
     <message>
         <source>Creator</source>
         <comment>channel user role</comment>
-        <translation>Creator</translation>
+        <translation>Tvorca</translation>
     </message>
     <message>
         <source>Restricted</source>
         <comment>channel user role</comment>
-        <translation>Restricted</translation>
+        <translation>Obmedzený</translation>
     </message>
     <message>
         <source>changed the chat title to %1</source>
         <comment>myself</comment>
-        <translation>changed the chat title to %1</translation>
+        <translation>zmenil názov četu na %1</translation>
     </message>
     <message>
         <source>changed the chat title to %1</source>
-        <translation>changed the chat title to %1</translation>
+        <translation>zmenil názov četu na %1</translation>
     </message>
     <message>
         <source>sent a poll</source>
         <comment>myself</comment>
-        <translation>sent a poll</translation>
+        <translation>poslal anketu</translation>
     </message>
     <message>
         <source>sent a poll</source>
-        <translation>sent a poll</translation>
+        <translation>poslal anketu</translation>
     </message>
     <message>
         <source>sent an anonymous quiz</source>
         <comment>myself</comment>
-        <translation>sent an anonymous quiz</translation>
+        <translation>poslal anonymný kvíz</translation>
     </message>
     <message>
         <source>sent an anonymous quiz</source>
-        <translation>sent an anonymous quiz</translation>
+        <translation>poslal anonymný kvíz</translation>
     </message>
     <message>
         <source>sent a quiz</source>
         <comment>myself</comment>
-        <translation>sent a quiz</translation>
+        <translation>poslal kvíz</translation>
     </message>
     <message>
         <source>sent a quiz</source>
-        <translation>sent a quiz</translation>
+        <translation>poslal kvíz</translation>
     </message>
     <message>
         <source>sent an anonymous poll</source>
         <comment>myself</comment>
-        <translation>sent an anonymous poll</translation>
+        <translation>poslal anonymnú anketu</translation>
     </message>
     <message>
         <source>sent an anonymous poll</source>
-        <translation>sent an anonymous poll</translation>
+        <translation>poslal anonymnú anketu</translation>
     </message>
     <message>
         <source>Anonymous Quiz</source>
-        <translation>Anonymous Quiz</translation>
+        <translation>Anonymný kvíz</translation>
     </message>
     <message>
         <source>Quiz</source>
-        <translation>Quiz</translation>
+        <translation>Kvíz</translation>
     </message>
     <message>
         <source>Anonymous Poll</source>
-        <translation>Anonymous Poll</translation>
+        <translation>Anonymná anketa</translation>
     </message>
     <message>
         <source>Poll</source>
-        <translation>Poll</translation>
+        <translation>Anketa</translation>
     </message>
     <message>
         <source>created this group</source>
         <comment>myself</comment>
-        <translation>created this group</translation>
+        <translation>vytvoril túto skupinu</translation>
     </message>
     <message>
         <source>created this group</source>
-        <translation>created this group</translation>
+        <translation>vytvoril túto skupinu</translation>
     </message>
     <message>
         <source>changed the chat photo</source>
         <comment>myself</comment>
-        <translation>changed the chat photo</translation>
+        <translation>zmenil fotografiu četu</translation>
     </message>
     <message>
         <source>changed the chat photo</source>
-        <translation>changed the chat photo</translation>
+        <translation>zmenil fotografiu četu</translation>
     </message>
     <message>
         <source>deleted the chat photo</source>
         <comment>myself</comment>
-        <translation>deleted the chat photo</translation>
+        <translation>odstránil fotografiu četu</translation>
     </message>
     <message>
         <source>deleted the chat photo</source>
-        <translation>deleted the chat photo</translation>
+        <translation>odstránil fotografiu četu</translation>
     </message>
     <message>
         <source>changed the secret chat TTL setting</source>
         <comment>myself; TTL = Time To Live</comment>
-        <translation>changed the secret chat TTL setting</translation>
+        <translation>zmenil TTL nastavenia četu</translation>
     </message>
     <message>
         <source>changed the secret chat TTL setting</source>
         <comment>TTL = Time To Live</comment>
-        <translation>changed the secret chat TTL setting</translation>
+        <translation>zmenil TTL nastavenia četu</translation>
     </message>
     <message>
         <source>upgraded this group to a supergroup</source>
         <comment>myself</comment>
-        <translation>upgraded this group to a supergroup</translation>
+        <translation>zmenil túto skupinu na superskupinu</translation>
     </message>
     <message>
         <source>changed the pinned message</source>
         <comment>myself</comment>
-        <translation>changed the pinned message</translation>
+        <translation>zmenil pripnutú správu</translation>
     </message>
     <message>
         <source>changed the pinned message</source>
-        <translation>changed the pinned message</translation>
+        <translation>zmenil pripnutú správu</translation>
     </message>
     <message>
         <source>created a screenshot in this chat</source>
         <comment>myself</comment>
-        <translation>created a screenshot in this chat</translation>
+        <translation>urobil snímku obrazovky v tomto čete</translation>
     </message>
     <message>
         <source>created a screenshot in this chat</source>
-        <translation>created a screenshot in this chat</translation>
+        <translation>urobil snímku obrazovky v tomto čete</translation>
     </message>
     <message>
         <source>sent an unsupported message</source>
         <comment>myself</comment>
-        <translation>sent an unsupported message</translation>
+        <translation>poslal nepodporovanú správu</translation>
     </message>
     <message>
         <source>sent an unsupported message</source>
-        <translation>sent an unsupported message</translation>
+        <translation>poslal nepodporovanú správu</translation>
     </message>
     <message>
         <source>sent an unsupported message: %1</source>
         <comment>myself; %1 is message type</comment>
-        <translation>sent an unsupported message: %1</translation>
+        <translation>poslal nepodporovanú správu: %1</translation>
     </message>
     <message>
         <source>sent an unsupported message: %1</source>
         <comment>%1 is message type</comment>
-        <translation>sent an unsupported message: %1</translation>
+        <translation>poslal nepodporovanú správu: %1</translation>
     </message>
     <message>
         <source>upgraded this group to a supergroup</source>
-        <translation>upgraded this group to a supergroup</translation>
+        <translation>zmenil túto skupinu na superskupinu</translation>
     </message>
     <message>
         <source>sent a self-destructing photo that is expired</source>
         <comment>myself</comment>
-        <translation>sent a self-destructing photo that is expired</translation>
+        <translation>poslal samodeštrukčnú fotografiu, ktorej platnosť vypršala</translation>
     </message>
     <message>
         <source>sent a self-destructing photo that is expired</source>
-        <translation>sent a self-destructing photo that is expired</translation>
+        <translation>poslal samodeštrukčnú fotografiu, ktorej platnosť vypršala</translation>
     </message>
     <message>
         <source>sent a self-destructing video that is expired</source>
         <comment>myself</comment>
-        <translation>sent a self-destructing video that is expired</translation>
+        <translation>poslal samodeštrukčné video, ktorého platnosť vypršala</translation>
     </message>
     <message>
         <source>sent a self-destructing video that is expired</source>
-        <translation>sent a self-destructing video that is expired</translation>
+        <translation>poslal samodeštrukčné video, ktorého platnosť vypršala</translation>
     </message>
     <message>
         <source>Unable to find user %1</source>
-        <translation>Unable to find user %1</translation>
+        <translation>Nemožno nájsť používateľa %1</translation>
     </message>
     <message>
         <source>sent a video note</source>
         <comment>myself</comment>
-        <translation>sent a video note</translation>
+        <translation>poslal video poznámku</translation>
     </message>
     <message>
         <source>sent a video note</source>
-        <translation>sent a video note</translation>
+        <translation>poslal video poznámku</translation>
     </message>
     <message>
         <source>You are already a member of this chat.</source>
-        <translation>You are already a member of this chat.</translation>
+        <translation>Už ste členom tohto četu.</translation>
     </message>
     <message>
         <source>Closed!</source>
-        <translation>Closed!</translation>
+        <translation>Zatvorené!</translation>
     </message>
     <message>
         <source>Pending acknowledgement</source>
-        <translation>Pending acknowledgement</translation>
+        <translation>Čaká sa na potvrdenie</translation>
     </message>
     <message>
         <source>has added %1 to the chat</source>
-        <translation>has added %1 to the chat</translation>
+        <translation>pridal %1 do četu</translation>
     </message>
     <message>
         <source>has removed %1 from the chat</source>
-        <translation>has removed %1 from the chat</translation>
+        <translation>odstránil %1 z četu</translation>
     </message>
     <message>
         <source>have added %1 to the chat</source>
         <comment>myself</comment>
-        <translation>have added %1 to the chat</translation>
+        <translation>som pridal %1 do četu</translation>
     </message>
     <message>
         <source>have removed %1 from the chat</source>
         <comment>myself</comment>
-        <translation>have removed %1 from the chat</translation>
+        <translation>som odstránil %1 z četu</translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points</source>
         <comment>myself</comment>
         <translation>
-            <numerusform>scored %Ln point</numerusform>
-            <numerusform>scored %Ln points</numerusform>
+            <numerusform>získal %Ln bod</numerusform>
+            <numerusform>získal %Ln body</numerusform>
+            <numerusform>získal %Ln bodov</numerusform>
         </translation>
     </message>
     <message>
         <source>sent a game</source>
         <comment>myself</comment>
-        <translation>sent a game</translation>
+        <translation>poslal hru</translation>
     </message>
     <message>
         <source>sent a game</source>
-        <translation>sent a game</translation>
+        <translation>poslal hru</translation>
     </message>
     <message>
         <source>cancelled a call</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>som ukončil hovor</translation>
     </message>
     <message>
         <source>missed a call</source>
-        <translation type="unfinished"></translation>
+        <translation>zmeškaný hovor</translation>
     </message>
     <message>
         <source>started a call</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>zavolal</translation>
     </message>
     <message>
         <source>started a call</source>
-        <translation type="unfinished"></translation>
+        <translation>zavolal</translation>
     </message>
     <message>
         <source>created topic: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>vytvorená téma: %1</translation>
     </message>
     <message>
         <source>renamed topic to: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>premenovaná téma: %1</translation>
     </message>
     <message>
         <source>edited topic icon</source>
-        <translation type="unfinished"></translation>
+        <translation>upravená ikona témy</translation>
     </message>
     <message>
         <source>closed topic</source>
-        <translation type="unfinished"></translation>
+        <translation>zatvorená téma</translation>
     </message>
     <message>
         <source>reopened topic</source>
-        <translation type="unfinished"></translation>
+        <translation>znovu otvorená tému</translation>
     </message>
     <message>
         <source>edited topic</source>
-        <translation type="unfinished"></translation>
+        <translation>upravená téma</translation>
     </message>
     <message>
         <source>hid topic</source>
-        <translation type="unfinished"></translation>
+        <translation>skrytá téma</translation>
     </message>
     <message>
         <source>unhid topic</source>
-        <translation type="unfinished"></translation>
+        <translation>odkrytá téma</translation>
     </message>
     <message>
         <source>sent a contact</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>poslal kontakt</translation>
     </message>
     <message>
         <source>sent a contact</source>
-        <translation type="unfinished"></translation>
+        <translation>poslal kontakt</translation>
     </message>
     <message>
         <source>started a video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>začal video čet</translation>
     </message>
     <message>
         <source>started a video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>začal video čet</translation>
     </message>
     <message>
         <source>ended the video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>ukončil video čet</translation>
     </message>
     <message>
         <source>ended the video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>ukončil video čet</translation>
     </message>
     <message>
         <source>scheduled a video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>naplánoval video čet</translation>
     </message>
     <message>
         <source>scheduled a video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>naplánoval video čet</translation>
     </message>
     <message>
         <source>invited participants to the video chat</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>pozval účastníkov do video četu</translation>
     </message>
     <message>
         <source>invited participants to the video chat</source>
-        <translation type="unfinished"></translation>
+        <translation>pozval účastníkov do video četu</translation>
     </message>
     <message>
         <source>changed the chat theme</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>zmenil tému četu</translation>
     </message>
     <message>
         <source>changed the chat theme</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenil tému četu</translation>
     </message>
     <message>
         <source>changed the chat background</source>
         <comment>myself</comment>
-        <translation type="unfinished"></translation>
+        <translation>zmenil pozadie četu</translation>
     </message>
     <message>
         <source>changed the chat background</source>
-        <translation type="unfinished"></translation>
+        <translation>zmenil pozadie četu</translation>
     </message>
 </context>
 <context>
     <name>harbour-rootelegram</name>
     <message>
         <source>Send shared content</source>
-        <translation type="unfinished"></translation>
+        <translation>Poslať poskytnutý obsah</translation>
     </message>
     <message>
         <source>Unknown caller</source>
-        <translation type="unfinished"></translation>
+        <translation>Neznámy volajúci</translation>
     </message>
     <message>
         <source>Calling…</source>
-        <translation type="unfinished"></translation>
+        <translation>Volanie…</translation>
     </message>
     <message>
         <source>Incoming voice call</source>
-        <translation type="unfinished"></translation>
+        <translation>Prichádzajúce hlasové volanie</translation>
     </message>
     <message>
         <source>Exchanging encryption keys…</source>
-        <translation type="unfinished"></translation>
+        <translation>Výmena šifrovacích kľúčov...</translation>
     </message>
     <message>
         <source>Ending call…</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukončovanie hovoru…</translation>
     </message>
     <message>
         <source>Decline</source>
-        <translation type="unfinished"></translation>
+        <translation>Odmietnuť</translation>
     </message>
     <message>
         <source>Accept</source>
-        <translation type="unfinished"></translation>
+        <translation>Prijať</translation>
     </message>
     <message>
         <source>Unmute</source>
-        <translation type="unfinished"></translation>
+        <translation>Ozvučiť</translation>
     </message>
     <message>
         <source>Mute</source>
-        <translation type="unfinished"></translation>
+        <translation>Stlmiť</translation>
     </message>
     <message>
         <source>End call</source>
-        <translation type="unfinished"></translation>
+        <translation>Ukončiť hovor</translation>
     </message>
     <message>
         <source>Call declined</source>
-        <translation type="unfinished"></translation>
+        <translation>Hovor odmeitnutý</translation>
     </message>
     <message>
         <source>No answer</source>
-        <translation type="unfinished"></translation>
+        <translation>Neodpovedať</translation>
     </message>
     <message>
         <source>Missed call</source>
-        <translation type="unfinished"></translation>
+        <translation>Zmeškaný hovor</translation>
     </message>
     <message>
         <source>Call failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Hovor zlyhal</translation>
     </message>
     <message>
         <source>Speaker off</source>
-        <translation type="unfinished"></translation>
+        <translation>Vypnúť reproduktor</translation>
     </message>
     <message>
         <source>Speaker</source>
-        <translation type="unfinished"></translation>
+        <translation>Reproduktor</translation>
     </message>
     <message>
         <source>Incoming video call</source>
-        <translation>Incoming video call</translation>
+        <translation>Prichádzjúci video hovor</translation>
     </message>
     <message>
         <source>Video not
 available</source>
-        <translation>Video not
-available</translation>
+        <translation>Vidoe je nedostupné</translation>
     </message>
     <message>
         <source>Camera is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>Fotoaparát je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
 </context>
 </TS>

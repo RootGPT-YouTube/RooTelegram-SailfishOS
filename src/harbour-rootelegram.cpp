@@ -66,6 +66,7 @@
 #include "processlauncher.h"
 #include "stickermanager.h"
 #include "textfiltermodel.h"
+#include "qrimageprovider.h"
 #include "boolfiltermodel.h"
 #include "tgsplugin.h"
 #include "rootelegramutils.h"
@@ -284,6 +285,7 @@ int main(int argc, char *argv[])
         if (!view) {
             view = SailfishApp::createView();
             view->QObject::setParent(app.data());
+            view->engine()->addImageProvider(QLatin1String("qr"), new QrImageProvider);
             QQmlContext *context = view->rootContext();
             context->setContextProperty("appSettings", appSettings);
             context->setContextProperty("appVersion", QStringLiteral(APP_VERSION));

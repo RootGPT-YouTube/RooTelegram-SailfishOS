@@ -100,6 +100,7 @@ public:
     };
 
     MessageData(const QVariantMap &data, qlonglong msgid);
+    ~MessageData();
 
     static bool lessThan(const MessageData *message1, const MessageData *message2);
     static QVector<int> flagsToRoles(uint flags);
@@ -137,6 +138,12 @@ public:
     QVariantList albumMessageIds;
 };
 
+// [RAM #1] Contatore diagnostico delle istanze MessageData vive. Serve a
+// distinguere sul device (journalctl) un leak di oggetti (cresce e non cala
+// mai) dalla ritenzione di pagine heap glibc (oscilla ma l'Anonymous resta
+// gonfio → cura = malloc_trim, vedi sotto). Usato solo dal thread del modello.
+static int s_messageDataLiveCount = 0;
+
 ChatModel::MessageData::MessageData(const QVariantMap &data, qlonglong msgid) :
     messageData(data),
     messageId(msgid),
@@ -147,6 +154,12 @@ ChatModel::MessageData::MessageData(const QVariantMap &data, qlonglong msgid) :
     albumEntryFilter(false),
     albumMessageIds(QVariantList())
 {
+    s_messageDataLiveCount++;
+}
+
+ChatModel::MessageData::~MessageData()
+{
+    s_messageDataLiveCount--;
 }
 
 QVector<int> ChatModel::MessageData::flagsToRoles(uint flags)
@@ -433,6 +446,7 @@ void ChatModel::clear(bool contentOnly)
     // e senza trim la RSS resta gonfia anche dopo qDeleteAll. Daemon mode
     // amplifica il problema perché il processo non muore mai.
     malloc_trim(0);
+    LOG("clear() done | live MessageData:" << s_messageDataLiveCount);
 }
 
 void ChatModel::initialize(const QVariantMap &chatInformation)
@@ -1003,7 +1017,23 @@ void ChatModel::removeRange(int firstDeleted, int lastDeleted)
         endRemoveRows();
 
         updateAlbumMessages(rescanAlbumIds, true);
+
+        // [RAM #1] Rimozione parziale: i MessageData eliminati sopra liberano
+        // QVariantMap pesanti (thumbnail/blob), ma glibc non restituisce le
+        // pagine al kernel da solo. Trimmiamo a FINE batch (non a ogni delete)
+        // così l'Anonymous rientra anche senza un reset completo del modello.
+        malloc_trim(0);
+        LOG("removeRange done | live MessageData:" << s_messageDataLiveCount << "| rows:" << messages.size());
     }
+}
+
+void ChatModel::trimMemory()
+{
+    // [RAM #1] Chiamata dal QML quando l'app va in background: restituisce le
+    // pagine heap libere al kernel e logga il numero di MessageData vivi, per
+    // distinguere leak-oggetti (cresce monotòno) da ritenzione-heap-glibc.
+    malloc_trim(0);
+    LOG("trimMemory (background) | live MessageData:" << s_messageDataLiveCount);
 }
 
 void ChatModel::insertMessages(const QList<MessageData*> newMessages)

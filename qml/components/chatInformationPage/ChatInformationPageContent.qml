@@ -351,6 +351,10 @@ SilicaFlickable {
         if (groupPhotoUploadInProgress) {
             return;
         }
+        if (!appSettings.isPermissionGranted("pictures")) {
+            appNotification.show(qsTr("Image access is turned off in RooTelegram settings."));
+            return;
+        }
         var picker = pageStack.push("Sailfish.Pickers.ImagePickerPage", {
             allowedOrientations: chatInformationPage.allowedOrientations
         });

@@ -182,6 +182,10 @@ AccordionItem {
                             horizontalCenter: parent.horizontalCenter
                         }
                         onClicked: {
+                            if (!appSettings.isPermissionGranted("contacts")) {
+                                appNotification.show(qsTr("Contacts are turned off in RooTelegram settings."));
+                                return;
+                            }
                             contactSyncLoader.item.synchronize();
                         }
                     }

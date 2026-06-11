@@ -80,6 +80,10 @@ Page {
             visible: newChatPage.syncSupported
             MenuItem {
                 onClicked: {
+                    if (!appSettings.isPermissionGranted("contacts")) {
+                        appNotification.show(qsTr("Contacts are turned off in RooTelegram settings."));
+                        return;
+                    }
                     newChatPage.isLoading = true;
                     contactSyncLoader.item.synchronize();
                     // Success message is not fired before TDLib returned "Contacts imported" (see above)

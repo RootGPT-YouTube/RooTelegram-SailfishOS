@@ -51,6 +51,9 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
     Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
     Q_PROPERTY(bool useNeonTheme READ useNeonTheme WRITE setUseNeonTheme NOTIFY useNeonThemeChanged)
+    // Quando true, chiudere/minimizzare l'app NON riporta lo stack alla Home:
+    // riaprendo si resta nella chat aperta. Default false = comportamento storico.
+    Q_PROPERTY(bool keepCurrentChatOnMinimize READ keepCurrentChatOnMinimize WRITE setKeepCurrentChatOnMinimize NOTIFY keepCurrentChatOnMinimizeChanged)
     // Ultima versione per cui è stato mostrato il popup "Novità". Vuota = mai
     // mostrato (fresh install / pre-feature).
     Q_PROPERTY(QString lastSeenVersion READ lastSeenVersion WRITE setLastSeenVersion NOTIFY lastSeenVersionChanged)
@@ -84,6 +87,16 @@ public:
 
     bool useNeonTheme() const;
     void setUseNeonTheme(bool useNeonTheme);
+
+    bool keepCurrentChatOnMinimize() const;
+    void setKeepCurrentChatOnMinimize(bool enable);
+
+    // Gate soft dei permessi Sailjail (Camera, Microphone, Location, ...): il
+    // sandbox di sistema li concede tutti insieme, questo è un controllo
+    // applicativo che l'app rispetta PRIMA di usare la risorsa. Default true
+    // (concesso) per non cambiare il comportamento di chi non tocca nulla.
+    Q_INVOKABLE bool isPermissionGranted(const QString &permission) const;
+    Q_INVOKABLE void setPermissionGranted(const QString &permission, bool granted);
 
     bool showStickersAsEmojis() const;
     void setShowStickersAsEmojis(bool showAsEmojis);
@@ -202,6 +215,8 @@ signals:
     void storyPostToProfileChanged();
     void storyPrivacyModeChanged();
     void useNeonThemeChanged();
+    void keepCurrentChatOnMinimizeChanged();
+    void permissionsChanged(const QString &permission, bool granted);
     void lastSeenVersionChanged();
     void storyCustomAudienceUserIdsChanged();
 

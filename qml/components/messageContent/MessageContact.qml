@@ -58,6 +58,10 @@ MessageContentBase {
         if (phoneText === "") {
             return;
         }
+        if (!appSettings.isPermissionGranted("contacts")) {
+            appNotification.show(qsTr("Contacts are turned off in RooTelegram settings."));
+            return;
+        }
         contactSaverLoader.active = true;
         contactSaverLoader.item.save(firstName, lastName, phoneText);
     }

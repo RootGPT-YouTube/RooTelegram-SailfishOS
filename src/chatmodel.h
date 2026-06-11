@@ -44,6 +44,7 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const override;
 
     Q_INVOKABLE void clear(bool contentOnly = false);
+    Q_INVOKABLE void trimMemory();
     Q_INVOKABLE void initialize(const QVariantMap &chatInformation);
     Q_INVOKABLE void triggerLoadMoreHistory();
     Q_INVOKABLE void triggerLoadHistoryForMessage(qlonglong messageId);
