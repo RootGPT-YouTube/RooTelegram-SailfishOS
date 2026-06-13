@@ -1471,20 +1471,8 @@
         <translation>Position (%1/%2)</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
+        <source>Copy Message</source>
         <translation>Copier le message</translation>
-    </message>
-    <message>
-        <source>Message unpinned</source>
-        <translation>Message désépinglé</translation>
-    </message>
-    <message>
-        <source>Unpin Message</source>
-        <translation>Désépingler le message</translation>
-    </message>
-    <message>
-        <source>Pin Message</source>
-        <translation>Épingler le message</translation>
     </message>
     <message>
         <source>Additional Options</source>
@@ -1692,6 +1680,18 @@
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
         <translation>Les contacts sont désactivés dans les réglages de RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Sharing your live location…</source>
+        <translation>Partage de votre position en direct…</translation>
+    </message>
+    <message>
+        <source>Live location sharing stopped</source>
+        <translation>Partage de position en direct arrêté</translation>
+    </message>
+    <message>
+        <source>Live location: Obtaining position...</source>
+        <translation>Position en direct : obtention de la position…</translation>
     </message>
 </context>
 <context>
@@ -1924,6 +1924,30 @@
     <message>
         <source>New Group</source>
         <translation>Nouveau groupe</translation>
+    </message>
+    <message>
+        <source>Channel name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the channel name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the group name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter a description</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2388,6 +2412,48 @@
     </message>
 </context>
 <context>
+    <name>LiveLocationDialog</name>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop sharing live location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send current location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Share live location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 15 minutes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 1 hour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 8 hours</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LiveLocationManager</name>
+    <message>
+        <source>Location services are not available on this device</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageAudio</name>
     <message>
         <source>Transcribe</source>
@@ -2519,7 +2585,7 @@
         <translation>Message supprimé</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
+        <source>Copy Message</source>
         <translation>Copier le message</translation>
     </message>
     <message>
@@ -2637,6 +2703,17 @@
             <numerusform>a marqué %Ln point dans %2</numerusform>
             <numerusform>a marqué %Ln points dans %2</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>MessageLocation</name>
+    <message>
+        <source>LIVE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Live ended</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4455,6 +4532,10 @@
     <message>
         <source>Archived chats</source>
         <translation>Discussions archivées</translation>
+    </message>
+    <message>
+        <source>“Seal the domain of the Daemon and close its cycle in the void of the eternal log!”</source>
+        <translation>« Scelle le domaine du Démon et referme son cycle dans le vide du journal éternel ! »</translation>
     </message>
 </context>
 <context>

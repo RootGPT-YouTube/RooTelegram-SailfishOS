@@ -1484,20 +1484,8 @@
         <translation>Poloha (%1/%2)</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
+        <source>Copy Message</source>
         <translation>Kopírovať správu do schránky</translation>
-    </message>
-    <message>
-        <source>Message unpinned</source>
-        <translation>Správa odopnutá</translation>
-    </message>
-    <message>
-        <source>Unpin Message</source>
-        <translation>Odopnúť správu</translation>
-    </message>
-    <message>
-        <source>Pin Message</source>
-        <translation>Pripnúť správu</translation>
     </message>
     <message>
         <source>Additional Options</source>
@@ -1706,6 +1694,18 @@
     <message>
         <source>Contacts are turned off in RooTelegram settings.</source>
         <translation>Kontakty sú vypnuté v nastaveniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Sharing your live location…</source>
+        <translation>Zdieľanie vašej polohy naživo…</translation>
+    </message>
+    <message>
+        <source>Live location sharing stopped</source>
+        <translation>Zdieľanie polohy naživo zastavené</translation>
+    </message>
+    <message>
+        <source>Live location: Obtaining position...</source>
+        <translation>Poloha naživo: zisťujem polohu…</translation>
     </message>
 </context>
 <context>
@@ -1940,6 +1940,30 @@
     <message>
         <source>New Group</source>
         <translation>Nová skupina</translation>
+    </message>
+    <message>
+        <source>Channel name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Group name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the channel name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter the group name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Description (optional)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enter a description</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2405,6 +2429,48 @@
     </message>
 </context>
 <context>
+    <name>LiveLocationDialog</name>
+    <message>
+        <source>Location</source>
+        <translation type="unfinished">Poloha</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop sharing live location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Send current location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Share live location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 15 minutes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 1 hour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>for 8 hours</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LiveLocationManager</name>
+    <message>
+        <source>Location services are not available on this device</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageAudio</name>
     <message>
         <source>Transcribe</source>
@@ -2536,7 +2602,7 @@
         <translation>Správa bola vymazaná</translation>
     </message>
     <message>
-        <source>Copy Message to Clipboard</source>
+        <source>Copy Message</source>
         <translation>Kopírovať správu do schránky</translation>
     </message>
     <message>
@@ -2658,6 +2724,17 @@
             <numerusform>získal %Ln body v %2</numerusform>
             <numerusform>získal %Ln bodov v %2</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>MessageLocation</name>
+    <message>
+        <source>LIVE</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Live ended</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4493,6 +4570,10 @@
         <source>Archived chats</source>
         <translation>Archivované konverzácie</translation>
     </message>
+    <message>
+        <source>“Seal the domain of the Daemon and close its cycle in the void of the eternal log!”</source>
+        <translation>„Zapečať doménu Démona a uzavri jeho cyklus v prázdnote večného logu!“</translation>
+    </message>
 </context>
 <context>
     <name>SettingsUserProfile</name>
@@ -5234,7 +5315,7 @@
     </message>
     <message>
         <source>joined this chat</source>
-        <translation>som sa pripojil k tomuto četu</translation>
+        <translation>pripojil(a) sa k tomuto četu</translation>
     </message>
     <message>
         <source>was added to this chat</source>
@@ -5242,7 +5323,7 @@
     </message>
     <message>
         <source>left this chat</source>
-        <translation>som opustil tento čet</translation>
+        <translation>opustil(a) tento čet</translation>
     </message>
     <message>
         <source>%1M</source>
@@ -5303,17 +5384,17 @@
     <message>
         <source>joined this chat</source>
         <comment>myself</comment>
-        <translation>som sa pripojil k tomuto četu</translation>
+        <translation>pripojili ste sa k tomuto četu</translation>
     </message>
     <message>
         <source>were added to this chat</source>
         <comment>myself</comment>
-        <translation>som bol pridaný do tohto četu</translation>
+        <translation>boli ste pridaní do tohto četu</translation>
     </message>
     <message>
         <source>left this chat</source>
         <comment>myself</comment>
-        <translation>som opustil tento čet</translation>
+        <translation>opustili ste tento čet</translation>
     </message>
     <message>
         <source>was never online</source>
@@ -5362,7 +5443,7 @@
     <message>
         <source>changed the chat title to %1</source>
         <comment>myself</comment>
-        <translation>zmenil názov četu na %1</translation>
+        <translation>zmenili ste názov četu na %1</translation>
     </message>
     <message>
         <source>changed the chat title to %1</source>
@@ -5423,7 +5504,7 @@
     <message>
         <source>created this group</source>
         <comment>myself</comment>
-        <translation>vytvoril túto skupinu</translation>
+        <translation>vytvorili ste túto skupinu</translation>
     </message>
     <message>
         <source>created this group</source>
@@ -5460,7 +5541,7 @@
     <message>
         <source>upgraded this group to a supergroup</source>
         <comment>myself</comment>
-        <translation>zmenil túto skupinu na superskupinu</translation>
+        <translation>zmenili ste túto skupinu na superskupinu</translation>
     </message>
     <message>
         <source>changed the pinned message</source>
@@ -5557,12 +5638,12 @@
     <message>
         <source>have added %1 to the chat</source>
         <comment>myself</comment>
-        <translation>som pridal %1 do četu</translation>
+        <translation>pridali ste %1 do četu</translation>
     </message>
     <message>
         <source>have removed %1 from the chat</source>
         <comment>myself</comment>
-        <translation>som odstránil %1 z četu</translation>
+        <translation>odstránili ste %1 z četu</translation>
     </message>
     <message numerus="yes">
         <source>scored %Ln points</source>

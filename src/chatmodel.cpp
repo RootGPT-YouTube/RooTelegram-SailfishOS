@@ -27,7 +27,10 @@
 #include <QListIterator>
 #include <QByteArray>
 #include <QBitArray>
+#include <QTimer>
 #include <malloc.h>
+#include <unistd.h>
+#include <cstdio>
 
 #define DEBUG_MODULE ChatModel
 #include "debuglog.h"
@@ -370,6 +373,16 @@ ChatModel::ChatModel(TDLibWrapper *tdLibWrapper) :
     connect(this->tdLibWrapper, SIGNAL(messageEditedUpdated(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageEditedUpdated(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(messageInteractionInfoUpdated(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageInteractionInfoUpdated(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(messagesDeleted(qlonglong, QList<qlonglong>)), this, SLOT(handleMessagesDeleted(qlonglong, QList<qlonglong>)));
+
+    // [RAM #1 - diagnosi A] Il daemon vive per ore/giorni: senza un campione
+    // periodico vediamo la RAM solo quando l'utente apre/chiude una chat o manda
+    // l'app in background. Un timer ogni 10 min logga RAMSTAT e fa un trim, così
+    // abbiamo una traccia continua RSS-vs-in-use su tutta la sessione. Leggero
+    // (un mallinfo + malloc_trim ogni 600 s). ChatModel vive quanto il processo.
+    QTimer *memoryProbeTimer = new QTimer(this);
+    memoryProbeTimer->setInterval(600000);
+    connect(memoryProbeTimer, &QTimer::timeout, this, &ChatModel::trimMemory);
+    memoryProbeTimer->start();
 }
 
 ChatModel::~ChatModel()
@@ -456,6 +469,7 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
     inReload = false;
     inIncrementalUpdate = false;
     searchModeActive = false;
+    initialFillAttempts = 0;
     searchQuery.clear();
     beginResetModel();
     qDeleteAll(messages);
@@ -488,6 +502,24 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
         tdLibWrapper->getChatHistory(chatId, startFrom);
     }
     initialMessageId = 0; // ancora una-tantum
+}
+
+void ChatModel::requestOlderHistoryFromOldest()
+{
+    if (this->messages.isEmpty()) {
+        return;
+    }
+    const qlonglong oldest = this->messages.first()->messageId;
+    if (messageThreadId) {
+        if (messageThreadId == 1) {
+            this->tdLibWrapper->getChatHistory(chatId, oldest, 0);
+        } else {
+            const qlonglong anchor = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
+            this->tdLibWrapper->getMessageThreadHistory(chatId, anchor, oldest, 0);
+        }
+    } else {
+        this->tdLibWrapper->getChatHistory(chatId, oldest, 0);
+    }
 }
 
 void ChatModel::triggerLoadHistoryForMessage(qlonglong messageId)
@@ -663,7 +695,30 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
         LOG("Receiving new messages :)" << messages.size());
     LOG("Received while search mode is" << searchModeActive);
 
+    // Riempimento iniziale: vogliamo almeno INITIAL_FILL_TARGET messaggi al primo
+    // ingresso in chat per riempire la vista (sotto questa soglia l'utente non ha
+    // contenuto da scrollare → non parte il caricamento incrementale e la chat
+    // resta a 3-4 messaggi finché non si esce e si rientra). TDLib restituisce
+    // pochi messaggi per chiamata quando la cache locale è fredda, quindi
+    // cicliamo getChatHistory finché non riempiamo o esauriamo i tentativi.
+    static const int INITIAL_FILL_TARGET = 20;
+    static const int MAX_FILL_ATTEMPTS = 8;
+    const bool initialFill = !this->inIncrementalUpdate && !this->searchModeActive;
+
     if (messages.size() == 0) {
+        // Cache fredda: la getChatHistory può tornare vuota mentre il fetch dal
+        // server è ancora in volo. Se stiamo riempendo la vista, abbiamo già
+        // qualche messaggio ma siamo sotto soglia e non abbiamo esaurito i
+        // tentativi, riprova (ogni chiamata async dà tempo al server).
+        if (initialFill && !this->messages.isEmpty()
+                && this->messages.size() < INITIAL_FILL_TARGET
+                && this->initialFillAttempts < MAX_FILL_ATTEMPTS) {
+            LOG("Empty history during initial fill, retrying...");
+            this->initialFillAttempts++;
+            this->inReload = true;
+            this->requestOlderHistoryFromOldest();
+            return;
+        }
         LOG("No additional messages loaded, notifying chat UI...");
         this->inReload = false;
         int listInboxPosition = this->calculateLastKnownMessageId();
@@ -711,8 +766,20 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
                 setMessagesAlbum(messagesToBeAdded);
             }
 
+            // Riempimento iniziale: continua a caricare la cronologia più vecchia
+            // (loop multi-round, bound da MAX_FILL_ATTEMPTS) finché la vista non è
+            // piena. madeProgress = abbiamo aggiunto messaggi nuovi in questo round:
+            // se 0 (tutti duplicati / fine cronologia) ci fermiamo, evitando loop.
+            const bool madeProgress = !messagesToBeAdded.isEmpty();
+            if (initialFill && madeProgress
+                    && this->messages.size() < INITIAL_FILL_TARGET
+                    && this->initialFillAttempts < MAX_FILL_ATTEMPTS) {
+                LOG("Initial fill below target, loading more history..." << this->messages.size());
+                this->initialFillAttempts++;
+                this->inReload = true;
+                this->requestOlderHistoryFromOldest();
             // First call only returns a few messages, we need to get a little more than that...
-            if (!messagesToBeAdded.isEmpty() && (messagesToBeAdded.size() + messages.size()) < 10 && !inReload) {
+            } else if (!initialFill && !messagesToBeAdded.isEmpty() && (messagesToBeAdded.size() + messages.size()) < 10 && !inReload) {
                 LOG("Only a few messages received in first call, loading more...");
                 this->inReload = true;
                 if (this->searchModeActive) {
@@ -1027,13 +1094,42 @@ void ChatModel::removeRange(int firstDeleted, int lastDeleted)
     }
 }
 
+// [RAM #1 - diagnosi A] Caratterizza la RAM del processo per distinguere un
+// leak vivo (in-use cresce monotòno → cache referenziate da TDLib) da una
+// ritenzione/frammentazione glibc (RSS alta ma in-use piatto → free chunk
+// intrappolati che malloc_trim non restituisce). glibc 2.30 sul device →
+// niente mallinfo2: uso mallinfo() leggendo i campi come unsigned (corretti
+// fino a ~4 GB) e la RSS esatta da /proc/self/statm (in pagine residenti).
+static void logMemoryStats(const char *tag)
+{
+    long rssKb = -1;
+    FILE *f = fopen("/proc/self/statm", "r");
+    if (f) {
+        long totalPages = 0, residentPages = 0;
+        if (fscanf(f, "%ld %ld", &totalPages, &residentPages) == 2) {
+            rssKb = residentPages * (sysconf(_SC_PAGESIZE) / 1024);
+        }
+        fclose(f);
+    }
+    struct mallinfo mi = mallinfo();
+    LOG("[RAMSTAT]" << tag
+        << "| RSS_kB:" << rssKb
+        << "| inuse_kB:" << ((unsigned)mi.uordblks / 1024)
+        << "| free_kB:" << ((unsigned)mi.fordblks / 1024)
+        << "| mmap_kB:" << ((unsigned)mi.hblkhd / 1024)
+        << "| arena_kB:" << ((unsigned)mi.arena / 1024)
+        << "| liveMsg:" << s_messageDataLiveCount);
+}
+
 void ChatModel::trimMemory()
 {
-    // [RAM #1] Chiamata dal QML quando l'app va in background: restituisce le
-    // pagine heap libere al kernel e logga il numero di MessageData vivi, per
-    // distinguere leak-oggetti (cresce monotòno) da ritenzione-heap-glibc.
+    // [RAM #1] Chiamata dal QML quando l'app va in background E dal timer
+    // periodico (vedi costruttore): restituisce le pagine heap libere al
+    // kernel. Loggiamo PRIMA e DOPO il trim così la differenza RSS dice quanto
+    // era davvero recuperabile (frammentazione) vs quanto resta vivo (TDLib).
+    logMemoryStats("pre-trim");
     malloc_trim(0);
-    LOG("trimMemory (background) | live MessageData:" << s_messageDataLiveCount);
+    logMemoryStats("post-trim");
 }
 
 void ChatModel::insertMessages(const QList<MessageData*> newMessages)

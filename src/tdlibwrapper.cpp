@@ -26,6 +26,13 @@
 #include "tdlibsecrets.h"
 #include <algorithm>
 #include <climits>
+#include <malloc.h>
+#include <unistd.h>
+#include <cerrno>
+#include <QTimer>
+#include <QDateTime>
+#include <QFile>
+#include <QVector>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -146,6 +153,52 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
 
     connect(networkConfigurationManager, SIGNAL(configurationChanged(QNetworkConfiguration)), this, SLOT(handleNetworkConfigurationChanged(QNetworkConfiguration)));
 
+    this->applyAntiRamOptions();
+
+    // ANTI-RAM Strada C (diagnosi forense 2026-06-12): TDLib accumula PER DESIGN
+    // metadata vivi (utenti/supergruppi/FileNode/last_message visti dagli updates)
+    // che non evicta mai finché il client non viene chiuso: nel daemon ~16 MB/h a
+    // riposo fino a 1.5 GB/24h, e message_unload_delay non basta. L'unico rimedio
+    // reale è riciclare il client (close + ricreazione: l'auth persiste nel DB)
+    // quando la UI è nascosta da un po', non c'è una chiamata e la RSS supera la
+    // soglia. Env override per i test on-device: RT_RECYCLE_RSS_MB,
+    // RT_RECYCLE_CHECK_S, RT_RECYCLE_HIDDEN_S.
+    this->isRecycling = false;
+    // Parte come "nascosta": se il daemon nasce headless (--daemon all'avvio del
+    // device) la finestra non diventa mai attiva e la QML non chiamerebbe mai
+    // setUiVisible. Al primo focus la QML azzera comunque lo stato.
+    this->uiHiddenSinceMs = QDateTime::currentMSecsSinceEpoch();
+    this->callOngoing = false;
+    this->rssBeforeRecycleKb = 0;
+    bool envOk = false;
+    int thresholdMb = qEnvironmentVariableIntValue("RT_RECYCLE_RSS_MB", &envOk);
+    if (!envOk || thresholdMb <= 0) {
+        thresholdMb = 350;
+    }
+    this->recycleRssThresholdKb = (qint64)thresholdMb * 1024;
+    int hiddenGraceS = qEnvironmentVariableIntValue("RT_RECYCLE_HIDDEN_S", &envOk);
+    if (!envOk || hiddenGraceS <= 0) {
+        hiddenGraceS = 300; // 5 min di UI nascosta prima di poter riciclare
+    }
+    this->recycleHiddenGraceMs = (qint64)hiddenGraceS * 1000;
+    int checkS = qEnvironmentVariableIntValue("RT_RECYCLE_CHECK_S", &envOk);
+    if (!envOk || checkS <= 0) {
+        checkS = 300; // controllo ogni 5 min
+    }
+    QTimer *recycleTimer = new QTimer(this);
+    recycleTimer->setInterval(checkS * 1000);
+    connect(recycleTimer, &QTimer::timeout, this, &TDLibWrapper::checkMemoryRecycle);
+    // DIAGNOSI 2026-06-13: riabilitato per diagnosticare il freeze post-execv.
+    // sailjail-launch (no booster) arriva a Ready → la causa è dentro
+    // restartProcess(), non l'assenza di invoker. Cfr project_ram_investigation_2_6_tdlib.
+    recycleTimer->start();
+    // Stato chiamata: connesso al segnale re-emesso da this (non dal receiver)
+    // così la connessione sopravvive alla ricreazione del receiver al riciclo.
+    connect(this, SIGNAL(callUpdated(QVariantMap)), this, SLOT(handleCallStateForRecycle(QVariantMap)));
+}
+
+void TDLibWrapper::applyAntiRamOptions()
+{
     this->setLogVerbosityLevel();
     this->setOptionInteger("notification_group_count_max", 5);
     // ANTI-RAM (causa principale del consumo crescente): dopo closeChat, TDLib
@@ -154,6 +207,7 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     // vera). Senza, i messaggi caricati restano in heap per tutta la sessione →
     // crescita ~13 MB/min che non torna mai giù (misurato via smaps_rollup). 60s
     // è un default prudente: riapri spesso la stessa chat → ricarica dal DB su disco.
+    // Le opzioni sono per-client: vanno riapplicate a ogni riciclo (Strada C).
     this->setOptionInteger("message_unload_delay", 60);
 }
 
@@ -558,6 +612,119 @@ void TDLibWrapper::closeChat(const QString &chatId)
     requestObject.insert(_TYPE, "closeChat");
     requestObject.insert(CHAT_ID, chatId);
     this->sendRequest(requestObject);
+}
+
+// RSS corrente in kB da /proc/self/statm (campo 2 = pagine residenti).
+// Allocator-agnostico: vale sia con glibc che con eventuali preload.
+static qint64 currentRssKb()
+{
+    QFile statm(QStringLiteral("/proc/self/statm"));
+    if (!statm.open(QIODevice::ReadOnly)) {
+        return 0;
+    }
+    const QList<QByteArray> fields = statm.readAll().split(' ');
+    if (fields.size() < 2) {
+        return 0;
+    }
+    return fields.at(1).toLongLong() * (sysconf(_SC_PAGESIZE) / 1024);
+}
+
+void TDLibWrapper::setUiVisible(bool visible)
+{
+    if (visible) {
+        this->uiHiddenSinceMs = 0;
+    } else if (this->uiHiddenSinceMs == 0) {
+        this->uiHiddenSinceMs = QDateTime::currentMSecsSinceEpoch();
+    }
+}
+
+void TDLibWrapper::handleCallStateForRecycle(const QVariantMap &call)
+{
+    const QString stateType = call.value("state").toMap().value(_TYPE).toString();
+    this->callOngoing = (stateType != QLatin1String("callStateDiscarded")
+                         && stateType != QLatin1String("callStateError"));
+}
+
+// ANTI-RAM Strada C: riciclo del client TDLib. Chiamato dal timer periodico;
+// se le condizioni di riposo sono soddisfatte manda "close" a TDLib. Il resto
+// avviene in handleAuthorizationStateChanged: su authorizationStateClosed il
+// client viene distrutto e ricreato (con isRecycling attivo NON si cancella il
+// database, quindi l'autenticazione riparte da sola fino a Ready) e gli stati
+// intermedi non vengono emessi verso la QML (riciclo silenzioso).
+void TDLibWrapper::checkMemoryRecycle()
+{
+    if (this->isRecycling || this->authorizationState != AuthorizationState::AuthorizationReady) {
+        return;
+    }
+    if (this->uiHiddenSinceMs == 0
+            || QDateTime::currentMSecsSinceEpoch() - this->uiHiddenSinceMs < this->recycleHiddenGraceMs) {
+        return;
+    }
+    if (this->callOngoing) {
+        return;
+    }
+    const qint64 rssKb = currentRssKb();
+    if (rssKb < this->recycleRssThresholdKb) {
+        return;
+    }
+    // qWarning e non LOG: i ricicli sono rari e devono finire nel journal anche
+    // in release (qCDebug delle categorie custom è filtrato di default su SFOS).
+    qWarning() << "[RECYCLE] RSS" << rssKb << "kB >= soglia" << this->recycleRssThresholdKb
+               << "kB e UI nascosta: avvio il riciclo (close + restart processo)";
+    this->isRecycling = true;
+    this->rssBeforeRecycleKb = rssKb;
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "close");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::restartProcess()
+{
+    // Riavvio dell'intero processo via execv: il kernel libera TUTTA la memoria
+    // (cosa che il riciclo del solo client non faceva — glibc tratteneva le
+    // pagine). Il "close" a TDLib (in checkMemoryRecycle) ha già flushato il DB,
+    // quindi il nuovo processo lo rilegge e si riautentica da solo. Stesso PID.
+    qWarning() << "[RECYCLE] riavvio del processo (execv) per liberare la RAM";
+
+    // Ricostruisci argv dal cmdline originale (include "--daemon").
+    QFile cmdlineFile(QStringLiteral("/proc/self/cmdline"));
+    if (!cmdlineFile.open(QIODevice::ReadOnly)) {
+        qWarning() << "[RECYCLE] impossibile leggere /proc/self/cmdline, niente restart";
+        return;
+    }
+    const QByteArray raw = cmdlineFile.readAll();
+    cmdlineFile.close();
+    QVector<QByteArray> args;
+    for (const QByteArray &part : raw.split('\0')) {
+        if (!part.isEmpty()) {
+            args.append(part);
+        }
+    }
+    if (args.isEmpty()) {
+        qWarning() << "[RECYCLE] cmdline vuota, niente restart";
+        return;
+    }
+    QVector<char*> argv;
+    argv.reserve(args.size() + 1);
+    for (QByteArray &arg : args) {
+        argv.append(arg.data());
+    }
+    argv.append(nullptr);
+
+    // Chiudi tutti gli FD ereditabili (D-Bus, Wayland, socket/thread TDLib, file
+    // del DB): senza questo il nuovo processo non riacquisirebbe il nome di
+    // servizio D-Bus (resterebbe su un socket ereditato). stdin/out/err restano.
+    long maxFd = sysconf(_SC_OPEN_MAX);
+    if (maxFd < 3) {
+        maxFd = 1024;
+    }
+    for (int fd = 3; fd < maxFd; ++fd) {
+        ::close(fd);
+    }
+
+    ::execv("/proc/self/exe", argv.data());
+    // Solo se execv fallisce arriviamo qui: il chiamante farà il fallback.
+    qWarning() << "[RECYCLE] execv fallito (errno" << errno << "), fallback al riciclo del client";
 }
 
 void TDLibWrapper::joinChat(const QString &chatId)
@@ -1247,6 +1414,65 @@ void TDLibWrapper::sendLocationMessage(qlonglong chatId, double latitude, double
     inputMessageContent.insert("proximity_alert_radius", 0);
 
     requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendLiveLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, int livePeriod, qlonglong replyToMessageId)
+{
+    LOG("Sending LIVE location message" << chatId << latitude << longitude << horizontalAccuracy << livePeriod << replyToMessageId);
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageLocation");
+
+    QVariantMap location;
+    location.insert("latitude", latitude);
+    location.insert("longitude", longitude);
+    location.insert("horizontal_accuracy", horizontalAccuracy);
+    location.insert(_TYPE, "location");
+    inputMessageContent.insert("location", location);
+    // Telegram accetta live_period 60..86400 (oltre = "indefinito" 0x7FFFFFFF).
+    inputMessageContent.insert("live_period", livePeriod);
+    inputMessageContent.insert("heading", 0);
+    inputMessageContent.insert("proximity_alert_radius", 0);
+
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::editLiveLocationMessage(qlonglong chatId, qlonglong messageId, double latitude, double longitude, double horizontalAccuracy)
+{
+    LOG("Editing LIVE location message" << chatId << messageId << latitude << longitude);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageLiveLocation");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+
+    QVariantMap location;
+    location.insert("latitude", latitude);
+    location.insert("longitude", longitude);
+    location.insert("horizontal_accuracy", horizontalAccuracy);
+    location.insert(_TYPE, "location");
+    requestObject.insert("location", location);
+    // live_period 0 = mantieni quello del messaggio; heading/proximity invariati.
+    requestObject.insert("live_period", 0);
+    requestObject.insert("heading", 0);
+    requestObject.insert("proximity_alert_radius", 0);
+
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::stopLiveLocationMessage(qlonglong chatId, qlonglong messageId)
+{
+    LOG("Stopping LIVE location message" << chatId << messageId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "editMessageLiveLocation");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert(MESSAGE_ID, messageId);
+    // location assente/null = TDLib interrompe la condivisione live.
+    requestObject.insert("live_period", 0);
+    requestObject.insert("heading", 0);
+    requestObject.insert("proximity_alert_radius", 0);
+
     this->sendRequest(requestObject);
 }
 
@@ -3198,6 +3424,16 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
     if (authorizationState == "authorizationStateClosed") {
         this->authorizationState = AuthorizationState::AuthorizationStateClosed;
         LOG("Reloading TD Lib...");
+        if (this->isRecycling) {
+            // Strada C2: riavvio dell'intero processo (libera TUTTA la RAM). Il
+            // "close" ha già flushato il DB. restartProcess() non ritorna se
+            // l'execv riesce; se ritorna (fallito) proseguiamo qui sotto col
+            // riciclo del solo client come fallback (che NON cancella il DB
+            // perché isRecycling è ancora true).
+            this->restartProcess();
+        }
+        qDeleteAll(this->basicGroups);
+        qDeleteAll(this->superGroups);
         this->basicGroups.clear();
         this->superGroups.clear();
         this->usersById.clear();
@@ -3208,13 +3444,42 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
         }
         td_json_client_destroy(this->tdLibClient);
         this->tdLibReceiver->terminate();
-        QDir tdLibPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tdlib");
-        tdLibPath.removeRecursively();
+        // Senza deleteLater ogni riciclo lascerebbe in giro un QThread morto.
+        this->tdLibReceiver->deleteLater();
+        if (!this->isRecycling) {
+            // Solo al logout vero: la sessione è revocata, il database va buttato.
+            // Al riciclo anti-RAM il database DEVE restare: è quello che permette
+            // al nuovo client di riautenticarsi da solo fino a Ready.
+            QDir tdLibPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tdlib");
+            tdLibPath.removeRecursively();
+        }
         this->tdLibClient = td_json_client_create();
         initializeTDLibReceiver();
+        if (this->isRecycling) {
+            // Le opzioni TDLib sono per-client: senza riapplicarle il nuovo client
+            // perderebbe message_unload_delay e tornerebbe ad accumulare messaggi.
+            this->applyAntiRamOptions();
+        }
         this->isLoggingOut = false;
     }
     this->authorizationStateData = authorizationStateData;
+    if (this->isRecycling) {
+        if (this->authorizationState != AuthorizationState::AuthorizationReady) {
+            // Riciclo silenzioso: gli stati intermedi (Closing/Closed/WaitTdlibParameters/…)
+            // non vanno alla UI — la OverviewPage su Closed spingerebbe la pagina di
+            // login. La QML vede solo il Ready finale, sul quale ricarica la chat
+            // list via updateContent()/getChats() (il ChatListModel aggiorna in
+            // place le chat già note, vedi handleChatDiscovered).
+            return;
+        }
+        this->isRecycling = false;
+        // Restituisci subito al kernel le pagine liberate dalla distruzione del
+        // vecchio client: senza trim glibc le terrebbe nell'arena e la RSS non
+        // scenderebbe (è il motivo per cui il daemon arrivava a 1.5 GB).
+        malloc_trim(0);
+        qWarning() << "[RECYCLE] completato: RSS" << currentRssKb()
+                   << "kB (prima del riciclo" << this->rssBeforeRecycleKb << "kB)";
+    }
     emit authorizationStateChanged(this->authorizationState, this->authorizationStateData);
 
 }
@@ -3894,6 +4159,28 @@ void TDLibWrapper::setEncryptionKey()
 
 void TDLibWrapper::setLogVerbosityLevel()
 {
+    // DIAGNOSI 2026-06-13: se RT_TDLIB_LOGFILE è settata, dirotta il log interno
+    // di TDLib su file con verbosità alta — così il processo ri-exec'd (che si
+    // bloccava prima di Ready) lascia traccia di DOVE si pianta. In release la
+    // variabile non c'è e resta il comportamento normale (verbosità 1).
+    const QByteArray logFile = qgetenv("RT_TDLIB_LOGFILE");
+    if (!logFile.isEmpty()) {
+        QVariantMap streamFile;
+        streamFile.insert(_TYPE, "logStreamFile");
+        streamFile.insert("path", QString::fromUtf8(logFile));
+        streamFile.insert("max_file_size", 16 * 1024 * 1024);
+        streamFile.insert("redirect_stderr", false);
+        QVariantMap streamRequest;
+        streamRequest.insert(_TYPE, "setLogStream");
+        streamRequest.insert("log_stream", streamFile);
+        this->sendRequest(streamRequest);
+        QVariantMap verbRequest;
+        verbRequest.insert(_TYPE, "setLogVerbosityLevel");
+        verbRequest.insert("new_verbosity_level", 3);
+        this->sendRequest(verbRequest);
+        qWarning() << "[RECYCLE] TDLib log dirottato su" << logFile << "verbosità 3 (pid" << QCoreApplication::applicationPid() << ")";
+        return;
+    }
     LOG("Setting log verbosity level to errors only");
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "setLogVerbosityLevel");

@@ -202,6 +202,10 @@ Page {
     // tutti la supportano, altrimenti cancelliamo diretto. Il Remorse resta.
     property var pendingBatchDelete: null
 
+    // true mentre la live location di QUESTA chat attende il primo fix GPS: mostra
+    // la barra "ottengo posizione…" finché il messaggio live non viene inviato.
+    property bool liveLocationWaitingFix: false
+
     function startBatchDelete(messages) {
         var ids = Functions.getMessagesArrayIds(messages);
         var remaining = {};
@@ -1559,10 +1563,35 @@ Page {
         }
     }
 
+    Connections {
+        target: liveLocationManager
+        // Attesa del primo fix GPS per la live location di questa chat: accendiamo
+        // la barra "ottengo posizione…" (analoga alla posizione statica).
+        onLiveLocationPending: {
+            if (chatPage.chatInformation && chatId === chatPage.chatInformation.id) {
+                chatPage.liveLocationWaitingFix = true;
+            }
+        }
+        // Messaggio live iniziale inviato: spegniamo la barra e confermiamo.
+        onLiveLocationStarted: {
+            if (chatPage.chatInformation && chatId === chatPage.chatInformation.id) {
+                chatPage.liveLocationWaitingFix = false;
+                appNotification.show(qsTr("Sharing your live location…"));
+            }
+        }
+        onLiveLocationError: {
+            chatPage.liveLocationWaitingFix = false;
+            appNotification.show(message);
+        }
+    }
+
     onStatusChanged: {
         switch(status) {
         case PageStatus.Activating:
             _openChatTracked();
+            // Ripristina la barra "ottengo posizione…" se rientrando nella chat la
+            // live location è ancora in attesa del primo fix (gestita headless dal C++).
+            chatPage.liveLocationWaitingFix = liveLocationManager.isPending(chatInformation.id);
             if(!chatPage.isInitialized) {
                 if(chatInformation.draft_message) {
                     if(chatInformation.draft_message && chatInformation.draft_message.input_message_text) {
@@ -1978,6 +2007,13 @@ Page {
         property var myMessage: ({})
         property var userInformation: ({})
         property var additionalItemsModel: 0
+        // [2.7 fix2] Gli oggetti con closure (additionalItemsModel: ban/elimina/
+        // segnala) vanno tenuti QUI in una property var: assegnati a model di una
+        // ListView verrebbero convertiti in QVariantMap e la funzione `action`
+        // andrebbe persa (sopravvive solo `name`, stringa) → il tap era muto. Il
+        // delegate invoca l'azione indicizzando jointActions[index], dove le
+        // JSValue (e i NamedAction QObject) restano intatte.
+        property var jointActions: []
         property var sourceItem
         property bool showCopyMessageToClipboardMenuItem
         property bool showForwardMessageMenuItem
@@ -2016,7 +2052,7 @@ Page {
             },
             NamedAction {
                 visible: messageOptionsDrawer.showCopyMessageToClipboardMenuItem
-                name: qsTr("Copy Message to Clipboard")
+                name: qsTr("Copy Message")
                 action: function() {
                     if (messageOptionsDrawer.sourceItem) {
                         messageOptionsDrawer.sourceItem.copyMessageToClipboard()
@@ -2031,32 +2067,15 @@ Page {
                 }
             },
             NamedAction {
-                visible: canPinMessages() &&
-                    messageOptionsDrawer.myMessage &&
-                    messageOptionsDrawer.myMessage["@type"] !== "sponsoredMessage" &&
-                    typeof messageOptionsDrawer.myMessage.id !== "undefined"
-                name: (messageOptionsDrawer.myMessage && messageOptionsDrawer.myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message")
-                action: function () {
-                    if (!messageOptionsDrawer.myMessage ||
-                            messageOptionsDrawer.myMessage["@type"] === "sponsoredMessage" ||
-                            typeof messageOptionsDrawer.myMessage.id === "undefined") {
-                        return;
-                    }
-                    if (messageOptionsDrawer.myMessage.is_pinned) {
-                        Remorse.popupAction(page, qsTr("Message unpinned"), function() { tdLibWrapper.unpinMessage(chatPage.chatInformation.id, messageOptionsDrawer.myMessage.id);
-                                                                                         pinnedMessageItem.requestCloseMessage(); } );
-                    } else {
-                        requestPinMessage(messageOptionsDrawer.myMessage);
-                    }
-                }
-            },
-            NamedAction {
                 visible: messageOptionsDrawer.showDeleteMessageMenuItem
                 name: qsTr("Delete message")
                 action: function() {
-                    if (messageOptionsDrawer.sourceItem) {
-                        // Fetch async delle capability → scelta per tutti/per me o diretto (#1).
-                        messageOptionsDrawer.sourceItem.requestDelete(false)
+                    // [2.7 fix] Non passare dal delegate (sourceItem può essere già
+                    // distrutto dalla ListView quando il Drawer apre): usiamo il flusso
+                    // delete a livello PAGINA, che fa il fetch async delle capability +
+                    // la scelta per-me/per-tutti ed è del tutto indipendente dal delegate.
+                    if (messageOptionsDrawer.myMessage && typeof messageOptionsDrawer.myMessage.id !== "undefined") {
+                        startBatchDelete([ messageOptionsDrawer.myMessage ]);
                     }
                 }
             }
@@ -2072,6 +2091,10 @@ Page {
                     var item = messageOptionsModel[i]
                     if (item.visible) jointModel.push(item)
                 }
+                // jointActions conserva gli oggetti REALI (con le closure intatte);
+                // drawerListView.model riceve lo stesso array ma per la sola
+                // visualizzazione (name/visible). L'azione si invoca da jointActions.
+                messageOptionsDrawer.jointActions = jointModel;
                 drawerListView.model = jointModel;
                 focus = true // Take the focus away from the text field
             }
@@ -2124,7 +2147,12 @@ Page {
                     horizontalAlignment: Text.AlignHCenter
                 }
                 onClicked: {
-                    modelData.action();
+                    // Invoca l'azione dall'array che conserva le closure (vedi
+                    // jointActions), NON da modelData (model = funzioni perse).
+                    var entry = messageOptionsDrawer.jointActions[index];
+                    if (entry && entry.action) {
+                        entry.action();
+                    }
                     messageOptionsDrawer.open = false
                 }
                 hidden: !modelData.visible
@@ -3480,13 +3508,30 @@ Page {
                                     height: Theme.iconSizeMedium
                                 }
                                 onClicked: {
-                                    rootelegramUtils.startGeoLocationUpdates();
                                     attachmentOptionsFlickable.isNeeded = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
-                                    attachmentPreviewRow.isLocation = true;
-                                    attachmentPreviewRow.attachmentDescription = qsTr("Location: Obtaining position...");
-                                    controlSendButton();
+                                    var locDialog = pageStack.push(Qt.resolvedUrl("../pages/LiveLocationDialog.qml"), {
+                                        sharingActive: liveLocationManager.isSharing(chatInformation.id)
+                                    });
+                                    locDialog.accepted.connect(function() {
+                                        if (locDialog.resultMode === "current") {
+                                            // Flusso posizione statica esistente: GPS → preview → invio.
+                                            rootelegramUtils.startGeoLocationUpdates();
+                                            attachmentPreviewRow.isLocation = true;
+                                            attachmentPreviewRow.attachmentDescription = qsTr("Location: Obtaining position...");
+                                            controlSendButton();
+                                        } else if (locDialog.resultMode === "live") {
+                                            // La conferma ("Sharing your live location…") e la barra
+                                            // "ottengo posizione…" sono pilotate dai segnali del manager
+                                            // (liveLocationStarted / liveLocationPending).
+                                            liveLocationManager.startLiveLocation(chatInformation.id, locDialog.resultPeriod);
+                                        } else if (locDialog.resultMode === "stop") {
+                                            liveLocationManager.stopLiveLocation(chatInformation.id);
+                                            chatPage.liveLocationWaitingFix = false;
+                                            appNotification.show(qsTr("Live location sharing stopped"));
+                                        }
+                                    });
                                 }
                             }
                             IconButton {
@@ -3977,6 +4022,46 @@ Page {
                             truncationMode: TruncationMode.Fade
                             color: Theme.secondaryColor
                             visible: attachmentPreviewRow.isDocument || attachmentPreviewRow.isVoiceNote || attachmentPreviewRow.isLocation
+                        }
+                    }
+
+                    Row {
+                        // Barra di stato della live location: compare quando la
+                        // condivisione in tempo reale è in attesa del primo fix GPS
+                        // ("ottengo posizione…"), come per la posizione statica. La X
+                        // annulla la condivisione prima ancora che parta il messaggio.
+                        id: liveLocationStatusRow
+                        visible: chatPage.liveLocationWaitingFix && !inlineQuery.userNameIsValid
+                        spacing: Theme.paddingMedium
+                        width: parent.width
+                        layoutDirection: Qt.RightToLeft
+                        anchors.right: parent.right
+
+                        IconButton {
+                            id: liveLocationCancelButton
+                            icon.source: "image://theme/icon-m-clear"
+                            onClicked: {
+                                liveLocationManager.stopLiveLocation(chatInformation.id);
+                                chatPage.liveLocationWaitingFix = false;
+                                appNotification.show(qsTr("Live location sharing stopped"));
+                            }
+                        }
+
+                        BusyIndicator {
+                            anchors.verticalCenter: parent.verticalCenter
+                            size: BusyIndicatorSize.Small
+                            running: liveLocationStatusRow.visible
+                        }
+
+                        Label {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - liveLocationCancelButton.width - 2 * Theme.paddingMedium - Theme.itemSizeSmall
+                            text: qsTr("Live location: Obtaining position...")
+                            maximumLineCount: 2
+                            wrapMode: Text.Wrap
+                            truncationMode: TruncationMode.Fade
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.secondaryColor
                         }
                     }
 

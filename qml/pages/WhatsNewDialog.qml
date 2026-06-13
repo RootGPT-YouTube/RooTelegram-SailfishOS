@@ -25,6 +25,12 @@ Dialog {
     id: whatsNewDialog
     allowedOrientations: Orientation.All
 
+    // Lingua dell'app = locale di sistema (SailfishApp carica i .qm in base ad
+    // essa). Prendiamo il codice a 2 lettere (es. "it" da "it_IT") per scegliere
+    // changelog/messaggio dal whatsnew.js, con fallback a "en" gestito nei getter.
+    readonly property string uiLang: Qt.locale().name.substring(0, 2)
+    readonly property string uiMessage: WhatsNew.messageFor(uiLang)
+
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: contentColumn.height + Theme.paddingLarge
@@ -81,7 +87,7 @@ Dialog {
 
             // Elenco puntato dei cambiamenti di questa versione.
             Repeater {
-                model: WhatsNew.changelog
+                model: WhatsNew.changelogFor(whatsNewDialog.uiLang)
 
                 Row {
                     x: Theme.horizontalPageMargin
@@ -107,13 +113,13 @@ Dialog {
             Item {
                 width: parent.width
                 height: Theme.paddingMedium
-                visible: WhatsNew.message !== ""
+                visible: whatsNewDialog.uiMessage !== ""
             }
             Label {
-                visible: WhatsNew.message !== ""
+                visible: whatsNewDialog.uiMessage !== ""
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: WhatsNew.message
+                text: whatsNewDialog.uiMessage
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryColor
                 wrapMode: Text.Wrap

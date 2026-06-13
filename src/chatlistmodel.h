@@ -119,6 +119,7 @@ signals:
 
 private:
     class ChatData;
+    ChatData *buildChatData(const QVariantMap &chatToBeAdded);
     void addVisibleChat(ChatData *chat);
     void updateChatVisibility(const TDLibWrapper::Group *group);
     void updateSecretChatVisibility(const QVariantMap secretChatDetails);

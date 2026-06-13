@@ -721,6 +721,12 @@ ApplicationWindow
             //
             // Il daemon è sempre attivo: l'app resta viva indipendentemente.
             var s = Qt.application.state;
+            // ANTI-RAM Strada C: informa il wrapper se la UI è in primo piano.
+            // Active è l'unico stato "davvero visibile": Inactive copre sia il
+            // cover sia lo swipe-close (che NON cambia stato, ma a quel punto
+            // siamo già passati per Inactive). Il riciclo del client TDLib parte
+            // solo dopo che la UI è rimasta non-attiva per il periodo di grazia.
+            tdLibWrapper.setUiVisible(s === Qt.ApplicationActive);
             var isBackground = (s === Qt.ApplicationSuspended
                                 || s === Qt.ApplicationHidden
                                 || (s === Qt.ApplicationInactive && !appWindow.visible));

@@ -63,8 +63,8 @@ Dialog {
             TextField {
                 id: titleField
                 width: parent.width
-                label: isChannel ? "Titolo canale" : "Titolo gruppo"
-                placeholderText: isChannel ? "Inserisci il titolo del canale" : "Inserisci il titolo del gruppo"
+                label: isChannel ? qsTr("Channel name") : qsTr("Group name")
+                placeholderText: isChannel ? qsTr("Enter the channel name") : qsTr("Enter the group name")
                 EnterKey.iconSource: isChannel ? "image://theme/icon-m-enter-next" : "image://theme/icon-m-enter-accept"
                 EnterKey.onClicked: {
                     if (isChannel) {
@@ -79,8 +79,8 @@ Dialog {
                 id: descriptionField
                 visible: isChannel
                 width: parent.width
-                label: "Descrizione (opzionale)"
-                placeholderText: "Inserisci una descrizione"
+                label: qsTr("Description (optional)")
+                placeholderText: qsTr("Enter a description")
             }
         }
 

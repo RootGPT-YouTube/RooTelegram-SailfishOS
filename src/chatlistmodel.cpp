@@ -811,9 +811,11 @@ void ChatListModel::setShowAllChats(bool showAll)
     }
 }
 
-void ChatListModel::handleChatDiscovered(const QString &, const QVariantMap &chatToBeAdded)
+// Costruisce un ChatData completo (ordini cartelle, gruppo, secret chat) a
+// partire dal payload di updateNewChat. Condiviso tra il ramo "chat nuova" e
+// il ramo "chat già nota" (rimpiazzo in place dopo il riciclo del client TDLib).
+ChatListModel::ChatData *ChatListModel::buildChatData(const QVariantMap &chatToBeAdded)
 {
-    LOG("New chat discovered");
     ChatData *chat = new ChatData(tdLibWrapper, chatToBeAdded);
 
     // Salva l'ordine principale in folderOrders[chatId][0] per poter ripristinare "Tutte"
@@ -852,6 +854,54 @@ void ChatListModel::handleChatDiscovered(const QString &, const QVariantMap &cha
             chat->updateSecretChat(secretChatDetails);
         }
     }
+
+    return chat;
+}
+
+void ChatListModel::handleChatDiscovered(const QString &, const QVariantMap &chatToBeAdded)
+{
+    const qlonglong knownChatId = chatToBeAdded.value(ID).toLongLong();
+    const bool wasVisible = chatIndexMap.contains(knownChatId);
+    if (wasVisible || hiddenChats.contains(knownChatId)) {
+        // Dopo il riciclo del client TDLib (anti-RAM, TDLibWrapper::checkMemoryRecycle)
+        // updateNewChat arriva di nuovo per OGNI chat della lista: senza questo ramo
+        // ogni chat già nel modello verrebbe duplicata. Rimpiazza i dati in place,
+        // gestendo anche l'eventuale cambio di visibilità.
+        LOG("Known chat rediscovered" << knownChatId);
+        ChatData *fresh = buildChatData(chatToBeAdded);
+        if (wasVisible) {
+            int chatIndex = chatIndexMap.value(knownChatId);
+            delete chatList.at(chatIndex);
+            chatList.replace(chatIndex, fresh);
+            if (fresh->isHidden() && !showHiddenChats) {
+                beginRemoveRows(QModelIndex(), chatIndex, chatIndex);
+                chatList.removeAt(chatIndex);
+                chatIndexMap.remove(knownChatId);
+                const int n = chatList.size();
+                for (int pos = chatIndex; pos < n; pos++) {
+                    chatIndexMap.insert(chatList.at(pos)->chatId, pos);
+                }
+                hiddenChats.insert(knownChatId, fresh);
+                endRemoveRows();
+            } else {
+                chatIndex = updateChatOrder(chatIndex);
+                const QModelIndex modelIndex(index(chatIndex));
+                emit dataChanged(modelIndex, modelIndex);
+                emit chatChanged(knownChatId);
+            }
+        } else {
+            delete hiddenChats.take(knownChatId);
+            if (fresh->isHidden() && !showHiddenChats) {
+                hiddenChats.insert(knownChatId, fresh);
+            } else {
+                addVisibleChat(fresh);
+            }
+        }
+        return;
+    }
+
+    LOG("New chat discovered");
+    ChatData *chat = buildChatData(chatToBeAdded);
 
     if (chat->isHidden() && !showHiddenChats) {
         LOG("Hidden chat" << chat->chatId);

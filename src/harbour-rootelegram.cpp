@@ -70,6 +70,7 @@
 #include "boolfiltermodel.h"
 #include "tgsplugin.h"
 #include "rootelegramutils.h"
+#include "livelocationmanager.h"
 #include "knownusersmodel.h"
 #include "contactsmodel.h"
 #include "storiesmodel.h"
@@ -222,6 +223,7 @@ int main(int argc, char *argv[])
     MceInterface *mceInterface = new MceInterface(app.data());
     TDLibWrapper *tdLibWrapper = new TDLibWrapper(appSettings, mceInterface, app.data());
     RooTelegramUtils *rootelegramUtils = new RooTelegramUtils(app.data());
+    LiveLocationManager *liveLocationManager = new LiveLocationManager(tdLibWrapper, app.data());
 
     DBusAdaptor *dBusAdaptor = tdLibWrapper->getDBusAdaptor();
 
@@ -291,6 +293,7 @@ int main(int argc, char *argv[])
             context->setContextProperty("appVersion", QStringLiteral(APP_VERSION));
             context->setContextProperty("tdLibWrapper", tdLibWrapper);
             context->setContextProperty("rootelegramUtils", rootelegramUtils);
+            context->setContextProperty("liveLocationManager", liveLocationManager);
             context->setContextProperty("dBusAdaptor", dBusAdaptor);
             context->setContextProperty("chatListModel", &chatListModel);
             context->setContextProperty("archivedChatsModel", &archivedChatsModel);

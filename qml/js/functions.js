@@ -700,7 +700,7 @@ function handleErrorMessage(code, message) {
     }
     // Silently ignore local file cache misses (TDLib tries to access files
     // from a previous session that are no longer in cache)
-    if (message === "File not found" || message === "FILE_DOWNLOAD_ID_INVALID"
+    if (message === "Message not found" || message === "File not found" || message === "FILE_DOWNLOAD_ID_INVALID"
             || message === "Wrong file id or the file is temporarily unavailable"
             || message === "Threads can't be used in General topic"
             || message === "Invalid forum topic identifier specified"
@@ -726,6 +726,9 @@ function handleErrorMessage(code, message) {
         // emette a volte all'avvio per azioni di background (es. mark-as-read / fetch)
         // su canali dove l'utente non è amministratore; l'app funziona regolarmente,
         // niente toast all'apertura.
+        // "Message not found": benigno, capita p.es. quando si cancella un messaggio
+        // di live location mentre il LiveLocationManager sta ancora editandolo (l'edit
+        // in volo fallisce). Il manager smette comunque agli aggiornamenti successivi.
         return;
     }
     if (message === "USER_ALREADY_PARTICIPANT") {

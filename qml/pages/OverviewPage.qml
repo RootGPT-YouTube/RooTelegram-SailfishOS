@@ -830,6 +830,17 @@ Page {
                 implicitHeight: neonCore.implicitHeight
                 width: implicitWidth
                 height: implicitHeight
+
+                // Task 6 — "neon malfunzionante": glowOn (0..1) pilota l'opacità dei
+                // tre layer (backglow/halo/core). Tra una raffica di sfarfallio e
+                // l'altra resta 1.0 (nessuna animazione attiva = nessun repaint).
+                property real glowOn: 1.0
+                // Anima SOLO in tema Neon, a brand visibile, con la home in primo
+                // piano e l'app attiva: niente animazioni off-screen (CPU sprecata).
+                readonly property bool flickerActive: overviewPage.neon && brandNeon.visible
+                                                      && overviewPage.status === PageStatus.Active
+                                                      && Qt.application.active
+
                 anchors {
                     // Neon: centrato. Silica: allineato a destra dell'header.
                     horizontalCenter: overviewPage.neon ? parent.horizontalCenter : undefined
@@ -842,6 +853,7 @@ Page {
                 RadialGradient {
                     id: neonBackglow
                     visible: overviewPage.neon
+                    opacity: brandNeon.glowOn
                     anchors.centerIn: parent
                     width: neonCore.implicitWidth * 1.5
                     height: neonCore.implicitHeight * 2.6
@@ -858,6 +870,7 @@ Page {
                 Label {
                     id: neonHalo
                     visible: overviewPage.neon
+                    opacity: brandNeon.glowOn
                     anchors.centerIn: parent
                     text: "R∞Telegram"
                     font.pixelSize: Theme.fontSizeHuge
@@ -876,6 +889,8 @@ Page {
                 // Nucleo: la scritta quasi bianca/luminosa con un glow stretto rosa acceso
                 Label {
                     id: neonCore
+                    // In Neon segue lo sfarfallio; in Silica sempre pieno (sobrio).
+                    opacity: overviewPage.neon ? brandNeon.glowOn : 1.0
                     anchors.centerIn: parent
                     // Silica: "R∞Telegram" (col simbolo dell'infinito come il Neon) in
                     // grassetto+corsivo, allineato a destra, di misura Large (un gradino
@@ -895,6 +910,40 @@ Page {
                         samples: 17
                         spread: 0.55
                         transparentBorder: true
+                    }
+                }
+
+                // Una "raffica" di sfarfallio: spegnimenti rapidi e riaccensioni
+                // irregolari, come un tubo al neon con lo starter difettoso.
+                SequentialAnimation {
+                    id: flickerBurst
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 0.10; duration: 45 }
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 0.92; duration: 50 }
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 0.22; duration: 40 }
+                    PauseAnimation { duration: 70 }
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 1.0; duration: 60 }
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 0.45; duration: 35 }
+                    NumberAnimation { target: brandNeon; property: "glowOn"; to: 1.0; duration: 110 }
+                }
+
+                // Innesca le raffiche a intervalli casuali (1.8–6 s) finché la home
+                // è in primo piano. Off-screen: ferma tutto e lascia il brand acceso.
+                Timer {
+                    id: flickerTimer
+                    running: brandNeon.flickerActive
+                    repeat: true
+                    interval: 2500
+                    onTriggered: {
+                        if (!flickerBurst.running) {
+                            flickerBurst.restart();
+                        }
+                        interval = 1800 + Math.round(Math.random() * 4200);
+                    }
+                    onRunningChanged: {
+                        if (!running) {
+                            flickerBurst.stop();
+                            brandNeon.glowOn = 1.0;
+                        }
                     }
                 }
             }
@@ -919,10 +968,11 @@ Page {
             property bool opened: false
             anchors.top: pageHeader.bottom
             // Neon: pannello a tutta larghezza (card vetro). Silica: box ALLINEATO A
-            // DESTRA come il brand, largo quanto basta alle voci. Sfondo: arancio
-            // bruciato Theme.rgba("#803500", 0.82) — lo STESSO del ContextMenu del
-            // long-press su una chat (e del menu Neon): highlightBackgroundColor pieno
-            // risultava troppo acceso sull'ambiance dell'utente.
+            // DESTRA come il brand, largo quanto basta alle voci. Sfondo (vedi `color`
+            // sotto): Neon = arancio bruciato translucido (come il menu Neon); Silica
+            // (task 2) = OPACO e adattivo al tema (Theme.overlayBackgroundColor forzato
+            // a alpha 1), niente arancio né trasparenza — su ambiance chiaro l'arancio
+            // translucido risultava illeggibile.
             anchors.right: parent.right
             anchors.rightMargin: Theme.horizontalPageMargin
             anchors.left: overviewPage.neon ? parent.left : undefined
@@ -931,7 +981,8 @@ Page {
                    ? undefined
                    : Math.min(parent.width - 2 * Theme.horizontalPageMargin, Theme.itemSizeHuge * 2.4)
             radius: overviewPage.neon ? Theme.paddingLarge : 0
-            color: Theme.rgba("#803500", 0.82)
+            color: overviewPage.neon ? Theme.rgba("#803500", 0.82)
+                                     : Theme.rgba(Theme.overlayBackgroundColor, 1.0)
             border.width: overviewPage.neon ? 4 : 0
             border.color: "#ff2d2d"
             z: 100

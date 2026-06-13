@@ -109,6 +109,9 @@ private:
     int calculateLastReadSentMessageId();
     int calculateScrollPosition(int listInboxPosition);
     bool isMostRecentMessageLoaded();
+    // Richiede la cronologia più vecchia partendo dal messaggio più vecchio già
+    // in modello (usato dal loop di riempimento iniziale, vedi handleMessagesReceived).
+    void requestOlderHistoryFromOldest();
 
 private:
     TDLibWrapper *tdLibWrapper;
@@ -123,6 +126,9 @@ private:
     bool inReload;
     bool inIncrementalUpdate;
     bool searchModeActive;
+    // Quanti round di getChatHistory abbiamo già fatto per riempire la vista al
+    // primo ingresso in chat (bound anti-loop quando la cache locale è fredda).
+    int initialFillAttempts = 0;
     QString searchQuery;
 };
 

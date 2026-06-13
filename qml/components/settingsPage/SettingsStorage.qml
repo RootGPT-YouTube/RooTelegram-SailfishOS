@@ -55,6 +55,37 @@ AccordionItem {
                 text: qsTr("Archived chats")
                 onClicked: pageStack.push(Qt.resolvedUrl("../../pages/ArchivedChatsPage.qml"))
             }
+
+            // Stesso separatore che divide una chat dall'altra nella home (sfuma
+            // ai bordi, neon in tema Neon). La linea interna è centrata verticalmente:
+            // alziamo l'altezza dell'elemento per dare respiro sopra e sotto, così il
+            // divisorio si stacca bene dai due pulsanti.
+            NeonSeparator {
+                width: parent.columnWidth
+                height: Theme.itemSizeExtraSmall
+            }
+
+            // "Kill the Daemon!": kill forzato dell'app/daemon (SIGKILL nativo, vedi
+            // ProcessLauncher::killApp). SOLO l'etichetta del pulsante resta SEMPRE
+            // in inglese (richiesta esplicita): NON va passata da qsTr. La descrizione
+            // "di lore" è invece tradotta in tutte le lingue (corsivo, tra virgolette).
+            Column {
+                width: parent.columnWidth
+                spacing: Theme.paddingSmall
+                NeonButton {
+                    width: parent.width
+                    text: "Kill the Daemon!"
+                    onClicked: processLauncher.killApp()
+                }
+                Label {
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    font.italic: true
+                    color: Theme.secondaryColor
+                    text: qsTr("“Seal the domain of the Daemon and close its cycle in the void of the eternal log!”")
+                }
+            }
         }
     }
 }

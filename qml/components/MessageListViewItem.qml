@@ -133,21 +133,38 @@ ListItem {
                 }
             }
         }
+        // [2.7 fix] Le azioni del Drawer "Opzioni aggiuntive" NON devono dipendere
+        // dal delegate: la ListView lo distrugge quando il Drawer apre/sposta la
+        // lista → sourceItem/scope-delegate null → il tap era muto. Catturiamo qui
+        // (delegate ancora vivo) ChatPage + i primitivi, e nelle closure usiamo solo
+        // tdLibWrapper/Remorse/appNotification (globali) + i valori catturati. Così
+        // sopravvivono alla morte del delegate, come già fa "Pin".
+        var thePage = page;
+        var theChatId = page ? page.chatInformation.id : 0;
+        var theUserId = senderUserId;
+        var theSenderName = senderDisplayName;
+        var theMessageId = (myMessage && typeof myMessage.id !== "undefined") ? myMessage.id : 0;
         if (canDeleteAllFromSender) {
             items.push({
                 visible: true,
-                name: senderDisplayName ? qsTr("Delete all messages from %1").arg(senderDisplayName) : qsTr("Delete all messages from this user"),
+                name: theSenderName ? qsTr("Delete all messages from %1").arg(theSenderName) : qsTr("Delete all messages from this user"),
                 action: function() {
-                    deleteAllMessagesFromSender()
+                    if (!theUserId) return;
+                    Remorse.popupAction(thePage, qsTr("Deletion of messages started"), function() {
+                        tdLibWrapper.deleteChatMessagesBySender(theChatId, theUserId);
+                    });
                 }
             })
         }
         if (canBanSender) {
             items.push({
                 visible: true,
-                name: senderDisplayName ? qsTr("Ban %1").arg(senderDisplayName) : qsTr("Ban user"),
+                name: theSenderName ? qsTr("Ban %1").arg(theSenderName) : qsTr("Ban user"),
                 action: function() {
-                    banSender()
+                    if (!theUserId) return;
+                    Remorse.popupAction(thePage, qsTr("User banned"), function() {
+                        tdLibWrapper.banChatMember(theChatId, theUserId, 0);
+                    });
                 }
             })
         }
@@ -156,7 +173,8 @@ ListItem {
                 visible: true,
                 name: qsTr("Report as spam"),
                 action: function() {
-                    reportSenderAsSpam()
+                    tdLibWrapper.reportChatSpam(theChatId, [ theMessageId ]);
+                    appNotification.show(qsTr("Report submitted"));
                 }
             })
         }
@@ -391,31 +409,8 @@ ListItem {
         })
     }
 
-    function deleteAllMessagesFromSender() {
-        if (!senderIsUser) {
-            return
-        }
-        var chatId = page.chatInformation.id
-        Remorse.popupAction(page, qsTr("Deletion of messages started"), function() {
-            tdLibWrapper.deleteChatMessagesBySender(chatId, senderUserId)
-        })
-    }
-
-    function banSender() {
-        if (!senderIsUser) {
-            return
-        }
-        var chatId = page.chatInformation.id
-        Remorse.popupAction(page, qsTr("User banned"), function() {
-            tdLibWrapper.banChatMember(chatId, senderUserId, 0)
-        })
-    }
-
-    function reportSenderAsSpam() {
-        var chatId = page.chatInformation.id
-        tdLibWrapper.reportChatSpam(chatId, [myMessage.id])
-        appNotification.show(qsTr("Report submitted"))
-    }
+    // [2.7] Le ex-funzioni deleteAllMessagesFromSender/banSender/reportSenderAsSpam
+    // sono state inlinate (delegate-independent) dentro additionalItemsModel, vedi sopra.
 
     function copyMessageToClipboard() {
         Clipboard.text = Functions.getMessageText(myMessage, true, userInformation.id, true)
@@ -488,7 +483,7 @@ ListItem {
         var actions = [];
         actions.push({ text: anySpoilerRevealed ? qsTr("Hide spoiler") : qsTr("Reveal spoiler"), visible: hasSpoilers, callback: function() { toggleAllSpoilers(); }});
         actions.push({ text: qsTr("Reply to Message"), visible: canReplyToMessage, callback: function() { replyToMessage(); }});
-        actions.push({ text: qsTr("Copy Message to Clipboard"), visible: showCopyMessageToClipboardMenuItem, callback: function() { copyMessageToClipboard(); }});
+        actions.push({ text: qsTr("Copy Message"), visible: showCopyMessageToClipboardMenuItem, callback: function() { copyMessageToClipboard(); }});
         actions.push({ text: qsTr("Forward message"), visible: showForwardMessageMenuItem, callback: function() { forwardMessage(); }});
         actions.push({ text: qsTr("Translate message"), visible: hasTranslatableText, callback: function() { messageListItem.translateMessage(); }});
         actions.push({ text: (myMessage && myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message"), visible: canPinMessage, callback: function() { togglePinMessage(); }});
@@ -794,7 +789,7 @@ ListItem {
                 MenuItem {
                     visible: showCopyMessageToClipboardMenuItem
                     onClicked: copyMessageToClipboard()
-                    text: qsTr("Copy Message to Clipboard")
+                    text: qsTr("Copy Message")
                 }
                 MenuItem {
                     visible: showForwardMessageMenuItem

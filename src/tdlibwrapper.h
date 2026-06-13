@@ -186,6 +186,9 @@ public:
     Q_INVOKABLE void downloadFile(int fileId);
     Q_INVOKABLE void openChat(const QString &chatId);
     Q_INVOKABLE void closeChat(const QString &chatId);
+    // ANTI-RAM Strada C: la QML notifica quando la finestra è visibile/nascosta;
+    // il riciclo del client TDLib parte solo a UI nascosta da un po'.
+    Q_INVOKABLE void setUiVisible(bool visible);
     Q_INVOKABLE void joinChat(const QString &chatId);
     Q_INVOKABLE void leaveChat(const QString &chatId);
     Q_INVOKABLE void deleteChat(qlonglong chatId);
@@ -206,6 +209,13 @@ public:
     Q_INVOKABLE void sendAnimationMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0, int duration = 0, int width = 0, int height = 0);
     Q_INVOKABLE void sendVoiceNoteMessage(qlonglong chatId, const QString &filePath, const QString &message, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, qlonglong replyToMessageId = 0);
+    // Live location: come sendLocationMessage ma con live_period > 0 (durata in
+    // secondi, 60..86400). editLiveLocationMessage aggiorna la posizione del
+    // messaggio live già inviato; stopLiveLocationMessage la interrompe (invia
+    // editMessageLiveLocation con location null, semantica TDLib per "stop").
+    Q_INVOKABLE void sendLiveLocationMessage(qlonglong chatId, double latitude, double longitude, double horizontalAccuracy, int livePeriod, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void editLiveLocationMessage(qlonglong chatId, qlonglong messageId, double latitude, double longitude, double horizontalAccuracy);
+    Q_INVOKABLE void stopLiveLocationMessage(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendStickerMessage(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
@@ -500,6 +510,9 @@ signals:
 
 public slots:
     void handleVersionDetected(const QString &version);
+    // ANTI-RAM Strada C (vedi checkMemoryRecycle in tdlibwrapper.cpp)
+    void checkMemoryRecycle();
+    void handleCallStateForRecycle(const QVariantMap &call);
     void handleAuthorizationStateChanged(const QString &authorizationState, const QVariantMap authorizationStateData);
     void handleOptionUpdated(const QString &optionName, const QVariant &optionValue);
     void handleConnectionStateChanged(const QString &connectionState);
@@ -595,6 +608,19 @@ private:
     bool currentChatIsForum;
     qlonglong pendingForumTopicsChatId;
     int pendingScheduledSendDate;
+
+    // ANTI-RAM Strada C: opzioni TDLib per-client da riapplicare anche dopo il riciclo
+    void applyAntiRamOptions();
+    // ANTI-RAM Strada C2: riavvio dell'intero PROCESSO via execv (libera davvero
+    // tutta la RAM, cosa che il riciclo del solo client NON faceva). Non ritorna
+    // se ha successo; ritorna solo se execv fallisce (→ fallback al riciclo client).
+    void restartProcess();
+    bool isRecycling;
+    qint64 uiHiddenSinceMs;       // 0 = UI visibile
+    bool callOngoing;
+    qint64 recycleRssThresholdKb;
+    qint64 recycleHiddenGraceMs;
+    qint64 rssBeforeRecycleKb;
 
 };
 
