@@ -13,7 +13,7 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.7";
+var version = "2.7.1";
 
 var changelogByLang = {
     "it": [
