@@ -1929,27 +1929,27 @@ Nachrichten</numerusform>
     </message>
     <message>
         <source>Channel name</source>
-        <translation type="unfinished"></translation>
+        <translation>Kanalname</translation>
     </message>
     <message>
         <source>Group name</source>
-        <translation type="unfinished"></translation>
+        <translation>Gruppenname</translation>
     </message>
     <message>
         <source>Enter the channel name</source>
-        <translation type="unfinished"></translation>
+        <translation>Kanalnamen eingeben</translation>
     </message>
     <message>
         <source>Enter the group name</source>
-        <translation type="unfinished"></translation>
+        <translation>Gruppennamen eingeben</translation>
     </message>
     <message>
         <source>Description (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Beschreibung (optional)</translation>
     </message>
     <message>
         <source>Enter a description</source>
-        <translation type="unfinished"></translation>
+        <translation>Beschreibung eingeben</translation>
     </message>
 </context>
 <context>
@@ -2417,42 +2417,42 @@ Nachrichten</numerusform>
     <name>LiveLocationDialog</name>
     <message>
         <source>Location</source>
-        <translation type="unfinished">Standort</translation>
+        <translation>Standort</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Schließen</translation>
     </message>
     <message>
         <source>Stop sharing live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Live-Standort nicht mehr teilen</translation>
     </message>
     <message>
         <source>Send current location</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuellen Standort senden</translation>
     </message>
     <message>
         <source>Share live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Live-Standort teilen</translation>
     </message>
     <message>
         <source>for 15 minutes</source>
-        <translation type="unfinished"></translation>
+        <translation>für 15 Minuten</translation>
     </message>
     <message>
         <source>for 1 hour</source>
-        <translation type="unfinished"></translation>
+        <translation>für 1 Stunde</translation>
     </message>
     <message>
         <source>for 8 hours</source>
-        <translation type="unfinished"></translation>
+        <translation>für 8 Stunden</translation>
     </message>
 </context>
 <context>
     <name>LiveLocationManager</name>
     <message>
         <source>Location services are not available on this device</source>
-        <translation type="unfinished"></translation>
+        <translation>Standortdienste sind auf diesem Gerät nicht verfügbar</translation>
     </message>
 </context>
 <context>
@@ -2711,11 +2711,11 @@ Nachrichten</numerusform>
     <name>MessageLocation</name>
     <message>
         <source>LIVE</source>
-        <translation type="unfinished"></translation>
+        <translation>LIVE</translation>
     </message>
     <message>
         <source>Live ended</source>
-        <translation type="unfinished"></translation>
+        <translation>Live beendet</translation>
     </message>
 </context>
 <context>
@@ -2762,6 +2762,21 @@ Nachrichten</numerusform>
             <numerusform>%Ln Stimme insgesamt</numerusform>
             <numerusform>%Ln Stimmen insgesamt</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>MessageSearchPage</name>
+    <message>
+        <source>Search in messages</source>
+        <translation>In Nachrichten suchen</translation>
+    </message>
+    <message>
+        <source>Type a word to search in all your chats</source>
+        <translation>Gib ein Wort ein, um in allen Chats zu suchen</translation>
+    </message>
+    <message>
+        <source>No messages found</source>
+        <translation>Keine Nachrichten gefunden</translation>
     </message>
 </context>
 <context>
@@ -2996,6 +3011,10 @@ Nachrichten</numerusform>
     <message>
         <source>Search...</source>
         <translation>Suchen...</translation>
+    </message>
+    <message>
+        <source>Search in messages</source>
+        <translation>In Nachrichten suchen</translation>
     </message>
 </context>
 <context>

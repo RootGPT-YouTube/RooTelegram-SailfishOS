@@ -292,6 +292,7 @@ public:
     Q_INVOKABLE void searchChatMessages(qlonglong chatId, const QString &query, qlonglong fromMessageId = 0);
     Q_INVOKABLE void getPinnedMessages(qlonglong chatId, qlonglong messageThreadId = 0, qlonglong fromMessageId = 0, int limit = 50);
     Q_INVOKABLE void searchPublicChats(const QString &query);
+    Q_INVOKABLE void searchMessages(const QString &query, const QString &offset = QString(), int limit = 50);
     Q_INVOKABLE void searchChatsOnServer(const QString &query, int limit = 50);
     Q_INVOKABLE void searchContacts(const QString &query, int limit = 100);
     Q_INVOKABLE void readAllChatMentions(qlonglong chatId);
@@ -414,6 +415,7 @@ signals:
     void chatOnlineMemberCountUpdated(const QString &chatId, int onlineMemberCount);
     void messagesReceived(const QVariantList &messages, int totalCount);
     void messagesReceivedWithExtra(const QVariantList &messages, int totalCount, const QString &extra);
+    void messagesInChatsReceived(const QVariantList &messages, int totalCount, const QString &nextOffset);
     void pinnedMessagesReceived(qlonglong chatId, qlonglong messageThreadId, const QVariantList &messages);
     void sponsoredMessageReceived(qlonglong chatId, const QVariantMap &message);
     void messageLinkInfoReceived(const QString &url, const QVariantMap &messageLinkInfo, const QString &extra);

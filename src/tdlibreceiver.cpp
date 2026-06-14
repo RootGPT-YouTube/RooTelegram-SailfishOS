@@ -142,6 +142,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateChatOnlineMemberCount", &TDLibReceiver::processChatOnlineMemberCountUpdated);
     handlers.insert("messages", &TDLibReceiver::processMessages);
     handlers.insert("foundChatMessages", &TDLibReceiver::processFoundChatMessages);
+    handlers.insert("foundMessages", &TDLibReceiver::processFoundMessages);
     handlers.insert("sponsoredMessage", &TDLibReceiver::processSponsoredMessage);   // TdLib <= 1.8.7
     handlers.insert("sponsoredMessages", &TDLibReceiver::processSponsoredMessages); // TdLib >= 1.8.8
     handlers.insert("updateNewMessage", &TDLibReceiver::processUpdateNewMessage);
@@ -513,6 +514,15 @@ void TDLibReceiver::processFoundChatMessages(const QVariantMap &receivedInformat
     LOG("Received found chat messages, amount: " << total_count);
     emit messagesReceived(messages, total_count);
     emit messagesReceivedWithExtra(messages, total_count, extra);
+}
+
+void TDLibReceiver::processFoundMessages(const QVariantMap &receivedInformation)
+{
+    const int total_count = receivedInformation.value(TOTAL_COUNT).toInt();
+    const QString nextOffset = receivedInformation.value("next_offset").toString();
+    const QVariantList messages = cleanupList(receivedInformation.value(MESSAGES).toList());
+    LOG("Received found messages (all chats), amount: " << total_count << "next:" << nextOffset);
+    emit messagesInChatsFound(messages, total_count, nextOffset);
 }
 
 void TDLibReceiver::processSponsoredMessage(const QVariantMap &receivedInformation)

@@ -1943,27 +1943,27 @@
     </message>
     <message>
         <source>Channel name</source>
-        <translation type="unfinished"></translation>
+        <translation>Название канала</translation>
     </message>
     <message>
         <source>Group name</source>
-        <translation type="unfinished"></translation>
+        <translation>Название группы</translation>
     </message>
     <message>
         <source>Enter the channel name</source>
-        <translation type="unfinished"></translation>
+        <translation>Введите название канала</translation>
     </message>
     <message>
         <source>Enter the group name</source>
-        <translation type="unfinished"></translation>
+        <translation>Введите название группы</translation>
     </message>
     <message>
         <source>Description (optional)</source>
-        <translation type="unfinished"></translation>
+        <translation>Описание (необязательно)</translation>
     </message>
     <message>
         <source>Enter a description</source>
-        <translation type="unfinished"></translation>
+        <translation>Введите описание</translation>
     </message>
 </context>
 <context>
@@ -2432,42 +2432,42 @@
     <name>LiveLocationDialog</name>
     <message>
         <source>Location</source>
-        <translation type="unfinished">Местоположение</translation>
+        <translation>Местоположение</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Закрыть</translation>
     </message>
     <message>
         <source>Stop sharing live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Остановить трансляцию местоположения</translation>
     </message>
     <message>
         <source>Send current location</source>
-        <translation type="unfinished"></translation>
+        <translation>Отправить текущее местоположение</translation>
     </message>
     <message>
         <source>Share live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Транслировать местоположение</translation>
     </message>
     <message>
         <source>for 15 minutes</source>
-        <translation type="unfinished"></translation>
+        <translation>на 15 минут</translation>
     </message>
     <message>
         <source>for 1 hour</source>
-        <translation type="unfinished"></translation>
+        <translation>на 1 час</translation>
     </message>
     <message>
         <source>for 8 hours</source>
-        <translation type="unfinished"></translation>
+        <translation>на 8 часов</translation>
     </message>
 </context>
 <context>
     <name>LiveLocationManager</name>
     <message>
         <source>Location services are not available on this device</source>
-        <translation type="unfinished"></translation>
+        <translation>Службы геолокации недоступны на этом устройстве</translation>
     </message>
 </context>
 <context>
@@ -2730,11 +2730,11 @@
     <name>MessageLocation</name>
     <message>
         <source>LIVE</source>
-        <translation type="unfinished"></translation>
+        <translation>LIVE</translation>
     </message>
     <message>
         <source>Live ended</source>
-        <translation type="unfinished"></translation>
+        <translation>Трансляция завершена</translation>
     </message>
 </context>
 <context>
@@ -2783,6 +2783,21 @@
             <numerusform>%Ln голоса всего</numerusform>
             <numerusform>%Ln голосов всего</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>MessageSearchPage</name>
+    <message>
+        <source>Search in messages</source>
+        <translation>Поиск по сообщениям</translation>
+    </message>
+    <message>
+        <source>Type a word to search in all your chats</source>
+        <translation>Введите слово для поиска во всех чатах</translation>
+    </message>
+    <message>
+        <source>No messages found</source>
+        <translation>Сообщения не найдены</translation>
     </message>
 </context>
 <context>
@@ -3018,6 +3033,10 @@
     <message>
         <source>Search...</source>
         <translation>Поиск...</translation>
+    </message>
+    <message>
+        <source>Search in messages</source>
+        <translation>Поиск по сообщениям</translation>
     </message>
 </context>
 <context>

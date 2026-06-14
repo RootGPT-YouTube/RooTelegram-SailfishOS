@@ -2415,42 +2415,42 @@
     <name>LiveLocationDialog</name>
     <message>
         <source>Location</source>
-        <translation type="unfinished">Posizione</translation>
+        <translation>Posizione</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Chiudi</translation>
     </message>
     <message>
         <source>Stop sharing live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Smetti di condividere la posizione in tempo reale</translation>
     </message>
     <message>
         <source>Send current location</source>
-        <translation type="unfinished"></translation>
+        <translation>Invia posizione attuale</translation>
     </message>
     <message>
         <source>Share live location</source>
-        <translation type="unfinished"></translation>
+        <translation>Condividi posizione in tempo reale</translation>
     </message>
     <message>
         <source>for 15 minutes</source>
-        <translation type="unfinished"></translation>
+        <translation>per 15 minuti</translation>
     </message>
     <message>
         <source>for 1 hour</source>
-        <translation type="unfinished"></translation>
+        <translation>per 1 ora</translation>
     </message>
     <message>
         <source>for 8 hours</source>
-        <translation type="unfinished"></translation>
+        <translation>per 8 ore</translation>
     </message>
 </context>
 <context>
     <name>LiveLocationManager</name>
     <message>
         <source>Location services are not available on this device</source>
-        <translation type="unfinished"></translation>
+        <translation>I servizi di localizzazione non sono disponibili su questo dispositivo</translation>
     </message>
 </context>
 <context>
@@ -2709,11 +2709,11 @@
     <name>MessageLocation</name>
     <message>
         <source>LIVE</source>
-        <translation type="unfinished"></translation>
+        <translation>LIVE</translation>
     </message>
     <message>
         <source>Live ended</source>
-        <translation type="unfinished"></translation>
+        <translation>Live terminata</translation>
     </message>
 </context>
 <context>
@@ -2760,6 +2760,21 @@
             <numerusform>%Ln voto in totale</numerusform>
             <numerusform>%Ln voti in totale</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>MessageSearchPage</name>
+    <message>
+        <source>Search in messages</source>
+        <translation>Cerca nei messaggi</translation>
+    </message>
+    <message>
+        <source>Type a word to search in all your chats</source>
+        <translation>Digita una parola per cercare in tutte le tue chat</translation>
+    </message>
+    <message>
+        <source>No messages found</source>
+        <translation>Nessun messaggio trovato</translation>
     </message>
 </context>
 <context>
@@ -2994,6 +3009,10 @@
     <message>
         <source>Search...</source>
         <translation>Cerca...</translation>
+    </message>
+    <message>
+        <source>Search in messages</source>
+        <translation>Cerca nei messaggi</translation>
     </message>
 </context>
 <context>

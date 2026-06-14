@@ -77,6 +77,7 @@ signals:
     void chatFolderEditReceived(const QVariantMap &folder, qlonglong chatId, int folderId, bool add);
     void messagesReceived(const QVariantList &messages, int totalCount);
     void messagesReceivedWithExtra(const QVariantList &messages, int totalCount, const QString &extra);
+    void messagesInChatsFound(const QVariantList &messages, int totalCount, const QString &nextOffset);
     void pinnedMessagesFound(qlonglong chatId, qlonglong messageThreadId, const QVariantList &messages);
     void messageLinkInfoReceived(const QString &url, const QVariantMap &messageLinkInfo, const QString &extra);
     void chatStatisticsUrlReceived(qlonglong chatId, const QString &url);
@@ -191,6 +192,7 @@ private:
     void processChatOnlineMemberCountUpdated(const QVariantMap &receivedInformation);
     void processMessages(const QVariantMap &receivedInformation);
     void processFoundChatMessages(const QVariantMap &receivedInformation);
+    void processFoundMessages(const QVariantMap &receivedInformation);
     void processSponsoredMessage(const QVariantMap &receivedInformation);
     void processSponsoredMessages(const QVariantMap &receivedInformation);
     void processUpdateNewMessage(const QVariantMap &receivedInformation);

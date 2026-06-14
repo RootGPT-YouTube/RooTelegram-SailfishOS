@@ -2763,6 +2763,21 @@
     </message>
 </context>
 <context>
+    <name>MessageSearchPage</name>
+    <message>
+        <source>Search in messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Type a word to search in all your chats</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No messages found</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MessageViaLabel</name>
     <message>
         <source>via %1</source>
@@ -2993,6 +3008,10 @@
     </message>
     <message>
         <source>Search...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search in messages</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

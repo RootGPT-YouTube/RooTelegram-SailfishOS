@@ -1001,6 +1001,7 @@ Page {
                 Repeater {
                     model: [
                         { "text": qsTr("Search..."), "action": "search" },
+                        { "text": qsTr("Search in messages"), "action": "searchMessages" },
                         { "text": qsTr("Mark all as read"), "action": "markRead" },
                         { "text": qsTr("Edit folders"), "action": "editFolders" },
                         { "text": qsTr("Reorder Pinned Chats"), "action": "reorderPinned" },
@@ -1016,6 +1017,9 @@ Page {
                                 chatSearchField.focus = true;
                                 chatSearchField.opacity = 1.0;
                                 pageHeader.opacity = 0.0;
+                                break;
+                            case "searchMessages":
+                                pageStack.push(Qt.resolvedUrl("../pages/MessageSearchPage.qml"));
                                 break;
                             case "markRead":
                                 overviewPage.markAllChatsAsRead();

@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.7.1
+RT_APP_VERSION = 2.7.5
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -171,6 +171,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/pages/DebugPage.qml \
     qml/pages/InitializationPage.qml \
     qml/pages/MediaAlbumPage.qml \
+    qml/pages/MessageSearchPage.qml \
     qml/pages/NewChatPage.qml \
     qml/pages/OverviewPage.qml \
     qml/pages/AboutPage.qml \

@@ -250,6 +250,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chatOnlineMemberCountUpdated(QString, int)), this, SIGNAL(chatOnlineMemberCountUpdated(QString, int)));
     connect(this->tdLibReceiver, SIGNAL(messagesReceived(QVariantList, int)), this, SIGNAL(messagesReceived(QVariantList, int)));
     connect(this->tdLibReceiver, SIGNAL(messagesReceivedWithExtra(QVariantList, int, QString)), this, SIGNAL(messagesReceivedWithExtra(QVariantList, int, QString)));
+    connect(this->tdLibReceiver, SIGNAL(messagesInChatsFound(QVariantList, int, QString)), this, SIGNAL(messagesInChatsReceived(QVariantList, int, QString)));
     connect(this->tdLibReceiver, SIGNAL(pinnedMessagesFound(qlonglong, qlonglong, QVariantList)), this, SIGNAL(pinnedMessagesReceived(qlonglong, qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(sponsoredMessageReceived(qlonglong, QVariantMap)), this, SLOT(handleSponsoredMessage(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(messageLinkInfoReceived(QString, QVariantMap, QString)), this, SIGNAL(messageLinkInfoReceived(QString, QVariantMap, QString)));
@@ -2413,6 +2414,20 @@ void TDLibWrapper::searchPublicChats(const QString &query)
     requestObject.insert(_TYPE, "searchPublicChats");
     requestObject.insert("query", query);
     requestObject.insert(_EXTRA, "searchPublicChats");
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::searchMessages(const QString &query, const QString &offset, int limit)
+{
+    LOG("Searching messages in all chats" << query << "offset" << offset << "limit" << limit);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchMessages");
+    requestObject.insert("query", query);
+    requestObject.insert("offset", offset);
+    requestObject.insert("limit", limit > 0 ? limit : 50);
+    requestObject.insert("min_date", 0);
+    requestObject.insert("max_date", 0);
+    requestObject.insert(_EXTRA, "searchMessages");
     this->sendRequest(requestObject);
 }
 
