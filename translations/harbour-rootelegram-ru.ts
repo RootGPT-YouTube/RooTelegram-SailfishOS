@@ -921,10 +921,6 @@
         <translation>Участники</translation>
     </message>
     <message>
-        <source>Removed Users</source>
-        <translation>Удалённые пользователи</translation>
-    </message>
-    <message>
         <source>Statistics</source>
         <translation>Статистика</translation>
     </message>
@@ -1068,6 +1064,10 @@
         <source>Image access is turned off in RooTelegram settings.</source>
         <translation>Доступ к изображениям отключён в настройках RooTelegram.</translation>
     </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Удалённые/Забаненные пользователи</translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1138,6 +1138,14 @@
     <message>
         <source>Member promoted to Admin.</source>
         <translation>Участник назначен администратором.</translation>
+    </message>
+    <message>
+        <source>Ban from group</source>
+        <translation>Забанить в группе</translation>
+    </message>
+    <message>
+        <source>Banning user</source>
+        <translation>Бан пользователя…</translation>
     </message>
 </context>
 <context>
@@ -1706,6 +1714,18 @@
     <message>
         <source>Live location: Obtaining position...</source>
         <translation>Трансляция: определение местоположения…</translation>
+    </message>
+    <message>
+        <source>Search GIFs</source>
+        <translation>Поиск GIF</translation>
+    </message>
+    <message>
+        <source>No saved GIFs</source>
+        <translation>Нет сохранённых GIF</translation>
+    </message>
+    <message>
+        <source>No GIFs found</source>
+        <translation>GIF не найдены</translation>
     </message>
 </context>
 <context>
@@ -5088,10 +5108,6 @@
 <context>
     <name>SupergroupMembersPage</name>
     <message>
-        <source>Removed Users</source>
-        <translation>Удалённые пользователи</translation>
-    </message>
-    <message>
         <source>Administrators</source>
         <translation>Администраторы</translation>
     </message>
@@ -5138,6 +5154,10 @@
     <message>
         <source>User has been unbanned.</source>
         <translation>Пользователь разблокирован.</translation>
+    </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Удалённые/Забаненные пользователи</translation>
     </message>
 </context>
 <context>

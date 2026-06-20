@@ -915,10 +915,6 @@
         <translation>Mitglieder</translation>
     </message>
     <message>
-        <source>Removed Users</source>
-        <translation>Entfernte Nutzer</translation>
-    </message>
-    <message>
         <source>Statistics</source>
         <translation>Statistiken</translation>
     </message>
@@ -1062,6 +1058,10 @@
         <source>Image access is turned off in RooTelegram settings.</source>
         <translation>Der Bildzugriff ist in den RooTelegram-Einstellungen ausgeschaltet.</translation>
     </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Entfernte/Gesperrte Benutzer</translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1132,6 +1132,14 @@
     <message>
         <source>Member promoted to Admin.</source>
         <translation>Mitglied zum Admin befördert.</translation>
+    </message>
+    <message>
+        <source>Ban from group</source>
+        <translation>Aus Gruppe verbannen</translation>
+    </message>
+    <message>
+        <source>Banning user</source>
+        <translation>Benutzer wird gesperrt …</translation>
     </message>
 </context>
 <context>
@@ -1692,6 +1700,18 @@
     <message>
         <source>Live location: Obtaining position...</source>
         <translation>Live-Standort: Position wird ermittelt…</translation>
+    </message>
+    <message>
+        <source>Search GIFs</source>
+        <translation>GIFs suchen</translation>
+    </message>
+    <message>
+        <source>No saved GIFs</source>
+        <translation>Keine gespeicherten GIFs</translation>
+    </message>
+    <message>
+        <source>No GIFs found</source>
+        <translation>Keine GIFs gefunden</translation>
     </message>
 </context>
 <context>
@@ -5045,10 +5065,6 @@ Nachrichten</numerusform>
 <context>
     <name>SupergroupMembersPage</name>
     <message>
-        <source>Removed Users</source>
-        <translation>Entfernte Nutzer</translation>
-    </message>
-    <message>
         <source>Administrators</source>
         <translation>Administratoren</translation>
     </message>
@@ -5095,6 +5111,10 @@ Nachrichten</numerusform>
     <message>
         <source>User has been unbanned.</source>
         <translation>Nutzer wurde entsperrt.</translation>
+    </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Entfernte/Gesperrte Benutzer</translation>
     </message>
 </context>
 <context>

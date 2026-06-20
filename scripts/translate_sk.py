@@ -27,6 +27,14 @@ CONTRIB = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/sk.ts")
 # --- Le mie traduzioni slovacche per i 76 residui tedeschi + le 37 mancanti ---
 # chiave: (context, source) -> str  oppure  tuple (3 forme) per i plurali.
 SK_FIX = {
+    # 2.8: banna membri (#4) + tab GIF (#5)
+    ("ChatInformationPageContent", "Removed/Banned Users"): "Odstránení/Zablokovaní používatelia",
+    ("SupergroupMembersPage", "Removed/Banned Users"): "Odstránení/Zablokovaní používatelia",
+    ("ChatInformationTabItemMembersGroups", "Ban from group"): "Zablokovať v skupine",
+    ("ChatInformationTabItemMembersGroups", "Banning user"): "Blokovanie používateľa…",
+    ("ChatPage", "No saved GIFs"): "Žiadne uložené GIF",
+    ("ChatPage", "Search GIFs"): "Hľadať GIF",
+    ("ChatPage", "No GIFs found"): "Nenašli sa žiadne GIF",
     ("AddProxyDialog", "Type"): "Typ",
     ("AllScheduledMessagesPage", "Document"): "Dokument",
     ("ScheduleMessageDialog", "Document"): "Dokument",

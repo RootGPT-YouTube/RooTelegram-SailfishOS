@@ -109,9 +109,12 @@ Page {
     // Testo selezionato nel singolo messaggio attivo (popolato dal delegate
     // MessageListViewItem); guida l'icona "copia testo selezionato" nella barra azioni.
     property string activeSelectedText: ""
+    // Offset di inizio della selezione attiva (hint posizione per la quote nativa).
+    property int activeSelectedTextPosition: 0
     onSelectedMessagesChanged: {
         // Al cambio della selezione, azzera: il delegate ripopola se c'è una selezione di testo.
         activeSelectedText = "";
+        activeSelectedTextPosition = 0;
     }
     readonly property bool canSendMessages: hasSendPrivilege("can_send_basic_messages")
     property bool doSendBotStartMessage
@@ -272,6 +275,54 @@ Page {
                 b.allForAll = false;   // in dubbio: niente "per tutti"
                 b.pending--;
                 chatPage.finalizeBatchDeleteIfReady();
+            }
+        }
+    }
+
+    // #1: modello dei suggerimenti per l'autocomplete delle menzioni @ nei GRUPPI,
+    // popolato dai membri REALI della chat (searchChatMembers) invece che da tutti
+    // i contatti conosciuti. dynamicRoles serve a conservare photo_small (oggetto
+    // file) come variant nel ListModel.
+    ListModel {
+        id: atMentionSuggestionsModel
+        dynamicRoles: true
+        // extra dell'ultima richiesta inviata: scartiamo le risposte async di altre
+        // chat o di query ormai superate (possono arrivare fuori ordine).
+        property string lastExtra: ""
+    }
+
+    Connections {
+        target: tdLibWrapper
+        onChatMembersReceived: {
+            if (extra !== atMentionSuggestionsModel.lastExtra) {
+                return;
+            }
+            atMentionSuggestionsModel.clear();
+            for (var i = 0; i < members.length; i++) {
+                var memberId = members[i].member_id;
+                if (!memberId || memberId["@type"] !== "messageSenderUser") {
+                    continue;
+                }
+                var uid = memberId.user_id;
+                var userInfo = tdLibWrapper.getUserInformation(uid);
+                if (!userInfo) {
+                    continue;
+                }
+                var username = "";
+                if (userInfo.usernames) {
+                    if (userInfo.usernames.active_usernames && userInfo.usernames.active_usernames.length > 0) {
+                        username = userInfo.usernames.active_usernames[0];
+                    } else if (userInfo.usernames.editable_username) {
+                        username = userInfo.usernames.editable_username;
+                    }
+                }
+                atMentionSuggestionsModel.append({
+                    "user_id": uid,
+                    "user_name": username,
+                    "title": Functions.getUserName(userInfo),
+                    "user_handle": "@" + (username !== "" ? username : uid),
+                    "photo_small": (userInfo.profile_photo && userInfo.profile_photo.small) ? userInfo.profile_photo.small : undefined
+                });
             }
         }
     }
@@ -642,6 +693,15 @@ Page {
                 tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
             }
         } else {
+            // Citazione nativa (#2): se l'utente ha quotato una porzione, la passa
+            // al wrapper come stato one-shot, iniettato nel prossimo
+            // inputMessageReplyToMessage (qualunque tipo di messaggio). Altrimenti
+            // azzera eventuali residui.
+            if (newMessageColumn.replyToMessageId !== "0" && newMessageColumn.replyQuoteText.length > 0) {
+                tdLibWrapper.setPendingReplyQuote(newMessageColumn.replyQuoteText, newMessageColumn.replyQuotePosition);
+            } else {
+                tdLibWrapper.setPendingReplyQuote("", -1);
+            }
             if (attachmentPreviewRow.visible) {
                 if (attachmentPreviewRow.isPicture) {
                     if (attachmentPreviewRow.imagePaths && attachmentPreviewRow.imagePaths.length > 1) {
@@ -776,7 +836,20 @@ Page {
         } else {
             chatPage.emojiProposals = null;
         }
-        if (currentWord.length > 1 && currentWord.charAt(0) === '@') {
+        var isGroupForMention = chatPage.isBasicGroup || (chatPage.isSuperGroup && !chatPage.isChannel);
+        if (currentWord.charAt(0) === '@' && isGroupForMention) {
+            // #1: nei gruppi suggerisci SOLO i membri reali della chat (ricerca
+            // server-side), non tutti i contatti conosciuti. Basta il solo "@"
+            // (query vuota = tutti i membri ordinati per menzione); l'extra include
+            // la query per scartare le risposte async stantie/fuori ordine.
+            var mentionQuery = currentWord.substring(1);
+            var mentionExtra = "mentionSuggestions:" + chatInformation.id + ":" + mentionQuery;
+            atMentionSuggestionsModel.lastExtra = mentionExtra;
+            knownUsersRepeater.model = atMentionSuggestionsModel;
+            tdLibWrapper.searchChatMembers(chatInformation.id, mentionQuery, 30, mentionExtra);
+        } else if (currentWord.length > 1 && currentWord.charAt(0) === '@') {
+            // Chat private/canali: fallback all'elenco utenti conosciuti (serve
+            // almeno una lettera, l'elenco globale è troppo grande per il solo "@").
             knownUsersRepeater.model = knownUsersProxyModel;
             knownUsersProxyModel.setFilterWildcard("*" + currentWord.substring(1) + "*");
         } else {
@@ -1107,31 +1180,23 @@ Page {
         lostFocusTimer.start();
     }
 
-    function toQuotedBlock(rawText) {
-        var sanitized = (rawText || "").replace(/\u2029/g, "\n").replace(/\r\n/g, "\n").trim();
-        if (sanitized === "") {
-            return "";
-        }
-        var lines = sanitized.split("\n");
-        for (var i = 0; i < lines.length; i++) {
-            lines[i] = "> " + lines[i];
-        }
-        return lines.join("\n");
-    }
-
-    function quoteSelectedText(message, selectedText) {
-        var quotedBlock = toQuotedBlock(selectedText);
-        if (quotedBlock === "") {
+    // Citazione nativa (#2): risponde al messaggio citando SOLO la porzione di
+    // testo selezionata, come Telegram ufficiale (TDLib inputTextQuote). Non
+    // inietta pi\u00f9 il blocco Markdown "> \u2026" nel composer: imposta la reply e lo
+    // stato quote, che verr\u00e0 passato al wrapper all'invio e mostrato nella barra.
+    function quoteSelectedText(message, selectedText, position) {
+        var sanitized = (selectedText || "").replace(/\u2029/g, "\n");
+        if (sanitized.replace(/^\s+|\s+$/g, "") === "") {
             return;
         }
         newMessageColumn.editMessageId = "0";
+        // Imposta prima la reply: onInReplyToMessageChanged azzera la quote, che
+        // reimpostiamo subito dopo qui sotto.
         newMessageInReplyToRow.inReplyToMessage = message;
-        if (newMessageTextField.text && newMessageTextField.text.length > 0) {
-            newMessageTextField.text = newMessageTextField.text + "\n\n" + quotedBlock + "\n";
-        } else {
-            newMessageTextField.text = quotedBlock + "\n";
-        }
-        newMessageTextField.cursorPosition = newMessageTextField.text.length;
+        newMessageColumn.replyQuoteText = sanitized;
+        newMessageColumn.replyQuotePosition = (typeof position === "number" && position >= 0) ? position : -1;
+        newMessageInReplyToRow.quoteText = sanitized;
+        newMessageTextField.focus = true;
         controlSendButton();
         lostFocusTimer.start();
     }
@@ -2060,7 +2125,9 @@ Page {
                 }
             },
             NamedAction {
-                visible: messageOptionsDrawer.showForwardMessageMenuItem && messageOptionsDrawer.myMessage.can_be_forwarded
+                // can_be_forwarded non esiste più inline (TDLib 1.8.62) → niente guardia
+                // capability qui, come il forward del ContextMenu/NeonMenu (che non la usa).
+                visible: messageOptionsDrawer.showForwardMessageMenuItem && messageOptionsDrawer.myMessage.can_be_saved !== false
                 name: qsTr("Forward message")
                 action: function () {
                     startForwardingMessages([messageOptionsDrawer.myMessage])
@@ -2831,7 +2898,7 @@ Page {
                                         startForwardingMessages([myMessage])
                                     }
                                     onQuoteSelectedText: {
-                                        chatPage.quoteSelectedText(myMessage, selectedText)
+                                        chatPage.quoteSelectedText(myMessage, selectedText, position)
                                     }
                                 }
                             }
@@ -3054,6 +3121,36 @@ Page {
                                 newMessageColumn.translatingInput = false
                             }
                         }
+                        // GIF salvate (tab GIF del composer): arrivano da getSavedAnimations().
+                        onSavedAnimationsReceived: {
+                            newMessageColumn.quickSavedAnimations = animations;
+                        }
+                        // Risoluzione del bot di ricerca GIF (searchPublicChat su "gif").
+                        onChatReceived: {
+                            if (newMessageColumn.gifBotUserId == 0 && newMessageColumn.gifBotUsername !== ""
+                                    && chat["@extra"] === "searchPublicChat:" + newMessageColumn.gifBotUsername) {
+                                if (!chat.type || chat.type["@type"] !== "chatTypePrivate") return;
+                                var botInfo = tdLibWrapper.getUserInformation(chat.type.user_id);
+                                if (botInfo && botInfo.type && botInfo.type["@type"] === "userTypeBot" && botInfo.type.is_inline) {
+                                    newMessageColumn.gifBotUserId = chat.type.user_id;
+                                    if (newMessageColumn.gifSearchActive) {
+                                        newMessageColumn.runGifSearch("");
+                                    }
+                                }
+                            }
+                        }
+                        // Risultati della ricerca GIF (inline query verso il bot @gif).
+                        onInlineQueryResults: {
+                            if (extra !== "gifSearch:" + newMessageColumn.gifSearchQuery) return;
+                            newMessageColumn.gifSearchLoading = false;
+                            newMessageColumn.gifSearchInlineQueryId = inlineQueryId;
+                            newMessageColumn.gifSearchNextOffset = nextOffset;
+                            for (var i = 0; i < results.length; i++) {
+                                if (results[i] && results[i]["@type"] === "inlineQueryResultAnimation") {
+                                    gifSearchResultModel.append(results[i]);
+                                }
+                            }
+                        }
                     }
 
                 // Banner topic chiuso
@@ -3078,6 +3175,10 @@ Page {
 
                     readonly property bool isNeeded: !chatPage.isSelecting && chatPage.canSendMessages
                     property string replyToMessageId: "0";
+                    // Citazione (#2): porzione di testo del messaggio quotato + posizione
+                    // (offset UTF-16, hint per TDLib). Vuoto = reply normale senza quote.
+                    property string replyQuoteText: "";
+                    property int replyQuotePosition: -1;
                     property string editMessageId: "0";
                     // true se il messaggio in modifica è un media con didascalia
                     // (foto/video/...): su send si usa editMessageCaption.
@@ -3089,6 +3190,44 @@ Page {
                     property bool quickEmojiPickerVisible: false;
                     property bool quickPremiumEmojiPickerVisible: false;
                     property bool quickStickerPickerVisible: false;
+                    property bool quickGifPickerVisible: false;
+                    property var quickSavedAnimations: [];
+                    function savedAnimationRemoteId(animation) {
+                        if (!animation || !animation.animation || !animation.animation.remote || !animation.animation.remote.id) return "";
+                        return animation.animation.remote.id.toString();
+                    }
+                    // Ricerca GIF: bot inline (opzione TDLib "animation_search_bot_username",
+                    // default "gif") risolto una volta, poi getInlineQueryResults come per @bot.
+                    property var gifBotUserId: 0;
+                    property string gifBotUsername: "";
+                    property string gifSearchQuery: "";
+                    property string gifSearchInlineQueryId: "";
+                    property string gifSearchNextOffset: "";
+                    property bool gifSearchLoading: false;
+                    readonly property bool gifSearchActive: gifSearchQuery.trim() !== "";
+                    function resolveGifBot() {
+                        if (gifBotUserId != 0) return;
+                        var u = tdLibWrapper.getOptionString("animation_search_bot_username");
+                        if (!u || u === "") u = "gif";
+                        gifBotUsername = u;
+                        tdLibWrapper.searchPublicChat(u, false);
+                    }
+                    function runGifSearch(offset) {
+                        if (gifBotUserId == 0) { resolveGifBot(); return; }
+                        if (!gifSearchActive) return;
+                        gifSearchLoading = true;
+                        tdLibWrapper.getInlineQueryResults(gifBotUserId, chatInformation.id, ({}), gifSearchQuery, offset || "", "gifSearch:" + gifSearchQuery);
+                    }
+                    onGifSearchQueryChanged: {
+                        gifSearchResultModel.clear();
+                        gifSearchNextOffset = "";
+                        if (gifSearchActive) {
+                            gifSearchTimer.restart();
+                        } else {
+                            gifSearchTimer.stop();
+                            gifSearchLoading = false;
+                        }
+                    }
                     property var quickStickerSets: [];
                     property int quickStickerSelectedSetIndex: -1;
                     function refreshQuickStickerSets() {
@@ -3239,6 +3378,12 @@ Page {
                                 newMessageInReplyToRow.visible = false;
                                 newMessageColumn.replyToMessageId = "0";
                             }
+                            // Ogni cambio del messaggio di reply azzera la quote (una
+                            // reply normale non ha citazione). quoteSelectedText la
+                            // reimposta DOPO aver settato inReplyToMessage.
+                            newMessageColumn.replyQuoteText = "";
+                            newMessageColumn.replyQuotePosition = -1;
+                            newMessageInReplyToRow.quoteText = "";
                         }
 
                         editable: true
@@ -3444,6 +3589,37 @@ Page {
                                     voiceNoteOverlayLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    newMessageColumn.quickGifPickerVisible = false;
+                                }
+                            }
+                            // Tab GIF: libreria delle GIF salvate (come gli sticker, ma animazioni).
+                            IconButton {
+                                id: attachGifIconButton
+                                visible: chatPage.hasSendPrivilege("can_send_other_messages")
+                                width: newMessageColumn.compactAttachmentButtonSize
+                                height: width
+                                // Niente icona dedicata: mostriamo la scritta "GIF" (stile Telegram),
+                                // così resta leggibile su qualsiasi ambiance Silica.
+                                highlighted: down || newMessageColumn.quickGifPickerVisible
+                                onClicked: {
+                                    newMessageColumn.quickGifPickerVisible = !newMessageColumn.quickGifPickerVisible;
+                                    if (newMessageColumn.quickGifPickerVisible) {
+                                        tdLibWrapper.getSavedAnimations();
+                                        newMessageColumn.resolveGifBot();
+                                    }
+                                    stickerPickerLoader.active = false;
+                                    voiceNoteOverlayLoader.active = false;
+                                    newMessageColumn.quickStickerPickerVisible = false;
+                                    newMessageColumn.quickEmojiPickerVisible = false;
+                                    newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                }
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: "GIF"
+                                    font.pixelSize: Theme.fontSizeTiny
+                                    font.bold: true
+                                    color: attachGifIconButton.highlighted ? Theme.highlightColor
+                                                                           : (attachGifIconButton.down ? Theme.highlightColor : Theme.primaryColor)
                                 }
                             }
                             IconButton {
@@ -3470,6 +3646,7 @@ Page {
                                     voiceNoteOverlayLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickStickerPickerVisible = false;
+                                    newMessageColumn.quickGifPickerVisible = false;
                                 }
                                 Label {
                                     anchors.right: parent.right
@@ -3494,6 +3671,7 @@ Page {
                                     newMessageColumn.quickEmojiPickerVisible = !newMessageColumn.quickEmojiPickerVisible;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
                                     newMessageColumn.quickStickerPickerVisible = false;
+                                    newMessageColumn.quickGifPickerVisible = false;
                                     stickerPickerLoader.active = false;
                                     voiceNoteOverlayLoader.active = false;
                                 }
@@ -3578,10 +3756,15 @@ Page {
                             active: quickEmojiPickerContainer.visible
                             sourceComponent: EmojiPicker {
                                 onEmojiPicked: {
+                                    // Le emoji standard si usano spesso a raffica (più
+                                    // faccine come rafforzativo): inseriamo l'emoji ma
+                                    // teniamo aperto il pannello. Si chiude solo ritoccando
+                                    // l'icona emoji (attachEmojiIconButton, che fa toggle).
                                     insertTextAtCursor(emoji);
-                                    attachmentOptionsFlickable.isNeeded = false;
-                                    newMessageColumn.quickEmojiPickerVisible = false;
-                                    newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    // insertTextAtCursor avvia lostFocusTimer (refocus →
+                                    // tastiera): qui lo annulliamo, così scegliere un'emoji
+                                    // non apre la tastiera e il pannello resta visibile.
+                                    lostFocusTimer.stop();
                                 }
                             }
                         }
@@ -3681,10 +3864,12 @@ Page {
                                         if (customEmojiId === "") {
                                             return;
                                         }
+                                        // Come le emoji standard: inseriamo ma teniamo
+                                        // aperto il pannello (uso a raffica) e NON apriamo
+                                        // la tastiera (annulliamo il refocus differito).
+                                        // Si chiude ritoccando l'icona emoji pro o inviando.
                                         insertCustomEmojiAtCursor(customEmojiId, fallbackEmoji);
-                                        attachmentOptionsFlickable.isNeeded = false;
-                                        newMessageColumn.quickPremiumEmojiPickerVisible = false;
-                                        newMessageColumn.quickEmojiPickerVisible = false;
+                                        lostFocusTimer.stop();
                                     }
 
                                     TDLibThumbnail {
@@ -3848,6 +4033,146 @@ Page {
                                 font.pixelSize: Theme.fontSizeExtraSmall
                                 horizontalAlignment: Text.AlignHCenter
                             }
+                        }
+                    }
+
+                    // Pannello GIF salvate (clone del pannello sticker, ma con le
+                    // animazioni di getSavedAnimations): tap = invia subito.
+                    Item {
+                        id: quickGifPickerContainer
+                        width: parent.width
+                        visible: newMessageColumn.quickGifPickerVisible && !inlineQuery.userNameIsValid
+                        height: visible ? quickGifPanelColumn.height : 0
+                        clip: true
+                        Behavior on height { SmoothedAnimation { duration: 160 } }
+                        Column {
+                            id: quickGifPanelColumn
+                            width: parent.width
+                            height: childrenRect.height
+                            spacing: Theme.paddingSmall
+
+                            SearchField {
+                                id: gifSearchField
+                                width: parent.width
+                                placeholderText: qsTr("Search GIFs")
+                                inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+                                onTextChanged: newMessageColumn.gifSearchQuery = text
+                                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+                                EnterKey.onClicked: focus = false
+                            }
+
+                            // Griglia delle GIF SALVATE (tab di default, quando non si cerca).
+                            GridView {
+                                id: quickGifGridView
+                                width: parent.width
+                                visible: !newMessageColumn.gifSearchActive
+                                height: visible ? (cellHeight * 3) : 0
+                                cellWidth: Math.floor(width / 3)
+                                cellHeight: Math.round(cellWidth * 0.75)
+                                clip: true
+                                model: newMessageColumn.quickSavedAnimations
+                                delegate: BackgroundItem {
+                                    id: quickGifButton
+                                    width: quickGifGridView.cellWidth
+                                    height: quickGifGridView.cellHeight
+                                    onClicked: {
+                                        var aid = newMessageColumn.savedAnimationRemoteId(modelData);
+                                        if (aid === "") return;
+                                        tdLibWrapper.sendSavedAnimation(chatInformation.id, aid, newMessageColumn.replyToMessageId);
+                                        attachmentOptionsFlickable.isNeeded = false;
+                                        newMessageInReplyToRow.inReplyToMessage = null;
+                                        newMessageColumn.editMessageId = "0";
+                                        newMessageColumn.quickGifPickerVisible = false;
+                                    }
+                                    TDLibThumbnail {
+                                        anchors.fill: parent
+                                        anchors.margins: Theme.paddingSmall / 2
+                                        thumbnail: modelData ? modelData.thumbnail : null
+                                        minithumbnail: modelData ? modelData.minithumbnail : null
+                                        fillMode: Image.PreserveAspectCrop
+                                        highlighted: quickGifButton.highlighted
+                                    }
+                                }
+                                VerticalScrollDecorator {}
+                            }
+
+                            // Griglia dei RISULTATI di ricerca (inline query verso @gif).
+                            GridView {
+                                id: quickGifSearchGridView
+                                width: parent.width
+                                visible: newMessageColumn.gifSearchActive
+                                height: visible ? (cellHeight * 3) : 0
+                                cellWidth: Math.floor(width / 3)
+                                cellHeight: Math.round(cellWidth * 0.75)
+                                clip: true
+                                model: gifSearchResultModel
+                                onContentYChanged: {
+                                    if (!newMessageColumn.gifSearchLoading && newMessageColumn.gifSearchNextOffset
+                                            && contentHeight - contentY - height < cellHeight) {
+                                        newMessageColumn.runGifSearch(newMessageColumn.gifSearchNextOffset);
+                                    }
+                                }
+                                delegate: BackgroundItem {
+                                    id: quickGifSearchButton
+                                    width: quickGifSearchGridView.cellWidth
+                                    height: quickGifSearchGridView.cellHeight
+                                    onClicked: {
+                                        if (!model.id || newMessageColumn.gifSearchInlineQueryId === "") return;
+                                        tdLibWrapper.sendInlineQueryResultMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, newMessageColumn.gifSearchInlineQueryId, model.id);
+                                        attachmentOptionsFlickable.isNeeded = false;
+                                        newMessageInReplyToRow.inReplyToMessage = null;
+                                        newMessageColumn.editMessageId = "0";
+                                        newMessageColumn.quickGifPickerVisible = false;
+                                    }
+                                    TDLibThumbnail {
+                                        anchors.fill: parent
+                                        anchors.margins: Theme.paddingSmall / 2
+                                        thumbnail: model.animation ? model.animation.thumbnail : null
+                                        minithumbnail: model.animation ? model.animation.minithumbnail : null
+                                        fillMode: Image.PreserveAspectCrop
+                                        highlighted: quickGifSearchButton.highlighted
+                                    }
+                                }
+                                VerticalScrollDecorator {}
+                            }
+
+                            BusyIndicator {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                size: BusyIndicatorSize.Small
+                                running: newMessageColumn.gifSearchActive && newMessageColumn.gifSearchLoading && gifSearchResultModel.count === 0
+                                visible: running
+                            }
+
+                            Label {
+                                width: parent.width - Theme.paddingMedium * 2
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                visible: !newMessageColumn.gifSearchActive && quickGifGridView.count === 0
+                                text: qsTr("No saved GIFs")
+                                color: Theme.secondaryColor
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+
+                            Label {
+                                width: parent.width - Theme.paddingMedium * 2
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                visible: newMessageColumn.gifSearchActive && gifSearchResultModel.count === 0 && !newMessageColumn.gifSearchLoading
+                                text: qsTr("No GIFs found")
+                                color: Theme.secondaryColor
+                                font.pixelSize: Theme.fontSizeExtraSmall
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                        }
+
+                        ListModel {
+                            id: gifSearchResultModel
+                            dynamicRoles: true
+                        }
+
+                        Timer {
+                            id: gifSearchTimer
+                            interval: 600
+                            onTriggered: newMessageColumn.runGifSearch("")
                         }
                     }
 
@@ -4434,10 +4759,14 @@ Page {
                                     voiceNoteOverlayLoader.active = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    newMessageColumn.quickStickerPickerVisible = false;
+                                    newMessageColumn.quickGifPickerVisible = false;
                                 } else {
                                     attachmentOptionsFlickable.isNeeded = true;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                    newMessageColumn.quickStickerPickerVisible = false;
+                                    newMessageColumn.quickGifPickerVisible = false;
                                 }
                             }
                         }
@@ -4583,6 +4912,18 @@ Page {
                         }
                     }
 
+                    // Cita (#2): risponde citando SOLO la porzione di testo selezionata
+                    // (quote nativa TDLib). Compare accanto al "copia selezionato".
+                    IconButton {
+                        icon.source: "image://theme/icon-m-message-reply"
+                        icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
+                        visible: selectedMessages.length === 1 && chatPage.activeSelectedText.length > 0 && chatPage.canSendMessages
+                        onClicked: {
+                            chatPage.quoteSelectedText(selectedMessages[0], chatPage.activeSelectedText, chatPage.activeSelectedTextPosition);
+                            chatPage.selectedMessages = [];
+                        }
+                    }
+
                     IconButton {
                         icon.source: "../../images/icon-m-copy.svg"
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
@@ -4594,8 +4935,14 @@ Page {
                     }
 
                     IconButton {
-                        visible: !chatPage.isSecretChat && selectedMessages.every(function(message){
-                            return message.can_be_forwarded
+                        // TDLib 1.8.62 non espone più `can_be_forwarded` inline nel
+                        // message (→ undefined) → il vecchio every() era sempre falso e
+                        // il pulsante inoltra non compariva MAI in selezione multipla.
+                        // Usiamo l'unico flag rimasto, `can_be_saved` (content-protection):
+                        // se assente (undefined) consideriamo inoltrabile, come fa il
+                        // forward del singolo messaggio (che non ha guardia).
+                        visible: !chatPage.isSecretChat && selectedMessages.length > 0 && selectedMessages.every(function(message){
+                            return message && message.can_be_saved !== false
                         })
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
                         icon.source: "image://theme/icon-m-forward"

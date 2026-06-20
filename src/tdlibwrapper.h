@@ -218,6 +218,7 @@ public:
     Q_INVOKABLE void stopLiveLocationMessage(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendStickerMessage(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void sendSavedAnimation(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption);
     Q_INVOKABLE void getMessage(qlonglong chatId, qlonglong messageId);
@@ -241,6 +242,7 @@ public:
     Q_INVOKABLE void reportChatSpam(qlonglong chatId, const QVariantList &messageIds);
     Q_INVOKABLE void getMapThumbnailFile(const QString &chatId, double latitude, double longitude, int width, int height, const QString &extra);
     Q_INVOKABLE void getRecentStickers();
+    Q_INVOKABLE void getSavedAnimations();
     Q_INVOKABLE void getInstalledStickerSets();
     Q_INVOKABLE void getInstalledCustomEmojiSets();
     Q_INVOKABLE void getStickerSet(const QString &setId, const QString &expectedType = QString());
@@ -251,6 +253,7 @@ public:
     Q_INVOKABLE void cacheCustomEmojiFromSticker(const QVariantMap &sticker);
     Q_INVOKABLE bool isCustomEmojiFileId(int fileId) const;
     Q_INVOKABLE void getSupergroupMembers(const QString &groupId, int limit, int offset, const QString &filterType = QString(), const QString &extra = QString());
+    Q_INVOKABLE void searchChatMembers(qlonglong chatId, const QString &query, int limit, const QString &extra = QString());
     Q_INVOKABLE void getChatEventLog(qlonglong chatId, qlonglong fromEventId = 0, int limit = 50);
     Q_INVOKABLE void getChatJoinRequests(qlonglong chatId, const QString &inviteLink = QString(), const QString &query = QString(), const QVariantMap &offsetRequest = QVariantMap(), int limit = 50);
     Q_INVOKABLE void processChatJoinRequest(qlonglong chatId, qlonglong userId, bool approve);
@@ -351,6 +354,7 @@ public:
     Q_INVOKABLE void getMessageThreadHistory(qlonglong chatId, qlonglong messageThreadId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50);
     Q_INVOKABLE void setCurrentMessageThreadId(qlonglong threadId);
     Q_INVOKABLE void setPendingScheduledSendDate(int sendDate);
+    Q_INVOKABLE void setPendingReplyQuote(const QString &text, int position);
     Q_INVOKABLE void getChatScheduledMessages(qlonglong chatId);
     Q_INVOKABLE void editMessageSchedulingState(qlonglong chatId, qlonglong messageId, int sendDate);
     Q_INVOKABLE qlonglong getCurrentMessageThreadId() const;
@@ -441,6 +445,7 @@ signals:
     void secretChatUpdated(qlonglong secretChatId, const QVariantMap &secretChat);
     void recentStickersUpdated(const QVariantList &stickerIds);
     void stickersReceived(const QVariantList &stickers);
+    void savedAnimationsReceived(const QVariantList &animations);
     void installedStickerSetsUpdated(const QVariantList &stickerSetIds);
     void installedStickerSetsUpdatedByType(const QVariantList &stickerSetIds, const QString &stickerType);
     void stickerSetsReceived(const QVariantList &stickerSets, const QString &stickerType);
@@ -563,6 +568,7 @@ private:
     const Group *updateGroup(qlonglong groupId, const QVariantMap &groupInfo, QHash<qlonglong,Group*> *groups);
     QVariantMap newSendMessageRequest(qlonglong chatId, qlonglong replyToMessageId);
     void applyPendingScheduling(QVariantMap &request);
+    void applyPendingReplyQuote(QVariantMap &replyTo);
     void initializeTDLibReceiver();
     void updateUserInformation(const QString &userId, const QVariantMap &userInformation);
     void upsertCustomEmojiFromSticker(const QVariantMap &sticker);
@@ -610,6 +616,11 @@ private:
     bool currentChatIsForum;
     qlonglong pendingForumTopicsChatId;
     int pendingScheduledSendDate;
+    // Citazione (quote) di una porzione del messaggio a cui si risponde: stato
+    // one-shot iniettato nel prossimo inputMessageReplyToMessage, come lo scheduling.
+    QString pendingReplyQuoteText;
+    int pendingReplyQuotePosition = -1;
+    bool pendingReplyQuoteSet = false;
 
     // ANTI-RAM Strada C: opzioni TDLib per-client da riapplicare anche dopo il riciclo
     void applyAntiRamOptions();

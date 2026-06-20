@@ -159,6 +159,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("chat", &TDLibReceiver::processChat);
     handlers.insert("updateRecentStickers", &TDLibReceiver::processUpdateRecentStickers);
     handlers.insert("stickers", &TDLibReceiver::processStickers);
+    handlers.insert("animations", &TDLibReceiver::processAnimations);
     handlers.insert("proxy", &TDLibReceiver::processProxy);
     handlers.insert("addedProxy", &TDLibReceiver::processProxy);     // TDLib 1.8.62: addProxy ritorna addedProxy
     handlers.insert("proxies", &TDLibReceiver::processProxies);
@@ -671,6 +672,13 @@ void TDLibReceiver::processStickers(const QVariantMap &receivedInformation)
     } else {
         emit stickers(cleanedStickers);
     }
+}
+
+void TDLibReceiver::processAnimations(const QVariantMap &receivedInformation)
+{
+    LOG("Received saved animations (GIFs)...");
+    // getSavedAnimations ritorna un oggetto "animations" con la lista "animations".
+    emit savedAnimations(cleanupList(receivedInformation.value("animations").toList()));
 }
 
 void TDLibReceiver::processProxy(const QVariantMap &receivedInformation)

@@ -921,10 +921,6 @@
         <translation>Członkowie</translation>
     </message>
     <message>
-        <source>Removed Users</source>
-        <translation>Usunięci użytkownicy</translation>
-    </message>
-    <message>
         <source>Statistics</source>
         <translation>Statystyki</translation>
     </message>
@@ -1068,6 +1064,10 @@
         <source>Image access is turned off in RooTelegram settings.</source>
         <translation>Dostęp do obrazów jest wyłączony w ustawieniach RooTelegram.</translation>
     </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Usunięci/Zbanowani użytkownicy</translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1138,6 +1138,14 @@
     <message>
         <source>Member promoted to Admin.</source>
         <translation>Awansowano członka na administratora.</translation>
+    </message>
+    <message>
+        <source>Ban from group</source>
+        <translation>Zbanuj z grupy</translation>
+    </message>
+    <message>
+        <source>Banning user</source>
+        <translation>Banowanie użytkownika…</translation>
     </message>
 </context>
 <context>
@@ -1706,6 +1714,18 @@
     <message>
         <source>Live location: Obtaining position...</source>
         <translation>Lokalizacja na żywo: ustalanie pozycji…</translation>
+    </message>
+    <message>
+        <source>Search GIFs</source>
+        <translation>Szukaj GIF-ów</translation>
+    </message>
+    <message>
+        <source>No saved GIFs</source>
+        <translation>Brak zapisanych GIF-ów</translation>
+    </message>
+    <message>
+        <source>No GIFs found</source>
+        <translation>Nie znaleziono GIF-ów</translation>
     </message>
 </context>
 <context>
@@ -5088,10 +5108,6 @@
 <context>
     <name>SupergroupMembersPage</name>
     <message>
-        <source>Removed Users</source>
-        <translation>Usunięci użytkownicy</translation>
-    </message>
-    <message>
         <source>Administrators</source>
         <translation>Administratorzy</translation>
     </message>
@@ -5138,6 +5154,10 @@
     <message>
         <source>User has been unbanned.</source>
         <translation>Użytkownik został odbanowany.</translation>
+    </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation>Usunięci/Zbanowani użytkownicy</translation>
     </message>
 </context>
 <context>

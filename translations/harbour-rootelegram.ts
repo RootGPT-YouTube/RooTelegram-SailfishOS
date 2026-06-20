@@ -915,10 +915,6 @@
         <translation type="unfinished">Members</translation>
     </message>
     <message>
-        <source>Removed Users</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Statistics</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1062,6 +1058,10 @@
         <source>Image access is turned off in RooTelegram settings.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Removed/Banned Users</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatInformationTabItemFilteredMessages</name>
@@ -1131,6 +1131,14 @@
     </message>
     <message>
         <source>Member promoted to Admin.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ban from group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Banning user</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1691,6 +1699,18 @@
     </message>
     <message>
         <source>Live location: Obtaining position...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search GIFs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No saved GIFs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No GIFs found</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5043,10 +5063,6 @@
 <context>
     <name>SupergroupMembersPage</name>
     <message>
-        <source>Removed Users</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Administrators</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5092,6 +5108,10 @@
     </message>
     <message>
         <source>User has been unbanned.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Removed/Banned Users</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

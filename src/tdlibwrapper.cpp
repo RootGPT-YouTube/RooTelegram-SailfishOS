@@ -285,6 +285,7 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(secretChatUpdated(qlonglong, QVariantMap)), this, SLOT(handleSecretChatUpdated(qlonglong, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(recentStickersUpdated(QVariantList)), this, SIGNAL(recentStickersUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(stickers(QVariantList)), this, SIGNAL(stickersReceived(QVariantList)));
+    connect(this->tdLibReceiver, SIGNAL(savedAnimations(QVariantList)), this, SIGNAL(savedAnimationsReceived(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(installedStickerSetsUpdated(QVariantList)), this, SIGNAL(installedStickerSetsUpdated(QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(installedStickerSetsUpdatedByType(QVariantList, QString)), this, SIGNAL(installedStickerSetsUpdatedByType(QVariantList, QString)));
     connect(this->tdLibReceiver, SIGNAL(stickerSets(QVariantList, QString)), this, SLOT(handleStickerSets(QVariantList, QString)));
@@ -1129,10 +1130,46 @@ QVariantMap TDLibWrapper::newSendMessageRequest(qlonglong chatId, qlonglong repl
         QVariantMap replyTo;
         replyTo.insert(_TYPE, TYPE_INPUT_MESSAGE_REPLY_TO_MESSAGE);
         replyTo.insert(MESSAGE_ID, replyToMessageId);
+        applyPendingReplyQuote(replyTo);
         request.insert(REPLY_TO, replyTo);
+    } else {
+        // Nessuna reply: scarta comunque la quote pendente per non farla
+        // sfuggire al messaggio successivo (consumo one-shot, come lo scheduling).
+        pendingReplyQuoteSet = false;
+        pendingReplyQuoteText.clear();
+        pendingReplyQuotePosition = -1;
     }
     applyPendingScheduling(request);
     return request;
+}
+
+void TDLibWrapper::setPendingReplyQuote(const QString &text, int position)
+{
+    pendingReplyQuoteText = text;
+    pendingReplyQuotePosition = position;
+    pendingReplyQuoteSet = !text.isEmpty();
+}
+
+void TDLibWrapper::applyPendingReplyQuote(QVariantMap &replyTo)
+{
+    if (!pendingReplyQuoteSet) {
+        return;
+    }
+    QVariantMap formattedText;
+    formattedText.insert(_TYPE, "formattedText");
+    formattedText.insert("text", pendingReplyQuoteText);
+    formattedText.insert("entities", QVariantList());
+    QVariantMap quote;
+    quote.insert(_TYPE, "inputTextQuote");
+    quote.insert("text", formattedText);
+    if (pendingReplyQuotePosition >= 0) {
+        quote.insert("quote_position", pendingReplyQuotePosition);
+    }
+    replyTo.insert("quote", quote);
+    // Consumo one-shot: la quote vale solo per questo invio.
+    pendingReplyQuoteSet = false;
+    pendingReplyQuoteText.clear();
+    pendingReplyQuotePosition = -1;
 }
 
 void TDLibWrapper::applyPendingScheduling(QVariantMap &request)
@@ -1275,7 +1312,12 @@ void TDLibWrapper::sendPhotoAlbum(qlonglong chatId, const QStringList &filePaths
         QVariantMap replyTo;
         replyTo.insert(_TYPE, TYPE_INPUT_MESSAGE_REPLY_TO_MESSAGE);
         replyTo.insert(MESSAGE_ID, replyToMessageId);
+        applyPendingReplyQuote(replyTo);
         requestObject.insert(REPLY_TO, replyTo);
+    } else {
+        pendingReplyQuoteSet = false;
+        pendingReplyQuoteText.clear();
+        pendingReplyQuotePosition = -1;
     }
     QVariantList inputMessageContents;
     const int maxAlbumSize = 10;
@@ -1513,6 +1555,29 @@ void TDLibWrapper::sendStickerMessage(qlonglong chatId, const QString &fileId, q
     stickerInputFile.insert(ID, fileId);
 
     inputMessageContent.insert("sticker", stickerInputFile);
+
+    requestObject.insert("input_message_content", inputMessageContent);
+    this->sendRequest(requestObject);
+}
+
+void TDLibWrapper::sendSavedAnimation(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId)
+{
+    if (fileId.isEmpty()) {
+        WARN("Sending saved animation aborted: empty animation remote ID");
+        return;
+    }
+    LOG("Sending saved animation (GIF)" << chatId << fileId << replyToMessageId);
+    // Le GIF salvate hanno già un file remoto: si re-inviano via inputFileRemote
+    // (nessun upload), a differenza di sendAnimationMessage che vuole un path locale.
+    QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
+    QVariantMap inputMessageContent;
+    inputMessageContent.insert(_TYPE, "inputMessageAnimation");
+
+    QVariantMap animationInputFile;
+    animationInputFile.insert(_TYPE, "inputFileRemote");
+    animationInputFile.insert(ID, fileId);
+
+    inputMessageContent.insert("animation", animationInputFile);
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -1820,6 +1885,14 @@ void TDLibWrapper::getRecentStickers()
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::getSavedAnimations()
+{
+    LOG("Retrieving saved animations (GIFs)");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "getSavedAnimations");
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::getInstalledStickerSets()
 {
     LOG("Retrieving installed sticker sets (regular)");
@@ -1965,6 +2038,26 @@ void TDLibWrapper::getSupergroupMembers(const QString &groupId, int limit, int o
     requestObject.insert("filter", filterObject);
     requestObject.insert("offset", offset);
     requestObject.insert("limit", limit);
+    this->sendRequest(requestObject);
+}
+
+// Ricerca server-side dei membri di una chat (gruppo basic o supergruppo) usata
+// per l'autocomplete delle menzioni @: il filtro chatMembersFilterMention ordina
+// i risultati per la menzione e funziona anche sui gruppi grandi (query lato
+// server). Risponde via il consueto handler "chatMembers" → chatMembersReceived.
+void TDLibWrapper::searchChatMembers(qlonglong chatId, const QString &query, int limit, const QString &extra)
+{
+    LOG("Searching chat members" << chatId << query);
+    const QString resolvedExtra = extra.isEmpty() ? QString::number(chatId) : extra;
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "searchChatMembers");
+    requestObject.insert(_EXTRA, resolvedExtra);
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert("query", query);
+    requestObject.insert("limit", limit > 0 ? limit : 30);
+    QVariantMap filterObject;
+    filterObject.insert(_TYPE, "chatMembersFilterMention");
+    requestObject.insert("filter", filterObject);
     this->sendRequest(requestObject);
 }
 
@@ -3445,7 +3538,21 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
             // l'execv riesce; se ritorna (fallito) proseguiamo qui sotto col
             // riciclo del solo client come fallback (che NON cancella il DB
             // perché isRecycling è ancora true).
-            this->restartProcess();
+            //
+            // GUARD anti-freeze (2.8): se mentre il "close" era in volo l'utente
+            // ha riattivato la UI (tap su notifica/icona → setUiVisible(true)
+            // azzera uiHiddenSinceMs), NON fare l'execv: distruggerebbe la
+            // finestra appena mostrata lasciando un daemon headless e una
+            // superficie Wayland morta nel compositor = "freeze" che obbliga al
+            // pkill. In quel caso saltiamo il restart e proseguiamo col riciclo
+            // in-place del solo client (sotto): la finestra sopravvive e si
+            // riconnette in pochi secondi. È un race raro (tap a cavallo del
+            // tick dei 5 min), per questo la finestra è piccola ma reale.
+            if (this->uiHiddenSinceMs == 0) {
+                qWarning() << "[RECYCLE] UI riattivata durante il riciclo: salto l'execv, riciclo in-place del solo client";
+            } else {
+                this->restartProcess();
+            }
         }
         qDeleteAll(this->basicGroups);
         qDeleteAll(this->superGroups);
