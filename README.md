@@ -65,6 +65,103 @@ Your support helps keep my projects alive! https://ko-fi.com/rootgpt
 Telegram Group.  
 GitHub: https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS  
 
+## 🔧 Build your own RPM (aarch64) — step by step
+These are foolproof, copy‑paste instructions to compile RooTelegram yourself from
+this repository and obtain an installable `.rpm`. They target **aarch64** (Sony
+Xperia 10 III, Jolla C2 — the tested devices). armv7hl/i486 work the same way but
+are not covered here.
+
+> **Why an extra download?** A couple of build dependencies are too big for git
+> (TDLib and the WebRTC/voice‑call libraries, ~210 MB compressed). They live in a
+> GitHub *Release* of this same repository and you download them **once**.
+
+### 0. What you need
+- A PC running **Linux** (the Sailfish SDK also runs on macOS/Windows, but this
+  guide assumes Linux).
+- About **3 GB** of free disk space and an internet connection.
+- The tools `git`, `tar`, `curl` (preinstalled on most distributions).
+
+### 1. Install the Sailfish SDK
+1. Download the **Sailfish SDK** from the official page:
+   https://sailfishos.org/develop/
+2. Run the installer and accept the default install location (`~/SailfishOS`).
+3. When asked for a **build target**, install **`SailfishOS-5.0.0.62-aarch64`**
+   (you can also add it later from the SDK Maintenance Tool / `sdk-assistant`).
+4. Check it is available:
+   ```bash
+   ~/SailfishOS/bin/sfdk tools list
+   ```
+   You should see a line containing `SailfishOS-5.0.0.62-aarch64`.
+
+### 2. Get the source code
+```bash
+git clone https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS.git
+cd RooTelegram-SailfishOS
+```
+
+### 3. Create your Telegram API credentials
+RooTelegram needs a personal Telegram **api_id / api_hash** pair to reach
+Telegram's servers. These are **not** included in the repository. Getting your own
+is free and takes two minutes:
+1. Open https://my.telegram.org → **API development tools** and log in with your
+   phone number.
+2. Create an app (any title / short name). You'll receive an **api_id** (a number)
+   and an **api_hash** (a long hex string).
+3. Create the file **`src/tdlibsecrets.h`** with exactly this content, replacing the
+   two values with your own:
+   ```c
+   #ifndef TDLIBSECRETS_H
+   #define TDLIBSECRETS_H
+   const char TDLIB_API_ID[]   = "1234567";
+   const char TDLIB_API_HASH[] = "0123456789abcdef0123456789abcdef";
+   #endif // TDLIBSECRETS_H
+   ```
+> ⚠️ Keep this file private — never commit or share your `api_hash`.
+
+### 4. Download the build dependencies (one‑time)
+The large prebuilt dependencies are **not** in git. Download the archive from this
+repo's **Releases** page and extract it **at the root of the cloned folder** (the
+one that contains `build-rpm.sh`):
+```bash
+curl -L -o build-deps.tar.gz \
+  https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
+tar xzf build-deps.tar.gz
+rm build-deps.tar.gz
+```
+This creates two folders: `tdlib/` (TDLib 1.8.62) and `vendor/` (the voice/video
+call libraries). Their licenses and exact upstream sources are documented in the
+archive's `PROVENANCE.txt` and in the repository `NOTICE` file.
+
+### 5. Build the RPM
+From the project root, just run:
+```bash
+bash build-rpm.sh
+```
+The script does everything for you: it auto‑clones `rlottie`, compiles inside the
+SDK and packages the RPM. The **first** build takes several minutes. When it
+finishes, the package is here:
+```
+RPMS/harbour-rootelegram-<version>-1.aarch64.rpm
+```
+
+### 6. Install it on the phone
+Replace `<device-ip>` with your phone's IP (Settings → Developer tools), with
+Developer mode enabled:
+```bash
+scp RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<device-ip>:/tmp/
+ssh defaultuser@<device-ip> 'devel-su pkcon install-local -y /tmp/harbour-rootelegram-*-1.aarch64.rpm'
+```
+
+### Troubleshooting
+- **`Sailfish SDK not found`** → it isn't in `~/SailfishOS`. Reinstall there, or run
+  `SDK_DIR=/path/to/SailfishOS bash build-rpm.sh`.
+- **`tdlibsecrets.h: No such file or directory`** → step 3 was skipped. Create
+  `src/tdlibsecrets.h` with your own Telegram api_id/api_hash.
+- **`TDLib not found in tdlib/...`** → step 4 was skipped or extracted in the wrong
+  folder. Make sure `tdlib/aarch64/lib/libtdjson.so` exists at the project root.
+- **Link errors mentioning `tg_owt` / `tgcalls`** → the `vendor/` folder is missing;
+  re‑extract the dependencies archive (step 4).
+
 ---
 
 # [ITALIANO] RooTelegram — Un client Telegram leggero e reattivo per SailfishOS
@@ -130,3 +227,102 @@ Telegram Proxy — ✔️ FATTO
 Aiutami a mantenere attivi i miei progetti! https://ko-fi.com/rootgpt  
 Telegram Group.  
 GitHub: https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS  
+
+## 🔧 Compila il tuo RPM (aarch64) — passo per passo
+Istruzioni "a prova di scimmia", da copia‑incolla, per compilare RooTelegram da
+solo a partire da questo repository e ottenere un `.rpm` installabile. Valgono per
+**aarch64** (Sony Xperia 10 III, Jolla C2 — i dispositivi testati). armv7hl/i486
+funzionano allo stesso modo ma non sono trattati qui.
+
+> **Perché un download extra?** Un paio di dipendenze di build sono troppo grandi
+> per git (TDLib e le librerie WebRTC/chiamate, ~210 MB compressi). Stanno in una
+> *Release* GitHub di questo stesso repository e le scarichi **una volta sola**.
+
+### 0. Cosa ti serve
+- Un PC con **Linux** (la Sailfish SDK gira anche su macOS/Windows, ma questa guida
+  assume Linux).
+- Circa **3 GB** di spazio libero su disco e una connessione internet.
+- Gli strumenti `git`, `tar`, `curl` (preinstallati nella maggior parte delle
+  distribuzioni).
+
+### 1. Installa la Sailfish SDK
+1. Scarica la **Sailfish SDK** dalla pagina ufficiale:
+   https://sailfishos.org/develop/
+2. Avvia l'installer e accetta il percorso predefinito (`~/SailfishOS`).
+3. Quando ti chiede un **build target**, installa **`SailfishOS-5.0.0.62-aarch64`**
+   (puoi anche aggiungerlo dopo dalla Maintenance Tool della SDK / `sdk-assistant`).
+4. Verifica che ci sia:
+   ```bash
+   ~/SailfishOS/bin/sfdk tools list
+   ```
+   Dovresti vedere una riga che contiene `SailfishOS-5.0.0.62-aarch64`.
+
+### 2. Scarica il codice sorgente
+```bash
+git clone https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS.git
+cd RooTelegram-SailfishOS
+```
+
+### 3. Crea le tue credenziali API Telegram
+RooTelegram ha bisogno di una coppia personale **api_id / api_hash** di Telegram
+per raggiungere i server. Queste **non** sono incluse nel repository. Ottenere le
+tue è gratis e richiede due minuti:
+1. Apri https://my.telegram.org → **API development tools** e accedi col tuo numero
+   di telefono.
+2. Crea un'app (titolo / nome breve a piacere). Riceverai un **api_id** (un numero)
+   e un **api_hash** (una lunga stringa esadecimale).
+3. Crea il file **`src/tdlibsecrets.h`** con esattamente questo contenuto,
+   sostituendo i due valori con i tuoi:
+   ```c
+   #ifndef TDLIBSECRETS_H
+   #define TDLIBSECRETS_H
+   const char TDLIB_API_ID[]   = "1234567";
+   const char TDLIB_API_HASH[] = "0123456789abcdef0123456789abcdef";
+   #endif // TDLIBSECRETS_H
+   ```
+> ⚠️ Tieni questo file privato — non committare e non condividere mai il tuo `api_hash`.
+
+### 4. Scarica le dipendenze di build (una tantum)
+Le dipendenze precompilate pesanti **non** sono in git. Scarica l'archivio dalla
+sezione **Releases** del repo ed estrailo **nella radice della cartella clonata**
+(quella che contiene `build-rpm.sh`):
+```bash
+curl -L -o build-deps.tar.gz \
+  https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
+tar xzf build-deps.tar.gz
+rm build-deps.tar.gz
+```
+Vengono create due cartelle: `tdlib/` (TDLib 1.8.62) e `vendor/` (le librerie per
+le chiamate audio/video). Licenze e sorgenti upstream esatti sono documentati nel
+`PROVENANCE.txt` dentro l'archivio e nel file `NOTICE` del repository.
+
+### 5. Compila l'RPM
+Dalla radice del progetto, lancia semplicemente:
+```bash
+bash build-rpm.sh
+```
+Lo script fa tutto da sé: clona `rlottie` in automatico, compila dentro la SDK e
+pacchettizza l'RPM. La **prima** build richiede qualche minuto. Al termine il
+pacchetto è qui:
+```
+RPMS/harbour-rootelegram-<versione>-1.aarch64.rpm
+```
+
+### 6. Installalo sul telefono
+Sostituisci `<ip-dispositivo>` con l'IP del telefono (Impostazioni → Strumenti per
+sviluppatori), con la Modalità sviluppatore attiva:
+```bash
+scp RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<ip-dispositivo>:/tmp/
+ssh defaultuser@<ip-dispositivo> 'devel-su pkcon install-local -y /tmp/harbour-rootelegram-*-1.aarch64.rpm'
+```
+
+### Risoluzione problemi
+- **`Sailfish SDK non trovato`** → non è in `~/SailfishOS`. Reinstallala lì, oppure
+  lancia `SDK_DIR=/percorso/SailfishOS bash build-rpm.sh`.
+- **`tdlibsecrets.h: No such file or directory`** → hai saltato il passo 3. Crea
+  `src/tdlibsecrets.h` con i tuoi api_id/api_hash di Telegram.
+- **`TDLib non trovata in tdlib/...`** → hai saltato il passo 4 o l'hai estratto
+  nella cartella sbagliata. Assicurati che esista `tdlib/aarch64/lib/libtdjson.so`
+  nella radice del progetto.
+- **Errori di link con `tg_owt` / `tgcalls`** → manca la cartella `vendor/`;
+  riestrai l'archivio delle dipendenze (passo 4).

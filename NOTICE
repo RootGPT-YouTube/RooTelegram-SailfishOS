@@ -31,17 +31,25 @@ DISTRIBUTION  : prebuilt libtdjson bundled in the RPM (excluded from this repo
 
 --------------------------------------------------------------------------------
 COMPONENT     : tg_owt (Telegram's WebRTC build, used for voice/video calls)
-LICENSE       : GPL v2 or later (BSD-style WebRTC components; overall GPL)
-SOURCE        : https://github.com/desktop-app/tg_owt
-DISTRIBUTION  : compiled and linked into the RPM (excluded from this repo via
-                .gitignore: /vendor/)
+LICENSE       : BSD-style WebRTC components; overall GPL-compatible
+SOURCE        : https://github.com/Michal-Szczepaniak/tg_owt  (commit 3215153,
+                "Add -fPIC") — a SailfishOS-oriented fork of desktop-app/tg_owt.
+                Local change: CMakeLists.txt drops the PipeWire video-capture
+                sources (unavailable on SailfishOS).
+DISTRIBUTION  : prebuilt static lib (libtg_owt.a) linked into the RPM; excluded
+                from this repo via .gitignore (/vendor/). The full corresponding
+                source — including the local CMakeLists.txt change — ships in the
+                build-dependencies archive (GitHub Releases: build-deps-aarch64).
 
 --------------------------------------------------------------------------------
 COMPONENT     : tgcalls (Telegram calls library, voice/video calls)
-LICENSE       : GPL v2 or later
-SOURCE        : https://github.com/TelegramMessenger/tgcalls
+LICENSE       : LGPL v3
+SOURCE        : https://github.com/Michal-Szczepaniak/tgcalls  (commit 8a5b4eb,
+                "Fix for sfos"; unmodified) — a SailfishOS-oriented fork of
+                TelegramMessenger/tgcalls.
 DISTRIBUTION  : compiled and linked into the RPM (excluded from this repo via
-                .gitignore: /vendor/)
+                .gitignore: /vendor/). Corresponding source ships in the
+                build-dependencies archive (GitHub Releases: build-deps-aarch64).
 
 --------------------------------------------------------------------------------
 COMPONENT     : rlottie (animated Lottie stickers)
