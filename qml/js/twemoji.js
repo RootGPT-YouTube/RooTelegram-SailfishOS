@@ -17,7 +17,56 @@ var re = /(?:\ud83d\udc68\ud83c\udffb\u200d\u2764\ufe0f\u200d\ud83d\udc8b\u200d\
 
   // avoid using a string literal like '\u200D' here because minifiers expand it inline
   U200D = String.fromCharCode(0x200D),
+  UFE0F = String.fromCharCode(0xFE0F),
   basePath = Qt.resolvedUrl("./emoji/");
+
+// Normalizzazione FE0F: Telegram (e alcune tastiere) inviano molte sequenze ZWJ
+// di genere/professione/simbolo SENZA il selettore di variazione U+FE0F
+// (es. 1F926 200D 2640 invece di 1F926 200D 2640 FE0F). La regex RGI di Twemoji
+// lo pretende, quindi senza FE0F la sequenza non aggancia e si spezza in due
+// glifi (es. \uD83E\uDD26 + \u2640 in un box rosso). Qui reinseriamo FE0F dopo i codepoint che
+// lo richiedono quando sono adiacenti a uno ZWJ. Copre ~841 emoji combinate
+// (genere \u2640/\u2642, mestieri \u2695/\u2696/\u2708, bandiera trans/pirata, orso polare, cuore in
+// fiamme, ecc.) senza regressioni. ES5-safe (solo .replace). Le emoji ZWJ
+// recenti non coperte dalla regex bundlata sono gestite a parte da rtNewEmoji
+// (sotto), che combacia DOPO questa normalizzazione.
+var needsFe0fClass =
+      "(?:\uD83C\uDF2B|\uD83C\uDFF3|\uD83C\uDFCB|\uD83C\uDFCC|\uD83D\uDD74|\uD83D\uDD75|\uD83D\uDC41|\uD83D\uDDE8|" +
+      "[\u2194\u2195\u2620\u2640\u2642\u2695\u2696\u26A7\u26D3\u26F9\u2708\u2744\u2764\u27A1])",
+    fe0fBeforeZwjRe = new RegExp("(" + needsFe0fClass + ")" + U200D, "g"),
+    fe0fAfterZwjRe = new RegExp(U200D + "(" + needsFe0fClass + ")(?!" + UFE0F + ")", "g");
+
+function normalizeFe0f(str) {
+  return String(str)
+    .replace(fe0fBeforeZwjRe, "$1" + UFE0F + U200D)
+    .replace(fe0fAfterZwjRe, U200D + "$1" + UFE0F);
+}
+
+// Tono della pelle: l'utente preferisce le emoji "gialle" neutre. Rimuoviamo i
+// modificatori U+1F3FB..U+1F3FF dall'input cos\u00EC ogni emoji ricade sulla base
+// gialla (gi\u00E0 gestita dalla regex): niente varianti pelle, matching compatto e
+// veloce, zero regressioni. Le rare emoji multi-persona a pelli diverse (coppie/
+// strette di mano) prive di base gialla si scompongono nelle sub-emoji (mai box
+// rotto). ES5-safe (forma a surrogati).
+var skinToneRe = /\uD83C[\uDFFB-\uDFFF]/g;
+
+// Rami per le emoji ZWJ recenti (Unicode 15.1/16) assenti dalla regex `re`
+// bundlata: persona che corre/cammina/inginocchiata + freccia, famiglia con
+// bimbi, fenice, fungo, lime, occhio-nel-fumetto, catena spezzata, faccia con
+// frecce, bandiera CQ, ecc. Forma "gialla" canonica (FE0F dove serve), cos\u00EC
+// combaciano dopo skinToneRe + normalizeFe0f. Generati dal set asset.
+var rtNewEmoji =
+      "\ud83e\uddd1\u200d\ud83e\uddd1\u200d\ud83e\uddd2\u200d\ud83e\uddd2|\ud83c\udfc3\u200d\u2640\ufe0f\u200d\u27a1\ufe0f|\ud83c\udfc3\u200d\u2642\ufe0f\u200d\u27a1\ufe0f|\ud83d\udc68\u200d\ud83e\uddaf\u200d\u27a1\ufe0f|\ud83d\udc68\u200d\ud83e\uddbc\u200d\u27a1\ufe0f|\ud83d\udc68\u200d\ud83e\uddbd\u200d\u27a1\ufe0f|\ud83d\udc69\u200d\ud83e\uddaf\u200d\u27a1\ufe0f|\ud83d\udc69\u200d\ud83e\uddbc\u200d\u27a1\ufe0f|\ud83d\udc69\u200d\ud83e\uddbd\u200d\u27a1\ufe0f|\ud83d\udeb6\u200d\u2640\ufe0f\u200d\u27a1\ufe0f|\ud83d\udeb6\u200d\u2642\ufe0f\u200d\u27a1\ufe0f|\ud83e\uddce\u200d\u2640\ufe0f\u200d\u27a1\ufe0f|\ud83e\uddce\u200d\u2642\ufe0f\u200d\u27a1\ufe0f|\ud83e\uddd1\u200d\ud83e\uddaf\u200d\u27a1\ufe0f|\ud83e\uddd1\u200d\ud83e\uddbc\u200d\u27a1\ufe0f|\ud83e\uddd1\u200d\ud83e\uddbd\u200d\u27a1\ufe0f|\ud83e\uddd1\u200d\ud83e\uddd1\u200d\ud83e\uddd2|\ud83e\uddd1\u200d\ud83e\uddd2\u200d\ud83e\uddd2|\ud83d\udc41\ufe0f\u200d\ud83d\udde8\ufe0f|\ud83c\udf44\u200d\ud83d\udfeb|\ud83c\udf4b\u200d\ud83d\udfe9|\ud83c\udfc3\u200d\u27a1\ufe0f|\ud83d\udc26\u200d\ud83d\udd25|\ud83d\ude42\u200d\u2194\ufe0f|\ud83d\ude42\u200d\u2195\ufe0f|\ud83d\udeb6\u200d\u27a1\ufe0f|\ud83e\uddce\u200d\u27a1\ufe0f|\ud83e\uddd1\u200d\ud83e\ude70|\ud83e\uddd1\u200d\ud83e\uddd2|\u26d3\ufe0f\u200d\ud83d\udca5|\ud83c\udde8\ud83c\uddf6",
+    // Codepoint SINGOLI recenti (Unicode 15/16/17) assenti dalla regex `re`
+    // bundlata (range fermo a ~\udee8): 1F6D8, 1FA89 arpa, 1FA8A/1FA8E/1FA8F,
+    // 1FABE labbra che mordono, 1FAC6/1FAC8/1FACD, 1FADC radice, 1FADF, 1FAE9
+    // occhi stanchi, 1FAEA naso che cola, 1FAEF mani a cuore. L'SVG esiste già nel
+    // set ma la regex non li agganciava → restavano testo grezzo. Forma a surrogati
+    // \uXXXX (ASCII-safe). Questi oggetti non hanno tono pelle; FE0F opzionale
+    // consumato. Vanno DOPO rtNewEmoji così le sequenze ZWJ vincono. Generati
+    // dall'audit del set asset (0 regressioni, cfr. [[project_version_2_8_5_backlog]]).
+    rtNewSingles = "\ud83d\uded8|\ud83e[\ude89\ude8a\ude8e\ude8f\udebe\udec6\udec8\udecd\udedc\udedf\udee9\udeea\udeef]",
+    emojiMatchRe = new RegExp("(?:" + rtNewEmoji + ")|(?:" + rtNewSingles + ")\ufe0f?|" + re.source, "g");
 
 function toCodePoint(unicodeSurrogates) {
   var
@@ -47,7 +96,7 @@ function getEmojiPath(str) {
 }
 
 function emojify(str, emojiSize) {
-  return String(str).replace(re, function (rawText) {
+  return normalizeFe0f(String(str).replace(skinToneRe, "")).replace(emojiMatchRe, function (rawText) {
     var iconId = toCodePoint(rawText.replace(UFE0Fg, ''));
     return iconId ?
       // recycle the match string replacing the emoji

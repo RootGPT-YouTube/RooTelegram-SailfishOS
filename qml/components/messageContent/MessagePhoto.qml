@@ -38,6 +38,13 @@ MessageContentBase {
     // "Object destroyed during incubation" warning on fast scroll.
     property bool _destroying: false
 
+    // True quando l'aspect proviene da metadati photo.sizes VALIDI: in tal caso il
+    // box è già dimensionato correttamente prima che la preview carichi e NON va più
+    // toccato → niente layout shift (i messaggi non sbalzano allo scroll quando la
+    // preview compare). Solo le rare foto senza metadati validi ricadono sull'aspect
+    // renderizzato dopo il load.
+    property bool aspectFromMetadata: false
+
     // Box massimo = 80% della finestra; in larghezza non superiamo comunque lo
     // spazio disponibile per il fumetto (textItemWidth), così non sborda.
     readonly property real maxBoxWidth: {
@@ -67,6 +74,21 @@ MessageContentBase {
             return;
         }
         photoAspect = getAspectRatio();
+        aspectFromMetadata = metadataAspectValid();
+    }
+    // I metadati photo.sizes contengono dimensioni valide? In tal caso il box è già
+    // dimensionato correttamente e non va ridimensionato dopo il render.
+    function metadataAspectValid() {
+        if (!photoData || !photoData.sizes || photoData.sizes.length === 0) {
+            return false;
+        }
+        for (var i = photoData.sizes.length - 1; i >= 0; i--) {
+            var candidate = photoData.sizes[i];
+            if (candidate && candidate.width > 0 && candidate.height > 0) {
+                return true;
+            }
+        }
+        return false;
     }
     // Aspect AUTOREVOLE = quello renderizzato: con PreserveAspectFit
     // paintedWidth/paintedHeight hanno SEMPRE le proporzioni reali dell'immagine,
@@ -74,6 +96,12 @@ MessageContentBase {
     // da photo.sizes (che per alcune immagini riportava proporzioni errate).
     function refreshRenderedAspect() {
         if (_destroying || !photo.image) {
+            return;
+        }
+        // Metadati validi: il box è già giusto → NON risistemarlo dopo il render
+        // (evita il salto dei messaggi quando la preview compare). Solo le rare foto
+        // senza metadati validi ricadono sull'aspect realmente renderizzato.
+        if (aspectFromMetadata) {
             return;
         }
         var pw = photo.image.paintedWidth;

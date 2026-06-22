@@ -862,7 +862,12 @@ SilicaFlickable {
                 width: parent.width
                 height: width
                 radius: imageContainer.thumbnailRadius
-                opacity: profilePictureLoader.status !== Loader.Ready || profilePictureLoader.item.opacity < 1 ? 1.0 : 0.0
+                // Tieni visibile l'avatar .small di fallback anche quando lo strato
+                // sopra (album foto / foto grande) NON è visibile: per alcuni utenti
+                // getUserProfilePhotos torna un album VUOTO (foto personale o privacy)
+                // → ProfilePictureList ha count 0 e resta invisibile; senza il check
+                // !item.visible l'avatar grande risultava completamente vuoto.
+                opacity: profilePictureLoader.status !== Loader.Ready || !profilePictureLoader.item.visible || profilePictureLoader.item.opacity < 1 ? 1.0 : 0.0
                 optimizeImageSize: false
             }
 
@@ -1289,7 +1294,7 @@ SilicaFlickable {
                 ModernChatOptionItem {
                     width: parent.width
                     visible: chatInformationPage.isSuperGroup
-                    title: qsTr("Removed Users")
+                    title: qsTr("Removed/Banned Users")
                     value: getRemovedUsersCountText()
                     iconSource: "image://theme/icon-m-remove"
                     showDisclosure: true
