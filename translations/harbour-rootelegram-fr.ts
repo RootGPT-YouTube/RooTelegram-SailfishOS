@@ -681,6 +681,34 @@
 </context>
 <context>
     <name>ChatInformationPageContent</name>
+    <message>
+        <source>Group no longer available</source>
+        <translation>Groupe non disponible</translation>
+    </message>
+    <message>
+        <source>The information for this group could not be loaded, even though you are online.
+
+The group has most likely been deleted and no longer exists, but remains in your chat list as a local copy left on the phone.
+
+You can remove it from your list. This removal is local only: it does not delete anything for the other members and sends no messages. If the group still existed, it would reappear by itself on the next new message.</source>
+        <translation>Les informations de ce groupe n&apos;ont pas pu être chargées, même si vous êtes en ligne.
+
+Le groupe a très probablement été supprimé et n&apos;existe plus, mais il reste dans votre liste de discussions comme une copie locale laissée sur le téléphone.
+
+Vous pouvez le retirer de votre liste. Cette suppression est purement locale : elle ne supprime rien pour les autres membres et n&apos;envoie aucun message. Si le groupe existait encore, il réapparaîtrait de lui-même au prochain nouveau message.</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Réessayer</translation>
+    </message>
+    <message>
+        <source>Remove from list</source>
+        <translation>Retirer de la liste</translation>
+    </message>
+    <message>
+        <source>Removing from list</source>
+        <translation>Retrait de la liste</translation>
+    </message>
     <message numerus="yes">
         <source>%1 subscribers</source>
         <translation>

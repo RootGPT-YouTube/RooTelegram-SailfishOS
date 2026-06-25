@@ -13,54 +13,47 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.5";
+var version = "2.8.6";
 
 var changelogByLang = {
     "it": [
-        "Emoji: ora si vedono anche le emoji più recenti (Unicode 16/17) che prima restavano come testo.",
-        "Foto profilo: l'avatar nella pagina del profilo non risulta più vuoto per alcuni contatti.",
-        "Anteprime: i messaggi non sbalzano più mentre scorri quando carica l'anteprima di una foto."
+        "Album video: più video inviati insieme ora si aprono e si salvano correttamente come video, non più come immagini.",
+        "Gruppi: un gruppo eliminato che resta nella lista ora mostra un avviso \"Gruppo non più disponibile\" con i pulsanti Riprova e Rimuovi, invece di girare all'infinito."
     ],
     "en": [
-        "Emoji: the most recent emoji (Unicode 16/17) that used to show up as plain text now display correctly.",
-        "Profile photo: the avatar on the profile page is no longer blank for some contacts.",
-        "Previews: messages no longer jump around while scrolling when a photo preview loads."
+        "Video albums: multiple videos sent together now open and save correctly as videos, no longer as images.",
+        "Groups: a deleted group still lingering in the list now shows a \"Group no longer available\" notice with Retry and Remove buttons, instead of spinning forever."
     ],
     "de": [
-        "Emoji: die aktuellsten Emoji (Unicode 16/17), die zuvor als reiner Text erschienen, werden jetzt korrekt angezeigt.",
-        "Profilbild: der Avatar auf der Profilseite ist bei manchen Kontakten nicht mehr leer.",
-        "Vorschauen: Nachrichten springen beim Scrollen nicht mehr, wenn eine Foto-Vorschau lädt."
+        "Video-Alben: mehrere zusammen gesendete Videos öffnen und speichern jetzt korrekt als Videos, nicht mehr als Bilder.",
+        "Gruppen: eine gelöschte Gruppe, die noch in der Liste verbleibt, zeigt jetzt den Hinweis \"Gruppe nicht mehr verfügbar\" mit den Schaltflächen Erneut versuchen und Entfernen, statt endlos zu laden."
     ],
     "pl": [
-        "Emoji: najnowsze emoji (Unicode 16/17), które wcześniej wyświetlały się jako zwykły tekst, są teraz poprawnie pokazywane.",
-        "Zdjęcie profilowe: awatar na stronie profilu nie jest już pusty dla niektórych kontaktów.",
-        "Podglądy: wiadomości nie przeskakują już podczas przewijania, gdy ładuje się podgląd zdjęcia."
+        "Albumy wideo: kilka filmów wysłanych razem otwiera się i zapisuje teraz poprawnie jako wideo, a nie jako obrazy.",
+        "Grupy: usunięta grupa pozostająca na liście pokazuje teraz komunikat \"Grupa już niedostępna\" z przyciskami Spróbuj ponownie i Usuń, zamiast kręcić się w nieskończoność."
     ],
     "ru": [
-        "Эмодзи: самые новые эмодзи (Unicode 16/17), которые раньше отображались обычным текстом, теперь показываются правильно.",
-        "Фото профиля: аватар на странице профиля больше не пустой у некоторых контактов.",
-        "Превью: сообщения больше не скачут при прокрутке, когда загружается превью фото."
+        "Видеоальбомы: несколько видео, отправленных вместе, теперь открываются и сохраняются правильно как видео, а не как изображения.",
+        "Группы: удалённая группа, оставшаяся в списке, теперь показывает уведомление \"Группа больше недоступна\" с кнопками Повторить и Удалить вместо бесконечной загрузки."
     ],
     "fr": [
-        "Émojis : les émojis les plus récents (Unicode 16/17) qui s'affichaient en texte brut sont désormais affichés correctement.",
-        "Photo de profil : l'avatar sur la page de profil n'est plus vide pour certains contacts.",
-        "Aperçus : les messages ne sautent plus pendant le défilement lorsqu'un aperçu de photo se charge."
+        "Albums vidéo : plusieurs vidéos envoyées ensemble s'ouvrent et s'enregistrent désormais correctement comme des vidéos, et non plus comme des images.",
+        "Groupes : un groupe supprimé qui reste dans la liste affiche maintenant un message \"Groupe non disponible\" avec les boutons Réessayer et Retirer, au lieu de tourner indéfiniment."
     ],
     "sk": [
-        "Emoji: najnovšie emoji (Unicode 16/17), ktoré sa predtým zobrazovali ako obyčajný text, sa teraz zobrazujú správne.",
-        "Profilová fotka: avatar na stránke profilu už nie je prázdny pri niektorých kontaktoch.",
-        "Náhľady: správy už pri posúvaní neposkakujú, keď sa načítava náhľad fotky."
+        "Video albumy: viacero videí odoslaných spolu sa teraz správne otvára a ukladá ako videá, už nie ako obrázky.",
+        "Skupiny: odstránená skupina, ktorá zostáva v zozname, teraz zobrazuje upozornenie \"Skupina už nie je dostupná\" s tlačidlami Skúsiť znova a Odstrániť namiesto nekonečného načítavania."
     ]
 };
 
 var messageByLang = {
-    "it": "RooTelegram 2.8.5 è un aggiornamento di rifinitura: rende visibili le emoji più recenti, corregge l'avatar vuoto nella pagina profilo di alcuni contatti ed elimina lo sbalzo dei messaggi quando carica l'anteprima di una foto.",
-    "en": "RooTelegram 2.8.5 is a polish update: it makes the most recent emoji visible, fixes the blank avatar on some contacts' profile page, and stops messages from jumping when a photo preview loads.",
-    "de": "RooTelegram 2.8.5 ist ein Feinschliff-Update: es macht die neuesten Emoji sichtbar, behebt den leeren Avatar auf der Profilseite mancher Kontakte und verhindert das Springen der Nachrichten beim Laden einer Foto-Vorschau.",
-    "pl": "RooTelegram 2.8.5 to aktualizacja dopracowująca: pokazuje najnowsze emoji, naprawia pusty awatar na stronie profilu niektórych kontaktów i eliminuje przeskakiwanie wiadomości podczas ładowania podglądu zdjęcia.",
-    "ru": "RooTelegram 2.8.5 — обновление-доработка: делает видимыми самые новые эмодзи, исправляет пустой аватар на странице профиля у некоторых контактов и устраняет скачки сообщений при загрузке превью фото.",
-    "fr": "RooTelegram 2.8.5 est une mise à jour de finition : elle rend visibles les émojis les plus récents, corrige l'avatar vide sur la page de profil de certains contacts et empêche les messages de sauter lorsqu'un aperçu de photo se charge.",
-    "sk": "RooTelegram 2.8.5 je dolaďovacia aktualizácia: sprístupní najnovšie emoji, opraví prázdny avatar na stránke profilu niektorých kontaktov a odstráni poskakovanie správ pri načítaní náhľadu fotky."
+    "it": "RooTelegram 2.8.6 corregge gli album video (più video insieme si aprivano e salvavano come immagini) e aggiunge un avviso per i gruppi eliminati che restano nella lista, con i pulsanti Riprova e Rimuovi al posto del caricamento infinito.",
+    "en": "RooTelegram 2.8.6 fixes video albums (multiple videos sent together used to open and save as images) and adds a notice for deleted groups still lingering in the list, with Retry and Remove buttons instead of an endless spinner.",
+    "de": "RooTelegram 2.8.6 behebt Video-Alben (mehrere zusammen gesendete Videos öffneten und speicherten als Bilder) und fügt einen Hinweis für gelöschte Gruppen hinzu, die in der Liste verbleiben, mit den Schaltflächen Erneut versuchen und Entfernen statt endlosem Laden.",
+    "pl": "RooTelegram 2.8.6 naprawia albumy wideo (kilka filmów wysłanych razem otwierało się i zapisywało jako obrazy) oraz dodaje komunikat dla usuniętych grup pozostających na liście, z przyciskami Spróbuj ponownie i Usuń zamiast nieskończonego ładowania.",
+    "ru": "RooTelegram 2.8.6 исправляет видеоальбомы (несколько видео, отправленных вместе, открывались и сохранялись как изображения) и добавляет уведомление для удалённых групп, оставшихся в списке, с кнопками Повторить и Удалить вместо бесконечной загрузки.",
+    "fr": "RooTelegram 2.8.6 corrige les albums vidéo (plusieurs vidéos envoyées ensemble s'ouvraient et s'enregistraient comme des images) et ajoute un message pour les groupes supprimés restant dans la liste, avec les boutons Réessayer et Retirer au lieu d'un chargement sans fin.",
+    "sk": "RooTelegram 2.8.6 opravuje video albumy (viacero videí odoslaných spolu sa otváralo a ukladalo ako obrázky) a pridáva upozornenie pre odstránené skupiny zostávajúce v zozname, s tlačidlami Skúsiť znova a Odstrániť namiesto nekonečného načítavania."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

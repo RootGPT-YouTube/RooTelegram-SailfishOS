@@ -23,6 +23,7 @@
 */
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import WerkWolf.RooTelegram 1.0
 import "../"
 import "../../js/twemoji.js" as Emoji
 import "../../js/functions.js" as Functions
@@ -33,6 +34,36 @@ SilicaFlickable {
     id: pageContent
     property alias membersList: membersList
     property bool groupPhotoUploadInProgress: false
+
+    // ── Rilevamento "gruppo fantasma" ────────────────────────────────────────
+    // Un gruppo eliminato lato server può restare nel DB TDLib locale: la pagina
+    // info girava all'infinito perché getGroup/SupergroupFullInfo non risponde mai.
+    // Qui: intercettiamo l'errore TDLib (immediato) e, come rete di sicurezza, un
+    // timeout di 5s contato SOLO da connessi → mostriamo un riquadro invece dello
+    // spinner. Vale solo per i gruppi (mai per chat private).
+    readonly property bool isGroupChat: chatInformationPage.isSuperGroup || chatInformationPage.isBasicGroup
+    property bool groupFullInfoReceived: false
+    property bool groupInfoFailed: false
+
+    function isConnected() {
+        var s = tdLibWrapper.getConnectionState();
+        return s === TelegramAPI.ConnectionReady || s === TelegramAPI.Updating;
+    }
+    function markGroupFullInfoReceived() {
+        groupInfoTimeoutTimer.stop();
+        pageContent.groupFullInfoReceived = true;
+        pageContent.groupInfoFailed = false;
+    }
+    function requestGroupFullInfo() {
+        if (!pageContent.isGroupChat) return;
+        groupInfoTimeoutTimer.stop();
+        pageContent.groupInfoFailed = false;
+        pageContent.groupFullInfoReceived = false;
+        tdLibWrapper.getGroupFullInfo(chatInformationPage.chatPartnerGroupId, chatInformationPage.isSuperGroup);
+        if (pageContent.isConnected()) {
+            groupInfoTimeoutTimer.restart();
+        }
+    }
 
     function initializePage() {
         membersList.clear();
@@ -81,6 +112,16 @@ SilicaFlickable {
         }
 
 
+        if (chatInformationPage.isSuperGroup || chatInformationPage.isBasicGroup) {
+            pageContent.groupFullInfoReceived = false;
+            pageContent.groupInfoFailed = false;
+            // initializePage ha già chiamato getGroupFullInfo nello switch sopra:
+            // avvia solo il timeout di sicurezza (solo da connessi).
+            if (pageContent.isConnected()) {
+                groupInfoTimeoutTimer.restart();
+            }
+        }
+
         tabViewLoader.active = true;
     }
     function scrollUp(force) {
@@ -99,6 +140,7 @@ SilicaFlickable {
         }
     }
     function handleBasicGroupFullInfo(groupFullInfo) {
+        markGroupFullInfoReceived();
         chatInformationPage.groupFullInformation = groupFullInfo;
         membersList.clear();
         if(groupFullInfo.members && groupFullInfo.members.length > 0) {
@@ -503,8 +545,97 @@ SilicaFlickable {
         });
     }
 
+    Timer {
+        id: groupInfoTimeoutTimer
+        interval: 5000
+        repeat: false
+        onTriggered: {
+            // Rete di sicurezza se TDLib non risponde NÉ con dati NÉ con errore.
+            if (pageContent.isGroupChat && !pageContent.groupFullInfoReceived && pageContent.isConnected()) {
+                pageContent.groupInfoFailed = true;
+            }
+        }
+    }
+
+    // Riquadro "gruppo non più disponibile": sostituisce lo spinner infinito quando
+    // le info del gruppo non arrivano (errore TDLib o timeout da connessi).
+    Rectangle {
+        id: groupGoneOverlay
+        anchors.fill: parent
+        z: 1000
+        visible: pageContent.groupInfoFailed
+        color: Theme.overlayBackgroundColor
+
+        // Intercetta i tap: niente interazione col contenuto sottostante.
+        MouseArea { anchors.fill: parent }
+
+        Column {
+            anchors {
+                left: parent.left
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+                margins: Theme.horizontalPageMargin
+            }
+            spacing: Theme.paddingLarge
+
+            Image {
+                anchors.horizontalCenter: parent.horizontalCenter
+                source: "image://theme/icon-l-attention"
+            }
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                font.pixelSize: Theme.fontSizeLarge
+                color: Theme.highlightColor
+                text: qsTr("Group no longer available")
+            }
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.secondaryHighlightColor
+                text: qsTr("The information for this group could not be loaded, even though you are online.\n\nThe group has most likely been deleted and no longer exists, but remains in your chat list as a local copy left on the phone.\n\nYou can remove it from your list. This removal is local only: it does not delete anything for the other members and sends no messages. If the group still existed, it would reappear by itself on the next new message.")
+            }
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Retry")
+                onClicked: pageContent.requestGroupFullInfo()
+            }
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Remove from list")
+                onClicked: {
+                    var chatId = chatInformationPage.chatInformation.id;
+                    Remorse.popupAction(chatInformationPage, qsTr("Removing from list"), function() {
+                        tdLibWrapper.sendRequest({
+                            "@type": "deleteChatHistory",
+                            "chat_id": chatId,
+                            "remove_from_chat_list": true,
+                            "revoke": false
+                        });
+                        pageStack.pop(pageStack.find( function(page){ return(page._depth === 0)} ));
+                    });
+                }
+            }
+        }
+    }
+
     Connections {
         target: tdLibWrapper
+
+        // Test di connessione: il timeout vale SOLO da connessi. Tornati online,
+        // ri-chiediamo le info; offline, fermiamo il timer (niente falso "eliminato").
+        onConnectionStateChanged: {
+            if (pageContent.isGroupChat && !pageContent.groupFullInfoReceived && !pageContent.groupInfoFailed) {
+                if (pageContent.isConnected()) {
+                    pageContent.requestGroupFullInfo();
+                } else {
+                    groupInfoTimeoutTimer.stop();
+                }
+            }
+        }
 
         onBasicGroupUpdated: {
             if (chatInformationPage.isBasicGroup && chatInformationPage.chatPartnerGroupId === groupId.toString()) {
@@ -528,12 +659,14 @@ SilicaFlickable {
         onSupergroupFullInfoReceived: {
             Debug.log("onSupergroupFullInfoReceived", chatInformationPage.isSuperGroup, chatInformationPage.chatPartnerGroupId, groupId)
             if(chatInformationPage.isSuperGroup && chatInformationPage.chatPartnerGroupId === groupId) {
+                markGroupFullInfoReceived();
                 chatInformationPage.groupFullInformation = groupFullInfo;
             }
         }
         onSupergroupFullInfoUpdated: {
             Debug.log("onSupergroupFullInfoUpdated", chatInformationPage.isSuperGroup, chatInformationPage.chatPartnerGroupId, groupId)
             if(chatInformationPage.isSuperGroup && chatInformationPage.chatPartnerGroupId === groupId) {
+                markGroupFullInfoReceived();
                 chatInformationPage.groupFullInformation = groupFullInfo;
             }
         }
@@ -727,6 +860,14 @@ SilicaFlickable {
             }
             if (extraText.indexOf("createCall:") === 0) {
                 appNotification.show(message !== "" ? message : qsTr("Unable to start the call."));
+            }
+            // Gruppo fantasma: l'errore della richiesta info gruppo (getGroup/Supergroup
+            // FullInfo imposta @extra = groupId) indica che il gruppo non esiste più →
+            // stop spinner, mostra il riquadro "Gruppo non più disponibile".
+            if (pageContent.isGroupChat && !pageContent.groupFullInfoReceived
+                    && extraText === chatInformationPage.chatPartnerGroupId) {
+                groupInfoTimeoutTimer.stop();
+                pageContent.groupInfoFailed = true;
             }
         }
         onChatStatisticsUrlReceived: {

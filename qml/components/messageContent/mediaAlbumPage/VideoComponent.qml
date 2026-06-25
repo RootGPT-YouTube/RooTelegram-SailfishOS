@@ -2,6 +2,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
 import QtMultimedia 5.6
+import QtGraphicalEffects 1.0
 import "../../"
 
 Video {
