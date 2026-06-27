@@ -81,6 +81,17 @@ public:
     Q_INVOKABLE QVariantMap getPrivateUnreadCounts() const;
     Q_INVOKABLE QVariantList getAllChatIds() const;
     Q_INVOKABLE QString getChatTitle(qlonglong chatId) const;
+    // Azzera SUBITO (ottimistico) il badge non letti di una chat nel modello, senza
+    // attendere updateChatReadInbox di TDLib (inaffidabile). Usato dall'apertura
+    // ESTERNA/da notifica per pulire il badge home anche su canali/gruppi, dove
+    // handleChatOpened non lo fa piu' (letto-da-scroll). Il read sul server lo fa
+    // a parte viewMessage(force=true).
+    Q_INVOKABLE void markChatReadOptimistically(qlonglong chatId);
+    // d1: imposta il badge non letti di un FORUM in home alla SOMMA degli unread dei
+    // suoi topic (calcolata da ForumTopicsPage). Il chat-level updateChatReadInbox di
+    // TDLib per i forum e' inaffidabile/in ritardo: cosi' il badge riflette i topic
+    // realmente non letti e si aggiorna leggendoli.
+    Q_INVOKABLE void setForumUnreadCount(qlonglong chatId, int unreadCount, int unreadMentionCount);
 
     bool showAllChats() const;
     void setShowAllChats(bool showAll);

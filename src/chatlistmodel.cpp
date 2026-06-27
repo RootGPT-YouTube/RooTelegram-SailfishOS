@@ -1020,12 +1020,20 @@ void ChatListModel::handleChatReadInboxUpdated(const QString &id, const QString 
 
 void ChatListModel::handleChatOpened(qlonglong chatId)
 {
-    // Aprire una chat (da home o da notifica) azzera SEMPRE e SUBITO il badge dei
-    // non letti in home. Doppia mossa:
-    //  1) read OTTIMISTICO nel modello -> il badge sparisce all'istante, senza
-    //     dipendere dai tempi (o dall'assenza) di updateChatReadInbox di TDLib;
-    //  2) read FORZATO sul server fino all'ultimo messaggio -> non ritorna dopo
-    //     una sync/riavvio. TDLib poi confermerà con updateChatReadInbox(0).
+    // Comportamento all'apertura di una chat (segnale chatOpened, vale per OGNI
+    // apertura interna). Distinguiamo per TIPO:
+    //  - PRIVATE/SECRET: azzeriamo SEMPRE e SUBITO il badge (aprirle = sei in fondo
+    //    alla conversazione). Doppia mossa: read OTTIMISTICO nel modello (badge via
+    //    istante) + read FORZATO sul server fino all'ultimo messaggio (non ritorna
+    //    dopo sync/riavvio; TDLib conferma con updateChatReadInbox(0)).
+    //  - CANALI/GRUPPI (incl. forum): NON forziamo il read fino all'ultimo messaggio
+    //    ne' azzeriamo il badge in modo ottimistico. Il "letto" deve riflettere SOLO
+    //    cio' che e' stato effettivamente SCROLLATO (gestito da ChatPage via
+    //    handleScrollPositionChanged -> viewMessage force=false). Prima si marcava
+    //    tutto letto all'apertura a prescindere dallo scroll (bug: aprendo un canale
+    //    con N post non letti li azzerava tutti).
+    // L'apertura ESTERNA/da notifica ha il suo force_read separato in
+    // OverviewPage.markChatReadOnExternalOpen, quindi il deep-link resta corretto.
     // Cerchiamo la chat in tutti e tre i contenitori (visibile / fuori-cartella /
     // nascosta), non solo in chatIndexMap.
     ChatData *chat = nullptr;
@@ -1042,8 +1050,14 @@ void ChatListModel::handleChatOpened(qlonglong chatId)
         return;
     }
 
+    // Solo PRIVATE/SECRET: marca tutto letto all'apertura. Canali e gruppi no
+    // (letto solo cio' che si scrolla). Stessa condizione gia' usata altrove nel file.
+    const bool markAllReadOnOpen =
+            chat->chatType == TDLibWrapper::ChatTypePrivate ||
+            chat->chatType == TDLibWrapper::ChatTypeSecret;
+
     const qlonglong lastMsgId = chat->lastMessage(ID).toLongLong();
-    if (lastMsgId != 0) {
+    if (markAllReadOnOpen && lastMsgId != 0) {
         tdLibWrapper->viewMessage(chatId, lastMsgId, true);
     }
     if (chat->unreadMentionCount() > 0) {
@@ -1051,6 +1065,52 @@ void ChatListModel::handleChatOpened(qlonglong chatId)
     }
     if (chat->unreadReactionCount() > 0) {
         tdLibWrapper->readAllChatReactions(chatId);
+    }
+
+    QVector<int> changedRoles;
+    // Azzeramento ottimistico del badge non letti SOLO per private/secret. Per
+    // canali/gruppi il badge resta quello reale (scalato dallo scroll e da
+    // updateChatReadInbox di TDLib), altrimenti mostrerebbe 0 con messaggi non letti.
+    if (markAllReadOnOpen && chat->updateUnreadCount(0)) {
+        changedRoles.append(ChatListModel::RoleUnreadCount);
+    }
+    if (chat->chatData.value(UNREAD_MENTION_COUNT).toInt() != 0) {
+        chat->chatData.insert(UNREAD_MENTION_COUNT, 0);
+        changedRoles.append(ChatListModel::RoleUnreadMentionCount);
+    }
+    if (chat->chatData.value(UNREAD_REACTION_COUNT).toInt() != 0) {
+        chat->chatData.insert(UNREAD_REACTION_COUNT, 0);
+        changedRoles.append(ChatListModel::RoleUnreadReactionCount);
+    }
+    if (!changedRoles.isEmpty()) {
+        changedRoles.append(ChatListModel::RoleDisplay);
+        if (chatIndex >= 0) {
+            const QModelIndex modelIndex(index(chatIndex));
+            emit dataChanged(modelIndex, modelIndex, changedRoles);
+        }
+        this->calculateUnreadState();
+    }
+}
+
+void ChatListModel::markChatReadOptimistically(qlonglong chatId)
+{
+    // Clear ottimistico del badge (count + mentions + reactions) senza attendere
+    // updateChatReadInbox di TDLib. Usato dall'apertura ESTERNA/da notifica: il
+    // force-read sul server lo fa viewMessage(force=true) a parte. Necessario per
+    // canali/gruppi, dove handleChatOpened non azzera piu' il badge all'apertura.
+    // Cerca la chat nei tre contenitori (visibile / fuori-cartella / nascosta).
+    ChatData *chat = nullptr;
+    int chatIndex = -1;
+    if (chatIndexMap.contains(chatId)) {
+        chatIndex = chatIndexMap.value(chatId);
+        chat = chatList.at(chatIndex);
+    } else if (folderFilteredChats.contains(chatId)) {
+        chat = folderFilteredChats.value(chatId);
+    } else if (hiddenChats.contains(chatId)) {
+        chat = hiddenChats.value(chatId);
+    }
+    if (!chat) {
+        return;
     }
 
     QVector<int> changedRoles;
@@ -1064,6 +1124,43 @@ void ChatListModel::handleChatOpened(qlonglong chatId)
     if (chat->chatData.value(UNREAD_REACTION_COUNT).toInt() != 0) {
         chat->chatData.insert(UNREAD_REACTION_COUNT, 0);
         changedRoles.append(ChatListModel::RoleUnreadReactionCount);
+    }
+    if (!changedRoles.isEmpty()) {
+        changedRoles.append(ChatListModel::RoleDisplay);
+        if (chatIndex >= 0) {
+            const QModelIndex modelIndex(index(chatIndex));
+            emit dataChanged(modelIndex, modelIndex, changedRoles);
+        }
+        this->calculateUnreadState();
+    }
+}
+
+void ChatListModel::setForumUnreadCount(qlonglong chatId, int unreadCount, int unreadMentionCount)
+{
+    // d1: badge home di un forum = somma unread dei topic (vedi ForumTopicsPage).
+    // Cerca la chat nei tre contenitori.
+    ChatData *chat = nullptr;
+    int chatIndex = -1;
+    if (chatIndexMap.contains(chatId)) {
+        chatIndex = chatIndexMap.value(chatId);
+        chat = chatList.at(chatIndex);
+    } else if (folderFilteredChats.contains(chatId)) {
+        chat = folderFilteredChats.value(chatId);
+    } else if (hiddenChats.contains(chatId)) {
+        chat = hiddenChats.value(chatId);
+    }
+    if (!chat) {
+        return;
+    }
+
+    QVector<int> changedRoles;
+    if (chat->updateUnreadCount(unreadCount < 0 ? 0 : unreadCount)) {
+        changedRoles.append(ChatListModel::RoleUnreadCount);
+    }
+    const int mentions = unreadMentionCount < 0 ? 0 : unreadMentionCount;
+    if (chat->chatData.value(UNREAD_MENTION_COUNT).toInt() != mentions) {
+        chat->chatData.insert(UNREAD_MENTION_COUNT, mentions);
+        changedRoles.append(ChatListModel::RoleUnreadMentionCount);
     }
     if (!changedRoles.isEmpty()) {
         changedRoles.append(ChatListModel::RoleDisplay);

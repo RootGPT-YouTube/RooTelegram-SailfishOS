@@ -251,8 +251,16 @@ Page {
     // arrivare in fondo (deep-link a un messaggio non ultimo) → badge unread che
     // restava in home dopo aver aperto la chat dalla notifica.
     function markChatReadOnExternalOpen(chatInfo) {
-        if (chatInfo && chatInfo.id && chatInfo.last_message && chatInfo.last_message.id) {
-            tdLibWrapper.viewMessage(chatInfo.id, chatInfo.last_message.id, true);
+        if (chatInfo && chatInfo.id) {
+            // Badge home via SUBITO (serve solo l'id): handleChatOpened non azzera piu'
+            // il badge all'apertura per canali/gruppi (letto-da-scroll). FUORI dal guard
+            // last_message, che su chat aperte da notifica (getChat) spesso manca →
+            // altrimenti il clear non gira affatto e il badge resta.
+            chatListModel.markChatReadOptimistically(chatInfo.id);
+            // Read FORZATO sul server: richiede last_message.
+            if (chatInfo.last_message && chatInfo.last_message.id) {
+                tdLibWrapper.viewMessage(chatInfo.id, chatInfo.last_message.id, true);
+            }
         }
     }
 

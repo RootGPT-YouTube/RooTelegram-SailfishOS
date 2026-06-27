@@ -470,6 +470,8 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
     inIncrementalUpdate = false;
     searchModeActive = false;
     initialFillAttempts = 0;
+    generalOldestRawId = 0;
+    generalDigAttempts = 0;
     searchQuery.clear();
     beginResetModel();
     qDeleteAll(messages);
@@ -512,7 +514,11 @@ void ChatModel::requestOlderHistoryFromOldest()
     const qlonglong oldest = this->messages.first()->messageId;
     if (messageThreadId) {
         if (messageThreadId == 1) {
-            this->tdLibWrapper->getChatHistory(chatId, oldest, 0);
+            // General: ancora all'oldest RAW ricevuto (puo' essere piu' vecchio del model,
+            // che contiene solo i messaggi General) cosi' la paginazione attraversa anche
+            // gli stretch di altri topic invece di restare bloccata sull'oldest del model.
+            const qlonglong from = (generalOldestRawId > 0 && generalOldestRawId < oldest) ? generalOldestRawId : oldest;
+            this->tdLibWrapper->getChatHistory(chatId, from, 0);
         } else {
             const qlonglong anchor = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
             this->tdLibWrapper->getMessageThreadHistory(chatId, anchor, oldest, 0);
@@ -741,6 +747,14 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
                 if (!messageData.value("scheduling_state").toMap().isEmpty()) {
                     continue;
                 }
+                // General topic: traccia l'oldest RAW (qualunque topic, anche quelli che
+                // poi filtriamo) per far avanzare l'ancora dell'older-load anche quando il
+                // batch e' tutto di altri topic.
+                if (messageThreadId == 1 && messageId && messageData.value(CHAT_ID).toLongLong() == chatId) {
+                    if (generalOldestRawId == 0 || messageId < generalOldestRawId) {
+                        generalOldestRawId = messageId;
+                    }
+                }
                 if (messageId && messageData.value(CHAT_ID).toLongLong() == chatId && !messageIndexMap.contains(messageId)) {
                     // Per General topic (threadId == 1) usiamo getChatHistory che ritorna
                     // TUTTO il supergruppo: dobbiamo filtrare client-side per escludere
@@ -771,7 +785,26 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
             // piena. madeProgress = abbiamo aggiunto messaggi nuovi in questo round:
             // se 0 (tutti duplicati / fine cronologia) ci fermiamo, evitando loop.
             const bool madeProgress = !messagesToBeAdded.isEmpty();
-            if (initialFill && madeProgress
+            // General topic: un batch di getChatHistory puo' essere TUTTO di altri topic
+            // (filtrato a 0 messaggi General) pur non essendo la fine della cronologia.
+            // In quel caso il model non avanza e la paginazione si blocca su "oggi".
+            // Continuiamo a scavare verso il passato dall'oldest RAW (bound anti-loop);
+            // appena troviamo messaggi General (madeProgress) il contatore si resetta.
+            // La fine-cronologia termina naturalmente (risposta vuota -> ramo size()==0).
+            static const int MAX_GENERAL_DIG = 20;
+            if (madeProgress) {
+                this->generalDigAttempts = 0;
+            }
+            const bool generalNeedsDig = (messageThreadId == 1) && !madeProgress
+                    && this->generalOldestRawId > 0
+                    && this->generalDigAttempts < MAX_GENERAL_DIG
+                    && !this->messages.isEmpty();
+            if (generalNeedsDig) {
+                LOG("General topic: batch tutto di altri topic, continuo a scavare..." << this->generalOldestRawId);
+                this->generalDigAttempts++;
+                this->inReload = true;
+                this->requestOlderHistoryFromOldest();
+            } else if (initialFill && madeProgress
                     && this->messages.size() < INITIAL_FILL_TARGET
                     && this->initialFillAttempts < MAX_FILL_ATTEMPTS) {
                 LOG("Initial fill below target, loading more history..." << this->messages.size());

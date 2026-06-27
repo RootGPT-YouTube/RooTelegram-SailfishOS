@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.8.6
+RT_APP_VERSION = 2.8.7
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -228,8 +228,20 @@ equals(QT_ARCH, arm64){
 INCLUDEPATH += $$PWD/tdlib/include
 DEPENDPATH += $$PWD/tdlib/include
 LIBS += -L$$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/ -ltdjson
-telegram.files = $$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib
-telegram.path = /usr/share/$${TARGET}
+# libtdjson: spediamo nell'RPM SOLO il file reale versionato (es. libtdjson.so.1.8.62)
+# e creiamo `libtdjson.so` come SYMLINK a install-time. Prima copiavamo l'INTERA dir
+# lib/, che conteneva DUE copie reali identiche del .so (~32MB sprecati nell'RPM, e
+# contro le regole di packaging). Il glob `libtdjson.so.*` e' arch-aware:
+# aarch64/armv7hl -> .so.1.8.62, i486 -> .so.1.8.21.
+TDJSON_REAL = $$files($$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/libtdjson.so.*)
+TDJSON_SONAME = $$basename(TDJSON_REAL)
+telegram.files = $$TDJSON_REAL
+telegram.path = /usr/share/$${TARGET}/lib
+
+# Symlink libtdjson.so -> <soname reale> creato in fase di install (no copia duplicata).
+tdjsonsymlink.path = /usr/share/$${TARGET}/lib
+tdjsonsymlink.extra = test -d $(INSTALL_ROOT)/usr/share/$${TARGET}/lib || mkdir -p $(INSTALL_ROOT)/usr/share/$${TARGET}/lib; ln -sf $$TDJSON_SONAME $(INSTALL_ROOT)/usr/share/$${TARGET}/lib/libtdjson.so
+tdjsonsymlink.CONFIG += no_check_exist
 
 # ffmpeg minimale bundlato (per normalizzare i video landscape in storie 9:16).
 # Installo la dir `bin` così la copia ricorsiva preserva il bit +x del binario.
@@ -316,7 +328,7 @@ openurl.desktop.files = harbour-rootelegram-open-url.desktop
 database.files = db
 database.path = /usr/share/$${TARGET}
 
-INSTALLS += telegram 86.png 108.png 128.png 172.png 256.png \
+INSTALLS += telegram tdjsonsymlink 86.png 108.png 128.png 172.png 256.png \
             rootelegram.desktop openurl.desktop gui images sounds database
 
 HEADERS += \

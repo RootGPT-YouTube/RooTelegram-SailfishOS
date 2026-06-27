@@ -566,6 +566,10 @@ Page {
                 }
             }
 
+            // d1: il badge home del forum riflette la SOMMA degli unread dei topic
+            // (il chat-level updateChatReadInbox di TDLib per i forum e' inaffidabile).
+            chatListModel.setForumUnreadCount(forumTopicsPage.chatInformation.id, totalUnread, totalUnreadMentions)
+
             // Se tutti i topic risultano letti, forza una sincronizzazione del badge in home.
             // In alcuni casi TDLib aggiorna subito i topic ma ritarda/non invia updateChatReadInbox.
             if (forumTopicsPage.syncHomeUnreadOnNextLoad) {
@@ -615,6 +619,16 @@ Page {
             if (lookupTopicId > 0) {
                 requestForumTopicDetails(lookupTopicId)
             }
+            // d1: aggiorna LIVE il badge home del forum dopo aver letto un topic
+            // (somma unread correnti dei topic nel modello).
+            var liveUnread = 0
+            var liveMentions = 0
+            for (var k = 0; k < topicsModel.count; k++) {
+                var tk = topicsModel.get(k)
+                liveUnread += Number(tk.unreadCount || 0)
+                liveMentions += Number(tk.unreadMentionCount || 0)
+            }
+            chatListModel.setForumUnreadCount(forumTopicsPage.chatInformation.id, liveUnread, liveMentions)
         }
 
         onForumTopicInfoUpdated: {

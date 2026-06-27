@@ -710,7 +710,7 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     </message>
     <message>
         <source>Removing from list</source>
-        <translation>Odstránenie zo zoznamu</translation>
+        <translation>Odstraňuje sa zo zoznamu</translation>
     </message>
     <message numerus="yes">
         <source>%1 subscribers</source>

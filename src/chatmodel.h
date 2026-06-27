@@ -129,6 +129,14 @@ private:
     // Quanti round di getChatHistory abbiamo già fatto per riempire la vista al
     // primo ingresso in chat (bound anti-loop quando la cache locale è fredda).
     int initialFillAttempts = 0;
+    // General topic (id 1): getChatHistory ritorna TUTTO il supergruppo e noi filtriamo
+    // i messaggi per forum_topic_id<=1. generalOldestRawId = id del messaggio piu' VECCHIO
+    // ricevuto RAW (qualunque topic) -> ancora dell'older-load, cosi' la paginazione avanza
+    // anche quando un batch e' tutto di altri topic (il model contiene solo i General e non
+    // avanzerebbe). generalDigAttempts = bound anti-loop quando si scava tra stretch di
+    // altri topic. Entrambi resettati a ogni initialize().
+    qlonglong generalOldestRawId = 0;
+    int generalDigAttempts = 0;
     QString searchQuery;
 };
 

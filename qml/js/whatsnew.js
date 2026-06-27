@@ -13,47 +13,47 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.6";
+var version = "2.8.7";
 
 var changelogByLang = {
     "it": [
-        "Album video: più video inviati insieme ora si aprono e si salvano correttamente come video, non più come immagini.",
-        "Gruppi: un gruppo eliminato che resta nella lista ora mostra un avviso \"Gruppo non più disponibile\" con i pulsanti Riprova e Rimuovi, invece di girare all'infinito."
+        "Canali e gruppi: i messaggi non letti ora vengono segnati come letti solo man mano che li scorri, non più tutti insieme appena apri la chat. Il contatore dei non letti rispecchia ciò che hai davvero visto.",
+        "Installazione più leggera: rimossa una copia duplicata della libreria TDLib, circa 32 MB in meno occupati sul dispositivo."
     ],
     "en": [
-        "Video albums: multiple videos sent together now open and save correctly as videos, no longer as images.",
-        "Groups: a deleted group still lingering in the list now shows a \"Group no longer available\" notice with Retry and Remove buttons, instead of spinning forever."
+        "Channels and groups: unread messages are now marked as read only as you scroll through them, no longer all at once when you open the chat. The unread counter reflects what you actually saw.",
+        "Lighter install: removed a duplicate copy of the TDLib library, about 32 MB less used on the device."
     ],
     "de": [
-        "Video-Alben: mehrere zusammen gesendete Videos öffnen und speichern jetzt korrekt als Videos, nicht mehr als Bilder.",
-        "Gruppen: eine gelöschte Gruppe, die noch in der Liste verbleibt, zeigt jetzt den Hinweis \"Gruppe nicht mehr verfügbar\" mit den Schaltflächen Erneut versuchen und Entfernen, statt endlos zu laden."
+        "Kanäle und Gruppen: ungelesene Nachrichten werden jetzt erst beim Durchscrollen als gelesen markiert, nicht mehr alle auf einmal beim Öffnen des Chats. Der Ungelesen-Zähler spiegelt wider, was du tatsächlich gesehen hast.",
+        "Schlankere Installation: eine doppelte Kopie der TDLib-Bibliothek entfernt, rund 32 MB weniger Speicherbelegung auf dem Gerät."
     ],
     "pl": [
-        "Albumy wideo: kilka filmów wysłanych razem otwiera się i zapisuje teraz poprawnie jako wideo, a nie jako obrazy.",
-        "Grupy: usunięta grupa pozostająca na liście pokazuje teraz komunikat \"Grupa już niedostępna\" z przyciskami Spróbuj ponownie i Usuń, zamiast kręcić się w nieskończoność."
+        "Kanały i grupy: nieprzeczytane wiadomości są teraz oznaczane jako przeczytane dopiero w miarę ich przewijania, a nie wszystkie naraz po otwarciu czatu. Licznik nieprzeczytanych odzwierciedla to, co faktycznie zobaczyłeś.",
+        "Lżejsza instalacja: usunięto zduplikowaną kopię biblioteki TDLib, około 32 MB mniej zajętego miejsca na urządzeniu."
     ],
     "ru": [
-        "Видеоальбомы: несколько видео, отправленных вместе, теперь открываются и сохраняются правильно как видео, а не как изображения.",
-        "Группы: удалённая группа, оставшаяся в списке, теперь показывает уведомление \"Группа больше недоступна\" с кнопками Повторить и Удалить вместо бесконечной загрузки."
+        "Каналы и группы: непрочитанные сообщения теперь отмечаются как прочитанные только по мере прокрутки, а не все сразу при открытии чата. Счётчик непрочитанных отражает то, что вы действительно видели.",
+        "Более лёгкая установка: удалена дублирующая копия библиотеки TDLib, примерно на 32 МБ меньше занимаемого места на устройстве."
     ],
     "fr": [
-        "Albums vidéo : plusieurs vidéos envoyées ensemble s'ouvrent et s'enregistrent désormais correctement comme des vidéos, et non plus comme des images.",
-        "Groupes : un groupe supprimé qui reste dans la liste affiche maintenant un message \"Groupe non disponible\" avec les boutons Réessayer et Retirer, au lieu de tourner indéfiniment."
+        "Canaux et groupes : les messages non lus ne sont désormais marqués comme lus qu'au fur et à mesure que vous les faites défiler, et non plus tous d'un coup à l'ouverture de la discussion. Le compteur de non-lus reflète ce que vous avez réellement vu.",
+        "Installation plus légère : suppression d'une copie en double de la bibliothèque TDLib, environ 32 Mo de moins occupés sur l'appareil."
     ],
     "sk": [
-        "Video albumy: viacero videí odoslaných spolu sa teraz správne otvára a ukladá ako videá, už nie ako obrázky.",
-        "Skupiny: odstránená skupina, ktorá zostáva v zozname, teraz zobrazuje upozornenie \"Skupina už nie je dostupná\" s tlačidlami Skúsiť znova a Odstrániť namiesto nekonečného načítavania."
+        "Kanály a skupiny: neprečítané správy sa teraz označujú ako prečítané až počas ich posúvania, nie všetky naraz pri otvorení konverzácie. Počítadlo neprečítaných odráža to, čo ste skutočne videli.",
+        "Ľahšia inštalácia: odstránená duplicitná kópia knižnice TDLib, približne o 32 MB menej zabraného miesta v zariadení."
     ]
 };
 
 var messageByLang = {
-    "it": "RooTelegram 2.8.6 corregge gli album video (più video insieme si aprivano e salvavano come immagini) e aggiunge un avviso per i gruppi eliminati che restano nella lista, con i pulsanti Riprova e Rimuovi al posto del caricamento infinito.",
-    "en": "RooTelegram 2.8.6 fixes video albums (multiple videos sent together used to open and save as images) and adds a notice for deleted groups still lingering in the list, with Retry and Remove buttons instead of an endless spinner.",
-    "de": "RooTelegram 2.8.6 behebt Video-Alben (mehrere zusammen gesendete Videos öffneten und speicherten als Bilder) und fügt einen Hinweis für gelöschte Gruppen hinzu, die in der Liste verbleiben, mit den Schaltflächen Erneut versuchen und Entfernen statt endlosem Laden.",
-    "pl": "RooTelegram 2.8.6 naprawia albumy wideo (kilka filmów wysłanych razem otwierało się i zapisywało jako obrazy) oraz dodaje komunikat dla usuniętych grup pozostających na liście, z przyciskami Spróbuj ponownie i Usuń zamiast nieskończonego ładowania.",
-    "ru": "RooTelegram 2.8.6 исправляет видеоальбомы (несколько видео, отправленных вместе, открывались и сохранялись как изображения) и добавляет уведомление для удалённых групп, оставшихся в списке, с кнопками Повторить и Удалить вместо бесконечной загрузки.",
-    "fr": "RooTelegram 2.8.6 corrige les albums vidéo (plusieurs vidéos envoyées ensemble s'ouvraient et s'enregistraient comme des images) et ajoute un message pour les groupes supprimés restant dans la liste, avec les boutons Réessayer et Retirer au lieu d'un chargement sans fin.",
-    "sk": "RooTelegram 2.8.6 opravuje video albumy (viacero videí odoslaných spolu sa otváralo a ukladalo ako obrázky) a pridáva upozornenie pre odstránené skupiny zostávajúce v zozname, s tlačidlami Skúsiť znova a Odstrániť namiesto nekonečného načítavania."
+    "it": "RooTelegram 2.8.7 sistema il conteggio dei messaggi letti in canali e gruppi: prima, aprendo una chat, tutti i post venivano segnati come letti anche senza scorrerli; ora si segnano letti solo i messaggi che scorri davvero. In più l'app occupa circa 32 MB in meno grazie alla rimozione di una libreria duplicata.",
+    "en": "RooTelegram 2.8.7 fixes the read-message count in channels and groups: previously, opening a chat marked every post as read even without scrolling; now only the messages you actually scroll through are marked as read. The app also takes about 32 MB less space thanks to removing a duplicated library.",
+    "de": "RooTelegram 2.8.7 korrigiert die Zählung gelesener Nachrichten in Kanälen und Gruppen: Bisher wurden beim Öffnen eines Chats alle Beiträge als gelesen markiert, auch ohne Scrollen; jetzt werden nur die Nachrichten als gelesen markiert, die du tatsächlich durchscrollst. Außerdem belegt die App dank Entfernung einer doppelten Bibliothek rund 32 MB weniger.",
+    "pl": "RooTelegram 2.8.7 naprawia licznik przeczytanych wiadomości w kanałach i grupach: wcześniej otwarcie czatu oznaczało wszystkie posty jako przeczytane nawet bez przewijania; teraz jako przeczytane oznaczane są tylko wiadomości, które faktycznie przewiniesz. Aplikacja zajmuje też około 32 MB mniej dzięki usunięciu zduplikowanej biblioteki.",
+    "ru": "RooTelegram 2.8.7 исправляет счётчик прочитанных сообщений в каналах и группах: раньше при открытии чата все посты отмечались как прочитанные даже без прокрутки; теперь прочитанными отмечаются только те сообщения, которые вы действительно прокручиваете. Приложение также занимает примерно на 32 МБ меньше благодаря удалению дублирующей библиотеки.",
+    "fr": "RooTelegram 2.8.7 corrige le comptage des messages lus dans les canaux et les groupes : auparavant, ouvrir une discussion marquait tous les messages comme lus même sans les faire défiler ; désormais, seuls les messages que vous faites réellement défiler sont marqués comme lus. L'application occupe aussi environ 32 Mo de moins grâce à la suppression d'une bibliothèque en double.",
+    "sk": "RooTelegram 2.8.7 opravuje počítanie prečítaných správ v kanáloch a skupinách: predtým sa pri otvorení konverzácie všetky príspevky označili ako prečítané aj bez posúvania; teraz sa ako prečítané označia iba správy, ktoré skutočne posuniete. Aplikácia tiež zaberá približne o 32 MB menej vďaka odstráneniu duplicitnej knižnice."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),
