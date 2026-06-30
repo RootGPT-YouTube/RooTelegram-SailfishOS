@@ -27,6 +27,15 @@ Item {
     readonly property alias fileInformation: tdLibImage.fileInformation
     readonly property alias image: tdLibImage
 
+    // [2.8.8 STRADA 1] Quando true (lista in movimento) NON consegniamo la foto
+    // all'Image element: resta il minithumbnail inline (già in RAM, zero download/
+    // decodifica). La versione piena viene scaricata e decodificata SOLO a vista
+    // ferma (deferFullImage torna false) o al tap (MediaAlbumPage/ImagePage). Così
+    // scrollando mesi di canale i delegati nascono/muoiono senza mai decodificare
+    // una JPEG → niente ratchet RAM/CPU → niente OOM kill. Default false: nelle
+    // viste senza scroll (album/zoom) il comportamento è invariato.
+    property bool deferFullImage: false
+
     // Debounce window before the photo is handed to the Image element. On
     // photo-heavy channels (Durov & co.) a fast scroll creates and destroys
     // many MessagePhoto delegates within a few hundred ms; without this delay
@@ -36,8 +45,18 @@ Item {
     // screen while the timer is pending.
     onWidthChanged: setImageFileDeferred()
     onPhotoChanged: setImageFileDeferred()
+    // Vista tornata ferma: carica la foto piena dei delegati attualmente a schermo.
+    onDeferFullImageChanged: {
+        if (!deferFullImage) {
+            setImageFileDeferred();
+        }
+    }
 
     function setImageFileDeferred() {
+        // In movimento: non armiamo nemmeno il caricamento, teniamo il minithumbnail.
+        if (deferFullImage) {
+            return;
+        }
         setImageFileTimer.restart();
     }
 
@@ -45,7 +64,12 @@ Item {
         id: setImageFileTimer
         interval: 250
         repeat: false
-        onTriggered: setImageFile()
+        // Ricontrollo: se nel frattempo è ripartito lo scroll, salta (riproverà a fermo).
+        onTriggered: {
+            if (!tdLibPhoto.deferFullImage) {
+                setImageFile();
+            }
+        }
     }
 
     function setImageFile() {

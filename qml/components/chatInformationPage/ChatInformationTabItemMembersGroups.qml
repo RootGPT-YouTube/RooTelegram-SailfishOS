@@ -104,7 +104,7 @@ ChatInformationTabItemBase {
     }
 
     function canManageTarget(memberData) {
-        if (!chatInformationPage.isSuperGroup || chatInformationPage.isChannel) {
+        if ((!chatInformationPage.isSuperGroup && !chatInformationPage.isBasicGroup) || chatInformationPage.isChannel) {
             return false
         }
         var targetUserId = getMemberUserId(memberData)
@@ -123,7 +123,8 @@ ChatInformationTabItemBase {
     }
 
     function canPromoteTarget(memberData) {
-        if (!canPromoteMembers || !canManageTarget(memberData)) {
+        // Solo il Creator può nominare nuovi admin (gli altri admin no)
+        if (!isCreator || !canManageTarget(memberData)) {
             return false
         }
         var targetStatusType = memberData && memberData.status ? (memberData.status["@type"] || "") : ""
@@ -141,11 +142,11 @@ ChatInformationTabItemBase {
     }
 
     function canDemoteTarget(memberData) {
-        // Solo il Creator può rimuovere lo status di Admin
+        // Solo il Creator può rimuovere lo status di Admin (gli altri admin no)
         if (!isCreator) {
             return false
         }
-        if (!chatInformationPage.isSuperGroup || chatInformationPage.isChannel) {
+        if ((!chatInformationPage.isSuperGroup && !chatInformationPage.isBasicGroup) || chatInformationPage.isChannel) {
             return false
         }
         var targetUserId = getMemberUserId(memberData)
@@ -273,6 +274,11 @@ ChatInformationTabItemBase {
             return
         }
         setProcessing(userId, true)
+        // Nei gruppi "basic" non esiste il ban: si rimuove impostando lo status a Left.
+        // Nei supergruppi si banna (banned_until_date 0 = permanente).
+        var removeStatus = chatInformationPage.isBasicGroup
+                ? { "@type": "chatMemberStatusLeft" }
+                : { "@type": "chatMemberStatusBanned", "banned_until_date": 0 }
         tdLibWrapper.sendRequest({
             "@type": "setChatMemberStatus",
             "chat_id": chatInformationPage.chatInformation.id,
@@ -280,10 +286,7 @@ ChatInformationTabItemBase {
                 "@type": "messageSenderUser",
                 "user_id": userId
             },
-            "status": {
-                "@type": "chatMemberStatusBanned",
-                "banned_until_date": 0
-            },
+            "status": removeStatus,
             "@extra": "chatMemberAction:remove:" + chatInformationPage.chatInformation.id + ":" + userId
         })
     }
@@ -331,7 +334,10 @@ ChatInformationTabItemBase {
                 photoData: user.profile_photo ? user.profile_photo.small : null
             }
             width: parent.width
-            property int memberUserId: Number(member_id && member_id.user_id ? member_id.user_id : 0)
+            // NB: `var` non `int` — gli ID utente Telegram superano i 2^31 e `int`
+            // (32 bit) li troncherebbe a 2147483647, facendo fallire i lookup dei
+            // membri (promote/demote/remove abortivano silenziosamente al re-check).
+            property var memberUserId: Number(member_id && member_id.user_id ? member_id.user_id : 0)
             property var memberEntry: ({ "member_id": member_id, "status": status })
             property bool actionInProgress: tabBase.isProcessing(memberUserId)
             property bool canPromoteCurrent: tabBase.canPromoteTarget(memberEntry)
@@ -339,7 +345,7 @@ ChatInformationTabItemBase {
             property bool canDemoteCurrent: tabBase.canDemoteTarget(memberEntry)
             openMenuOnPressAndHold: false
             onPressAndHold: {
-                if (chatInformationPage.isSuperGroup && !chatInformationPage.isChannel && (canPromoteCurrent || canRemoveCurrent || canDemoteCurrent)) {
+                if ((chatInformationPage.isSuperGroup || chatInformationPage.isBasicGroup) && !chatInformationPage.isChannel && (canPromoteCurrent || canRemoveCurrent || canDemoteCurrent)) {
                     membersTabNeonMenu.open([
                         { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Promote to Admin"), visible: memberDelegate.canPromoteCurrent, callback: function() {
                             tabBase.promoteMemberToAdmin(memberDelegate.memberUserId);
@@ -347,8 +353,8 @@ ChatInformationTabItemBase {
                         { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove Admin"), visible: memberDelegate.canDemoteCurrent, callback: function() {
                             Remorse.itemAction(memberDelegate, qsTr("Removing Admin"), function() { tabBase.demoteAdminToMember(memberDelegate.memberUserId); });
                         }},
-                        { text: memberDelegate.actionInProgress ? qsTr("Processing…") : qsTr("Remove from group"), visible: memberDelegate.canRemoveCurrent, callback: function() {
-                            Remorse.itemAction(memberDelegate, qsTr("Removing user"), function() { tabBase.removeMemberFromGroup(memberDelegate.memberUserId); });
+                        { text: memberDelegate.actionInProgress ? qsTr("Processing…") : (chatInformationPage.isBasicGroup ? qsTr("Remove from group") : qsTr("Ban from group")), visible: memberDelegate.canRemoveCurrent, callback: function() {
+                            Remorse.itemAction(memberDelegate, chatInformationPage.isBasicGroup ? qsTr("Removing user") : qsTr("Banning user"), function() { tabBase.removeMemberFromGroup(memberDelegate.memberUserId); });
                         }}
                     ]);
                 }

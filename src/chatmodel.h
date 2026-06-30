@@ -97,6 +97,7 @@ private slots:
 private:
     class MessageData;
     void removeRange(int firstDeleted, int lastDeleted);
+    void enforceHistoryWindowAfterPrepend(qlonglong firstInsertedId);
     void insertMessages(const QList<MessageData*> newMessages);
     void appendMessages(const QList<MessageData*> newMessages);
     void prependMessages(const QList<MessageData*> newMessages);

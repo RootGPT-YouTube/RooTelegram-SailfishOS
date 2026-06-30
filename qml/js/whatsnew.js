@@ -13,47 +13,54 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.7";
+var version = "2.8.8";
 
 var changelogByLang = {
     "it": [
-        "Canali e gruppi: i messaggi non letti ora vengono segnati come letti solo man mano che li scorri, non più tutti insieme appena apri la chat. Il contatore dei non letti rispecchia ciò che hai davvero visto.",
-        "Installazione più leggera: rimossa una copia duplicata della libreria TDLib, circa 32 MB in meno occupati sul dispositivo."
+        "Canali molto grandi (es. Durov's Channel): scorrere indietro nel tempo è ora molto più fluido e regge molto più a lungo prima di rallentare. I lunghi blocchi che congelavano l'app per decine di secondi sono spariti nell'uso normale; spingendosi molto indietro di mesi può ancora impuntarsi, ma il miglioramento è netto.",
+        "Avvio più sicuro: una schermata di caricamento con barra di avanzamento blocca l'interazione finché l'app non è pronta, evitando i blocchi e i crash che potevano capitare toccando subito ricerche o chat pesanti nei primi secondi dopo l'apertura.",
+        "Avvio automatico all'accensione: nelle Impostazioni puoi far partire RooTelegram in background quando accendi il telefono, così le notifiche arrivano senza doverlo aprire. Attivo di default; chiudere o terminare l'app non la riavvia, l'avvio automatico agisce solo al boot del dispositivo."
     ],
     "en": [
-        "Channels and groups: unread messages are now marked as read only as you scroll through them, no longer all at once when you open the chat. The unread counter reflects what you actually saw.",
-        "Lighter install: removed a duplicate copy of the TDLib library, about 32 MB less used on the device."
+        "Very large channels (e.g. Durov's Channel): scrolling far back in time is now much smoother and holds up much longer before slowing down. The long freezes that used to lock the app for tens of seconds are gone in normal use; going very far back through many months can still stutter, but it's a big improvement.",
+        "Safer startup: a loading screen with a progress bar blocks interaction until the app is ready, preventing the freezes and crashes that could happen when tapping searches or heavy chats in the first seconds after opening.",
+        "Start at device boot: in Settings you can have RooTelegram launch in the background when the phone powers on, so notifications arrive without opening it first. On by default; closing or killing the app does not relaunch it, autostart only happens at device boot."
     ],
     "de": [
-        "Kanäle und Gruppen: ungelesene Nachrichten werden jetzt erst beim Durchscrollen als gelesen markiert, nicht mehr alle auf einmal beim Öffnen des Chats. Der Ungelesen-Zähler spiegelt wider, was du tatsächlich gesehen hast.",
-        "Schlankere Installation: eine doppelte Kopie der TDLib-Bibliothek entfernt, rund 32 MB weniger Speicherbelegung auf dem Gerät."
+        "Sehr große Kanäle (z. B. Durov's Channel): das Zurückscrollen in der Zeit ist jetzt deutlich flüssiger und hält viel länger durch, bevor es langsamer wird. Die langen Hänger, die die App zehn Sekunden und länger blockierten, sind im normalen Gebrauch verschwunden; sehr weit zurück über viele Monate kann es noch stocken, aber die Verbesserung ist deutlich.",
+        "Sichererer Start: ein Ladebildschirm mit Fortschrittsbalken sperrt die Bedienung, bis die App bereit ist, und verhindert so die Hänger und Abstürze, die auftreten konnten, wenn man in den ersten Sekunden nach dem Öffnen sofort auf Suchen oder schwere Chats tippte.",
+        "Automatischer Start beim Hochfahren: in den Einstellungen kannst du RooTelegram beim Einschalten des Telefons im Hintergrund starten lassen, damit Benachrichtigungen ankommen, ohne die App erst zu öffnen. Standardmäßig aktiv; die App zu schließen oder zu beenden startet sie nicht neu, der automatische Start erfolgt nur beim Gerätestart."
     ],
     "pl": [
-        "Kanały i grupy: nieprzeczytane wiadomości są teraz oznaczane jako przeczytane dopiero w miarę ich przewijania, a nie wszystkie naraz po otwarciu czatu. Licznik nieprzeczytanych odzwierciedla to, co faktycznie zobaczyłeś.",
-        "Lżejsza instalacja: usunięto zduplikowaną kopię biblioteki TDLib, około 32 MB mniej zajętego miejsca na urządzeniu."
+        "Bardzo duże kanały (np. Durov's Channel): przewijanie wstecz w czasie jest teraz dużo płynniejsze i wytrzymuje znacznie dłużej, zanim zwolni. Długie zawieszenia, które blokowały aplikację na dziesiątki sekund, zniknęły w normalnym użytkowaniu; przy bardzo głębokim cofaniu o wiele miesięcy może jeszcze się zacinać, ale poprawa jest wyraźna.",
+        "Bezpieczniejszy start: ekran ładowania z paskiem postępu blokuje interakcję, dopóki aplikacja nie jest gotowa, zapobiegając zawieszeniom i awariom, które mogły wystąpić po dotknięciu wyszukiwania lub ciężkich czatów w pierwszych sekundach po otwarciu.",
+        "Automatyczny start przy włączeniu telefonu: w Ustawieniach możesz sprawić, że RooTelegram uruchomi się w tle po włączeniu telefonu, aby powiadomienia przychodziły bez otwierania go. Domyślnie włączone; zamknięcie lub zakończenie aplikacji nie uruchamia jej ponownie, autostart następuje tylko przy starcie urządzenia."
     ],
     "ru": [
-        "Каналы и группы: непрочитанные сообщения теперь отмечаются как прочитанные только по мере прокрутки, а не все сразу при открытии чата. Счётчик непрочитанных отражает то, что вы действительно видели.",
-        "Более лёгкая установка: удалена дублирующая копия библиотеки TDLib, примерно на 32 МБ меньше занимаемого места на устройстве."
+        "Очень большие каналы (напр. Durov's Channel): прокрутка назад во времени теперь намного плавнее и держится гораздо дольше, прежде чем начать тормозить. Длинные подвисания, которые блокировали приложение на десятки секунд, исчезли при обычном использовании; при прокрутке очень далеко назад на много месяцев всё ещё возможны рывки, но улучшение значительное.",
+        "Более безопасный запуск: экран загрузки с индикатором прогресса блокирует взаимодействие, пока приложение не готово, предотвращая подвисания и сбои, которые могли возникать при нажатии на поиск или тяжёлые чаты в первые секунды после открытия.",
+        "Автозапуск при включении устройства: в Настройках можно сделать так, чтобы RooTelegram запускался в фоне при включении телефона, и уведомления приходили без его открытия. Включено по умолчанию; закрытие или завершение приложения не перезапускает его, автозапуск происходит только при загрузке устройства."
     ],
     "fr": [
-        "Canaux et groupes : les messages non lus ne sont désormais marqués comme lus qu'au fur et à mesure que vous les faites défiler, et non plus tous d'un coup à l'ouverture de la discussion. Le compteur de non-lus reflète ce que vous avez réellement vu.",
-        "Installation plus légère : suppression d'une copie en double de la bibliothèque TDLib, environ 32 Mo de moins occupés sur l'appareil."
+        "Très grands canaux (p. ex. Durov's Channel) : faire défiler loin en arrière dans le temps est désormais bien plus fluide et tient beaucoup plus longtemps avant de ralentir. Les longs blocages qui figeaient l'application pendant des dizaines de secondes ont disparu à l'usage normal ; en remontant très loin sur de nombreux mois, des à-coups restent possibles, mais l'amélioration est nette.",
+        "Démarrage plus sûr : un écran de chargement avec barre de progression bloque l'interaction jusqu'à ce que l'application soit prête, évitant les blocages et plantages qui pouvaient survenir en touchant des recherches ou des discussions lourdes dans les premières secondes après l'ouverture.",
+        "Démarrage automatique à l'allumage : dans les Réglages, vous pouvez faire démarrer RooTelegram en arrière-plan à l'allumage du téléphone, afin que les notifications arrivent sans l'ouvrir. Activé par défaut ; fermer ou forcer l'arrêt de l'application ne la relance pas, le démarrage automatique n'a lieu qu'au démarrage de l'appareil."
     ],
     "sk": [
-        "Kanály a skupiny: neprečítané správy sa teraz označujú ako prečítané až počas ich posúvania, nie všetky naraz pri otvorení konverzácie. Počítadlo neprečítaných odráža to, čo ste skutočne videli.",
-        "Ľahšia inštalácia: odstránená duplicitná kópia knižnice TDLib, približne o 32 MB menej zabraného miesta v zariadení."
+        "Veľmi veľké kanály (napr. Durov's Channel): posúvanie späť v čase je teraz oveľa plynulejšie a vydrží oveľa dlhšie, kým sa spomalí. Dlhé zaseknutia, ktoré blokovali aplikáciu na desiatky sekúnd, v bežnom používaní zmizli; pri veľmi hlbokom posúvaní o mnoho mesiacov sa ešte môže zasekávať, ale zlepšenie je výrazné.",
+        "Bezpečnejší štart: načítavacia obrazovka s indikátorom priebehu blokuje ovládanie, kým nie je aplikácia pripravená, čím predchádza zaseknutiam a pádom, ktoré mohli nastať po klepnutí na vyhľadávanie alebo ťažké konverzácie v prvých sekundách po otvorení.",
+        "Automatický štart pri zapnutí zariadenia: v Nastaveniach môžete nechať RooTelegram spustiť sa na pozadí pri zapnutí telefónu, aby upozornenia prichádzali bez jeho otvorenia. Predvolene zapnuté; zatvorenie alebo ukončenie aplikácie ju nereštartuje, automatický štart sa deje len pri štarte zariadenia."
     ]
 };
 
 var messageByLang = {
-    "it": "RooTelegram 2.8.7 sistema il conteggio dei messaggi letti in canali e gruppi: prima, aprendo una chat, tutti i post venivano segnati come letti anche senza scorrerli; ora si segnano letti solo i messaggi che scorri davvero. In più l'app occupa circa 32 MB in meno grazie alla rimozione di una libreria duplicata.",
-    "en": "RooTelegram 2.8.7 fixes the read-message count in channels and groups: previously, opening a chat marked every post as read even without scrolling; now only the messages you actually scroll through are marked as read. The app also takes about 32 MB less space thanks to removing a duplicated library.",
-    "de": "RooTelegram 2.8.7 korrigiert die Zählung gelesener Nachrichten in Kanälen und Gruppen: Bisher wurden beim Öffnen eines Chats alle Beiträge als gelesen markiert, auch ohne Scrollen; jetzt werden nur die Nachrichten als gelesen markiert, die du tatsächlich durchscrollst. Außerdem belegt die App dank Entfernung einer doppelten Bibliothek rund 32 MB weniger.",
-    "pl": "RooTelegram 2.8.7 naprawia licznik przeczytanych wiadomości w kanałach i grupach: wcześniej otwarcie czatu oznaczało wszystkie posty jako przeczytane nawet bez przewijania; teraz jako przeczytane oznaczane są tylko wiadomości, które faktycznie przewiniesz. Aplikacja zajmuje też około 32 MB mniej dzięki usunięciu zduplikowanej biblioteki.",
-    "ru": "RooTelegram 2.8.7 исправляет счётчик прочитанных сообщений в каналах и группах: раньше при открытии чата все посты отмечались как прочитанные даже без прокрутки; теперь прочитанными отмечаются только те сообщения, которые вы действительно прокручиваете. Приложение также занимает примерно на 32 МБ меньше благодаря удалению дублирующей библиотеки.",
-    "fr": "RooTelegram 2.8.7 corrige le comptage des messages lus dans les canaux et les groupes : auparavant, ouvrir une discussion marquait tous les messages comme lus même sans les faire défiler ; désormais, seuls les messages que vous faites réellement défiler sont marqués comme lus. L'application occupe aussi environ 32 Mo de moins grâce à la suppression d'une bibliothèque en double.",
-    "sk": "RooTelegram 2.8.7 opravuje počítanie prečítaných správ v kanáloch a skupinách: predtým sa pri otvorení konverzácie všetky príspevky označili ako prečítané aj bez posúvania; teraz sa ako prečítané označia iba správy, ktoré skutočne posuniete. Aplikácia tiež zaberá približne o 32 MB menej vďaka odstráneniu duplicitnej knižnice."
+    "it": "RooTelegram 2.8.8 rende molto più fluido lo scorrimento indietro nei canali grandi: i lunghi blocchi che congelavano l'app sono spariti nell'uso normale (scorrendo molto indietro di mesi può ancora rallentare, ma molto meno di prima). Aggiunge una schermata di avvio con barra di progresso che evita crash nei primi secondi, e l'avvio automatico in background all'accensione del telefono (attivabile e disattivabile nelle Impostazioni).",
+    "en": "RooTelegram 2.8.8 makes scrolling back through large channels much smoother: the long freezes that used to lock the app are gone in normal use (going very far back through many months can still slow down, but far less than before). It adds a startup screen with a progress bar that prevents crashes in the first seconds, and automatic background launch when the phone powers on (toggle on or off in Settings).",
+    "de": "RooTelegram 2.8.8 macht das Zurückscrollen in großen Kanälen viel flüssiger: die langen Hänger, die die App blockierten, sind im normalen Gebrauch verschwunden (sehr weit zurück über viele Monate kann es noch langsamer werden, aber deutlich weniger als zuvor). Hinzu kommen ein Startbildschirm mit Fortschrittsbalken, der Abstürze in den ersten Sekunden verhindert, und der automatische Start im Hintergrund beim Einschalten des Telefons (in den Einstellungen ein- und ausschaltbar).",
+    "pl": "RooTelegram 2.8.8 znacznie usprawnia przewijanie wstecz w dużych kanałach: długie zawieszenia, które blokowały aplikację, zniknęły w normalnym użytkowaniu (przy bardzo głębokim cofaniu o wiele miesięcy może jeszcze zwalniać, ale dużo mniej niż wcześniej). Dodaje ekran startowy z paskiem postępu, który zapobiega awariom w pierwszych sekundach, oraz automatyczne uruchamianie w tle po włączeniu telefonu (włączane i wyłączane w Ustawieniach).",
+    "ru": "RooTelegram 2.8.8 делает прокрутку назад в больших каналах намного плавнее: длинные подвисания, которые блокировали приложение, исчезли при обычном использовании (при прокрутке очень далеко назад на много месяцев всё ещё может тормозить, но гораздо меньше, чем раньше). Добавлены экран запуска с индикатором прогресса, предотвращающий сбои в первые секунды, и автоматический запуск в фоне при включении телефона (включается и отключается в Настройках).",
+    "fr": "RooTelegram 2.8.8 rend le défilement vers l'arrière dans les grands canaux bien plus fluide : les longs blocages qui figeaient l'application ont disparu à l'usage normal (en remontant très loin sur de nombreux mois, cela peut encore ralentir, mais bien moins qu'avant). Il ajoute un écran de démarrage avec barre de progression qui évite les plantages dans les premières secondes, et le lancement automatique en arrière-plan à l'allumage du téléphone (activable et désactivable dans les Réglages).",
+    "sk": "RooTelegram 2.8.8 robí posúvanie späť vo veľkých kanáloch oveľa plynulejším: dlhé zaseknutia, ktoré blokovali aplikáciu, v bežnom používaní zmizli (pri veľmi hlbokom posúvaní o mnoho mesiacov sa ešte môže spomaliť, ale oveľa menej než predtým). Pridáva štartovaciu obrazovku s indikátorom priebehu, ktorá predchádza pádom v prvých sekundách, a automatické spustenie na pozadí pri zapnutí telefónu (zapnuteľné a vypnuteľné v Nastaveniach)."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

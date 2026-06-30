@@ -133,6 +133,11 @@ MessageContentBase {
         anchors.fill: parent
         photo: rawMessage.content.photo
         highlighted: messagePhotoContent.highlighted
+        // [2.8.8 STRADA 1] Mentre la chat scorre mostra solo il minithumbnail; la foto
+        // piena si scarica/decodifica a vista ferma. messageListItem manca nelle viste
+        // album/zoom (lì vogliamo la piena subito) → di default non si differisce.
+        deferFullImage: !!messageListItem && !!messageListItem.precalculatedValues
+                        && messageListItem.precalculatedValues.viewMoving === true
         // Cap decoded texture size for inline previews. Channels like Durov's
         // load many high-res photos in a row; without this cap the GPU/EGL
         // pipeline runs out of texture memory during fast scroll and stalls

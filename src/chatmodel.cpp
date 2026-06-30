@@ -778,6 +778,11 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
             if (!messagesToBeAdded.isEmpty()) {
                 insertMessages(messagesToBeAdded);
                 setMessagesAlbum(messagesToBeAdded);
+                // [2.8.8] Finestra scorrevole: dopo un prepend di cronologia vecchia,
+                // pota i messaggi piu' recenti se il modello supera il cap (vedi func).
+                // messagesToBeAdded e' ordinato crescente -> .first() = il piu' vecchio
+                // del batch, che dopo un prepend finisce in cima (indice 0).
+                enforceHistoryWindowAfterPrepend(messagesToBeAdded.first()->messageId);
             }
 
             // Riempimento iniziale: continua a caricare la cronologia più vecchia
@@ -1125,6 +1130,41 @@ void ChatModel::removeRange(int firstDeleted, int lastDeleted)
         malloc_trim(0);
         LOG("removeRange done | live MessageData:" << s_messageDataLiveCount << "| rows:" << messages.size());
     }
+}
+
+// [2.8.8] Finestra scorrevole (v1, senso unico). Caricando cronologia piu' VECCHIA
+// (prepend, l'utente scrolla all'indietro) il modello cresceva senza limiti: su
+// canali grossi a -mesi (es. Durov's Channel) ogni nuovo blocco costava O(N) +
+// accumulo di immagini, fino al freeze. Se superiamo il cap E l'ultimo inserimento
+// e' stato un prepend, potiamo i messaggi piu' RECENTI (in fondo, indici alti).
+// E' SICURO senza causare salti: scrollando all'indietro il viewport sta in ALTO
+// (indici bassi), quindi rimuovere righe SOTTO il viewport non sposta il contentY
+// della ListView; e onMessagesIncrementalUpdate non fa scrollToIndex a chat gia'
+// inizializzata. Tornando verso il basso, triggerLoadMoreFuture ricarica i messaggi
+// potati. Solo chat normali: niente thread/forum/search/riempimento-iniziale, dove
+// le ancore di paginazione e i loop di dig si comportano diversamente.
+void ChatModel::enforceHistoryWindowAfterPrepend(qlonglong firstInsertedId)
+{
+    // Tetto generoso: ben oltre uno schermo, cosi' il taglio scatta solo in
+    // scroll profondo e il viewport resta lontanissimo dal punto di taglio.
+    static const int HISTORY_WINDOW_CAP = 500;
+    if (this->searchModeActive || this->messageThreadId != 0) {
+        return;
+    }
+    if (this->messages.size() <= HISTORY_WINDOW_CAP) {
+        return;
+    }
+    // Conferma che e' stato davvero un PREPEND: i messaggi appena inseriti sono
+    // finiti in cima (indice 0). Se non lo sono (append/insert al fondo) non
+    // tocchiamo nulla: tagliare l'alto mentre il viewport e' in basso salterebbe.
+    if (this->messages.isEmpty() || this->messages.first()->messageId != firstInsertedId) {
+        return;
+    }
+    const int firstToRemove = HISTORY_WINDOW_CAP;
+    const int lastToRemove = this->messages.size() - 1;
+    LOG("[WINDOW] Model over cap (" << this->messages.size() << "), trimming newer rows"
+        << firstToRemove << ".." << lastToRemove);
+    this->removeRange(firstToRemove, lastToRemove);
 }
 
 // [RAM #1 - diagnosi A] Caratterizza la RAM del processo per distinguere un

@@ -51,6 +51,33 @@ Page {
     // deep-link "apri Storie" da notifica storia (coda per il cold-start)
     property bool openStoriesRequested: false;
 
+    // [2.8.8] Gate di avvio: overlay che BLOCCA l'input finché la lista chat non è
+    // davvero pronta. Al primo avvio / dopo un kill, toccare il titolo (ricerca) o
+    // il pull-down (ricerca globale / nuova chat) mentre TDLib non è ancora Ready
+    // poteva freezare/crashare. La progress bar avanza per milestone (QML → client →
+    // auth Ready → connessione/primo batch → lista chat). Gate su authorizationState,
+    // NON sulla rete: offline non deve intrappolare l'utente (c'è anche un timeout).
+    property bool startupGateActive: true;
+    property real startupProgress: 0.05;
+
+    // Avanza il progresso SOLO in avanti (mai indietro) e solo a gate attivo.
+    function setStartupProgress(p) {
+        if (overviewPage.startupGateActive && p > overviewPage.startupProgress) {
+            overviewPage.startupProgress = p;
+        }
+    }
+    // Chiude il gate: porta la barra al 100% e, dopo una breve pausa (così la si vede
+    // davvero arrivare in fondo nonostante l'animazione lenta), lascia che il fade la
+    // nasconda. Il fade vero parte allo scadere di startupGateHoldTimer.
+    function dismissStartupGate() {
+        if (!overviewPage.startupGateActive || startupGateHoldTimer.running) {
+            return;
+        }
+        overviewPage.startupProgress = 1.0;
+        startupGateSafetyTimer.stop();
+        startupGateHoldTimer.start();
+    }
+
     onStatusChanged: {
         if (status === PageStatus.Active && initializationCompleted && !chatListCreated && !logoutLoading) {
             updateContent();
@@ -87,6 +114,8 @@ Page {
         repeat: false
         onTriggered: {
             overviewPage.chatListCreated = true;
+            // Lista chat pronta: chiudiamo il gate di avvio (sblocca l'input, barra al 100%).
+            overviewPage.dismissStartupGate();
             // Deep-link messo in coda mentre la lista non era ancora pronta (tap
             // notifica ad app chiusa / da daemon): ora apriamo chat/messaggio/URL.
             if (overviewPage.openStoriesRequested) {
@@ -426,6 +455,9 @@ Page {
         case TelegramAPI.AuthorizationStateClosed:
             overviewPage.loading = false;
             overviewPage.logoutLoading = false;
+            // Non autenticato: l'InitializationPage gestisce il suo flusso (login),
+            // togliamo il gate per non sovrapporlo / intrappolare l'utente.
+            overviewPage.dismissStartupGate();
             if(isOnInitialization) { // pageStack isn't ready on Component.onCompleted
                 openInitializationPageTimer.start()
             } else {
@@ -436,6 +468,7 @@ Page {
             loadingBusyIndicator.text = qsTr("Loading chat list...");
             overviewPage.loading = false;
             overviewPage.initializationCompleted = true;
+            overviewPage.setStartupProgress(0.55); // autenticato: ora si carica la lista chat
             overviewPage.updateContent();
             if (appSettings.disableVideoPreload) {
                 Functions.applyVideoPreloadOverride();
@@ -447,6 +480,7 @@ Page {
                 return;
             }
             Debug.log("Logging out")
+            overviewPage.dismissStartupGate();
             overviewPage.initializationCompleted = false;
             overviewPage.loading = false;
             chatListCreatedTimer.stop();
@@ -510,6 +544,9 @@ Page {
         }
         onConnectionStateChanged: {
             overviewPage.connectionState = connectionState;
+            if (connectionState === TelegramAPI.ConnectionReady) {
+                overviewPage.setStartupProgress(0.8);
+            }
             setPageStatus();
         }
         onOwnUserIdFound: {
@@ -540,6 +577,9 @@ Page {
                 }
                 return;
             }
+            // Primo batch di chat ricevuto (anche offline, da DB locale): la lista sta
+            // arrivando. Milestone indipendente dalla rete (può non arrivare ConnectionReady).
+            overviewPage.setStartupProgress(0.8);
             if(chats && chats.chat_ids && chats.chat_ids.length === 0) {
                 chatListCreatedTimer.restart();
             } else {
@@ -587,6 +627,8 @@ Page {
     }
 
     Component.onCompleted: {
+        startupGateSafetyTimer.start();
+        setStartupProgress(0.2); // QML caricato + client/parametri pronti
         initializePage();
     }
 
@@ -1431,6 +1473,81 @@ Page {
     // Menù neon a comparsa per il long-press sulle chat (sostituisce il ContextMenu Silica).
     NeonMenuOverlay {
         id: chatNeonMenu
+    }
+
+    // [2.8.8] Rete di sicurezza: se per qualunque motivo la lista chat non viene mai
+    // segnalata pronta (edge case offline/stallo TDLib), dopo un po' togliamo comunque
+    // il gate così l'utente non resta bloccato. Il gate vero si chiude prima, su
+    // chatListCreated / auth non-Ready.
+    Timer {
+        id: startupGateSafetyTimer
+        interval: 15000
+        repeat: false
+        onTriggered: {
+            Debug.log("[OverviewPage] Startup gate safety timeout reached, dismissing");
+            overviewPage.dismissStartupGate();
+        }
+    }
+
+    // [2.8.8] Pausa al 100%: dato che la barra è volutamente lenta (~5×), dopo aver
+    // raggiunto il 100% la teniamo visibile un attimo prima di avviare il fade, così
+    // l'utente vede chiaramente il caricamento completato. ~ durata animazione barra.
+    Timer {
+        id: startupGateHoldTimer
+        interval: 1400
+        repeat: false
+        onTriggered: {
+            overviewPage.startupGateActive = false;
+        }
+    }
+
+    // [2.8.8] Overlay-gate di avvio: copre la pagina e cattura il tocco (blocca input)
+    // finché la lista chat non è pronta, mostrando una progress bar a milestone.
+    Rectangle {
+        id: startupGate
+        anchors.fill: parent
+        z: 10000
+        color: Theme.overlayBackgroundColor
+        visible: opacity > 0
+        opacity: overviewPage.startupGateActive ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation { duration: 400 } }
+
+        // Inghiotte tutti i tocchi/gesti finché il gate è visibile: impedisce di
+        // toccare titolo/pull-down e avviare azioni pesanti prima che TDLib sia pronto.
+        MouseArea {
+            anchors.fill: parent
+            enabled: startupGate.visible
+            preventStealing: true
+            onClicked: {}
+            onPressAndHold: {}
+        }
+
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - 2 * Theme.horizontalPageMargin
+            spacing: Theme.paddingLarge
+
+            BusyIndicator {
+                anchors.horizontalCenter: parent.horizontalCenter
+                size: BusyIndicatorSize.Large
+                running: overviewPage.startupGateActive
+            }
+
+            ProgressBar {
+                id: startupProgressBar
+                width: parent.width
+                minimumValue: 0.0
+                maximumValue: 1.0
+                value: overviewPage.startupProgress
+                label: qsTr("Starting RooTelegram...")
+                // La percentuale segue il valore ANIMATO della barra (non il target
+                // startupProgress, che salta subito): così testo e barra avanzano insieme.
+                valueText: Math.round(startupProgressBar.value * 100) + "%"
+                // Animazione volutamente LENTA (~5×: 250→1250ms) per dare la certezza
+                // visiva che ogni fase di caricamento sia stata completata.
+                Behavior on value { NumberAnimation { duration: 1250; easing.type: Easing.OutQuad } }
+            }
+        }
     }
 
 }

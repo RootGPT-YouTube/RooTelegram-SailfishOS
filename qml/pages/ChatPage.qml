@@ -67,6 +67,9 @@ Page {
         if (chatIsOpen && chatInformation && chatInformation.id) {
             tdLibWrapper.closeChat(chatInformation.id);
             chatIsOpen = false;
+            // [2.8.8 STRADA 1] Uscendo dalla chat sfoltiamo la cache media (throttle
+            // interno 2min): libera i FileNode dei post scrollati in canali grossi.
+            tdLibWrapper.optimizeStorage();
         }
     }
     // NB: `var`, non `int`: in QML `int` è 32-bit e tronca gli user_id Telegram
@@ -2677,6 +2680,12 @@ Page {
                             readonly property int messageInReplyToHeight: Math.ceil(2 * replyChipFontMetrics.height) + Theme.paddingSmall;
                             readonly property int webPagePreviewHeight: ( (textColumnWidth * 2 / 3) + (6 * Theme.fontSizeExtraSmall) + ( 7 * Theme.paddingSmall) )
                             readonly property bool pageIsSelecting: chatPage.isSelecting
+                            // [2.8.8 STRADA 1] Vero mentre la lista è in movimento (drag, flick,
+                            // quick-scroll). Le foto dei post NON scaricano/decodificano la versione
+                            // piena finché la vista scorre: resta il minithumbnail (già in RAM), la
+                            // piena arriva solo a vista ferma. Taglia il picco RAM/CPU del deep-scroll
+                            // nei canali grossi (causa dell'OOM kill).
+                            readonly property bool viewMoving: chatView.moving || chatView.flicking || chatView.dragging || chatView.quickScrollAnimating
                         }
 
                         function handleScrollPositionChanged() {

@@ -37,15 +37,27 @@ Row {
     property var inReplyToMessage;
     property bool editable: false;
     property bool inReplyToMessageDeleted: false;
+    // Citazione (#2): se valorizzato, l'anteprima mostra SOLO la porzione citata
+    // (tra virgolette) invece del testo intero del messaggio.
+    property string quoteText: "";
 
     signal clearRequested()
 
-    onInReplyToMessageChanged: {
-        if (inReplyToMessage) {
-            inReplyToUserText.text = (inReplyToMessage.sender_id["@type"] === "messageSenderChat" ? page.chatInformation.title : (inReplyToRow.inReplyToMessage.sender_id.user_id !== inReplyToRow.myUserId) ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(inReplyToRow.inReplyToMessage.sender_id.user_id)), inReplyToUserText.font.pixelSize) : qsTr("You"));
+    function refreshInReplyToTexts() {
+        if (inReplyToMessageDeleted || !inReplyToMessage) {
+            return;
+        }
+        inReplyToUserText.text = (inReplyToMessage.sender_id["@type"] === "messageSenderChat" ? page.chatInformation.title : (inReplyToRow.inReplyToMessage.sender_id.user_id !== inReplyToRow.myUserId) ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(inReplyToRow.inReplyToMessage.sender_id.user_id)), inReplyToUserText.font.pixelSize) : qsTr("You"));
+        if (inReplyToRow.quoteText && inReplyToRow.quoteText.length > 0) {
+            var escaped = inReplyToRow.quoteText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            inReplyToMessageText.text = "“" + Emoji.emojify(escaped, inReplyToMessageText.font.pixelSize) + "”";
+        } else {
             inReplyToMessageText.text = Emoji.emojify(Functions.getMessageText(inReplyToRow.inReplyToMessage, true, inReplyToRow.myUserId, false), inReplyToMessageText.font.pixelSize);
         }
     }
+
+    onInReplyToMessageChanged: refreshInReplyToTexts()
+    onQuoteTextChanged: refreshInReplyToTexts()
 
     onInReplyToMessageDeletedChanged: {
         if (inReplyToMessageDeleted) {

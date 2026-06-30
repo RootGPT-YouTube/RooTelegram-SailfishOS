@@ -3086,6 +3086,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Search in messages</source>
         <translation>Hľadať v správach</translation>
     </message>
+    <message>
+        <source>Starting RooTelegram...</source>
+        <translation>Spúšťanie RooTelegram...</translation>
+    </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
@@ -4357,6 +4361,14 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
         <translation>Pri zatvorení alebo minimalizovaní aplikácie ponechať otvorený čet namiesto návratu na domovskú obrazovku. Nechajte zapnuté, aby sa nedokončený koncept pri zatvorení aplikácie nestratil.</translation>
+    </message>
+    <message>
+        <source>Start automatically at device boot</source>
+        <translation>Spúšťať automaticky pri štarte zariadenia</translation>
+    </message>
+    <message>
+        <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
+        <translation>Spustiť RooTelegram na pozadí pri zapnutí telefónu, aby upozornenia prichádzali bez jeho otvorenia. Zatvorenie alebo ukončenie aplikácie ju nereštartuje – automatický štart sa deje len pri štarte zariadenia.</translation>
     </message>
 </context>
 <context>

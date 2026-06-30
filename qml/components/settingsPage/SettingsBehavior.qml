@@ -45,6 +45,17 @@ AccordionItem {
 
             TextSwitch {
                 width: parent.columnWidth
+                checked: appSettings.autostartEnabled
+                text: qsTr("Start automatically at device boot")
+                description: qsTr("Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.")
+                automaticCheck: false
+                onClicked: {
+                    appSettings.autostartEnabled = !checked
+                }
+            }
+
+            TextSwitch {
+                width: parent.columnWidth
                 checked: appSettings.keepCurrentChatOnMinimize
                 text: qsTr("Stay in chat when closing the app")
                 description: qsTr("When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn't lost when the app closes.")

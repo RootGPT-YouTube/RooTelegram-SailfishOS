@@ -34,7 +34,7 @@ Page {
     }
 
     function getPageTitle() {
-        return isBannedMode() ? qsTr("Removed Users") : qsTr("Administrators")
+        return isBannedMode() ? qsTr("Removed/Banned Users") : qsTr("Administrators")
     }
 
     function getFilterType() {
@@ -311,7 +311,10 @@ Page {
         }
 
         onOkReceived: {
-            if (!request.startsWith("unbanChatMember:")) {
+            // NB: indexOf(...)===0, NON startsWith() — il motore JS di QML (Qt 5.6)
+            // è ES5 e non ha String.startsWith (lanciava TypeError, abortendo il
+            // refresh della lista dopo lo sban).
+            if (!request || request.indexOf("unbanChatMember:") !== 0) {
                 return
             }
             var parts = request.split(":")
@@ -326,7 +329,7 @@ Page {
         }
 
         onErrorReceived: {
-            if (extra && extra.startsWith("unbanChatMember:")) {
+            if (extra && extra.indexOf("unbanChatMember:") === 0) {
                 var parts = extra.split(":")
                 if (parts.length === 3 && parts[1].toString() === chatId.toString()) {
                     setProcessing(parts[2], false)

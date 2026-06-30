@@ -1,0 +1,16 @@
+[Unit]
+Description=RooTelegram - avvio automatico in background al boot del dispositivo
+# Parte quando la sessione utente e' pronta (compositore Wayland + booster su).
+After=post-user-session.target
+PartOf=post-user-session.target
+
+[Service]
+Type=simple
+# Avvia il daemon SOLO se l'utente non ha disattivato l'autostart, controllando un
+# file-marker nella config dir dell'app (scritto/rimosso dal toggle in Impostazioni).
+# IMPORTANTE: nessun Restart=. Se l'utente chiude o killa l'app, NON viene riavviata:
+# l'autostart agisce esclusivamente all'avvio del dispositivo.
+ExecStart=/bin/sh -c 'test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/autostart-disabled" && exit 0; exec /usr/bin/invoker --type=generic --single-instance /usr/bin/harbour-rootelegram --daemon'
+
+[Install]
+WantedBy=post-user-session.target

@@ -3058,6 +3058,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Search in messages</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Starting RooTelegram...</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
@@ -4318,6 +4322,14 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Start automatically at device boot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

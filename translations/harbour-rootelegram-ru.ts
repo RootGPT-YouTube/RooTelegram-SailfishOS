@@ -3086,6 +3086,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Search in messages</source>
         <translation>Поиск по сообщениям</translation>
     </message>
+    <message>
+        <source>Starting RooTelegram...</source>
+        <translation>Запуск RooTelegram...</translation>
+    </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
@@ -4357,6 +4361,14 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
         <translation>При закрытии или сворачивании приложения сохранять открытый чат, а не возвращаться на главный экран. Оставьте включённым, чтобы незавершённый черновик не терялся при закрытии приложения.</translation>
+    </message>
+    <message>
+        <source>Start automatically at device boot</source>
+        <translation>Запускать автоматически при загрузке устройства</translation>
+    </message>
+    <message>
+        <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
+        <translation>Запускать RooTelegram в фоне при включении телефона, чтобы уведомления приходили без его открытия. Закрытие или завершение приложения не перезапускает его — автозапуск происходит только при загрузке устройства.</translation>
     </message>
 </context>
 <context>

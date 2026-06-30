@@ -34,7 +34,14 @@ Image {
     property real maxSourceDimension: 0
 
     asynchronous: true
-    cache: true
+    // [2.8.8] Memoria deep-scroll: le PREVIEW INLINE (maxSourceDimension > 0, es. le
+    // foto dei post nei canali) NON vanno tenute in QQuickPixmapCache. Scrollando
+    // mesi di canale ogni foto si vede una sola volta: cache=true non dà riuso, ma
+    // RATCHETTA la RAM (pixmap decodificati trattenuti anche dopo che il delegate è
+    // distrutto) fino all'OOM kill (misurato: +94MB a colpo). cache=false le libera
+    // quando escono dallo schermo. Full-view/zoom (ImagePage, ZoomImage) e
+    // thumbnail/avatar (maxSourceDimension == 0) MANTENGONO la cache: lì il riuso serve.
+    cache: maxSourceDimension === 0
     enabled: !!file.fileId
     fillMode: Image.PreserveAspectCrop
     clip: true

@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.8.7
+RT_APP_VERSION = 2.8.8
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -279,6 +279,13 @@ exists($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}) {
 licenses.files = $$PWD/LICENSE $$PWD/NOTICE
 licenses.path = /usr/share/$${TARGET}/licenses
 INSTALLS += licenses
+
+# [2.8.8] Servizio systemd utente per l'autostart in background al boot del device.
+# Abilitato di default dallo scriptlet %posttrans (systemctl --global enable);
+# il toggle in Impostazioni crea/rimuove il marker che il servizio controlla.
+systemdservice.files = $$PWD/harbour-rootelegram.service
+systemdservice.path = /usr/lib/systemd/user
+INSTALLS += systemdservice
 
 # QR Code generator library (Nayuki, MIT): compilata nell'app per il login QR.
 qrcodegenlicense.files = $$PWD/src/qrcodegen/LICENSE

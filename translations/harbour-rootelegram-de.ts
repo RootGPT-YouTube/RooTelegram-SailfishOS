@@ -3064,6 +3064,10 @@ Nachrichten</numerusform>
         <source>Search in messages</source>
         <translation>In Nachrichten suchen</translation>
     </message>
+    <message>
+        <source>Starting RooTelegram...</source>
+        <translation>RooTelegram wird gestartet...</translation>
+    </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
@@ -4325,6 +4329,14 @@ Nachrichten</numerusform>
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
         <translation>Beim Schließen oder Minimieren der App den offenen Chat behalten, statt zur Startansicht zurückzukehren. Lass dies an, damit ein unfertiger Entwurf beim Schließen der App nicht verloren geht.</translation>
+    </message>
+    <message>
+        <source>Start automatically at device boot</source>
+        <translation>Beim Gerätestart automatisch starten</translation>
+    </message>
+    <message>
+        <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
+        <translation>RooTelegram beim Einschalten des Telefons im Hintergrund starten, damit Benachrichtigungen ankommen, ohne es erst zu öffnen. Die App zu schließen oder zu beenden startet sie nicht neu – der automatische Start erfolgt nur beim Gerätestart.</translation>
     </message>
 </context>
 <context>

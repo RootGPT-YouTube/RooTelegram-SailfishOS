@@ -111,11 +111,14 @@ ListItem {
     readonly property bool canSelectMessageText: !!(messageListItem.precalculatedValues && messageListItem.precalculatedValues.pageIsSelecting) && isSelected
     readonly property string selectedMessageText: canSelectMessageText ? (messageText.selectedText || "").replace(/\u2029/g, "\n") : ""
     readonly property bool hasSelectedMessageText: selectedMessageText.length > 0
+    // Offset di inizio selezione (hint di posizione per la quote nativa TDLib).
+    readonly property int selectedMessageTextStart: canSelectMessageText ? messageText.selectionStart : 0
     // Propaga il testo selezionato a ChatPage cos\u00ec la barra azioni in basso pu\u00f2
     // offrire "copia testo selezionato" accanto a "copia intero messaggio".
     onSelectedMessageTextChanged: {
         if (canSelectMessageText && isSelected) {
             page.activeSelectedText = selectedMessageText;
+            page.activeSelectedTextPosition = selectedMessageTextStart;
         }
     }
     property bool hasContentComponent
@@ -221,7 +224,7 @@ ListItem {
     signal replyToMessage()
     signal editMessage()
     signal forwardMessage()
-    signal quoteSelectedText(string selectedText)
+    signal quoteSelectedText(string selectedText, int position)
 
     // Mappa "OFFSET-LENGTH" → true degli spoiler già rivelati in questo messaggio.
     // Su Qt 5.6 (Sailfish) il binding analyzer NON traccia in modo affidabile le
@@ -433,7 +436,7 @@ ListItem {
         if (!hasSelectedMessageText || !canReplyToMessage) {
             return;
         }
-        quoteSelectedText(selectedMessageText);
+        quoteSelectedText(selectedMessageText, selectedMessageTextStart);
         clearSelectedText();
     }
 
@@ -1288,6 +1291,12 @@ ListItem {
                                 layer.effect: PressEffect { source: messageInReplyToRow }
                                 inReplyToMessage: messageInReplyToLoader.inReplyToMessage
                                 inReplyToMessageDeleted: messageInReplyToLoader.inReplyToMessageDeleted
+                                // Mostra la porzione citata (#2) se il messaggio risponde
+                                // con una quote (TDLib messageReplyToMessage.quote = textQuote;
+                                // textQuote.text = formattedText, .text.text = stringa).
+                                quoteText: (myMessage.reply_to && myMessage.reply_to.quote
+                                            && myMessage.reply_to.quote.text)
+                                           ? myMessage.reply_to.quote.text.text : ""
                             }
                             MouseArea {
                                 id: messageInReplyToMouseArea

@@ -186,6 +186,10 @@ public:
     Q_INVOKABLE void downloadFile(int fileId);
     Q_INVOKABLE void openChat(const QString &chatId);
     Q_INVOKABLE void closeChat(const QString &chatId);
+    // [2.8.8 STRADA 1] Sfoltisce la cache file su disco (foto/video dei post scrollati)
+    // e rilascia i relativi FileNode in RAM. Chiamata all'uscita dalla chat; throttle
+    // interno (max una volta ogni 2 min). Complementa il non-decodificare-in-scroll.
+    Q_INVOKABLE void optimizeStorage();
     // ANTI-RAM Strada C: la QML notifica quando la finestra è visibile/nascosta;
     // il riciclo del client TDLib parte solo a UI nascosta da un po'.
     Q_INVOKABLE void setUiVisible(bool visible);
@@ -598,6 +602,12 @@ private:
     QMap<qlonglong, QVariantMap> secretChats;
     QHash<QString, QVariantMap> customEmojiById;
     QHash<int, QString> customEmojiByThumbnailFileId;
+    // [2.8.8 perf] Indice inverso fileId-sticker -> customEmojiId. Senza, handleFileUpdated
+    // scandiva LINEARMENTE tutta customEmojiById a ogni file-update di un'emoji custom:
+    // nei canali pieni di emoji custom/premium (Durov's) la mappa cresce a migliaia e
+    // ogni update diventava O(N) -> tempesta di QVariantMap::value sul GUI thread =
+    // stutter da decine di secondi nel deep-scroll. Con l'indice il lookup torna O(1).
+    QHash<int, QString> customEmojiByStickerFileId;
     QSet<QString> pendingCustomEmojiRequests;
     QSet<int> customEmojiFileIds;
     QVariantMap unreadMessageInformation;

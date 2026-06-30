@@ -17,6 +17,10 @@ Page {
     id: storiesPage
     allowedOrientations: Orientation.All
 
+    // Tema: con Silica (useNeonTheme == false) tab e voci menu tornano allo stile
+    // nativo (niente corsivo/glow/vetro-arancio), come fanno OverviewPage & co.
+    readonly property bool neon: appSettings.useNeonTheme
+
     Component.onCompleted: {
         storiesModel.activeList = "main";
         storiesModel.refresh();
@@ -96,8 +100,10 @@ Page {
                         Rectangle {
                             anchors.fill: parent
                             radius: Theme.paddingSmall
-                            color: Theme.rgba("#ffffff", tabDelegate.active ? 0.18 : (tabDelegate.pressed ? 0.12 : 0.06))
-                            border.width: 2
+                            color: storiesPage.neon
+                                   ? Theme.rgba("#ffffff", tabDelegate.active ? 0.18 : (tabDelegate.pressed ? 0.12 : 0.06))
+                                   : Theme.rgba(Theme.highlightBackgroundColor, tabDelegate.active ? 0.5 : (tabDelegate.pressed ? 0.3 : 0.15))
+                            border.width: storiesPage.neon ? 2 : 0
                             border.color: Theme.rgba("#ff8a3d", tabDelegate.active ? 0.9 : 0.45)
                         }
                         Label {
@@ -108,9 +114,11 @@ Page {
                             truncationMode: TruncationMode.Fade
                             text: modelData.label
                             font.pixelSize: Theme.fontSizeSmall
-                            font.italic: true
-                            color: tabDelegate.active ? "#fff3e6" : "#ffffff"
-                            layer.enabled: true
+                            font.italic: storiesPage.neon
+                            color: storiesPage.neon
+                                   ? (tabDelegate.active ? "#fff3e6" : "#ffffff")
+                                   : (tabDelegate.active ? Theme.highlightColor : Theme.primaryColor)
+                            layer.enabled: storiesPage.neon
                             layer.effect: Glow {
                                 color: "#ffffff"
                                 radius: tabDelegate.active ? 8 : 5
@@ -133,9 +141,10 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("Refresh")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: storiesPage.neon
+                    color: storiesPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                                            : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: storiesPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }
@@ -144,9 +153,10 @@ Page {
                 Label {
                     anchors.centerIn: parent
                     text: qsTr("New story")
-                    font.italic: true
-                    color: parent.highlighted ? "#fff3e6" : "#ffffff"
-                    layer.enabled: true
+                    font.italic: storiesPage.neon
+                    color: storiesPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                                            : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    layer.enabled: storiesPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
             }

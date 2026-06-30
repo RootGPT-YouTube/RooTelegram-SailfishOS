@@ -54,6 +54,7 @@ class AppSettings : public QObject {
     // Quando true, chiudere/minimizzare l'app NON riporta lo stack alla Home:
     // riaprendo si resta nella chat aperta. Default false = comportamento storico.
     Q_PROPERTY(bool keepCurrentChatOnMinimize READ keepCurrentChatOnMinimize WRITE setKeepCurrentChatOnMinimize NOTIFY keepCurrentChatOnMinimizeChanged)
+    Q_PROPERTY(bool autostartEnabled READ autostartEnabled WRITE setAutostartEnabled NOTIFY autostartEnabledChanged)
     // Ultima versione per cui è stato mostrato il popup "Novità". Vuota = mai
     // mostrato (fresh install / pre-feature).
     Q_PROPERTY(QString lastSeenVersion READ lastSeenVersion WRITE setLastSeenVersion NOTIFY lastSeenVersionChanged)
@@ -90,6 +91,9 @@ public:
 
     bool keepCurrentChatOnMinimize() const;
     void setKeepCurrentChatOnMinimize(bool enable);
+
+    bool autostartEnabled() const;
+    void setAutostartEnabled(bool enable);
 
     // Gate soft dei permessi Sailjail (Camera, Microphone, Location, ...): il
     // sandbox di sistema li concede tutti insieme, questo è un controllo
@@ -184,6 +188,7 @@ public:
     Q_INVOKABLE void setStoryCustomAudienceUserIds(const QStringList &ids);
 
 signals:
+    void autostartEnabledChanged();
     void sendByEnterChanged();
     void focusTextAreaAfterSendChanged();
     void useOpenWithChanged();

@@ -10,6 +10,10 @@
 
 #include "appsettings.h"
 
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
+
 #define DEBUG_MODULE AppSettings
 #include "debuglog.h"
 
@@ -132,6 +136,41 @@ void AppSettings::setKeepCurrentChatOnMinimize(bool enable)
         settings.setValue(KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE, enable);
         emit keepCurrentChatOnMinimizeChanged();
     }
+}
+
+// [2.8.8] Autostart in background al boot. La fonte di verita' e' un file-marker
+// "autostart-disabled" nella config dir dell'app: il servizio systemd utente
+// (harbour-rootelegram.service) lo controlla all'avvio del dispositivo e lancia
+// il daemon solo se ASSENTE. Default ON = nessun marker su installazione pulita.
+// Usiamo un marker (non systemctl) perche' il sandbox Sailjail blocca l'accesso
+// al systemd utente dall'app; scrivere nella propria config dir e' invece permesso.
+static QString autostartMarkerPath(const QSettings &settings)
+{
+    return QFileInfo(settings.fileName()).absolutePath() + QStringLiteral("/autostart-disabled");
+}
+
+bool AppSettings::autostartEnabled() const
+{
+    return !QFile::exists(autostartMarkerPath(settings));
+}
+
+void AppSettings::setAutostartEnabled(bool enable)
+{
+    if (this->autostartEnabled() == enable) {
+        return;
+    }
+    const QString marker = autostartMarkerPath(settings);
+    if (enable) {
+        QFile::remove(marker);
+    } else {
+        QDir().mkpath(QFileInfo(marker).absolutePath());
+        QFile markerFile(marker);
+        if (markerFile.open(QIODevice::WriteOnly)) {
+            markerFile.close();
+        }
+    }
+    LOG("autostartEnabled" << enable);
+    emit autostartEnabledChanged();
 }
 
 bool AppSettings::isPermissionGranted(const QString &permission) const

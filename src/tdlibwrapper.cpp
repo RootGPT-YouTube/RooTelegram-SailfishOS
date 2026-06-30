@@ -616,6 +616,43 @@ void TDLibWrapper::closeChat(const QString &chatId)
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::optimizeStorage()
+{
+    // Throttle: scorrere/uscire da molte chat in fretta non deve scatenare un
+    // optimizeStorage ogni volta (è un lavoro non banale lato TDLib). Max 1/2min.
+    static qint64 lastRunMs = 0;
+    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
+    if (lastRunMs != 0 && (nowMs - lastRunMs) < 120000) {
+        return;
+    }
+    lastRunMs = nowMs;
+
+    LOG("Optimizing storage (pruning cached media, releasing FileNodes)");
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "optimizeStorage");
+    // Tetto morbido alla cache file su disco: oltre ~300MB TDLib elimina i media
+    // più vecchi e rilascia i relativi FileNode tenuti in RAM (il "trattenuto" del
+    // deep-scroll). Re-scaricabili on-demand: tradiamo disco/banda per stabilità RAM.
+    requestObject.insert("size", static_cast<qint64>(300) * 1024 * 1024);
+    requestObject.insert("ttl", 0);
+    requestObject.insert("count", 0);
+    // I file usati negli ultimi 60s sono immuni: non buttiamo ciò che si è appena visto.
+    requestObject.insert("immunity_delay", 60);
+    // Solo i tipi pesanti che si accumulano scrollando i canali (no sticker/emoji,
+    // che sono piccoli e fastidiosi da ri-scaricare).
+    QVariantList fileTypes;
+    const QStringList types { "fileTypePhoto", "fileTypeVideo", "fileTypeAnimation",
+                              "fileTypeDocument", "fileTypeVideoNote" };
+    for (const QString &t : types) {
+        QVariantMap fileType;
+        fileType.insert(_TYPE, t);
+        fileTypes.append(fileType);
+    }
+    requestObject.insert("file_types", fileTypes);
+    requestObject.insert("return_deleted_file_statistics", false);
+    this->sendRequest(requestObject);
+}
+
 // RSS corrente in kB da /proc/self/statm (campo 2 = pagine residenti).
 // Allocator-agnostico: vale sia con glibc che con eventuali preload.
 static qint64 currentRssKb()
@@ -3698,16 +3735,17 @@ void TDLibWrapper::handleFileUpdated(const QVariantMap &fileInformation)
                 customEmojiChanged = true;
             }
         }
-        QList<QString> customEmojiIds = this->customEmojiById.keys();
-        QListIterator<QString> idsIterator(customEmojiIds);
-        while (idsIterator.hasNext()) {
-            const QString customEmojiId = idsIterator.next();
-            QVariantMap sticker = this->customEmojiById.value(customEmojiId);
-            QVariantMap stickerFile = customEmojiStickerFileMap(sticker);
-            if (stickerFile.value(ID).toInt() == fileId) {
+        // [2.8.8 perf] Lookup O(1) via indice inverso, invece della scansione lineare di
+        // TUTTA customEmojiById a ogni file-update (era il collo di bottiglia del deep-scroll:
+        // O(update x N_emoji) -> stutter da decine di secondi sul GUI thread nei canali pieni
+        // di emoji custom). Vedi customEmojiByStickerFileId in tdlibwrapper.h.
+        const QString customEmojiIdBySticker = this->customEmojiByStickerFileId.value(fileId);
+        if (!customEmojiIdBySticker.isEmpty()) {
+            QVariantMap sticker = this->customEmojiById.value(customEmojiIdBySticker);
+            if (!sticker.isEmpty()) {
                 sticker.insert("sticker", fileInformation);
-                this->customEmojiById.insert(customEmojiId, sticker);
-                affectedCustomEmojiIds.insert(customEmojiId);
+                this->customEmojiById.insert(customEmojiIdBySticker, sticker);
+                affectedCustomEmojiIds.insert(customEmojiIdBySticker);
                 customEmojiChanged = true;
             }
         }
@@ -3970,6 +4008,7 @@ void TDLibWrapper::upsertCustomEmojiFromSticker(const QVariantMap &sticker)
     const int stickerFileId = stickerFile.value(ID).toInt();
     if (stickerFileId > 0) {
         this->customEmojiFileIds.insert(stickerFileId);
+        this->customEmojiByStickerFileId.insert(stickerFileId, customEmojiId);
         const QVariantMap stickerLocal = stickerFile.value("local").toMap();
         const bool hasStickerLocally = stickerLocal.value("is_downloading_completed").toBool()
                 && !stickerLocal.value("path").toString().isEmpty();

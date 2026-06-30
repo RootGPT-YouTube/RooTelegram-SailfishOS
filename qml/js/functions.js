@@ -45,6 +45,18 @@ function getUserName(userInformation) {
     return ((userInformation.first_name || "") + " " + (userInformation.last_name || "")).trim();
 }
 
+// Nome utente tappabile per i messaggi di servizio ("ha rimosso X", "ha aggiunto
+// Y"): genera un link `userId://` che Functions.handleLink apre come chat privata.
+// In contesti `simple` (anteprime lista chat, clipboard, edit) restituisce il
+// nome semplice senza HTML, per non sporcare il testo plain.
+function getServiceUserLink(userId, simple) {
+    var name = getUserName(tdLibWrapper.getUserInformation(userId));
+    if (simple) {
+        return name;
+    }
+    return "<a style=\"font-weight: bold; color:" + messageLinkColor() + ";\" href=\"userId://" + userId + "\">" + name + "</a>";
+}
+
 // Censura plain-text degli spoiler per i preview (chat list, notifiche): sostituisce
 // la sostringa coperta da textEntityTypeSpoiler con blocchi unicode U+2588 della
 // stessa lunghezza, così l'utente non legge il contenuto nel preview ma percepisce
@@ -158,7 +170,7 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
                 if (i > 0) {
                     addedUserNames += ", ";
                 }
-                addedUserNames += getUserName(tdLibWrapper.getUserInformation(message.content.member_user_ids[i]));
+                addedUserNames += getServiceUserLink(message.content.member_user_ids[i], simple);
             }
             return myself ? qsTr("have added %1 to the chat", "myself").arg(addedUserNames) : qsTr("has added %1 to the chat").arg(addedUserNames);
         }
@@ -166,7 +178,7 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         if (message.sender_id['@type'] === "messageSenderUser" && message.sender_id.user_id === message.content.user_id) {
             return myself ? qsTr("left this chat", "myself") : qsTr("left this chat");
         } else {
-            return myself ? qsTr("have removed %1 from the chat", "myself").arg(getUserName(tdLibWrapper.getUserInformation(message.content.user_id))) : qsTr("has removed %1 from the chat").arg(getUserName(tdLibWrapper.getUserInformation(message.content.user_id)));
+            return myself ? qsTr("have removed %1 from the chat", "myself").arg(getServiceUserLink(message.content.user_id, simple)) : qsTr("has removed %1 from the chat").arg(getServiceUserLink(message.content.user_id, simple));
         }
     case 'messageChatChangeTitle':
         return myself ? qsTr("changed the chat title to %1", "myself").arg(message.content.title) : qsTr("changed the chat title to %1").arg(message.content.title);

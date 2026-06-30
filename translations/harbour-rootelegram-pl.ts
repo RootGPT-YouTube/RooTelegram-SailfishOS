@@ -3086,6 +3086,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>Search in messages</source>
         <translation>Szukaj w wiadomościach</translation>
     </message>
+    <message>
+        <source>Starting RooTelegram...</source>
+        <translation>Uruchamianie RooTelegram...</translation>
+    </message>
 </context>
 <context>
     <name>PinScopeDialog</name>
@@ -4357,6 +4361,14 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>When you close or minimize the app, keep the open chat instead of returning to the home view. Keep this on so an unfinished draft isn&apos;t lost when the app closes.</source>
         <translation>Po zamknięciu lub zminimalizowaniu aplikacji zachowaj otwarty czat zamiast wracać do ekranu głównego. Zostaw włączone, aby niedokończona wersja robocza nie przepadła przy zamknięciu aplikacji.</translation>
+    </message>
+    <message>
+        <source>Start automatically at device boot</source>
+        <translation>Uruchamiaj automatycznie przy starcie urządzenia</translation>
+    </message>
+    <message>
+        <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
+        <translation>Uruchamiaj RooTelegram w tle po włączeniu telefonu, aby powiadomienia przychodziły bez otwierania go. Zamknięcie lub zakończenie aplikacji nie uruchamia jej ponownie – autostart następuje tylko przy starcie urządzenia.</translation>
     </message>
 </context>
 <context>

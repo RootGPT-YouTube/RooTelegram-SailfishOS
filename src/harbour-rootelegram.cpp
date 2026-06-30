@@ -173,13 +173,21 @@ int main(int argc, char *argv[])
     // performance. Va chiamato prima che vengano creati i thread (qui, all'avvio).
     mallopt(M_ARENA_MAX, 2);
 
-    // WEBM sticker (VP9): il decoder hardware msm_vidc (v4l2 vp9d) si incastra
-    // dopo ripetuti open/close del pipeline e porta giù l'app (vedi
-    // project_gif_loop_unsupported). Forziamo GStreamer a usare il decoder VP9
-    // SOFTWARE (libvpx vp9dec) portandolo a rank MAX: playbin lo preferisce
-    // all'hardware SOLO per il VP9. L'H264 delle GIF resta su hardware, intatto.
+    // Decoder GStreamer software forzati (rank MAX → playbin li preferisce all'HW).
     // Va settato prima che QtMultimedia faccia gst_init (qui, prima dell'app).
-    qputenv("GST_PLUGIN_FEATURE_RANK", QByteArray("vp9dec:MAX"));
+    //
+    // - vp9dec: lo sticker WEBM (VP9) sul decoder hardware msm_vidc (v4l2 vp9d) si
+    //   incastra dopo ripetuti open/close del pipeline e porta giù l'app (vedi
+    //   project_gif_loop_unsupported).
+    // - avdec_h264: le STORIE video ri-codificate da Telegram lato server escono con
+    //   una struttura di timestamp (es. tbr 120) che il decoder H.264 hardware del
+    //   device rifiuta con "not-negotiated (-4) / Internal data stream error" → il
+    //   visore mostra solo i primi secondi poi nero (gli stessi file si vedono sui
+    //   client ufficiali). Riprodotto on-device: HW fallisce, avdec_h264 software le
+    //   riproduce intere. Forzando il software l'H.264 via playbin (visore storie +
+    //   video in chat) decodifica in software; le GIF/animazioni NON sono toccate
+    //   perché usano il plugin custom DroidCodec, non playbin.
+    qputenv("GST_PLUGIN_FEATURE_RANK", QByteArray("vp9dec:MAX,avdec_h264:MAX"));
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     const QStringList startupArguments = app->arguments();

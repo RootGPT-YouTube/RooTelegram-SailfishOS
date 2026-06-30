@@ -45,6 +45,17 @@ MessageContentBase {
     // Loader non "attaccavano" → i controlli non tornavano a fine video).
     property bool isPlaying: false;
 
+    // [2.8.8 STRADA 1b] Mentre la chat scorre NON scarichiamo né decodifichiamo il
+    // thumbnail pieno del video: resta il minithumbnail inline (già in RAM, zero
+    // download). I canali di video (Durov & co.) hanno thumbnail spesso 1280px che,
+    // decodificati a risoluzione nativa a ogni delegato scrollato, ratchettavano la
+    // RAM fino al freeze (misurato 2026-06-30: cresceva solo la cartella thumbnails/,
+    // non photos/ già coperta da STRADA 1). A vista ferma (deferThumbnail→false) il
+    // thumbnail viene scaricato e decodificato. Default false: nelle viste senza
+    // scroll (manca messageListItem) il comportamento è invariato.
+    property bool deferThumbnail: !!messageListItem && !!messageListItem.precalculatedValues
+                                  && messageListItem.precalculatedValues.viewMoving === true
+
     // Dimensionamento come le foto (#5): primo frame mostrato COMPLETO, ridotto
     // all'80% della finestra (portrait e landscape), fumetto stretto sul media.
     property real mediaAspect: (videoData && videoData.width > 0 && videoData.height > 0)
@@ -105,6 +116,13 @@ MessageContentBase {
     // finché non si riapre la chat.
     onVideoDataChanged: updateVideoThumbnail();
 
+    // Vista tornata ferma: aggancia/decodifica il thumbnail dei video a schermo.
+    onDeferThumbnailChanged: {
+        if (!deferThumbnail) {
+            updateVideoThumbnail();
+        }
+    }
+
     function updateVideoThumbnail() {
         if (videoData) {
             if (typeof rawMessage !== "undefined") {
@@ -119,7 +137,10 @@ MessageContentBase {
                 handlePlay();
             } else if (typeof videoData.thumbnail !== "undefined") {
                 previewFileId = videoData.thumbnail.file.id;
-                if (videoData.thumbnail.file.local.is_downloading_completed) {
+                if (deferThumbnail) {
+                    // In scroll: resta il minithumbnail, niente download/decode del
+                    // thumbnail pieno. Riproveremo a vista ferma (onDeferThumbnailChanged).
+                } else if (videoData.thumbnail.file.local.is_downloading_completed) {
                     placeholderImage.source = videoData.thumbnail.file.local.path;
                 } else {
                     tdLibWrapper.downloadFile(previewFileId);
@@ -147,7 +168,12 @@ MessageContentBase {
             if (videoData) {
                 if (fileInformation.local.is_downloading_completed && fileId === previewFileId) {
                     videoData.thumbnail.photo = fileInformation;
-                    placeholderImage.source = fileInformation.local.path;
+                    // In scroll non decodifichiamo: un download in volo che si completa
+                    // NON deve assegnare il source (= decode). A vista ferma
+                    // onDeferThumbnailChanged riesegue updateVideoThumbnail e lo aggancia.
+                    if (!deferThumbnail) {
+                        placeholderImage.source = fileInformation.local.path;
+                    }
                 }
                 if (!fileInformation.remote.is_uploading_active && fileInformation.local.is_downloading_completed && fileId === videoFileId) {
                     videoDownloadBusyIndicator.running = false;
@@ -186,6 +212,21 @@ MessageContentBase {
         // Primo frame mostrato INTERO (come le foto), niente crop.
         fillMode: Image.PreserveAspectFit
         asynchronous: true
+        // [2.8.8 STRADA 1b] Come TDLibImage per le preview inline: NON tenere il
+        // thumbnail decodificato nella QQuickPixmapCache globale. Scrollando un canale
+        // di video ogni thumbnail si vede una sola volta → cache=true non dà riuso ma
+        // RATCHETTA la RAM (pixmap trattenute anche dopo che il delegate muore).
+        // cache=false le libera all'uscita dallo schermo.
+        cache: false
+        // [2.8.8 STRADA 1b] Cap di decodifica come le foto (TDLibImage.maxSourceDimension):
+        // i thumbnail video dei canali sono spesso 1280px → senza cap decodificavano a
+        // risoluzione nativa (~3.7MB RGBA l'uno) e scrollando un canale di video
+        // ratchettavano la RAM fino al freeze. 720px è abbondante per un'anteprima inline
+        // e taglia la RAM per-thumbnail ~4-8×. (parent, non self, per evitare binding loop.)
+        sourceSize {
+            width: parent ? Math.min(parent.width, 720) : 0
+            height: parent ? Math.min(parent.height, 720) : 0
+        }
         visible: status === Image.Ready && !videoMessageComponent.isPlaying
         layer.enabled: videoMessageComponent.highlighted
         layer.effect: PressEffect { source: placeholderImage }
