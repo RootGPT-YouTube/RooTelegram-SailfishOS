@@ -237,6 +237,7 @@ private:
     void processUpdateMessageIsPinned(const QVariantMap &receivedInformation);
     void processUsers(const QVariantMap &receivedInformation);
     void processMessageSenders(const QVariantMap &receivedInformation);
+    void processPollVoters(const QVariantMap &receivedInformation);
     void processError(const QVariantMap &receivedInformation);
     void processSecretChat(const QVariantMap &receivedInformation);
     void processUpdateSecretChat(const QVariantMap &receivedInformation);

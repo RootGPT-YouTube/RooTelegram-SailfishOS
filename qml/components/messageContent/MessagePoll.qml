@@ -87,7 +87,7 @@ MessageContentBase {
             font.pixelSize: Theme.fontSizeSmall
             width: parent.width
             visible: text !== ""
-            text: Emoji.emojify(pollData.question, Theme.fontSizeSmall)
+            text: Emoji.emojify(Functions.enhanceMessageText(pollData.question), Theme.fontSizeSmall)
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             textFormat: Text.StyledText
             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.highlightColor : Theme.primaryColor
@@ -114,7 +114,7 @@ MessageContentBase {
                 id: optionDelegate
                 width: pollMessageComponent.width
                 automaticCheck: false
-                text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                text: Emoji.emojify(modelData.text.text, Theme.fontSizeMedium)
                 checked: pollMessageComponent.chosenIndexes.indexOf(index) > -1
                 highlighted: pollMessageComponent.highlighted || down
                 onClicked: {
@@ -176,7 +176,7 @@ MessageContentBase {
                             id: voteTextLabel
                             property int lastLineWidth
                             width: parent.width
-                            text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                            text: Emoji.emojify(Functions.enhanceMessageText(modelData.text), Theme.fontSizeMedium)
                             textFormat: Text.StyledText
                             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.highlightColor : Theme.primaryColor
@@ -233,8 +233,9 @@ MessageContentBase {
         Label {
             width: parent.width
             wrapMode: Text.Wrap
-            visible: isQuiz && text.length > 0
-            text: Emoji.emojify(Functions.enhanceMessageText(pollData.type.explanation) || "", font.pixelSize)
+            // la spiegazione del quiz si mostra solo dopo aver risposto (o a sondaggio chiuso)
+            visible: isQuiz && text.length > 0 && !pollMessageComponent.canAnswer
+            text: pollData.type.explanation ? Emoji.emojify(Functions.enhanceMessageText(pollData.type.explanation), font.pixelSize) : ""
             textFormat: Text.StyledText
             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.highlightColor : Theme.primaryColor
             font.pixelSize: Theme.fontSizeExtraSmall
@@ -264,7 +265,7 @@ MessageContentBase {
                 }
 
                 IconButton {
-                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && pollData.type.allow_multiple_answers  && !pollMessageComponent.hasAnswered
+                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && pollData.type.allow_multiple_answers && !pollMessageComponent.hasAnswered
                     opacity: visible ? 1.0 : 0.0
                     Behavior on opacity { FadeAnimation {}}
                     icon.source: "image://theme/icon-m-send"

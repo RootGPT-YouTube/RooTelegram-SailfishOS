@@ -2818,7 +2818,7 @@ Page {
                                 var previewWidth = Math.min(parentWidth, Math.sqrt(previewAreaBase * targetAspectRatio));
                                 return Math.max(Theme.itemSizeExtraSmall, Math.round(previewWidth / targetAspectRatio));
                             case "messagePoll":
-                                return Theme.itemSizeSmall * (4 + content.poll.options);
+                                return Theme.itemSizeSmall * (4 + content.poll.options.length);
                             case "messageSticker":
                                 return content.sticker.height;
                             case "messageVideo":

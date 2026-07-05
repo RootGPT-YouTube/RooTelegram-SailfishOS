@@ -102,8 +102,9 @@ Page {
             Label {
                 width: parent.width
                 wrapMode: Text.Wrap
+                textFormat: Text.StyledText
                 color: Theme.secondaryHighlightColor
-                text: Emoji.emojify(pollData.question, font.pixelSize)
+                text: Emoji.emojify(Functions.enhanceMessageText(pollData.question), font.pixelSize)
             }
 
             Column {
@@ -123,10 +124,11 @@ Page {
                         width: resultsColumn.width
                         height: displayOptionLabel.height + displayOptionStatistics.height + displayOptionUsers.height + Theme.paddingLarge
                         property ListModel users: ListModel {}
+                        property int votersLoaded: 0
                         property string usersResponseIdentifierString: "pollResults."+pollResultsPage.chatId+"."+pollResultsPage.messageId+"."+index
                         function loadUsers() {
-                            if(users.count < modelData.voter_count) {
-                                tdLibWrapper.getPollVoters(pollResultsPage.chatId, pollResultsPage.messageId, index, 50, users.length, usersResponseIdentifierString)
+                            if(votersLoaded < modelData.voter_count) {
+                                tdLibWrapper.getPollVoters(pollResultsPage.chatId, pollResultsPage.messageId, index, 50, votersLoaded, usersResponseIdentifierString)
                             }
                         }
                         Component.onCompleted: {
@@ -146,8 +148,14 @@ Page {
                             onMessageSendersReceived: {
                                 Debug.log("Received poll users...")
                                 if(extra === optionDelegate.usersResponseIdentifierString) {
+                                    if(senders.length === 0) {
+                                        return; // niente altri votanti: stop, evita richieste in loop
+                                    }
+                                    optionDelegate.votersLoaded += senders.length;
                                     for(var i = 0; i < senders.length; i += 1) {
-                                        optionDelegate.users.append({id: senders[i].user_id, user:tdLibWrapper.getUserInformation(senders[i].user_id)});
+                                        if(senders[i]['@type'] === "messageSenderUser") {
+                                            optionDelegate.users.append({id: senders[i].user_id, user:tdLibWrapper.getUserInformation(senders[i].user_id)});
+                                        }
                                     }
                                     loadUsersTimer.start();
                                 }
@@ -165,7 +173,7 @@ Page {
                             sourceItem: displayOptionChosenMarker
                             direction: OpacityRamp.LeftToRight
                         }
-                        Column {
+                        Item {
                             id: iconsColumn
                             width: pollResultsPage.isQuiz ?Theme.iconSizeSmall + Theme.paddingMedium : Theme.paddingMedium
                             height: displayOptionLabel.height + displayOptionStatistics.height
@@ -185,7 +193,8 @@ Page {
 
                         Label {
                             id: displayOptionLabel
-                            text: Emoji.emojify(modelData.text, Theme.fontSizeMedium)
+                            text: Emoji.emojify(Functions.enhanceMessageText(modelData.text), Theme.fontSizeMedium)
+                            textFormat: Text.StyledText
                             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                             anchors {
                                 left: iconsColumn.right

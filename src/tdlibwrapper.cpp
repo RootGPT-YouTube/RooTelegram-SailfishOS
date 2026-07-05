@@ -1627,12 +1627,27 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessagePoll");
 
+    // TDLib 1.8.62: question e testi delle opzioni sono formattedText
+    // (schema verificato a runtime contro la libtdjson deployata)
+    QVariantMap formattedQuestion;
+    formattedQuestion.insert(_TYPE, "formattedText");
+    formattedQuestion.insert("text", question);
+
+    QVariantList pollOptions;
+    for (const QVariant &option : options) {
+        QVariantMap optionText;
+        optionText.insert(_TYPE, "formattedText");
+        optionText.insert("text", option.toString());
+        pollOptions.append(optionText);
+    }
+
     QVariantMap pollType;
     if(correctOption > -1) {
         pollType.insert(_TYPE, "pollTypeQuiz");
         pollType.insert("correct_option_id", correctOption);
         if(!explanation.isEmpty()) {
             QVariantMap formattedExplanation;
+            formattedExplanation.insert(_TYPE, "formattedText");
             formattedExplanation.insert("text", explanation);
             pollType.insert("explanation", formattedExplanation);
         }
@@ -1642,8 +1657,8 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
     }
 
     inputMessageContent.insert(TYPE, pollType);
-    inputMessageContent.insert("question", question);
-    inputMessageContent.insert("options", options);
+    inputMessageContent.insert("question", formattedQuestion);
+    inputMessageContent.insert("options", pollOptions);
     inputMessageContent.insert("is_anonymous", anonymous);
 
     requestObject.insert("input_message_content", inputMessageContent);

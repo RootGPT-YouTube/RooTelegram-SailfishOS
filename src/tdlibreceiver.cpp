@@ -187,6 +187,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateMessageIsPinned", &TDLibReceiver::processUpdateMessageIsPinned);
     handlers.insert("users", &TDLibReceiver::processUsers);
     handlers.insert("messageSenders", &TDLibReceiver::processMessageSenders);
+    handlers.insert("pollVoters", &TDLibReceiver::processPollVoters);
     handlers.insert("error", &TDLibReceiver::processError);
     handlers.insert("ok", &TDLibReceiver::ok);
     handlers.insert("secretChat", &TDLibReceiver::processSecretChat);
@@ -881,6 +882,19 @@ void TDLibReceiver::processMessageSenders(const QVariantMap &receivedInformation
 {
     LOG("Received Message Senders");
     emit messageSendersReceived(receivedInformation.value(_EXTRA).toString(), receivedInformation.value("senders").toList(), receivedInformation.value(TOTAL_COUNT).toInt());
+}
+
+void TDLibReceiver::processPollVoters(const QVariantMap &receivedInformation)
+{
+    LOG("Received Poll Voters");
+    // TDLib 1.8.62: getPollVoters risponde pollVoters con i MessageSender
+    // annidati in pollVoter.voter_id; riemessi come lista piatta di sender
+    const QVariantList voters = receivedInformation.value("voters").toList();
+    QVariantList senders;
+    for (const QVariant &voter : voters) {
+        senders.append(voter.toMap().value("voter_id"));
+    }
+    emit messageSendersReceived(receivedInformation.value(_EXTRA).toString(), senders, receivedInformation.value(TOTAL_COUNT).toInt());
 }
 
 void TDLibReceiver::processError(const QVariantMap &receivedInformation)
