@@ -42,6 +42,23 @@ MessageContentBase {
     }
     readonly property bool canAnswer: !hasAnswered && !pollData.is_closed
     readonly property bool isQuiz: pollData.type['@type'] === "pollTypeQuiz"
+    // le libtdjson variano tra le arch: schema classico (flag dentro type,
+    // correct_option_id singolare) o nuovo (flag sul poll, correct_option_ids)
+    readonly property bool allowsMultipleAnswers: pollData.allows_multiple_answers !== undefined
+                                                  ? pollData.allows_multiple_answers === true
+                                                  : pollData.type.allow_multiple_answers === true
+    readonly property bool allowsRevoting: pollData.allows_revoting !== undefined
+                                           ? pollData.allows_revoting === true
+                                           : !isQuiz
+    function isCorrectOption(index) {
+        if (!isQuiz) {
+            return false;
+        }
+        if (pollData.type.correct_option_ids !== undefined) {
+            return pollData.type.correct_option_ids.indexOf(index) > -1;
+        }
+        return pollData.type.correct_option_id === index;
+    }
     property list<NamedAction> extraContextMenuItems: [
         NamedAction {
             visible: !pollData.is_closed && pollMessageComponent.canEdit
@@ -49,14 +66,14 @@ MessageContentBase {
             action: function () { tdLibWrapper.stopPoll(pollMessageComponent.chatId, pollMessageComponent.messageId) }
         },
         NamedAction {
-            visible: !pollData.is_closed && !pollMessageComponent.isQuiz && pollMessageComponent.hasAnswered
+            visible: !pollData.is_closed && pollMessageComponent.allowsRevoting && pollMessageComponent.hasAnswered
             name: qsTr("Reset Answer")
             action: function () { pollMessageComponent.resetChosen() }
         }
     ]
 
     function handleChoose(index) {
-        if(!pollData.type.allow_multiple_answers) {
+        if(!allowsMultipleAnswers) {
             chosenIndexes = [index];
             sendResponse();
             return;
@@ -97,7 +114,7 @@ MessageContentBase {
             font.pixelSize: Theme.fontSizeTiny
             width: parent.width
             visible: text !== ""
-            text: pollData.is_closed ? qsTr("Final Result:") : (pollData.type.allow_multiple_answers ? qsTr("Multiple Answers are allowed.") : "")
+            text: pollData.is_closed ? qsTr("Final Result:") : (pollMessageComponent.allowsMultipleAnswers ? qsTr("Multiple Answers are allowed.") : "")
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             color: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
         }
@@ -158,7 +175,7 @@ MessageContentBase {
                         id: correctAnswerIcon
                         anchors.bottom: parent.bottom
                         highlighted: pollMessageComponent.isOwnMessage || pollMessageComponent.highlighted
-                        readonly property bool isRight: pollMessageComponent.isQuiz && pollData.type.correct_option_id === index
+                        readonly property bool isRight: pollMessageComponent.isCorrectOption(index)
                         source: "image://theme/icon-s-accept"
                         visible: isRight
                     }
@@ -265,7 +282,7 @@ MessageContentBase {
                 }
 
                 IconButton {
-                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && pollData.type.allow_multiple_answers && !pollMessageComponent.hasAnswered
+                    visible: !pollData.is_closed && pollMessageComponent.chosenIndexes.length > 0 && pollMessageComponent.allowsMultipleAnswers && !pollMessageComponent.hasAnswered
                     opacity: visible ? 1.0 : 0.0
                     Behavior on opacity { FadeAnimation {}}
                     icon.source: "image://theme/icon-m-send"

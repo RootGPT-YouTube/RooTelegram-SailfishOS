@@ -1620,6 +1620,29 @@ void TDLibWrapper::sendSavedAnimation(qlonglong chatId, const QString &fileId, q
     this->sendRequest(requestObject);
 }
 
+// Le libtdjson 1.8.62 imbarcate NON sono lo stesso snapshot su tutte le arch:
+// aarch64 usa lo schema poll classico (options:vector<formattedText>,
+// pollTypeRegular/Quiz), armv7hl/i486 quello nuovo (inputPollOption,
+// InputPollType, correct_option_ids). La sonda chiede alla lib caricata quale
+// formato accetta: il parse della richiesta avviene PRIMA del controllo
+// sull'eseguibilità sincrona, quindi "can't be executed synchronously"
+// significa che il formato è stato parsato con successo.
+static bool usesNewPollApi()
+{
+    static int cached = -1;
+    if (cached < 0) {
+        const char *probe = "{\"@type\":\"sendMessage\",\"chat_id\":1,\"input_message_content\":{"
+                            "\"@type\":\"inputMessagePoll\","
+                            "\"question\":{\"@type\":\"formattedText\",\"text\":\"x\"},"
+                            "\"options\":[{\"@type\":\"inputPollOption\",\"text\":{\"@type\":\"formattedText\",\"text\":\"x\"}}],"
+                            "\"type\":{\"@type\":\"inputPollTypeRegular\"}}}";
+        const char *result = td_json_client_execute(nullptr, probe);
+        cached = (result && QByteArray(result).contains("synchronously")) ? 1 : 0;
+        LOG("Poll API probe:" << (cached ? "schema nuovo (inputPollOption)" : "schema classico"));
+    }
+    return cached == 1;
+}
+
 void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId)
 {
     LOG("Sending poll message" << chatId << question << replyToMessageId);
@@ -1627,8 +1650,8 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessagePoll");
 
-    // TDLib 1.8.62: question e testi delle opzioni sono formattedText
-    // (schema verificato a runtime contro la libtdjson deployata)
+    const bool newApi = usesNewPollApi();
+
     QVariantMap formattedQuestion;
     formattedQuestion.insert(_TYPE, "formattedText");
     formattedQuestion.insert("text", question);
@@ -1638,13 +1661,27 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
         QVariantMap optionText;
         optionText.insert(_TYPE, "formattedText");
         optionText.insert("text", option.toString());
-        pollOptions.append(optionText);
+        if (newApi) {
+            QVariantMap inputPollOption;
+            inputPollOption.insert(_TYPE, "inputPollOption");
+            inputPollOption.insert("text", optionText);
+            pollOptions.append(inputPollOption);
+        } else {
+            pollOptions.append(optionText);
+        }
     }
 
     QVariantMap pollType;
     if(correctOption > -1) {
-        pollType.insert(_TYPE, "pollTypeQuiz");
-        pollType.insert("correct_option_id", correctOption);
+        if (newApi) {
+            pollType.insert(_TYPE, "inputPollTypeQuiz");
+            QVariantList correctOptionIds;
+            correctOptionIds.append(correctOption);
+            pollType.insert("correct_option_ids", correctOptionIds);
+        } else {
+            pollType.insert(_TYPE, "pollTypeQuiz");
+            pollType.insert("correct_option_id", correctOption);
+        }
         if(!explanation.isEmpty()) {
             QVariantMap formattedExplanation;
             formattedExplanation.insert(_TYPE, "formattedText");
@@ -1652,14 +1689,24 @@ void TDLibWrapper::sendPollMessage(qlonglong chatId, const QString &question, co
             pollType.insert("explanation", formattedExplanation);
         }
     } else {
-        pollType.insert(_TYPE, "pollTypeRegular");
-        pollType.insert("allow_multiple_answers", multiple);
+        if (newApi) {
+            pollType.insert(_TYPE, "inputPollTypeRegular");
+        } else {
+            pollType.insert(_TYPE, "pollTypeRegular");
+            pollType.insert("allow_multiple_answers", multiple);
+        }
     }
 
     inputMessageContent.insert(TYPE, pollType);
     inputMessageContent.insert("question", formattedQuestion);
     inputMessageContent.insert("options", pollOptions);
     inputMessageContent.insert("is_anonymous", anonymous);
+    if (newApi) {
+        inputMessageContent.insert("allows_multiple_answers", multiple);
+        if (correctOption <= -1) {
+            inputMessageContent.insert("allows_revoting", true);
+        }
+    }
 
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);

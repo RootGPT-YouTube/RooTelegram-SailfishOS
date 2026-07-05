@@ -232,7 +232,8 @@ LIBS += -L$$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/ -ltdjson
 # e creiamo `libtdjson.so` come SYMLINK a install-time. Prima copiavamo l'INTERA dir
 # lib/, che conteneva DUE copie reali identiche del .so (~32MB sprecati nell'RPM, e
 # contro le regole di packaging). Il glob `libtdjson.so.*` e' arch-aware:
-# aarch64/armv7hl -> .so.1.8.62, i486 -> .so.1.8.21.
+# tutte e tre le arch -> .so.1.8.62 (snapshot diversi: aarch64 schema poll
+# classico, armv7hl/i486 schema nuovo; il glob resta arch-agnostico).
 TDJSON_REAL = $$files($$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/libtdjson.so.*)
 TDJSON_SONAME = $$basename(TDJSON_REAL)
 telegram.files = $$TDJSON_REAL

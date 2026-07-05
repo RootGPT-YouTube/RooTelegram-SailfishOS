@@ -184,7 +184,7 @@ Page {
 
                             Icon {
                                 highlighted: true
-                                property bool isRight: pollResultsPage.isQuiz && pollData.type.correct_option_id === index
+                                property bool isRight: pollResultsPage.isQuiz && (pollData.type.correct_option_ids !== undefined ? pollData.type.correct_option_ids.indexOf(index) > -1 : pollData.type.correct_option_id === index)
                                 source: "image://theme/icon-s-accept"
                                 visible: isRight
                                 anchors.verticalCenter: parent.verticalCenter
