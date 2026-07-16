@@ -68,6 +68,7 @@ namespace {
     const QString HINT_GROUP_ID("x-rootelegram.group_id");        // int
     const QString HINT_CHAT_ID("x-rootelegram.chat_id");          // qlonglong
     const QString HINT_TOTAL_COUNT("x-rootelegram.total_count");  // int
+    const QString HINT_MAX_NOTIFICATION_ID("x-rootelegram.max_notification_id"); // int
 
     const QString HINT_IMAGE_PATH("image-path");                    // QString
     const QString HINT_VIBRA("x-nemo-vibrate");                     // bool
@@ -118,6 +119,10 @@ public:
     int notificationGroupId;
     qlonglong chatId;
     int totalCount;
+    // Id massimo tra le notifiche TDLib mostrate in questo gruppo: serve per
+    // removeNotificationGroup quando l'utente rimuove la notifica da lipstick.
+    // Persistito come hint per sopravvivere al riciclo anti-RAM (execv).
+    int maxNotificationId;
     Notification *nemoNotification;
     QMap<int,QVariantMap> activeNotifications;
     QList<int> notificationOrder;
@@ -127,6 +132,7 @@ NotificationManager::NotificationGroup::NotificationGroup(int group, qlonglong c
     notificationGroupId(group),
     chatId(chat),
     totalCount(count),
+    maxNotificationId(0),
     nemoNotification(notification)
 {
 }
@@ -180,7 +186,11 @@ NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings
             if (groupOk && chatOk && countOk && !notificationGroups.contains(groupId)) {
                 LOG("Restoring notification group" << groupId << "chatId" << chatId << "count" << totalCount);
                 applyBranding(notification);
-                notificationGroups.insert(groupId, new NotificationGroup(groupId, chatId, totalCount, notification));
+                NotificationGroup *group = new NotificationGroup(groupId, chatId, totalCount, notification);
+                // 0 se l'hint manca (notifica pubblicata da una versione precedente)
+                group->maxNotificationId = notification->hintValue(HINT_MAX_NOTIFICATION_ID).toInt();
+                notificationGroups.insert(groupId, group);
+                connectNotificationClosed(groupId, notification);
                 continue;
             }
         }
@@ -243,6 +253,7 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
             notification->setHintValue(HINT_PRIORITY, 120);
             notificationGroups.insert(groupId, notificationGroup =
                 new NotificationGroup(groupId, chatId, totalCount, notification));
+            connectNotificationClosed(groupId, notification);
         }
 
         QListIterator<QVariant> addedNotificationIterator(addedNotifications);
@@ -251,6 +262,9 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
             const int addedId = addedNotification.value(ID).toInt();
             notificationGroup->activeNotifications.insert(addedId, addedNotification);
             notificationGroup->notificationOrder.append(addedId);
+            if (addedId > notificationGroup->maxNotificationId) {
+                notificationGroup->maxNotificationId = addedId;
+            }
         }
 
         QListIterator<QVariant> removedNotificationIdsIterator(removedNotificationIds);
@@ -284,9 +298,12 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
         LOG("Feedback" << needFeedback);
         publishNotification(notificationGroup, needFeedback);
     } else if (notificationGroup) {
-        // No active notifications left in this group
-        notificationGroup->nemoNotification->close();
+        // No active notifications left in this group.
+        // Prima fuori dalla mappa, POI close(): se closed() venisse emesso in
+        // modo sincrono, handleNotificationClosed non deve più trovare il gruppo
+        // (lo tratterebbe come rimozione utente → doppio delete).
         notificationGroups.remove(groupId);
+        notificationGroup->nemoNotification->close();
         delete notificationGroup;
     }
 
@@ -398,12 +415,40 @@ void NotificationManager::handleMessageReaction(qlonglong chatId, qlonglong mess
     // updateMessageUnreadReactions arriva anche quando la reaction viene letta
     // (count torna a 0) o rimossa: notifichiamo solo quando c'è una nuova
     // reaction non letta.
+    const QString reactionKey = QString::number(chatId) + QLatin1Char(':') + QString::number(messageId);
     if (unreadReactionCount <= 0 || unreadReactions.isEmpty()) {
+        notifiedReactions.remove(reactionKey);
         return;
     }
 
-    // Prendiamo l'ultima reaction non letta (la più recente) per emoji + autore.
-    const QVariantMap lastReaction = unreadReactions.last().toMap();
+    // Dedup: TDLib può ri-emettere lo stesso stato di reaction non lette (es.
+    // dopo un resync o il riciclo anti-RAM). Notifichiamo solo se compare una
+    // firma (autore|emoji) mai vista per questo messaggio; lo stato salvato
+    // viene comunque riallineato (dimentica anche le reaction rimosse).
+    QSet<QString> currentSignatures;
+    QVariantMap newestUnseenReaction;
+    const QSet<QString> seenSignatures = notifiedReactions.value(reactionKey);
+    for (int i = 0; i < unreadReactions.size(); i++) {
+        const QVariantMap reaction = unreadReactions.at(i).toMap();
+        const QVariantMap rType = reaction.value(TYPE).toMap();
+        const QVariantMap rSender = reaction.value(SENDER_ID).toMap();
+        const QString signature = rSender.value(USER_ID).toString() + QLatin1Char('|')
+            + rSender.value(CHAT_ID).toString() + QLatin1Char('|')
+            + rType.value(EMOJI).toString() + QLatin1Char('|')
+            + rType.value("custom_emoji_id").toString();
+        currentSignatures.insert(signature);
+        if (!seenSignatures.contains(signature)) {
+            newestUnseenReaction = reaction; // l'ultima nuova in ordine di lista = la più recente
+        }
+    }
+    notifiedReactions.insert(reactionKey, currentSignatures);
+    if (newestUnseenReaction.isEmpty()) {
+        LOG("Reaction state already notified for" << chatId << messageId << "- skipping duplicate");
+        return;
+    }
+
+    // Prendiamo l'ultima reaction non letta nuova (la più recente) per emoji + autore.
+    const QVariantMap lastReaction = newestUnseenReaction;
     const QVariantMap reactionType = lastReaction.value(TYPE).toMap();
     const QString emoji = reactionType.value(EMOJI).toString(); // vuoto per custom emoji
 
@@ -540,6 +585,9 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     nemoNotification->setSummary(summary);
     nemoNotification->setHintValue(HINT_VIBRA, needFeedback);
     nemoNotification->setHintValue(HINT_IMAGE_PATH, notificationIconFile);
+    // Persistito per poter fare removeNotificationGroup anche dopo un riavvio
+    // del processo (riciclo anti-RAM), quando la mappa in RAM è andata persa.
+    nemoNotification->setHintValue(HINT_MAX_NOTIFICATION_ID, notificationGroup->maxNotificationId);
 
     // Don't show popup for the currently open chat
     if (!needFeedback || (chatModel->getChatId() == notificationGroup->chatId &&
@@ -571,5 +619,53 @@ void NotificationManager::controlLedNotification(bool enabled)
         mceInterface->ledPatternActivate(PATTERN);
     } else {
         mceInterface->ledPatternDeactivate(PATTERN);
+    }
+}
+
+void NotificationManager::connectNotificationClosed(int groupId, Notification *notification)
+{
+    // Lipstick emette NotificationClosed quando la notifica sparisce dallo
+    // schermo: tap dell'utente, clear dalla vista eventi, o il nostro close().
+    // La lookup per groupId nel gestore distingue i casi: se il gruppo è ancora
+    // in mappa la rimozione NON è partita da noi → è stato l'utente.
+    connect(notification, &Notification::closed, this, [this, groupId](uint reason) {
+        LOG("Notification closed by daemon, group" << groupId << "reason" << reason);
+        handleNotificationClosed(groupId);
+    });
+    // Cintura: il tap invoca la remote action e lipstick rimuove la notifica;
+    // se closed() non arrivasse, clicked() copre comunque il caso tap.
+    connect(notification, &Notification::clicked, this, [this, groupId]() {
+        LOG("Notification clicked, group" << groupId);
+        handleNotificationClosed(groupId);
+    });
+}
+
+void NotificationManager::handleNotificationClosed(int groupId)
+{
+    NotificationGroup *notificationGroup = notificationGroups.value(groupId);
+    if (!notificationGroup) {
+        // Chiusa da noi (close() dopo che TDLib ha rimosso il gruppo): il
+        // gruppo è già stato tolto dalla mappa, niente da fare.
+        return;
+    }
+    // Rimossa dall'utente (tap o clear): informa TDLib, altrimenti il gruppo
+    // resta attivo nel suo DB e viene ri-pubblicato in updateActiveNotifications
+    // al prossimo avvio del client (= a ogni riciclo anti-RAM) → la stessa
+    // notifica "ricompare" dopo un po' anche se già vista.
+    LOG("Notification group" << groupId << "removed by user, informing TDLib up to id" << notificationGroup->maxNotificationId);
+    if (notificationGroup->maxNotificationId > 0) {
+        tdLibWrapper->removeNotificationGroup(groupId, notificationGroup->maxNotificationId);
+    }
+    notificationGroups.remove(groupId);
+    // Se lipstick non l'avesse già rimossa (percorso clicked()), chiudila:
+    // per una notifica già rimossa dal daemon è un no-op innocuo.
+    notificationGroup->nemoNotification->close();
+    // Siamo dentro un segnale del Notification stesso: mai delete diretto del
+    // sender, si usa deleteLater e si sgancia dal distruttore del gruppo.
+    notificationGroup->nemoNotification->deleteLater();
+    notificationGroup->nemoNotification = nullptr;
+    delete notificationGroup;
+    if (notificationGroups.isEmpty()) {
+        controlLedNotification(false);
     }
 }

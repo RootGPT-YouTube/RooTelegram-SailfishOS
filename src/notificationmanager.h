@@ -26,6 +26,8 @@
 #define NOTIFICATIONMANAGER_H
 
 #include <QObject>
+#include <QHash>
+#include <QSet>
 #include <nemonotifications-qt5/notification.h>
 #include "tdlibwrapper.h"
 #include "appsettings.h"
@@ -59,6 +61,8 @@ private:
     void applyBranding(Notification *notification) const;
     void publishNotification(const NotificationGroup *notificationGroup, bool needFeedback);
     void controlLedNotification(bool enabled);
+    void connectNotificationClosed(int groupId, Notification *notification);
+    void handleNotificationClosed(int groupId);
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
         const QVariantList &removedNotificationIds = QVariantList(),
@@ -73,6 +77,10 @@ private:
     QMap<qlonglong,ChatInfo*> chatMap;
     QMap<int,NotificationGroup*> notificationGroups;
     QString notificationIconFile;
+    // Dedup notifiche reaction: per messaggio ("chatId:messageId") l'insieme
+    // delle firme (autore|emoji) già notificate — evita doppioni quando TDLib
+    // ri-emette updateMessageUnreadReactions con lo stesso stato.
+    QHash<QString, QSet<QString> > notifiedReactions;
 
 };
 

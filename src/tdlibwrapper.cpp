@@ -833,6 +833,20 @@ void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::removeNotificationGroup(int notificationGroupId, int maxNotificationId)
+{
+    // Contratto TDLib: va chiamato quando è l'UTENTE a rimuovere la notifica
+    // (tap o clear dalla vista eventi). Senza questa chiamata TDLib tiene il
+    // gruppo attivo nel suo DB e lo ri-manda in updateActiveNotifications al
+    // prossimo avvio del client (= a ogni riciclo anti-RAM) → notifiche fantasma.
+    LOG("Removing notification group" << notificationGroupId << "up to" << maxNotificationId);
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "removeNotificationGroup");
+    requestObject.insert("notification_group_id", notificationGroupId);
+    requestObject.insert("max_notification_id", maxNotificationId);
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::sendChatAction(qlonglong chatId, const QString &action)
 {
     // "sta scrivendo…" lato nostro (#17): informa l'altro che stiamo digitando

@@ -198,6 +198,7 @@ public:
     Q_INVOKABLE void deleteChat(qlonglong chatId);
     Q_INVOKABLE void getChatHistory(qlonglong chatId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50, bool onlyLocal = false);
     Q_INVOKABLE void viewMessage(qlonglong chatId, qlonglong messageId, bool force);
+    Q_INVOKABLE void removeNotificationGroup(int notificationGroupId, int maxNotificationId);
     Q_INVOKABLE void sendChatAction(qlonglong chatId, const QString &action = "chatActionTyping");
     Q_INVOKABLE void pinMessage(const QString &chatId, const QString &messageId, bool disableNotification = false, bool onlyForSelf = false);
     Q_INVOKABLE void unpinMessage(const QString &chatId, const QString &messageId);

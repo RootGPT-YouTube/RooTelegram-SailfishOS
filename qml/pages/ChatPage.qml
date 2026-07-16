@@ -1928,6 +1928,16 @@ Page {
             chatInformation.unread_count = unreadCount;
             chatUnreadMessagesItem.visible = ( !chatPage.loading && unreadCount > 0 && chatOverviewItem.visible );
             chatUnreadMessagesCount.text = Functions.formatUnreadCount(unreadCount)
+            if (unreadCount === 0 && chatPage.status === PageStatus.Active) {
+                // Fix notifiche-fantasma: prima mention/reaction venivano marcate
+                // lette solo se il viewMessageTimer vedeva GIÀ unread_count === 0
+                // (spesso non ancora aggiornato → race persa). Qui reagiamo al
+                // momento esatto in cui l'unread arriva a 0: mention/reaction
+                // residue vengono lette e TDLib rimuove il loro gruppo notifiche,
+                // che altrimenti ricomparirebbe al riciclo anti-RAM successivo.
+                tdLibWrapper.readAllChatMentions(chatInformation.id);
+                tdLibWrapper.readAllChatReactions(chatInformation.id);
+            }
         }
         onLastReadSentMessageUpdated: {
             Debug.log("[ChatPage] Updating last read sent index, new index: ", lastReadSentIndex);
