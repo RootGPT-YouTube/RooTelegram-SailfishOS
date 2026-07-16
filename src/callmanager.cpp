@@ -298,6 +298,28 @@ void sinkInputInfoCb(pa_context * /*c*/, const pa_sink_input_info *info, int eol
         scan->found = true;
     }
 }
+
+// Legge il volume corrente di un sink per nome (per salvarlo prima della
+// forzatura WEBRTC in flat-volumes e ripristinarlo a chiamata finita).
+struct SinkVolumeScan {
+    pa_threaded_mainloop *ml = nullptr;
+    pa_cvolume volume;
+    bool found = false;
+};
+
+void sinkVolumeInfoCb(pa_context * /*c*/, const pa_sink_info *info, int eol, void *userdata)
+{
+    SinkVolumeScan *scan = static_cast<SinkVolumeScan *>(userdata);
+    if (eol) {
+        pa_threaded_mainloop_signal(scan->ml, 0);
+        return;
+    }
+    if (!info) {
+        return;
+    }
+    scan->volume = info->volume;
+    scan->found = true;
+}
 } // namespace
 
 void CallManager::ensurePulseConnection()
@@ -418,10 +440,35 @@ bool CallManager::routeWebrtcToCallSink()
         if (o2) {
             pa_operation_unref(o2);
         }
-        // Forza il volume a 100%/0dB: su SFOS 5.1 lo stream WEBRTC nasce a 0%
-        // (-inf dB) → audio inesistente finché non lo si riporta a livello normale.
+        // flat-volumes=yes su SFOS: alzare lo stream WEBRTC trascina in alto anche
+        // il volume del SINK di sistema (sono accoppiati) e quel valore resta alto
+        // a chiamata finita. Salviamo UNA volta il volume "pulito" del sink PRIMA di
+        // forzarlo: lo stream nasce a 0% e in flat-volume non abbassa il sink, quindi
+        // qui il valore e' ancora quello scelto dall'utente. Ripristino in stopInstance().
+        if (!m_sinkVolumeSaved && !m_audioSink.isEmpty()) {
+            SinkVolumeScan vscan;
+            vscan.ml = ml;
+            pa_operation *ov = pa_context_get_sink_info_by_name(
+                ctx, m_audioSink.toUtf8().constData(), &sinkVolumeInfoCb, &vscan);
+            if (ov) {
+                while (pa_operation_get_state(ov) == PA_OPERATION_RUNNING) {
+                    pa_threaded_mainloop_wait(ml);
+                }
+                pa_operation_unref(ov);
+            }
+            if (vscan.found) {
+                m_savedSinkVolume = vscan.volume;
+                m_sinkVolumeSaved = true;
+                LOG("Call: saved system sink volume before WEBRTC boost, avg"
+                    << pa_cvolume_avg(&m_savedSinkVolume));
+            }
+        }
+        // Volume iniziale a 90% (non 100%): su SFOS 5.1 lo stream WEBRTC nasce a 0%
+        // (-inf dB) e va portato a un livello udibile UNA volta sola. Non lo
+        // ri-forziamo dopo (il timer si ferma appena trova lo stream), cosi'
+        // l'utente puo' regolarlo durante la chiamata.
         pa_cvolume cv;
-        pa_cvolume_set(&cv, scan.channels, PA_VOLUME_NORM);
+        pa_cvolume_set(&cv, scan.channels, (PA_VOLUME_NORM * 9) / 10);
         pa_operation *o3 = pa_context_set_sink_input_volume(ctx, scan.index, &cv, nullptr, nullptr);
         if (o3) {
             pa_operation_unref(o3);
@@ -454,6 +501,24 @@ void CallManager::stopInstance()
 {
     m_audioUnmuteTimer->stop();
     stopKeepDisplayOn();
+    // flat-volumes: ripristina il volume di sistema del sink salvato prima della
+    // forzatura WEBRTC. Senza questo, a chiamata finita il volume di sistema
+    // resta alto (bug segnalato: pactl sempre ~100%, minimo alzato).
+    if (m_sinkVolumeSaved) {
+        pa_context *ctx = static_cast<pa_context *>(m_pulseContext);
+        pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop *>(m_pulseMainloop);
+        if (ctx && ml && !m_audioSink.isEmpty() && pa_context_get_state(ctx) == PA_CONTEXT_READY) {
+            pa_threaded_mainloop_lock(ml);
+            pa_operation *o = pa_context_set_sink_volume_by_name(
+                ctx, m_audioSink.toUtf8().constData(), &m_savedSinkVolume, nullptr, nullptr);
+            if (o) {
+                pa_operation_unref(o);
+            }
+            pa_threaded_mainloop_unlock(ml);
+            LOG("Call ended: restored system sink volume on" << m_audioSink);
+        }
+        m_sinkVolumeSaved = false;
+    }
     if (!instance) {
         return;
     }

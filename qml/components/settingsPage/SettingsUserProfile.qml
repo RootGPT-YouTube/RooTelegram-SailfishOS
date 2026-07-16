@@ -170,6 +170,9 @@ AccordionItem {
                     Connections {
                         target: tdLibWrapper
                         onContactsImported: {
+                            // Aggiorna la lista contatti del ContactsModel, altrimenti
+                            // "Nuova chat" non mostra gli importati fino al riavvio.
+                            tdLibWrapper.getContacts();
                             appNotification.show(qsTr("Contacts successfully synchronized with Telegram."));
                         }
                     }

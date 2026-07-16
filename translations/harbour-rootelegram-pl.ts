@@ -5940,5 +5940,9 @@ niedostępne</translation>
         <source>Camera is turned off in RooTelegram settings.</source>
         <translation>Aparat jest wyłączony w ustawieniach RooTelegram.</translation>
     </message>
+    <message>
+        <source>If these emoji match your contact&apos;s, the call is end-to-end encrypted</source>
+        <translation>Jeśli te emoji zgadzają się z emoji rozmówcy, połączenie jest szyfrowane end-to-end</translation>
+    </message>
 </context>
 </TS>

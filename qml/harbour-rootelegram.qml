@@ -291,6 +291,7 @@ ApplicationWindow
                     callScreen.speakerOn = (call.is_video === true);
                     callScreen.connectedAt = 0;
                     callScreen.elapsed = 0;
+                    callScreen.verifyEmojis = [];
                     if (!outgoing) {
                         appWindow.startCallRingtone();   // entrante: squilla + vibra
                     } else {
@@ -308,6 +309,11 @@ ApplicationWindow
                     if (typeof callManager !== 'undefined') {
                         callManager.setSpeakerphoneOn(callScreen.speakerOn);
                     }
+                }
+                // Emoji di verifica cifratura: disponibili da callStateReady in poi.
+                if (st === "callStateReady" && call.state && call.state.emojis
+                        && callScreen.verifyEmojis.length === 0) {
+                    callScreen.verifyEmojis = call.state.emojis;
                 }
                 callScreen.visible = true;
                 appWindow.activate();
@@ -345,6 +351,7 @@ ApplicationWindow
                     callScreen.visible = false;
                     callScreen.callId = 0;
                     callScreen.callState = "";
+                    callScreen.verifyEmojis = [];
                     // Ripristina l'orientamento della pagina sotto.
                     if (callScreen.savedOrientations !== undefined && pageStack.currentPage) {
                         pageStack.currentPage.allowedOrientations = callScreen.savedOrientations;
@@ -375,6 +382,11 @@ ApplicationWindow
         property bool speakerOn: false   // default: auricolare (no vivavoce)
         property double connectedAt: 0
         property int elapsed: 0
+        // Emoji di verifica cifratura E2E: le 4 emoji fornite da TDLib in
+        // callStateReady (state.emojis), derivate dalla chiave condivisa. Se
+        // combaciano con quelle dell'interlocutore la chiamata è cifrata e non
+        // intercettata. Azzerate a ogni nuova chiamata / a fine chiamata.
+        property var verifyEmojis: []
         readonly property bool ringingIncoming: callState === "callStatePending" && !outgoing
         readonly property bool connected: callState === "callStateReady"
         // V3c: videochiamata connessa → layout dedicato (info in alto, controlli in basso).
@@ -579,6 +591,32 @@ ApplicationWindow
                 text: callScreen.statusText()
             }
 
+            // Emoji di verifica cifratura E2E (le 4 emoji di callStateReady).
+            Column {
+                width: parent.width
+                spacing: Theme.paddingSmall
+                visible: callScreen.connected && callScreen.verifyEmojis.length > 0
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: Theme.paddingLarge
+                    Repeater {
+                        model: callScreen.verifyEmojis
+                        Label {
+                            text: modelData
+                            font.pixelSize: Theme.fontSizeExtraLarge * 1.4
+                        }
+                    }
+                }
+                Label {
+                    width: parent.width
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.Wrap
+                    text: qsTr("If these emoji match your contact's, the call is end-to-end encrypted")
+                    color: Theme.secondaryColor
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                }
+            }
+
             Item { width: 1; height: Theme.paddingLarge }
 
             // Entrante che squilla: Accetta / Rifiuta.
@@ -659,6 +697,19 @@ ApplicationWindow
                     color: Theme.secondaryHighlightColor
                     font.pixelSize: Theme.fontSizeMedium
                     text: callScreen.statusText()
+                }
+                // Emoji di verifica cifratura E2E (compatte, sopra il video).
+                Row {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: Theme.paddingMedium
+                    visible: callScreen.connected && callScreen.verifyEmojis.length > 0
+                    Repeater {
+                        model: callScreen.verifyEmojis
+                        Label {
+                            text: modelData
+                            font.pixelSize: Theme.fontSizeLarge
+                        }
+                    }
                 }
             }
         }

@@ -13,47 +13,54 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.9";
+var version = "2.8.10";
 
 var changelogByLang = {
     "it": [
-        "Sondaggi riparati: la creazione falliva e domande/risposte non venivano più visualizzate correttamente. Ora creazione (normale, anonimo, risposte multiple, quiz con spiegazione), voto, ritiro del voto, elenco dei votanti, risultati e chiusura funzionano di nuovo.",
-        "La spiegazione dei quiz compare solo dopo aver risposto (o a sondaggio chiuso), non più in anticipo."
+        "Volume delle chiamate: risolto il problema per cui, dopo una chiamata, il volume di sistema restava più alto (minimo alzato, volume sempre al massimo). Ora al termine della chiamata il volume torna esattamente com'era prima.",
+        "Il volume iniziale in chiamata è più equilibrato (90% anziché forzato al massimo) e resta regolabile durante la conversazione.",
+        "Nuovo: durante le chiamate vengono mostrate le 4 emoji di verifica della cifratura. Se combaciano con quelle dell'interlocutore, la chiamata è cifrata end-to-end e non intercettata."
     ],
     "en": [
-        "Polls fixed: creating them failed and questions/answers were no longer displayed correctly. Creation (regular, anonymous, multiple answers, quiz with explanation), voting, retracting your vote, the voter list, results and closing now work again.",
-        "Quiz explanations only appear after you answer (or when the poll is closed), no longer in advance."
+        "Call volume: fixed the issue where the system volume stayed higher after a call (raised minimum, volume stuck at maximum). The volume now returns to exactly what it was before the call ended.",
+        "The initial in-call volume is more balanced (90% instead of forced to maximum) and stays adjustable during the conversation.",
+        "New: the 4 encryption verification emoji are now shown during calls. If they match your contact's, the call is end-to-end encrypted and not intercepted."
     ],
     "de": [
-        "Umfragen repariert: das Erstellen schlug fehl und Fragen/Antworten wurden nicht mehr korrekt angezeigt. Erstellen (normal, anonym, Mehrfachantworten, Quiz mit Erklärung), Abstimmen, Stimme zurückziehen, Wählerliste, Ergebnisse und Schließen funktionieren jetzt wieder.",
-        "Die Quiz-Erklärung erscheint erst nach der Antwort (oder bei geschlossener Umfrage), nicht mehr im Voraus."
+        "Anruflautstärke: das Problem behoben, bei dem die Systemlautstärke nach einem Anruf höher blieb (angehobenes Minimum, Lautstärke auf Maximum hängend). Die Lautstärke kehrt jetzt am Anrufende genau zum vorherigen Wert zurück.",
+        "Die anfängliche Gesprächslautstärke ist ausgewogener (90 % statt auf Maximum erzwungen) und bleibt während des Gesprächs regelbar.",
+        "Neu: Während Anrufen werden die 4 Emoji zur Verschlüsselungsprüfung angezeigt. Stimmen sie mit denen des Kontakts überein, ist der Anruf Ende-zu-Ende verschlüsselt und nicht abgehört."
     ],
     "pl": [
-        "Naprawione ankiety: tworzenie kończyło się błędem, a pytania/odpowiedzi nie wyświetlały się już poprawnie. Tworzenie (zwykła, anonimowa, wielokrotny wybór, quiz z wyjaśnieniem), głosowanie, wycofanie głosu, lista głosujących, wyniki i zamykanie znów działają.",
-        "Wyjaśnienie quizu pojawia się dopiero po udzieleniu odpowiedzi (lub po zamknięciu ankiety), a nie z wyprzedzeniem."
+        "Głośność połączeń: naprawiono problem, przez który po połączeniu głośność systemu pozostawała wyższa (podniesione minimum, głośność utknięta na maksimum). Po zakończeniu połączenia głośność wraca teraz dokładnie do poprzedniej wartości.",
+        "Początkowa głośność w rozmowie jest bardziej wyważona (90% zamiast wymuszonego maksimum) i pozostaje regulowana podczas rozmowy.",
+        "Nowość: podczas połączeń wyświetlane są 4 emoji weryfikacji szyfrowania. Jeśli zgadzają się z emoji rozmówcy, połączenie jest szyfrowane end-to-end i nieprzechwytywane."
     ],
     "ru": [
-        "Опросы исправлены: создание завершалось ошибкой, а вопросы и ответы отображались неправильно. Создание (обычный, анонимный, с несколькими ответами, викторина с пояснением), голосование, отзыв голоса, список проголосовавших, результаты и закрытие снова работают.",
-        "Пояснение викторины появляется только после ответа (или при закрытом опросе), а не заранее."
+        "Громкость звонков: устранена проблема, из-за которой после звонка системная громкость оставалась выше (поднятый минимум, громкость застревала на максимуме). Теперь по завершении звонка громкость возвращается точно к прежнему значению.",
+        "Начальная громкость во время звонка стала более сбалансированной (90% вместо принудительного максимума) и остаётся регулируемой во время разговора.",
+        "Новое: во время звонков показываются 4 эмодзи проверки шифрования. Если они совпадают с эмодзи собеседника, звонок зашифрован сквозным шифрованием и не перехвачен."
     ],
     "fr": [
-        "Sondages réparés : la création échouait et les questions/réponses ne s'affichaient plus correctement. La création (normal, anonyme, réponses multiples, quiz avec explication), le vote, le retrait du vote, la liste des votants, les résultats et la clôture fonctionnent à nouveau.",
-        "L'explication des quiz n'apparaît qu'après avoir répondu (ou une fois le sondage clos), plus à l'avance."
+        "Volume des appels : correction du problème où le volume système restait plus élevé après un appel (minimum relevé, volume bloqué au maximum). Le volume revient désormais exactement à sa valeur d'avant à la fin de l'appel.",
+        "Le volume initial en appel est plus équilibré (90 % au lieu d'être forcé au maximum) et reste réglable pendant la conversation.",
+        "Nouveau : les 4 emoji de vérification du chiffrement sont désormais affichés pendant les appels. S'ils correspondent à ceux de votre contact, l'appel est chiffré de bout en bout et non intercepté."
     ],
     "sk": [
-        "Ankety opravené: vytváranie zlyhávalo a otázky/odpovede sa už nezobrazovali správne. Vytváranie (bežná, anonymná, viac odpovedí, kvíz s vysvetlením), hlasovanie, stiahnutie hlasu, zoznam hlasujúcich, výsledky a zatvorenie opäť fungujú.",
-        "Vysvetlenie kvízu sa zobrazí až po odpovedi (alebo pri zatvorenej ankete), už nie vopred."
+        "Hlasitosť hovorov: opravený problém, keď po hovore zostala hlasitosť systému vyššia (zdvihnuté minimum, hlasitosť zaseknutá na maxime). Po skončení hovoru sa hlasitosť teraz vráti presne na predchádzajúcu hodnotu.",
+        "Počiatočná hlasitosť počas hovoru je vyváženejšia (90 % namiesto vynúteného maxima) a zostáva nastaviteľná počas rozhovoru.",
+        "Novinka: počas hovorov sa zobrazujú 4 emoji na overenie šifrovania. Ak sa zhodujú s emoji druhej strany, hovor je šifrovaný end-to-end a neodpočúvaný."
     ]
 };
 
 var messageByLang = {
-    "it": "Sondaggi riparati: creazione (normale, anonimo, multi-risposta, quiz), voto, ritiro del voto, risultati e chiusura ora funzionano. La spiegazione dei quiz compare solo dopo la risposta.",
-    "en": "Polls fixed: creation (regular, anonymous, multiple answers, quiz), voting, retracting your vote, results and closing now work. Quiz explanations only appear after you answer.",
-    "de": "Umfragen repariert: Erstellen (normal, anonym, Mehrfachantworten, Quiz), Abstimmen, Stimme zurückziehen, Ergebnisse und Schließen funktionieren jetzt. Die Quiz-Erklärung erscheint erst nach der Antwort.",
-    "pl": "Naprawione ankiety: tworzenie (zwykła, anonimowa, wielokrotny wybór, quiz), głosowanie, wycofanie głosu, wyniki i zamykanie znów działają. Wyjaśnienie quizu pojawia się dopiero po odpowiedzi.",
-    "ru": "Опросы исправлены: создание (обычный, анонимный, несколько ответов, викторина), голосование, отзыв голоса, результаты и закрытие теперь работают. Пояснение викторины появляется только после ответа.",
-    "fr": "Sondages réparés : création (normal, anonyme, réponses multiples, quiz), vote, retrait du vote, résultats et clôture fonctionnent désormais. L'explication des quiz n'apparaît qu'après la réponse.",
-    "sk": "Ankety opravené: vytváranie (bežná, anonymná, viac odpovedí, kvíz), hlasovanie, stiahnutie hlasu, výsledky a zatvorenie teraz fungujú. Vysvetlenie kvízu sa zobrazí až po odpovedi."
+    "it": "Volume chiamate: dopo una chiamata il volume di sistema non resta più alto, torna com'era prima; volume iniziale più equilibrato. Nuovo: durante le chiamate compaiono le 4 emoji di verifica della cifratura.",
+    "en": "Call volume: after a call the system volume no longer stays high — it returns to what it was before; more balanced initial volume. New: the 4 encryption verification emoji now appear during calls.",
+    "de": "Anruflautstärke: nach einem Anruf bleibt die Systemlautstärke nicht mehr höher — sie kehrt genau zum vorherigen Wert zurück. Die anfängliche Gesprächslautstärke ist ausgewogener und regelbar.",
+    "pl": "Głośność połączeń: po połączeniu głośność systemu nie pozostaje już wyższa — wraca dokładnie do poprzedniej wartości. Początkowa głośność w rozmowie jest bardziej wyważona i regulowana.",
+    "ru": "Громкость звонков: после звонка системная громкость больше не остаётся выше — она возвращается точно к прежнему значению. Начальная громкость во время звонка стала сбалансированнее и регулируемой.",
+    "fr": "Volume des appels : après un appel, le volume système ne reste plus élevé — il revient exactement à sa valeur d'avant. Le volume initial en appel est plus équilibré et réglable.",
+    "sk": "Hlasitosť hovorov: po hovore hlasitosť systému už nezostáva vyššia — vráti sa presne na predchádzajúcu hodnotu. Počiatočná hlasitosť počas hovoru je vyváženejšia a nastaviteľná."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

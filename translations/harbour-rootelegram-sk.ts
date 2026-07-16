@@ -5939,5 +5939,9 @@ available</source>
         <source>Camera is turned off in RooTelegram settings.</source>
         <translation>Fotoaparát je vypnutý v nastaveniach RooTelegram.</translation>
     </message>
+    <message>
+        <source>If these emoji match your contact&apos;s, the call is end-to-end encrypted</source>
+        <translation>Ak sa tieto emoji zhodujú s emoji vášho kontaktu, hovor je šifrovaný end-to-end</translation>
+    </message>
 </context>
 </TS>

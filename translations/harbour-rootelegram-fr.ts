@@ -5894,5 +5894,9 @@ indisponible</translation>
         <source>Camera is turned off in RooTelegram settings.</source>
         <translation>La caméra est désactivée dans les réglages de RooTelegram.</translation>
     </message>
+    <message>
+        <source>If these emoji match your contact&apos;s, the call is end-to-end encrypted</source>
+        <translation>Si ces emoji correspondent à ceux de votre contact, l&apos;appel est chiffré de bout en bout</translation>
+    </message>
 </context>
 </TS>

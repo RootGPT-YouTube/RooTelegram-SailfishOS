@@ -50,8 +50,16 @@ Page {
     Connections {
         target: tdLibWrapper
         onContactsImported: {
-            reloadContacts();
+            // contactIds del ContactsModel è popolata solo dalla risposta di
+            // getContacts: dopo l'import va richiesta di nuovo, altrimenti i
+            // contatti appena importati non compaiono fino al riavvio.
+            tdLibWrapper.getContacts();
             appNotification.show(qsTr("Contacts successfully synchronized with Telegram."));
+        }
+        onUsersReceived: {
+            if (extra === "contactsRequested") {
+                reloadContacts();
+            }
         }
     }
 

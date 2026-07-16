@@ -16,6 +16,7 @@
 #include <QList>
 #include <memory>
 #include <vector>
+#include <pulse/volume.h>   // pa_cvolume (volume di sistema del sink salvato per il restore)
 
 namespace tgcalls {
 class Instance;
@@ -119,6 +120,12 @@ private:
     QString m_speakerPort;
     QString m_earpiecePort;
     bool m_speakerOn;   // V4: stato vivavoce (per riapplicare la porta al routing)
+    // flat-volumes=yes su SFOS accoppia il volume dello stream WEBRTC a quello del
+    // sink di sistema: forzando su lo stream trasciniamo su il sink e resta alto a
+    // chiamata finita. Salviamo qui il volume "pulito" del sink prima della forzatura
+    // e lo ripristiniamo in stopInstance().
+    pa_cvolume m_savedSinkVolume;
+    bool m_sinkVolumeSaved = false;
 };
 
 #endif // CALLMANAGER_H
