@@ -55,6 +55,14 @@ namespace {
     const QString NOTIFICATION_GROUP_ID("notification_group_id");
     const QString ADDED_NOTIFICATIONS("added_notifications");
     const QString REMOVED_NOTIFICATION_IDS("removed_notification_ids");
+    const QString UNREAD_COUNT("unread_count");
+    const QString UNREAD_MENTION_COUNT("unread_mention_count");
+    const QString UNREAD_REACTION_COUNT("unread_reaction_count");
+
+    // removeNotificationGroup con id ignoto (gruppo zombie senza notifiche
+    // caricabili, maxNotificationId==0): TDLib clampa internamente il valore
+    // a current_notification_id, quindi INT32_MAX = "spurga tutto il gruppo".
+    const int PURGE_ALL_NOTIFICATIONS_ID = 2147483647;
 
     const QString CHAT_TYPE_BASIC_GROUP("chatTypeBasicGroup");
     const QString CHAT_TYPE_SUPERGROUP("chatTypeSupergroup");
@@ -205,16 +213,77 @@ NotificationManager::~NotificationManager()
     qDeleteAll(notificationGroups.values());
 }
 
-void NotificationManager::handleUpdateActiveNotifications(const QVariantList &notificationGroups)
+void NotificationManager::handleUpdateActiveNotifications(const QVariantList &activeNotificationGroups)
 {
-    const int n = notificationGroups.size();
+    const int n = activeNotificationGroups.size();
     LOG("Received active notifications, number of groups:" << n);
+
+    // Snapshot iniziale dopo il (ri)avvio del client TDLib: è autoritativa.
+    // I gruppi ripristinati da lipstick nel costruttore che TDLib non elenca
+    // più sono già stati letti altrove → via in silenzio.
+    QSet<int> snapshotGroupIds;
     for (int i = 0; i < n; i++) {
-        const QVariantMap notificationGroupInfo(notificationGroups.at(i).toMap());
-        updateNotificationGroup(notificationGroupInfo.value(ID).toInt(),
-            notificationGroupInfo.value(CHAT_ID).toLongLong(),
-            notificationGroupInfo.value(TOTAL_COUNT).toInt(),
-            notificationGroupInfo.value(NOTIFICATIONS).toList());
+        snapshotGroupIds.insert(activeNotificationGroups.at(i).toMap().value(ID).toInt());
+    }
+    const QList<int> knownGroupIds = notificationGroups.keys();
+    QListIterator<int> knownGroupIdIterator(knownGroupIds);
+    while (knownGroupIdIterator.hasNext()) {
+        const int knownGroupId = knownGroupIdIterator.next();
+        if (!snapshotGroupIds.contains(knownGroupId)) {
+            LOG("Group" << knownGroupId << "no longer active in TDLib, dismissing");
+            dismissNotificationGroup(knownGroupId);
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        const QVariantMap notificationGroupInfo(activeNotificationGroups.at(i).toMap());
+        const int groupId = notificationGroupInfo.value(ID).toInt();
+        const qlonglong chatId = notificationGroupInfo.value(CHAT_ID).toLongLong();
+        const QVariantList notifications(notificationGroupInfo.value(NOTIFICATIONS).toList());
+
+        // Anti-fantasma: al (ri)avvio la snapshot è autoritativa. Due segnali
+        // indipendenti di gruppo zombie (stantio nel DB notifiche di TDLib,
+        // tipico dopo un riciclo anti-RAM). Se ne basta uno per spurgare:
+        //
+        //  (a) LISTA NOTIFICHE VUOTA con total_count>0: TDLib non ha nulla di
+        //      reale da mostrare. Questo segnale NON dipende dalla cache chat,
+        //      ed è proprio il caso che sfuggiva su canali/gruppi: la snapshot
+        //      arriva prestissimo, prima che quei chat (caricati lazy) siano
+        //      in cache → getChat vuoto → la vecchia guardia (che pretendeva
+        //      la chat "letta") saltava lo spurgo e pubblicava un fantasma
+        //      "N messaggi non letti".
+        //
+        //  (b) CHAT INTERAMENTE LETTA (unread/mention/reaction == 0): il gruppo
+        //      è stato letto altrove; vale solo se la chat è già in cache.
+        //
+        // In entrambi i casi va spurgato in TDLib, altrimenti ricompare a ogni
+        // riavvio del client.
+        const QVariantMap chatInformation(tdLibWrapper->getChat(QString::number(chatId)));
+        const bool emptyGhostGroup = notifications.isEmpty();
+        const bool fullyReadChat = !chatInformation.isEmpty()
+                && chatInformation.value(UNREAD_COUNT).toInt() == 0
+                && chatInformation.value(UNREAD_MENTION_COUNT).toInt() == 0
+                && chatInformation.value(UNREAD_REACTION_COUNT).toInt() == 0;
+        if (emptyGhostGroup || fullyReadChat) {
+            int maxNotificationId = 0;
+            QListIterator<QVariant> notificationIterator(notifications);
+            while (notificationIterator.hasNext()) {
+                const int notificationId = notificationIterator.next().toMap().value(ID).toInt();
+                if (notificationId > maxNotificationId) {
+                    maxNotificationId = notificationId;
+                }
+            }
+            LOG("Group" << groupId << "for chat" << chatId << "is a ghost ("
+                << (emptyGhostGroup ? "empty notifications list" : "chat fully read")
+                << "): purging instead of publishing");
+            tdLibWrapper->removeNotificationGroup(groupId,
+                maxNotificationId > 0 ? maxNotificationId : PURGE_ALL_NOTIFICATIONS_ID);
+            dismissNotificationGroup(groupId);
+            continue;
+        }
+
+        updateNotificationGroup(groupId, chatId,
+            notificationGroupInfo.value(TOTAL_COUNT).toInt(), notifications);
     }
 }
 
@@ -299,12 +368,7 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
         publishNotification(notificationGroup, needFeedback);
     } else if (notificationGroup) {
         // No active notifications left in this group.
-        // Prima fuori dalla mappa, POI close(): se closed() venisse emesso in
-        // modo sincrono, handleNotificationClosed non deve più trovare il gruppo
-        // (lo tratterebbe come rimozione utente → doppio delete).
-        notificationGroups.remove(groupId);
-        notificationGroup->nemoNotification->close();
-        delete notificationGroup;
+        dismissNotificationGroup(groupId);
     }
 
     if (notificationGroups.isEmpty()) {
@@ -612,6 +676,23 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
     nemoNotification->publish();
 }
 
+void NotificationManager::dismissNotificationGroup(int groupId)
+{
+    NotificationGroup *notificationGroup = notificationGroups.value(groupId);
+    if (!notificationGroup) {
+        return;
+    }
+    // Prima fuori dalla mappa, POI close(): se closed() venisse emesso in
+    // modo sincrono, handleNotificationClosed non deve più trovare il gruppo
+    // (lo tratterebbe come rimozione utente → doppio delete).
+    notificationGroups.remove(groupId);
+    notificationGroup->nemoNotification->close();
+    delete notificationGroup;
+    if (notificationGroups.isEmpty()) {
+        controlLedNotification(false);
+    }
+}
+
 void NotificationManager::controlLedNotification(bool enabled)
 {
     static const QString PATTERN("PatternCommunicationIM");
@@ -653,9 +734,12 @@ void NotificationManager::handleNotificationClosed(int groupId)
     // al prossimo avvio del client (= a ogni riciclo anti-RAM) → la stessa
     // notifica "ricompare" dopo un po' anche se già vista.
     LOG("Notification group" << groupId << "removed by user, informing TDLib up to id" << notificationGroup->maxNotificationId);
-    if (notificationGroup->maxNotificationId > 0) {
-        tdLibWrapper->removeNotificationGroup(groupId, notificationGroup->maxNotificationId);
-    }
+    // maxNotificationId==0 = gruppo zombie ripubblicato senza contenuto (o
+    // hint di una versione vecchia): senza id noto si spurga tutto il gruppo,
+    // altrimenti TDLib non viene mai informato e la notifica ricompare a
+    // ogni riciclo anti-RAM.
+    tdLibWrapper->removeNotificationGroup(groupId, notificationGroup->maxNotificationId > 0
+        ? notificationGroup->maxNotificationId : PURGE_ALL_NOTIFICATIONS_ID);
     notificationGroups.remove(groupId);
     // Se lipstick non l'avesse già rimossa (percorso clicked()), chiudila:
     // per una notifica già rimossa dal daemon è un no-op innocuo.

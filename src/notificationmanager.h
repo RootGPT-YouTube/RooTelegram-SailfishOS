@@ -63,6 +63,7 @@ private:
     void controlLedNotification(bool enabled);
     void connectNotificationClosed(int groupId, Notification *notification);
     void handleNotificationClosed(int groupId);
+    void dismissNotificationGroup(int groupId);
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
         const QVariantList &removedNotificationIds = QVariantList(),

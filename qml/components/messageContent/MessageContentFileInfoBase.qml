@@ -56,7 +56,9 @@ MessageContentBase {
         width: parent.width
         height: Theme.itemSizeLarge
         Loader {
-            active: contentItem.thumbnail || contentItem.minithumbnail
+            // !!: thumbnail/minithumbnail possono essere undefined (documenti
+            // senza anteprima) e active è bool.
+            active: !!(contentItem.thumbnail || contentItem.minithumbnail)
             visible: active
             anchors.fill: leftButton
             sourceComponent: Component {

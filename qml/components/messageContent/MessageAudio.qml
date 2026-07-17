@@ -83,15 +83,39 @@ MessageContentFileInfoBase {
         id: audioPlayer
         source: file.isDownloadingCompleted ? file.path : ""
         autoPlay: false
+        playbackRate: appWindow.mediaPlaybackRate
+        // Il backend GStreamer applica il rate con un seek: se il rate viene
+        // impostato a player fermo può non "attaccare" alla partenza → lo
+        // ri-agganciamo (via Qt.binding, per non perdere il binding) appena
+        // parte la riproduzione.
+        onPlaybackStateChanged: {
+            if (playbackState === Audio.PlayingState) {
+                playbackRate = Qt.binding(function() { return appWindow.mediaPlaybackRate; });
+            }
+        }
+    }
+
+    PlaybackSpeedButton {
+        id: speedButton
+        darkPill: false
+        visible: audioSlider.visible
+        opacity: audioSlider.opacity
+        z: audioSlider.z + 1
+        anchors {
+            verticalCenter: audioSlider.verticalCenter
+            right: parent.right
+        }
     }
 
     Slider {
+        id: audioSlider
         width: parent.width
         anchors {
             left: parent.left
             leftMargin: -Screen.width/16
             right: parent.right
-            rightMargin: -Screen.width/16
+            // Il pulsante velocità occupa il fondo destro della riga slider.
+            rightMargin: -Screen.width/16 + speedButton.width
             top: primaryItem.bottom
             topMargin: -height/3
         }
@@ -110,6 +134,10 @@ MessageContentFileInfoBase {
         onReleased: {
             audioPlayer.seek(Math.floor(value));
             audioPlayer.play();
+            // Il trascinamento utente scrive `value` e ROMPE il binding con la
+            // posizione: senza ri-aggancio la barra resta congelata anche se il
+            // seek è andato a buon fine (stesso pattern del player degli album).
+            value = Qt.binding(function() { return audioPlayer.position; });
         }
     }
 }

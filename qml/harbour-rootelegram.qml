@@ -39,6 +39,17 @@ ApplicationWindow
     allowedOrientations: defaultAllowedOrientations
     property var pendingShareResources: []
 
+    // Velocità di riproduzione per vocali e audio, condivisa tra i player e
+    // valida per la sessione. Il backend GStreamer di Jolla usa scaletempo
+    // come audio-filter: il tempo cambia, il pitch no. SOLO audio: sui video
+    // il cambio rate è un seek trick-play che il decoder hardware droid non
+    // regge (crash dell'app verificato sul campo, 2026-07-17).
+    property real mediaPlaybackRate: 1.0
+    function cycleMediaPlaybackRate() {
+        mediaPlaybackRate = (mediaPlaybackRate === 1.0) ? 1.25
+                          : (mediaPlaybackRate === 1.25) ? 1.5 : 1.0;
+    }
+
     function openShareDialog(resources) {
         if (!resources || resources.length === 0) {
             return;

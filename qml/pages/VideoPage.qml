@@ -34,8 +34,11 @@ Page {
     property alias isVideoNote: myVideoComponent.isVideoNote
     property var sourceMessage;
 
-    property int videoWidth : videoData.width
-    property int videoHeight : videoData.height
+    // Fallback difensivo: alcuni video arrivano SENZA width/height nei
+    // metadati → sizingFactor NaN → contenitore collassato a 0 → pagina nera
+    // e play non tappabile ("il play non funziona più" in fullscreen).
+    property int videoWidth : (videoData && videoData.width > 0) ? videoData.width : videoPage.width
+    property int videoHeight : (videoData && videoData.height > 0) ? videoData.height : videoPage.height
     property string videoUrl;
 
     property real imageSizeFactor : videoWidth / videoHeight;
@@ -63,6 +66,12 @@ Page {
     }
 
     Component.onCompleted: {
+        // [VIDEODBG] rimuovere a diagnosi conclusa.
+        console.warn("[VIDEODBG] VideoPage aperta, videoType=" + videoType
+            + " completed=" + (videoData && videoData[videoType] ? videoData[videoType].local.is_downloading_completed : "videoData-KO")
+            + " fileId=" + (videoData && videoData[videoType] ? videoData[videoType].id : "-")
+            + " metaWH=" + (videoData ? videoData.width + "x" + videoData.height : "-")
+            + " sizing=" + sizingFactor + " compWH=" + myVideoComponent.width + "x" + myVideoComponent.height);
         updateVideoData();
     }
 

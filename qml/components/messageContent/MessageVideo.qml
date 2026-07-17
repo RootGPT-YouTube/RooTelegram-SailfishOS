@@ -40,6 +40,105 @@ MessageContentBase {
     property bool onScreen: messageListItem ? messageListItem.page.status === PageStatus.Active : true;
     property string videoType : "video";
     property bool playRequested: false;
+    // Un solo auto-retry per tentativo di play quando il player fallisce con
+    // ResourceError (file locale sparito): vedi onError nel Video.
+    property bool errorRetryDone: false;
+    // Posizione (ms) a cui riprendere dopo il seek utente. MAI fare seek "a
+    // caldo" sulla pipeline droid: il flush con codec in volo può deadlockare
+    // il MAIN THREAD (futex, verificato con /proc/<pid>/stack il 2026-07-17:
+    // app intera congelata, D-Bus muto). Al rilascio dello slider smontiamo il
+    // player e lo ricreiamo, posizionandoci in preroll a codec appena nato.
+    property int resumePositionMs: 0;
+    // Anti-blink del seek: durante lo smonta-e-ricrea copriamo il buco visivo
+    // con un fermo-immagine dell'ultimo frame (grab del loader) e mutiamo
+    // l'audio (il nuovo player parte da 0 per un attimo prima del preroll-seek).
+    property bool seekRebuilding: false;
+    property int lastSeekTarget: 0;
+    // Target dell'ultimo tap in attesa di essere applicato (-1 = nessuno). I tap
+    // sulla timeline si COALIZZANO: una raffica → un solo smonta-e-ricrea finale.
+    property int pendingSeekTarget: -1;
+    // Un ciclo teardown→preroll è in corso: VIETATO avviarne un altro finché non
+    // finisce. Sovrapporre i teardown sul decoder HW droid (istanza unica,
+    // rilascio ASINCRONO) fa deadlockare il MAIN THREAD sul seek → freeze totale
+    // NON recuperabile (watchdog/timer girano sullo stesso thread congelato).
+    // Quindi il seek va SERIALIZZATO e prevenuto, non recuperato. (Firma del bug
+    // vista nel journal 2026-07-17: 4 tap ravvicinati → i [VIDEODBG] si fermano
+    // di netto dopo un preroll-seek = app appesa.)
+    property bool seekRebuildInFlight: false;
+    // Posizione effettivamente applicata al ciclo in volo (per riconoscere il
+    // "target raggiunto" anche se nel frattempo sono arrivati altri tap).
+    property int appliedSeekTarget: 0;
+    // Riferimento vivo al risultato del grab: l'URL è valido finché
+    // l'oggetto non viene garbage-collected.
+    property var seekFrameGrab: null;
+
+    function endSeekRebuild() {
+        seekRebuildFallback.stop();
+        seekRevealDelay.stop();
+        seekCoalesce.stop();
+        seekRebuilding = false;
+        seekRebuildInFlight = false;
+        pendingSeekTarget = -1;
+        seekFreezeFrame.source = "";
+        seekFrameGrab = null;
+    }
+
+    // Tap/rilascio sulla timeline. NON smonta subito: registra il target, alza
+    // il fermo-immagine (una sola volta per raffica) e riavvia il debounce; il
+    // vero smonta-e-ricrea parte solo quando i tap si fermano (seekCoalesce).
+    function seekViaRebuild(targetMs) {
+        console.warn("[VIDEODBG] tap timeline a " + targetMs + "ms (coalesce)");
+        pendingSeekTarget = targetMs;
+        lastSeekTarget = targetMs;
+        if (!seekRebuilding) {
+            seekRebuilding = true;       // alza la cover: muta l'audio, mostra il frame
+            armSeekCover();
+        }
+        seekRebuildFallback.restart();
+        seekCoalesce.restart();
+    }
+
+    // Grab dell'ultimo frame per coprire il buco visivo durante il rebuild.
+    function armSeekCover() {
+        try {
+            videoComponentLoader.grabToImage(function(result) {
+                videoMessageComponent.seekFrameGrab = result;
+                seekFreezeFrame.source = result.url;
+            });
+        } catch (e) {
+            // Nessuna cover disponibile: best effort, il rebuild avverrà comunque.
+        }
+    }
+
+    // Applica UN solo seek (il più recente) — e SOLO se non c'è già un ciclo in
+    // volo. È questo il cancello che impedisce i teardown sovrapposti.
+    function applyPendingSeek() {
+        if (pendingSeekTarget < 0 || seekRebuildInFlight) {
+            return;   // niente da fare, o ciclo in corso (riproverà a target raggiunto)
+        }
+        seekRebuildInFlight = true;
+        resumePositionMs = pendingSeekTarget;
+        appliedSeekTarget = pendingSeekTarget;
+        pendingSeekTarget = -1;
+        console.warn("[VIDEODBG] applico seek a " + appliedSeekTarget + "ms (un solo rebuild)");
+        videoComponentLoader.active = false;
+        videoComponentLoader.active = true;
+    }
+
+    // Il player in volo ha raggiunto il target. Se altri tap sono arrivati nel
+    // frattempo applica il prossimo (sempre uno solo, mai sovrapposto); altrimenti
+    // togli la cover dopo il reveal delay (tempo al decoder di presentare il frame).
+    function handleSeekReached() {
+        if (!seekRebuildInFlight) {
+            return;
+        }
+        seekRebuildInFlight = false;
+        if (pendingSeekTarget >= 0) {
+            applyPendingSeek();
+        } else {
+            seekRevealDelay.restart();
+        }
+    }
     // Stato di riproduzione: pilota la visibilità di anteprima/controlli/badge via
     // BINDING (gli assegnamenti imperativi a playButton.visible dall'interno del
     // Loader non "attaccavano" → i controlli non tornavano a fine video).
@@ -153,6 +252,13 @@ MessageContentBase {
 
     function handlePlay() {
         playRequested = true;
+        errorRetryDone = false;
+        // [VIDEODBG] console.warn = qWarning: visibile nel journal anche con
+        // *.debug=false di patchmanager. Rimuovere a diagnosi conclusa.
+        console.warn("[VIDEODBG] handlePlay fullscreen=" + fullscreen
+            + " videoType=" + videoType + " fileId=" + videoFileId
+            + " completed=" + (videoData && videoData[videoType] ? videoData[videoType].local.is_downloading_completed : "videoData-KO")
+            + " path=" + (videoData && videoData[videoType] ? videoData[videoType].local.path : "-"));
         if (videoData[videoType].local.is_downloading_completed) {
             videoUrl = videoData[videoType].local.path;
             videoComponentLoader.active = true;
@@ -174,6 +280,13 @@ MessageContentBase {
                     if (!deferThumbnail) {
                         placeholderImage.source = fileInformation.local.path;
                     }
+                }
+                if (fileId === videoFileId) {
+                    console.warn("[VIDEODBG] fileUpdated id=" + fileId
+                        + " completed=" + fileInformation.local.is_downloading_completed
+                        + " downloading=" + fileInformation.local.is_downloading_active
+                        + " downloaded=" + fileInformation.local.downloaded_size
+                        + " onScreen=" + onScreen + " playRequested=" + playRequested);
                 }
                 if (!fileInformation.remote.is_uploading_active && fileInformation.local.is_downloading_completed && fileId === videoFileId) {
                     videoDownloadBusyIndicator.running = false;
@@ -271,6 +384,7 @@ MessageContentBase {
                 highlighted: videoMessageComponent.highlighted || down
                 visible: true
                 onClicked: {
+                    console.warn("[VIDEODBG] tap sul play, pill " + videoControlsPill.width + "x" + videoControlsPill.height);
                     handlePlay();
                 }
             }
@@ -384,6 +498,44 @@ MessageContentBase {
         sourceComponent: videoComponent
     }
 
+    // Fermo-immagine anti-blink: copre il loader durante lo smonta-e-ricrea
+    // del seek finché il nuovo player non raggiunge la posizione richiesta.
+    Image {
+        id: seekFreezeFrame
+        anchors.fill: videoComponentLoader
+        z: videoComponentLoader.z + 1
+        visible: videoMessageComponent.seekRebuilding && status === Image.Ready
+        cache: false
+    }
+
+    // Debounce dei tap sulla timeline: finché i tap arrivano il timer si riavvia;
+    // quando si fermano si applica UN solo smonta-e-ricrea al target finale. È il
+    // cuore della prevenzione del deadlock: niente tempesta di teardown.
+    Timer {
+        id: seekCoalesce
+        interval: 320
+        onTriggered: videoMessageComponent.applyPendingSeek()
+    }
+
+    // Paracadute: se il nuovo player non arriva mai a destinazione (errore,
+    // watchdog...), il fermo-immagine e il mute non devono restare per sempre.
+    Timer {
+        id: seekRebuildFallback
+        interval: 4000
+        onTriggered: videoMessageComponent.endSeekRebuild()
+    }
+
+    // Reveal ritardato: quando il nuovo player RAGGIUNGE il target diamo al
+    // decoder droid un istante per PRESENTARE il frame post-seek prima di
+    // togliere il fermo-immagine. Senza questa attesa si scopre il loader di un
+    // frame nero/vecchio → il blink residuo. Vive nel root (non nel Loader) per
+    // sopravvivere allo smonta-e-ricrea.
+    Timer {
+        id: seekRevealDelay
+        interval: 200
+        onTriggered: videoMessageComponent.endSeekRebuild()
+    }
+
     Component {
         id: videoComponent
 
@@ -403,6 +555,7 @@ MessageContentBase {
                 id: messageVideo
 
                 Component.onCompleted: {
+                    console.warn("[VIDEODBG] Video creato, source=" + videoUrl + " error=" + messageVideo.error);
                     if (messageVideo.error === MediaPlayer.NoError) {
                         messageVideo.play();
                         timeLeftTimer.start();
@@ -425,6 +578,17 @@ MessageContentBase {
                     if (status == MediaPlayer.Loaded) {
                         Debug.log("Loaded");
                         videoBusyIndicator.visible = false;
+                    }
+                    // Posizionamento post-seek utente: pipeline appena
+                    // prerollata, codec giovane — l'unico momento in cui il
+                    // seek è digeribile per il decoder droid.
+                    if ((status == MediaPlayer.Loaded || status == MediaPlayer.Buffered)
+                            && videoMessageComponent.resumePositionMs > 0 && messageVideo.seekable) {
+                        var resumeTo = videoMessageComponent.resumePositionMs;
+                        videoMessageComponent.resumePositionMs = 0;
+                        console.warn("[VIDEODBG] preroll-seek a " + resumeTo + "ms");
+                        messageVideo.seek(resumeTo);
+                        seekWatchdog.arm();
                     }
                     if (status == MediaPlayer.Buffering) {
                         Debug.log("Buffering");
@@ -458,6 +622,21 @@ MessageContentBase {
                 width: parent.width
                 height: parent.height
                 source: videoUrl
+                // Durante il rebuild da seek il player riparte da 0 per un
+                // attimo prima del preroll-seek: muto, sotto il fermo-immagine.
+                muted: videoMessageComponent.seekRebuilding
+                onPositionChanged: {
+                    // Ciclo in volo arrivato a destinazione (preroll-seek applicato:
+                    // resumePositionMs==0). Delega al root: se ci sono tap in coda fa
+                    // UN altro rebuild (mai sovrapposto), altrimenti arma il reveal
+                    // della cover. Confronto con appliedSeekTarget (non lastSeekTarget:
+                    // può essere già avanzato per tap successivi ancora in coda).
+                    if (videoMessageComponent.seekRebuildInFlight
+                            && videoMessageComponent.resumePositionMs === 0
+                            && Math.abs(position - videoMessageComponent.appliedSeekTarget) < 3000) {
+                        videoMessageComponent.handleSeekReached();
+                    }
+                }
                 layer.enabled: videoMessageComponent.highlighted
                 layer.effect: PressEffect { source: messageVideo }
                 function restorePreview() {
@@ -468,6 +647,40 @@ MessageContentBase {
                 }
                 onStopped: {
                     restorePreview();
+                }
+                // onErrorChanged (proprietà con notify), NON onError: il tipo
+                // Video di QtMultimedia 5.6 è un wrapper QML che non inoltra
+                // il segnale error(error, errorString) → "Cannot assign to
+                // non-existent property" e l'intero componente non carica più.
+                onErrorChanged: {
+                    if (error === MediaPlayer.NoError) {
+                        return;
+                    }
+                    console.warn("[VIDEODBG] player error=" + error + " '" + errorString
+                        + "' retryDone=" + videoMessageComponent.errorRetryDone);
+                    // Pipeline in errore: annulla la raffica di seek (cover + coda),
+                    // così un pendingSeekTarget stantìo non rilancia un rebuild.
+                    videoMessageComponent.endSeekRebuild();
+                    if (error === MediaPlayer.ResourceError && !videoMessageComponent.errorRetryDone) {
+                        // File locale sparito sotto i piedi: TDLib ripulisce lo
+                        // storage, ma lo snapshot del messaggio (in fullscreen è
+                        // congelato al push di VideoPage) crede il file ancora
+                        // scaricato → il play parte su un path inesistente e
+                        // senza questo retry resterebbe morto ("il pulsante play
+                        // non funziona più"). downloadFile fa verificare il file
+                        // a TDLib, che lo riscarica se manca; al termine
+                        // onFileUpdated rilancia il play via playRequested.
+                        videoMessageComponent.errorRetryDone = true;
+                        videoMessageComponent.playRequested = true;
+                        videoDownloadBusyIndicator.running = true;
+                        tdLibWrapper.downloadFile(videoFileId);
+                        restorePreview();
+                    } else {
+                        // Pipeline morta (es. seek indigesto al decoder hardware
+                        // droid): niente player nero inerte, tornano anteprima e
+                        // controlli e il play può ripartire da zero.
+                        restorePreview();
+                    }
                 }
                 onPlaybackStateChanged: {
                     // Alcuni backend GStreamer non emettono onStopped a fine video:
@@ -515,6 +728,51 @@ MessageContentBase {
                 interval: 2000
                 onTriggered: {
                     timeLeftItem.visible = false;
+                }
+            }
+
+            // Watchdog anti-appensione: il seek sul decoder hardware droid a
+            // volte incanta la pipeline SENZA emettere errori (posizione ferma,
+            // frame congelato) → onErrorChanged non può scattare. Se in
+            // PlayingState la posizione non avanza per 2 tick consecutivi,
+            // smontiamo il player: tornano anteprima e play, e da lì riparte
+            // anche l'auto-recovery (ri-download se il file è sparito).
+            Timer {
+                id: seekWatchdog
+                interval: 2000
+                repeat: true
+                property real lastPosition: -1
+                property int stuckCount: 0
+                function arm() {
+                    lastPosition = -1;
+                    stuckCount = 0;
+                    restart();
+                }
+                onTriggered: {
+                    if (!videoComponentLoader.active
+                            || messageVideo.playbackState !== MediaPlayer.PlayingState) {
+                        stop();
+                        stuckCount = 0;
+                        lastPosition = -1;
+                        return;
+                    }
+                    if (messageVideo.position === lastPosition) {
+                        stuckCount++;
+                        if (stuckCount >= 2) {
+                            console.warn("[VIDEODBG] watchdog: posizione ferma a "
+                                + messageVideo.position + " dopo un seek, restorePreview");
+                            stop();
+                            stuckCount = 0;
+                            // Seek soft-stuck (non deadlock: il timer è scattato):
+                            // annulla la raffica così la coda non resta appesa.
+                            videoMessageComponent.endSeekRebuild();
+                            messageVideo.restorePreview();
+                            return;
+                        }
+                    } else {
+                        stuckCount = 0;
+                    }
+                    lastPosition = messageVideo.position;
                 }
             }
 
@@ -605,9 +863,11 @@ MessageContentBase {
                     enabled: messageVideo.seekable
                     visible: (messageVideo.duration > 0)
                     onReleased: {
-                        messageVideo.seek(Math.floor(value));
-                        messageVideo.play();
-                        timeLeftTimer.start();
+                        // Niente seek sulla pipeline viva (deadlock droid):
+                        // fermo-immagine + smonta-e-ricrea, orchestrato da una
+                        // funzione del root (questo handler vive dentro il
+                        // componente che verrà distrutto). Leggere `value` prima.
+                        videoMessageComponent.seekViaRebuild(Math.floor(value));
                     }
                     valueText: getTimeString(Math.round((messageVideo.duration - messageVideoSlider.value) / 1000))
                 }
