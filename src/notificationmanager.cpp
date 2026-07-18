@@ -116,6 +116,14 @@ void NotificationManager::ChatInfo::setChatInfo(const QVariantMap &chatInfo)
     title = chatInfo.value(TITLE).toString();
 }
 
+struct NotificationManager::PendingSnapshotGroup
+{
+    int groupId = 0;
+    qlonglong chatId = 0;
+    int totalCount = 0;
+    QVariantList notifications;
+};
+
 class NotificationManager::NotificationGroup
 {
 public:
@@ -176,6 +184,12 @@ NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings
     connect(this->tdLibWrapper, SIGNAL(notificationUpdated(QVariantMap)), this, SLOT(handleUpdateNotification(QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(newChatDiscovered(QString, QVariantMap)), this, SLOT(handleChatDiscovered(QString, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(chatTitleUpdated(QString, QString)), this, SLOT(handleChatTitleUpdated(QString, QString)));
+
+    // Rete di sicurezza fail-open: se la chat di un gruppo differito non arriva
+    // (updateNewChat mai emesso), non perdiamo la notifica -> la pubblichiamo.
+    pendingFlushTimer.setSingleShot(true);
+    pendingFlushTimer.setInterval(10000);
+    connect(&pendingFlushTimer, SIGNAL(timeout()), this, SLOT(flushPendingSnapshotGroups()));
 
     this->controlLedNotification(false);
 
@@ -260,30 +274,74 @@ void NotificationManager::handleUpdateActiveNotifications(const QVariantList &ac
         // riavvio del client.
         const QVariantMap chatInformation(tdLibWrapper->getChat(QString::number(chatId)));
         const bool emptyGhostGroup = notifications.isEmpty();
-        const bool fullyReadChat = !chatInformation.isEmpty()
-                && chatInformation.value(UNREAD_COUNT).toInt() == 0
-                && chatInformation.value(UNREAD_MENTION_COUNT).toInt() == 0
-                && chatInformation.value(UNREAD_REACTION_COUNT).toInt() == 0;
+        const bool chatInCache = !chatInformation.isEmpty();
+        const bool fullyReadChat = chatInCache && chatFullyRead(chatInformation);
+
+        // (a)+(b): zombie certo -> spurga senza pubblicare.
         if (emptyGhostGroup || fullyReadChat) {
-            int maxNotificationId = 0;
-            QListIterator<QVariant> notificationIterator(notifications);
-            while (notificationIterator.hasNext()) {
-                const int notificationId = notificationIterator.next().toMap().value(ID).toInt();
-                if (notificationId > maxNotificationId) {
-                    maxNotificationId = notificationId;
-                }
-            }
-            LOG("Group" << groupId << "for chat" << chatId << "is a ghost ("
-                << (emptyGhostGroup ? "empty notifications list" : "chat fully read")
-                << "): purging instead of publishing");
-            tdLibWrapper->removeNotificationGroup(groupId,
-                maxNotificationId > 0 ? maxNotificationId : PURGE_ALL_NOTIFICATIONS_ID);
-            dismissNotificationGroup(groupId);
+            purgeSnapshotGroup(groupId, chatId, notifications);
             continue;
         }
 
+        // (c) 4° STADIO: lista NON vuota ma chat NON in cache (canale/gruppo
+        // caricato lazy). Non sappiamo sincronicamente se è già letta: pubblicare
+        // ora è proprio ciò che generava il fantasma "N messaggi non letti" sui
+        // messaggi letti altrove ma ancora attivi nel DB notifiche di TDLib.
+        // DIFFERIAMO: handleChatDiscovered deciderà (publish se davvero non letta,
+        // purge se letta) appena arriva updateNewChat per questa chat.
+        if (!chatInCache) {
+            PendingSnapshotGroup pending;
+            pending.groupId = groupId;
+            pending.chatId = chatId;
+            pending.totalCount = notificationGroupInfo.value(TOTAL_COUNT).toInt();
+            pending.notifications = notifications;
+            pendingSnapshotGroups.insert(groupId, pending);
+            pendingFlushTimer.start(); // (ri)arma il fail-open
+            continue;
+        }
+
+        // Chat in cache e con contenuto non letto: pubblicazione legittima.
         updateNotificationGroup(groupId, chatId,
             notificationGroupInfo.value(TOTAL_COUNT).toInt(), notifications);
+    }
+}
+
+bool NotificationManager::chatFullyRead(const QVariantMap &chatInformation)
+{
+    return chatInformation.value(UNREAD_COUNT).toInt() == 0
+            && chatInformation.value(UNREAD_MENTION_COUNT).toInt() == 0
+            && chatInformation.value(UNREAD_REACTION_COUNT).toInt() == 0;
+}
+
+void NotificationManager::purgeSnapshotGroup(int groupId, qlonglong chatId, const QVariantList &notifications)
+{
+    int maxNotificationId = 0;
+    QListIterator<QVariant> notificationIterator(notifications);
+    while (notificationIterator.hasNext()) {
+        const int notificationId = notificationIterator.next().toMap().value(ID).toInt();
+        if (notificationId > maxNotificationId) {
+            maxNotificationId = notificationId;
+        }
+    }
+    LOG("Group" << groupId << "for chat" << chatId << "is a ghost: purging instead of publishing");
+    tdLibWrapper->removeNotificationGroup(groupId,
+        maxNotificationId > 0 ? maxNotificationId : PURGE_ALL_NOTIFICATIONS_ID);
+    dismissNotificationGroup(groupId);
+}
+
+void NotificationManager::flushPendingSnapshotGroups()
+{
+    // Fail-open: le chat differite non sono arrivate in tempo. Per non perdere
+    // notifiche legittime le pubblichiamo comunque (comportamento pre-fix).
+    if (pendingSnapshotGroups.isEmpty()) {
+        return;
+    }
+    const QList<PendingSnapshotGroup> stillPending = pendingSnapshotGroups.values();
+    pendingSnapshotGroups.clear();
+    QListIterator<PendingSnapshotGroup> it(stillPending);
+    while (it.hasNext()) {
+        const PendingSnapshotGroup p = it.next();
+        updateNotificationGroup(p.groupId, p.chatId, p.totalCount, p.notifications);
     }
 }
 
@@ -349,6 +407,23 @@ void NotificationManager::updateNotificationGroup(int groupId, qlonglong chatId,
             notificationGroup->notificationOrder.clear();
         }
 
+        // 5° STADIO anti-fantasma (path LIVE): per certi canali/gruppi, DOPO la
+        // lettura TDLib manda updateNotificationGroup con total_count>0 ma NESSUNA
+        // notifica reale (added 0 e activeNotifications vuoto). Pubblicare qui
+        // produce il fantasma "N messaggi non letti" senza contenuto, che ricompare
+        // a ogni update finché non si spurga il gruppo in TDLib. Se non c'è nulla di
+        // reale da mostrare, spurga invece di pubblicare (VERIFICATO sul device con
+        // Prezz.one/Linux Mint: total 1, added 0 dopo la lettura).
+        if (notificationGroup->activeNotifications.isEmpty()) {
+            LOG("Live group" << groupId << "chat" << chatId << "total" << totalCount
+                << "but no real notifications: purging instead of publishing");
+            const int maxId = notificationGroup->maxNotificationId;
+            tdLibWrapper->removeNotificationGroup(groupId,
+                maxId > 0 ? maxId : PURGE_ALL_NOTIFICATIONS_ID);
+            dismissNotificationGroup(groupId); // rimuove dalla mappa, chiude, gestisce il LED
+            return;
+        }
+
         // Decide if we need a bzzz
         switch (feedback) {
         case AppSettings::NotificationFeedbackNone:
@@ -395,6 +470,30 @@ void NotificationManager::handleChatDiscovered(const QString &chatId, const QVar
         chat = new ChatInfo(chatInformation);
         chatMap.insert(id, chat);
         LOG("New chat" << id << chat->title);
+    }
+
+    // 4° STADIO: risolvi i gruppi della snapshot differiti perché questa chat
+    // (canale/gruppo lazy) non era ancora in cache. Ora conosciamo lo stato di
+    // lettura: se interamente letta è un fantasma -> purge, altrimenti publish.
+    if (!pendingSnapshotGroups.isEmpty()) {
+        const QList<int> pendingIds = pendingSnapshotGroups.keys();
+        QListIterator<int> pendingIt(pendingIds);
+        while (pendingIt.hasNext()) {
+            const int groupId = pendingIt.next();
+            const PendingSnapshotGroup p = pendingSnapshotGroups.value(groupId);
+            if (p.chatId != id) {
+                continue;
+            }
+            pendingSnapshotGroups.remove(groupId);
+            if (chatFullyRead(chatInformation)) {
+                purgeSnapshotGroup(groupId, id, p.notifications);
+            } else {
+                updateNotificationGroup(groupId, id, p.totalCount, p.notifications);
+            }
+        }
+        if (pendingSnapshotGroups.isEmpty()) {
+            pendingFlushTimer.stop();
+        }
     }
 }
 

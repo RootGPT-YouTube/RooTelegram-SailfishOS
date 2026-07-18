@@ -28,6 +28,7 @@
 #include <QObject>
 #include <QHash>
 #include <QSet>
+#include <QTimer>
 #include <nemonotifications-qt5/notification.h>
 #include "tdlibwrapper.h"
 #include "appsettings.h"
@@ -40,6 +41,7 @@ class NotificationManager : public QObject
     Q_OBJECT
     class ChatInfo;
     class NotificationGroup;
+    struct PendingSnapshotGroup;
 
 public:
 
@@ -53,6 +55,7 @@ public slots:
     void handleUpdateNotification(const QVariantMap &updatedNotification);
     void handleChatDiscovered(const QString &chatId, const QVariantMap &chatInformation);
     void handleChatTitleUpdated(const QString &chatId, const QString &title);
+    void flushPendingSnapshotGroups();
     void handleNewStory(qlonglong chatId);
     void handleMessageReaction(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions, int unreadReactionCount);
 
@@ -64,6 +67,11 @@ private:
     void connectNotificationClosed(int groupId, Notification *notification);
     void handleNotificationClosed(int groupId);
     void dismissNotificationGroup(int groupId);
+    // Anti-fantasma 4° stadio: spurga in TDLib un gruppo zombie della snapshot
+    // senza pubblicarlo (lista notifiche o id ignoto -> PURGE_ALL).
+    void purgeSnapshotGroup(int groupId, qlonglong chatId, const QVariantList &notifications);
+    // True se la chat (già in cache) risulta interamente letta.
+    static bool chatFullyRead(const QVariantMap &chatInformation);
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
         const QVariantList &removedNotificationIds = QVariantList(),
@@ -78,6 +86,12 @@ private:
     QMap<qlonglong,ChatInfo*> chatMap;
     QMap<int,NotificationGroup*> notificationGroups;
     QString notificationIconFile;
+    // Gruppi della snapshot d'avvio la cui chat (canale/gruppo lazy) NON era
+    // ancora in cache: decisione pubblica/spurga DIFFERITA a handleChatDiscovered
+    // (o al flush fail-open). Chiave = groupId. Evita il fantasma dei gruppi con
+    // lista notifiche NON vuota su chat non ancora note.
+    QHash<int,PendingSnapshotGroup> pendingSnapshotGroups;
+    QTimer pendingFlushTimer;
     // Dedup notifiche reaction: per messaggio ("chatId:messageId") l'insieme
     // delle firme (autore|emoji) già notificate — evita doppioni quando TDLib
     // ri-emette updateMessageUnreadReactions con lo stesso stato.

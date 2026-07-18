@@ -13,47 +13,40 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.11";
+var version = "2.8.13";
 
 var changelogByLang = {
     "it": [
-        "Notifiche fantasma: risolto il problema per cui le notifiche di canali e gruppi già letti ricomparivano da sole dopo un po'. Quando chiudi o apri una notifica, ora resta chiusa.",
-        "Menzioni e reazioni ora vengono segnate come lette in modo affidabile, così non arrivano più notifiche ripetute per messaggi già visti."
+        "Notifiche fantasma: risolto il caso rimasto in alcuni canali e gruppi, in cui la notifica restava visibile anche dopo aver letto i messaggi e riappariva dopo un riavvio. Ora, una volta letti, questi avvisi si chiudono da soli poco dopo."
     ],
     "en": [
-        "Ghost notifications: fixed the issue where notifications from channels and groups you had already read came back on their own after a while. When you dismiss or open a notification, it now stays closed.",
-        "Mentions and reactions are now reliably marked as read, so you no longer get repeated notifications for messages you have already seen."
+        "Ghost notifications: fixed the remaining case in some channels and groups where the notification stayed even after you had read the messages, and came back after a restart. Once read, these alerts now clear on their own shortly after."
     ],
     "de": [
-        "Geister-Benachrichtigungen: das Problem behoben, bei dem Benachrichtigungen bereits gelesener Kanäle und Gruppen nach einer Weile von selbst wieder auftauchten. Wenn du eine Benachrichtigung schließt oder öffnest, bleibt sie jetzt geschlossen.",
-        "Erwähnungen und Reaktionen werden jetzt zuverlässig als gelesen markiert, sodass du keine wiederholten Benachrichtigungen für bereits gesehene Nachrichten mehr erhältst."
+        "Geister-Benachrichtigungen: der verbleibende Fall in manchen Kanälen und Gruppen behoben, bei dem die Benachrichtigung auch nach dem Lesen der Nachrichten bestehen blieb und nach einem Neustart wiederkam. Nach dem Lesen verschwinden diese Hinweise nun kurz darauf von selbst."
     ],
     "pl": [
-        "Duchy powiadomień: naprawiono problem, przez który powiadomienia z już przeczytanych kanałów i grup po pewnym czasie same wracały. Gdy zamkniesz lub otworzysz powiadomienie, teraz pozostaje zamknięte.",
-        "Wzmianki i reakcje są teraz niezawodnie oznaczane jako przeczytane, więc nie otrzymujesz już powtarzających się powiadomień o wiadomościach, które już widziałeś."
+        "Duchy powiadomień: naprawiono pozostały przypadek w niektórych kanałach i grupach, gdy powiadomienie pozostawało nawet po przeczytaniu wiadomości i wracało po ponownym uruchomieniu. Po przeczytaniu te powiadomienia teraz same wkrótce znikają."
     ],
     "ru": [
-        "Призрачные уведомления: устранена проблема, из-за которой уведомления из уже прочитанных каналов и групп через некоторое время снова появлялись сами по себе. Теперь, когда вы закрываете или открываете уведомление, оно остаётся закрытым.",
-        "Упоминания и реакции теперь надёжно отмечаются как прочитанные, поэтому вы больше не получаете повторные уведомления о сообщениях, которые уже видели."
+        "Призрачные уведомления: устранён оставшийся случай в некоторых каналах и группах, когда уведомление оставалось даже после прочтения сообщений и снова появлялось после перезапуска. Теперь после прочтения эти уведомления вскоре исчезают сами."
     ],
     "fr": [
-        "Notifications fantômes : correction du problème où les notifications de canaux et groupes déjà lus réapparaissaient d'elles-mêmes après un moment. Lorsque vous fermez ou ouvrez une notification, elle reste désormais fermée.",
-        "Les mentions et les réactions sont maintenant marquées comme lues de manière fiable, vous ne recevez donc plus de notifications répétées pour des messages déjà vus."
+        "Notifications fantômes : correction du cas restant, dans certains canaux et groupes, où la notification demeurait même après avoir lu les messages et réapparaissait après un redémarrage. Une fois lus, ces avis disparaissent maintenant d'eux-mêmes peu après."
     ],
     "sk": [
-        "Duchovné oznámenia: opravený problém, keď sa oznámenia z už prečítaných kanálov a skupín po chvíli samy znova objavovali. Keď oznámenie zavriete alebo otvoríte, teraz zostane zatvorené.",
-        "Zmienky a reakcie sa teraz spoľahlivo označujú ako prečítané, takže už nedostávate opakované oznámenia pre správy, ktoré ste už videli."
+        "Duchovné oznámenia: opravený zostávajúci prípad v niektorých kanáloch a skupinách, keď oznámenie zostávalo aj po prečítaní správ a po reštarte sa znova objavilo. Po prečítaní tieto oznámenia teraz čoskoro samy zmiznú."
     ]
 };
 
 var messageByLang = {
-    "it": "Notifiche fantasma risolte: le notifiche di canali e gruppi già letti non ricompaiono più da sole. Menzioni e reazioni ora vengono segnate come lette in modo affidabile, senza notifiche ripetute.",
-    "en": "Ghost notifications fixed: notifications from channels and groups you already read no longer come back on their own. Mentions and reactions are now reliably marked as read, with no repeated notifications.",
-    "de": "Geister-Benachrichtigungen behoben: Benachrichtigungen bereits gelesener Kanäle und Gruppen tauchen nicht mehr von selbst wieder auf. Erwähnungen und Reaktionen werden jetzt zuverlässig als gelesen markiert, ohne wiederholte Benachrichtigungen.",
-    "pl": "Naprawiono duchy powiadomień: powiadomienia z już przeczytanych kanałów i grup nie wracają już same. Wzmianki i reakcje są teraz niezawodnie oznaczane jako przeczytane, bez powtarzających się powiadomień.",
-    "ru": "Призрачные уведомления исправлены: уведомления из уже прочитанных каналов и групп больше не возвращаются сами по себе. Упоминания и реакции теперь надёжно отмечаются как прочитанные, без повторных уведомлений.",
-    "fr": "Notifications fantômes corrigées : les notifications de canaux et groupes déjà lus ne reviennent plus d'elles-mêmes. Les mentions et réactions sont désormais marquées comme lues de manière fiable, sans notifications répétées.",
-    "sk": "Duchovné oznámenia opravené: oznámenia z už prečítaných kanálov a skupín sa už samy nevracajú. Zmienky a reakcie sa teraz spoľahlivo označujú ako prečítané, bez opakovaných oznámení."
+    "it": "Altre notifiche fantasma risolte: i canali e i gruppi in cui l'avviso restava anche dopo la lettura ora si chiudono correttamente.",
+    "en": "More ghost notifications fixed: channels and groups where the alert stayed even after reading now clear properly.",
+    "de": "Weitere Geister-Benachrichtigungen behoben: Kanäle und Gruppen, in denen der Hinweis auch nach dem Lesen blieb, werden jetzt korrekt geschlossen.",
+    "pl": "Naprawiono kolejne duchy powiadomień: kanały i grupy, w których powiadomienie pozostawało nawet po przeczytaniu, teraz zamykają się poprawnie.",
+    "ru": "Исправлены ещё призрачные уведомления: каналы и группы, где уведомление оставалось даже после прочтения, теперь закрываются правильно.",
+    "fr": "D'autres notifications fantômes corrigées : les canaux et groupes où l'avis restait même après lecture se ferment désormais correctement.",
+    "sk": "Opravené ďalšie duchovné oznámenia: kanály a skupiny, kde oznámenie zostávalo aj po prečítaní, sa teraz správne zatvárajú."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),
