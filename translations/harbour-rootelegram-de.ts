@@ -4761,14 +4761,14 @@ Nachrichten</numerusform>
         <translation>Unbekannter Chat</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n neue Story</numerusform>
             <numerusform>%n neue Storys</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n Story</numerusform>
             <numerusform>%n Storys</numerusform>

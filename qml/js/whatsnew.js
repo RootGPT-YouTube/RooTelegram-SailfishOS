@@ -13,40 +13,61 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.8.13";
+var version = "2.9";
 
 var changelogByLang = {
     "it": [
-        "Notifiche fantasma: risolto il caso rimasto in alcuni canali e gruppi, in cui la notifica restava visibile anche dopo aver letto i messaggi e riappariva dopo un riavvio. Ora, una volta letti, questi avvisi si chiudono da soli poco dopo."
+        "L'app non si apre più da sola a tutto schermo mentre stai facendo altro: quando si riavvia in background per liberare memoria, ora resta in background.",
+        "Se scarichi due file diversi con lo stesso nome, ora li apri davvero entrambi: il secondo viene salvato come «Nome (1).pdf» invece di riaprire il primo.",
+        "Foto e video salvati: probabile miglioramento per le app Android che li rifiutavano dicendo «formato non supportato». Se ti capitava, riprova e fai sapere se è risolto.",
+        "Corretta la dicitura del conteggio delle Storie."
     ],
     "en": [
-        "Ghost notifications: fixed the remaining case in some channels and groups where the notification stayed even after you had read the messages, and came back after a restart. Once read, these alerts now clear on their own shortly after."
+        "The app no longer opens by itself in fullscreen while you are doing something else: when it restarts in the background to free memory, it now stays in the background.",
+        "If you download two different files with the same name, you now really get both: the second one is saved as \"Name (1).pdf\" instead of reopening the first.",
+        "Saved photos and videos: likely improvement for the Android apps that refused them saying \"format not supported\". If this happened to you, please try again and let us know whether it is fixed.",
+        "Fixed the wording of the story counter."
     ],
     "de": [
-        "Geister-Benachrichtigungen: der verbleibende Fall in manchen Kanälen und Gruppen behoben, bei dem die Benachrichtigung auch nach dem Lesen der Nachrichten bestehen blieb und nach einem Neustart wiederkam. Nach dem Lesen verschwinden diese Hinweise nun kurz darauf von selbst."
+        "Die App öffnet sich nicht mehr von selbst im Vollbild, während du etwas anderes tust: wenn sie im Hintergrund neu startet, um Speicher freizugeben, bleibt sie jetzt im Hintergrund.",
+        "Wenn du zwei verschiedene Dateien mit gleichem Namen herunterlädst, erhältst du jetzt wirklich beide: die zweite wird als „Name (1).pdf“ gespeichert, statt die erste erneut zu öffnen.",
+        "Gespeicherte Fotos und Videos: wahrscheinliche Verbesserung für Android-Apps, die sie mit „Format nicht unterstützt“ abgelehnt haben. Falls dir das passiert ist, versuche es erneut und melde, ob es behoben ist.",
+        "Formulierung der Story-Zählung korrigiert."
     ],
     "pl": [
-        "Duchy powiadomień: naprawiono pozostały przypadek w niektórych kanałach i grupach, gdy powiadomienie pozostawało nawet po przeczytaniu wiadomości i wracało po ponownym uruchomieniu. Po przeczytaniu te powiadomienia teraz same wkrótce znikają."
+        "Aplikacja nie otwiera się już sama na pełnym ekranie, gdy robisz coś innego: gdy uruchamia się ponownie w tle, aby zwolnić pamięć, teraz pozostaje w tle.",
+        "Jeśli pobierzesz dwa różne pliki o tej samej nazwie, otrzymasz teraz naprawdę oba: drugi zostanie zapisany jako „Nazwa (1).pdf”, zamiast otwierać ponownie pierwszy.",
+        "Zapisane zdjęcia i filmy: prawdopodobna poprawa dla aplikacji Android, które odrzucały je z komunikatem „format nieobsługiwany”. Jeśli ci się to zdarzało, spróbuj ponownie i daj znać, czy problem zniknął.",
+        "Poprawiono brzmienie licznika relacji."
     ],
     "ru": [
-        "Призрачные уведомления: устранён оставшийся случай в некоторых каналах и группах, когда уведомление оставалось даже после прочтения сообщений и снова появлялось после перезапуска. Теперь после прочтения эти уведомления вскоре исчезают сами."
+        "Приложение больше не открывается само на весь экран, пока вы заняты другим: перезапускаясь в фоне для освобождения памяти, оно теперь остаётся в фоне.",
+        "Если скачать два разных файла с одинаковым именем, теперь вы действительно получите оба: второй сохраняется как «Имя (1).pdf», а не открывает первый заново.",
+        "Сохранённые фото и видео: вероятное улучшение для Android-приложений, которые отклоняли их с сообщением «формат не поддерживается». Если с вами такое случалось, попробуйте снова и сообщите, помогло ли это.",
+        "Исправлена формулировка счётчика историй."
     ],
     "fr": [
-        "Notifications fantômes : correction du cas restant, dans certains canaux et groupes, où la notification demeurait même après avoir lu les messages et réapparaissait après un redémarrage. Une fois lus, ces avis disparaissent maintenant d'eux-mêmes peu après."
+        "L'application ne s'ouvre plus d'elle-même en plein écran pendant que vous faites autre chose : lorsqu'elle redémarre en arrière-plan pour libérer de la mémoire, elle y reste désormais.",
+        "Si vous téléchargez deux fichiers différents portant le même nom, vous obtenez maintenant vraiment les deux : le second est enregistré sous « Nom (1).pdf » au lieu de rouvrir le premier.",
+        "Photos et vidéos enregistrées : amélioration probable pour les applications Android qui les refusaient en indiquant « format non pris en charge ». Si cela vous arrivait, réessayez et dites-nous si c'est réglé.",
+        "Correction du libellé du compteur de stories."
     ],
     "sk": [
-        "Duchovné oznámenia: opravený zostávajúci prípad v niektorých kanáloch a skupinách, keď oznámenie zostávalo aj po prečítaní správ a po reštarte sa znova objavilo. Po prečítaní tieto oznámenia teraz čoskoro samy zmiznú."
+        "Aplikácia sa už neotvára sama na celú obrazovku, kým robíte niečo iné: keď sa na pozadí restartuje, aby uvolnila pamäť, teraz zostáva na pozadí.",
+        "Ak si stiahnete dva rôzne súbory s rovnakým názvom, teraz dostanete skutočne oba: druhý sa uloží ako „Názov (1).pdf“, namiesto opätovného otvorenia prvého.",
+        "Uložené fotografie a videá: pravdepodobné zlepšenie pre aplikácie Android, ktoré ich odmietali s hlásením „nepodporovaný formát“. Ak sa vám to stávalo, skúste to znova a dajte vedieť, či je to vyriešené.",
+        "Opravená formulácia počítadla príbehov."
     ]
 };
 
 var messageByLang = {
-    "it": "Altre notifiche fantasma risolte: i canali e i gruppi in cui l'avviso restava anche dopo la lettura ora si chiudono correttamente.",
-    "en": "More ghost notifications fixed: channels and groups where the alert stayed even after reading now clear properly.",
-    "de": "Weitere Geister-Benachrichtigungen behoben: Kanäle und Gruppen, in denen der Hinweis auch nach dem Lesen blieb, werden jetzt korrekt geschlossen.",
-    "pl": "Naprawiono kolejne duchy powiadomień: kanały i grupy, w których powiadomienie pozostawało nawet po przeczytaniu, teraz zamykają się poprawnie.",
-    "ru": "Исправлены ещё призрачные уведомления: каналы и группы, где уведомление оставалось даже после прочтения, теперь закрываются правильно.",
-    "fr": "D'autres notifications fantômes corrigées : les canaux et groupes où l'avis restait même après lecture se ferment désormais correctement.",
-    "sk": "Opravené ďalšie duchovné oznámenia: kanály a skupiny, kde oznámenie zostávalo aj po prečítaní, sa teraz správne zatvárajú."
+    "it": "Aggiornamento medio: l'app non salta più in primo piano da sola, e i file con lo stesso nome non si sovrappongono più.",
+    "en": "Medium update: the app no longer jumps to the foreground by itself, and files with the same name no longer overwrite each other.",
+    "de": "Mittleres Update: die App springt nicht mehr von selbst in den Vordergrund, und Dateien mit gleichem Namen überdecken sich nicht mehr.",
+    "pl": "Średnia aktualizacja: aplikacja nie wyskakuje już sama na pierwszy plan, a pliki o tej samej nazwie nie nadpisują się wzajemnie.",
+    "ru": "Среднее обновление: приложение больше не выходит на передний план само, а файлы с одинаковым именем больше не перекрывают друг друга.",
+    "fr": "Mise à jour intermédiaire : l'application ne passe plus au premier plan d'elle-même, et les fichiers de même nom ne se recouvrent plus.",
+    "sk": "Stredná aktualizácia: aplikácia už sama neskočí do popredia a súbory s rovnakým názvom sa už neprekrývajú."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

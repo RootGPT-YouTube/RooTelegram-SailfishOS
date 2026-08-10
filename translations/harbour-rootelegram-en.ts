@@ -4761,17 +4761,17 @@ messages</numerusform>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <source>%n new stories</source>
+        <translation>
+            <numerusform>%n new story</numerusform>
+            <numerusform>%n new stories</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <source>%n stories</source>
+        <translation>
+            <numerusform>%n story</numerusform>
+            <numerusform>%n stories</numerusform>
         </translation>
     </message>
     <message>

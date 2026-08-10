@@ -62,8 +62,8 @@ MessageContentBase {
     // rilascio ASINCRONO) fa deadlockare il MAIN THREAD sul seek → freeze totale
     // NON recuperabile (watchdog/timer girano sullo stesso thread congelato).
     // Quindi il seek va SERIALIZZATO e prevenuto, non recuperato. (Firma del bug
-    // vista nel journal 2026-07-17: 4 tap ravvicinati → i [VIDEODBG] si fermano
-    // di netto dopo un preroll-seek = app appesa.)
+    // vista nel journal 2026-07-17: dopo 4 tap ravvicinati i log si fermavano di
+    // netto subito dopo un preroll-seek = app appesa.)
     property bool seekRebuildInFlight: false;
     // Posizione effettivamente applicata al ciclo in volo (per riconoscere il
     // "target raggiunto" anche se nel frattempo sono arrivati altri tap).
@@ -87,7 +87,6 @@ MessageContentBase {
     // il fermo-immagine (una sola volta per raffica) e riavvia il debounce; il
     // vero smonta-e-ricrea parte solo quando i tap si fermano (seekCoalesce).
     function seekViaRebuild(targetMs) {
-        console.warn("[VIDEODBG] tap timeline a " + targetMs + "ms (coalesce)");
         pendingSeekTarget = targetMs;
         lastSeekTarget = targetMs;
         if (!seekRebuilding) {
@@ -120,7 +119,6 @@ MessageContentBase {
         resumePositionMs = pendingSeekTarget;
         appliedSeekTarget = pendingSeekTarget;
         pendingSeekTarget = -1;
-        console.warn("[VIDEODBG] applico seek a " + appliedSeekTarget + "ms (un solo rebuild)");
         videoComponentLoader.active = false;
         videoComponentLoader.active = true;
     }
@@ -253,12 +251,6 @@ MessageContentBase {
     function handlePlay() {
         playRequested = true;
         errorRetryDone = false;
-        // [VIDEODBG] console.warn = qWarning: visibile nel journal anche con
-        // *.debug=false di patchmanager. Rimuovere a diagnosi conclusa.
-        console.warn("[VIDEODBG] handlePlay fullscreen=" + fullscreen
-            + " videoType=" + videoType + " fileId=" + videoFileId
-            + " completed=" + (videoData && videoData[videoType] ? videoData[videoType].local.is_downloading_completed : "videoData-KO")
-            + " path=" + (videoData && videoData[videoType] ? videoData[videoType].local.path : "-"));
         if (videoData[videoType].local.is_downloading_completed) {
             videoUrl = videoData[videoType].local.path;
             videoComponentLoader.active = true;
@@ -280,13 +272,6 @@ MessageContentBase {
                     if (!deferThumbnail) {
                         placeholderImage.source = fileInformation.local.path;
                     }
-                }
-                if (fileId === videoFileId) {
-                    console.warn("[VIDEODBG] fileUpdated id=" + fileId
-                        + " completed=" + fileInformation.local.is_downloading_completed
-                        + " downloading=" + fileInformation.local.is_downloading_active
-                        + " downloaded=" + fileInformation.local.downloaded_size
-                        + " onScreen=" + onScreen + " playRequested=" + playRequested);
                 }
                 if (!fileInformation.remote.is_uploading_active && fileInformation.local.is_downloading_completed && fileId === videoFileId) {
                     videoDownloadBusyIndicator.running = false;
@@ -384,7 +369,6 @@ MessageContentBase {
                 highlighted: videoMessageComponent.highlighted || down
                 visible: true
                 onClicked: {
-                    console.warn("[VIDEODBG] tap sul play, pill " + videoControlsPill.width + "x" + videoControlsPill.height);
                     handlePlay();
                 }
             }
@@ -555,7 +539,6 @@ MessageContentBase {
                 id: messageVideo
 
                 Component.onCompleted: {
-                    console.warn("[VIDEODBG] Video creato, source=" + videoUrl + " error=" + messageVideo.error);
                     if (messageVideo.error === MediaPlayer.NoError) {
                         messageVideo.play();
                         timeLeftTimer.start();
@@ -586,7 +569,6 @@ MessageContentBase {
                             && videoMessageComponent.resumePositionMs > 0 && messageVideo.seekable) {
                         var resumeTo = videoMessageComponent.resumePositionMs;
                         videoMessageComponent.resumePositionMs = 0;
-                        console.warn("[VIDEODBG] preroll-seek a " + resumeTo + "ms");
                         messageVideo.seek(resumeTo);
                         seekWatchdog.arm();
                     }
@@ -656,8 +638,6 @@ MessageContentBase {
                     if (error === MediaPlayer.NoError) {
                         return;
                     }
-                    console.warn("[VIDEODBG] player error=" + error + " '" + errorString
-                        + "' retryDone=" + videoMessageComponent.errorRetryDone);
                     // Pipeline in errore: annulla la raffica di seek (cover + coda),
                     // così un pendingSeekTarget stantìo non rilancia un rebuild.
                     videoMessageComponent.endSeekRebuild();
@@ -759,8 +739,6 @@ MessageContentBase {
                     if (messageVideo.position === lastPosition) {
                         stuckCount++;
                         if (stuckCount >= 2) {
-                            console.warn("[VIDEODBG] watchdog: posizione ferma a "
-                                + messageVideo.position + " dopo un seek, restorePreview");
                             stop();
                             stuckCount = 0;
                             // Seek soft-stuck (non deadlock: il timer è scattato):

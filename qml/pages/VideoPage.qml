@@ -66,12 +66,6 @@ Page {
     }
 
     Component.onCompleted: {
-        // [VIDEODBG] rimuovere a diagnosi conclusa.
-        console.warn("[VIDEODBG] VideoPage aperta, videoType=" + videoType
-            + " completed=" + (videoData && videoData[videoType] ? videoData[videoType].local.is_downloading_completed : "videoData-KO")
-            + " fileId=" + (videoData && videoData[videoType] ? videoData[videoType].id : "-")
-            + " metaWH=" + (videoData ? videoData.width + "x" + videoData.height : "-")
-            + " sizing=" + sizingFactor + " compWH=" + myVideoComponent.width + "x" + myVideoComponent.height);
         updateVideoData();
     }
 

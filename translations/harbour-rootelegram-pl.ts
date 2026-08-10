@@ -4796,7 +4796,7 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <translation>Nieznany czat</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n nowa relacja</numerusform>
             <numerusform>%n nowe relacje</numerusform>
@@ -4804,7 +4804,7 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n relacja</numerusform>
             <numerusform>%n relacje</numerusform>

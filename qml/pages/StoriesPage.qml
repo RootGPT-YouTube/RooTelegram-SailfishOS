@@ -308,8 +308,8 @@ Page {
                         font.pixelSize: Theme.fontSizeSmall
                         color: model.has_unread ? Theme.highlightColor : Theme.secondaryColor
                         text: model.has_unread
-                              ? qsTr("%n new story(es)", "", model.story_count || 0)
-                              : qsTr("%n story(es)", "", model.story_count || 0)
+                              ? qsTr("%n new stories", "", model.story_count || 0)
+                              : qsTr("%n stories", "", model.story_count || 0)
                     }
                 }
             }

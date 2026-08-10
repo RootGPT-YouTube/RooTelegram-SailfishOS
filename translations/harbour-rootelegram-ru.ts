@@ -4796,7 +4796,7 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation>Неизвестный чат</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n новая история</numerusform>
             <numerusform>%n новые истории</numerusform>
@@ -4804,7 +4804,7 @@ You can remove it from your list. This removal is local only: it does not delete
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n история</numerusform>
             <numerusform>%n истории</numerusform>

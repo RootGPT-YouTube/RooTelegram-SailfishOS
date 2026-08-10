@@ -4755,14 +4755,14 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation type="unfinished">
             <numerusform></numerusform>
             <numerusform></numerusform>

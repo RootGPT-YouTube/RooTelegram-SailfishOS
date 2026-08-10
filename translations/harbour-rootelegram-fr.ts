@@ -4759,14 +4759,14 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <translation>Discussion inconnue</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n nouvelle story</numerusform>
             <numerusform>%n nouvelles stories</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n story</numerusform>
             <numerusform>%n stories</numerusform>

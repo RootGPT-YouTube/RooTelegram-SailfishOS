@@ -4796,7 +4796,7 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <translation>Neznámy čet</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n nový príbeh</numerusform>
             <numerusform>%n nové príbehy</numerusform>
@@ -4804,7 +4804,7 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n príbeh</numerusform>
             <numerusform>%n príbehy</numerusform>

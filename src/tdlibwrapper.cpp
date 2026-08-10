@@ -725,7 +725,7 @@ void TDLibWrapper::restartProcess()
     // quindi il nuovo processo lo rilegge e si riautentica da solo. Stesso PID.
     qWarning() << "[RECYCLE] riavvio del processo (execv) per liberare la RAM";
 
-    // Ricostruisci argv dal cmdline originale (include "--daemon").
+    // Ricostruisci argv dal cmdline originale.
     QFile cmdlineFile(QStringLiteral("/proc/self/cmdline"));
     if (!cmdlineFile.open(QIODevice::ReadOnly)) {
         qWarning() << "[RECYCLE] impossibile leggere /proc/self/cmdline, niente restart";
@@ -742,6 +742,15 @@ void TDLibWrapper::restartProcess()
     if (args.isEmpty()) {
         qWarning() << "[RECYCLE] cmdline vuota, niente restart";
         return;
+    }
+    // Il riciclo avviene con la UI NASCOSTA: il processo nuovo deve rinascere
+    // headless. Ma "--daemon" c'è solo se ad avviarci è stata l'unità di
+    // autostart; aprendo dall'icona la cmdline ne è priva, e senza questo
+    // l'execv rilancerebbe l'app in modalità interfaccia, prendendosi lo
+    // schermo sopra quello che l'utente sta facendo. Va fatto QUI, prima di
+    // costruire argv: l'append può riallocare il vettore.
+    if (!args.contains(QByteArrayLiteral("--daemon"))) {
+        args.append(QByteArrayLiteral("--daemon"));
     }
     QVector<char*> argv;
     argv.reserve(args.size() + 1);
@@ -3498,31 +3507,110 @@ QString TDLibWrapper::getOptionString(const QString &optionName)
     return this->options.value(optionName).toString();
 }
 
+namespace {
+
+// I file che salviamo per l'utente (Download, Immagini) devono essere leggibili
+// anche da FUORI la nostra sandbox, in particolare dalle app Android: girano in
+// un container con gli uid mappati (l'uid host 500000 e' root del container),
+// quindi per loro siamo "altri" e senza il bit di lettura per altri vedono un
+// file che non possono aprire — "formato non supportato", anteprima vuota —
+// nonostante il contenuto sia integro. (Sul PC via KDE Connect funziona perche'
+// quel trasferimento gira come defaultuser, cioe' il proprietario del file.)
+// QFile::copy non garantisce i permessi del file creato: li fissiamo a 0644.
+void makeFileReadableOutsideSandbox(const QString &filePath)
+{
+    QFile::setPermissions(filePath, QFileDevice::ReadOwner | QFileDevice::WriteOwner
+                                    | QFileDevice::ReadGroup | QFileDevice::ReadOther);
+}
+
+// Distingue "lo stesso allegato salvato di nuovo" (→ riusiamo la copia che c'e'
+// gia') da "due file diversi che si chiamano uguale" (→ va de-duplicato il
+// nome). Dimensione diversa = file diverso, senza leggere niente. A parita' di
+// dimensione confrontiamo il contenuto solo sotto la soglia: sui video grossi
+// una seconda lettura integrale bloccherebbe il thread della UI, e nome +
+// dimensione identici su contenuti diversi e' un caso che in pratica non capita.
+bool isSameFileContent(const QString &firstPath, const QString &secondPath)
+{
+    const qint64 fullCompareLimitBytes = 8LL * 1024 * 1024;
+    QFileInfo firstInfo(firstPath);
+    QFileInfo secondInfo(secondPath);
+    if (firstInfo.size() != secondInfo.size()) {
+        return false;
+    }
+    if (firstInfo.size() == 0 || firstInfo.size() > fullCompareLimitBytes) {
+        return true;
+    }
+    QFile firstFile(firstPath);
+    QFile secondFile(secondPath);
+    if (!firstFile.open(QIODevice::ReadOnly) || !secondFile.open(QIODevice::ReadOnly)) {
+        // Non riusciamo a leggere: meglio de-duplicare che sovrascrivere o
+        // riaprire il file sbagliato.
+        return false;
+    }
+    while (!firstFile.atEnd()) {
+        if (firstFile.read(65536) != secondFile.read(65536)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// "File.pdf" occupato → "File (1).pdf", "File (2).pdf", ... Stringa vuota se
+// non troviamo un nome libero (situazione assurda, ma non vogliamo un ciclo
+// infinito ne' sovrascrivere).
+QString deduplicatedFilePath(const QString &destinationDir, const QString &fileName)
+{
+    const QFileInfo nameInfo(fileName);
+    const QString baseName = nameInfo.completeBaseName();
+    const QString suffix = nameInfo.suffix();
+    const QString dottedSuffix = suffix.isEmpty() ? QString() : QStringLiteral(".") + suffix;
+    for (int counter = 1; counter < 1000; ++counter) {
+        const QString candidate = destinationDir + "/" + baseName
+                                  + QStringLiteral(" (%1)").arg(counter) + dottedSuffix;
+        if (!QFile::exists(candidate)) {
+            return candidate;
+        }
+    }
+    return QString();
+}
+
+}
+
 void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCopy)
 {
     LOG("Copy file to downloads" << filePath << openAfterCopy);
     QFileInfo fileInfo(filePath);
-    if (fileInfo.exists()) {
-        QString downloadFilePath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation) + "/" + fileInfo.fileName();
-        if (QFile::exists(downloadFilePath)) {
-            if (openAfterCopy) {
-                this->openFileOnDevice(downloadFilePath);
-            } else {
-                emit copyToDownloadsSuccessful(fileInfo.fileName(), downloadFilePath);
-            }
-        } else {
-            if (QFile::copy(filePath, downloadFilePath)) {
-                if (openAfterCopy) {
-                    this->openFileOnDevice(downloadFilePath);
-                } else {
-                    emit copyToDownloadsSuccessful(fileInfo.fileName(), downloadFilePath);
-                }
-            } else {
-                emit copyToDownloadsError(fileInfo.fileName(), downloadFilePath);
-            }
-        }
-    } else {
+    if (!fileInfo.exists()) {
         emit copyToDownloadsError(fileInfo.fileName(), filePath);
+        return;
+    }
+    QString destinationDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    if (destinationDir.isEmpty()) {
+        destinationDir = QDir::homePath() + "/Downloads";
+    }
+    QDir().mkpath(destinationDir);
+    QString downloadFilePath = destinationDir + "/" + fileInfo.fileName();
+    // Collisione di nome: due allegati DIVERSI che si chiamano entrambi
+    // "File.pdf" finivano sullo stesso path, e il ramo "esiste gia'" saltava la
+    // copia riaprendo il PRIMO file — il secondo download sembrava riuscito ma
+    // mostrava il vecchio contenuto. Ora il nome viene de-duplicato; se invece
+    // e' davvero lo stesso file, riusiamo la copia esistente come prima.
+    if (QFile::exists(downloadFilePath) && !isSameFileContent(filePath, downloadFilePath)) {
+        downloadFilePath = deduplicatedFilePath(destinationDir, fileInfo.fileName());
+        if (downloadFilePath.isEmpty()) {
+            emit copyToDownloadsError(fileInfo.fileName(), destinationDir);
+            return;
+        }
+    }
+    if (!QFile::exists(downloadFilePath) && !QFile::copy(filePath, downloadFilePath)) {
+        emit copyToDownloadsError(QFileInfo(downloadFilePath).fileName(), downloadFilePath);
+        return;
+    }
+    makeFileReadableOutsideSandbox(downloadFilePath);
+    if (openAfterCopy) {
+        this->openFileOnDevice(downloadFilePath);
+    } else {
+        emit copyToDownloadsSuccessful(QFileInfo(downloadFilePath).fileName(), downloadFilePath);
     }
 }
 
@@ -3530,21 +3618,29 @@ void TDLibWrapper::copyFileToPictures(const QString &filePath)
 {
     LOG("Copy file to pictures" << filePath);
     QFileInfo fileInfo(filePath);
-    if (fileInfo.exists()) {
-        QString destDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-        if (destDir.isEmpty()) {
-            destDir = QDir::homePath() + "/Pictures";
-        }
-        QDir().mkpath(destDir);
-        QString destPath = destDir + "/" + fileInfo.fileName();
-        if (QFile::exists(destPath) || QFile::copy(filePath, destPath)) {
-            emit copyToDownloadsSuccessful(fileInfo.fileName(), destPath);
-        } else {
-            emit copyToDownloadsError(fileInfo.fileName(), destPath);
-        }
-    } else {
+    if (!fileInfo.exists()) {
         emit copyToDownloadsError(fileInfo.fileName(), filePath);
+        return;
     }
+    QString destinationDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    if (destinationDir.isEmpty()) {
+        destinationDir = QDir::homePath() + "/Pictures";
+    }
+    QDir().mkpath(destinationDir);
+    QString destinationPath = destinationDir + "/" + fileInfo.fileName();
+    if (QFile::exists(destinationPath) && !isSameFileContent(filePath, destinationPath)) {
+        destinationPath = deduplicatedFilePath(destinationDir, fileInfo.fileName());
+        if (destinationPath.isEmpty()) {
+            emit copyToDownloadsError(fileInfo.fileName(), destinationDir);
+            return;
+        }
+    }
+    if (!QFile::exists(destinationPath) && !QFile::copy(filePath, destinationPath)) {
+        emit copyToDownloadsError(QFileInfo(destinationPath).fileName(), destinationPath);
+        return;
+    }
+    makeFileReadableOutsideSandbox(destinationPath);
+    emit copyToDownloadsSuccessful(QFileInfo(destinationPath).fileName(), destinationPath);
 }
 
 void TDLibWrapper::openFileOnDevice(const QString &filePath)

@@ -4759,14 +4759,14 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <translation>Chat sconosciuta</translation>
     </message>
     <message numerus="yes">
-        <source>%n new story(es)</source>
+        <source>%n new stories</source>
         <translation>
             <numerusform>%n nuova storia</numerusform>
             <numerusform>%n nuove storie</numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <source>%n story(es)</source>
+        <source>%n stories</source>
         <translation>
             <numerusform>%n storia</numerusform>
             <numerusform>%n storie</numerusform>
