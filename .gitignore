@@ -80,3 +80,9 @@ _ffmpeg_build/
 
 # Stamp del guard anti-stale APP_VERSION in build-rpm.sh (build state, non versionare)
 .last_built_app_version
+
+# Specchio della memoria di lavoro: note, IP privati dei device, dettagli di rete.
+# NON deve finire in nessun repo, tantomeno nel mirror pubblico. Oggi vive fuori
+# dagli alberi git (RooTelegram/memory/), questa e' la rete di sicurezza se ci
+# finisse dentro per una copia distratta.
+memory/
