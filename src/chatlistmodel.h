@@ -101,6 +101,7 @@ private slots:
     void handleChatLastMessageUpdated(const QString &chatId, const QString &order, const QVariantMap &lastMessage);
     void handleChatOrderUpdated(const QString &chatId, const QString &order);
     void handleChatReadInboxUpdated(const QString &chatId, const QString &lastReadInboxMessageId, int unreadCount);
+    void handleForumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId);
     void handleChatOpened(qlonglong chatId);
     void handleChatReadOutboxUpdated(const QString &chatId, const QString &lastReadOutboxMessageId);
     void handleChatPhotoUpdated(qlonglong chatId, const QVariantMap &photo);
@@ -131,6 +132,9 @@ signals:
 private:
     class ChatData;
     ChatData *buildChatData(const QVariantMap &chatToBeAdded);
+    // Badge dei forum: chiede i topic e ne somma gli unread. Throttled, perche'
+    // updateChatReadInbox puo' arrivare a raffica.
+    void requestForumUnreadRefresh(qlonglong chatId);
     void addVisibleChat(ChatData *chat);
     void updateChatVisibility(const TDLibWrapper::Group *group);
     void updateSecretChatVisibility(const QVariantMap secretChatDetails);
@@ -145,6 +149,8 @@ private:
     QHash<qlonglong,int> chatIndexMap;
     QHash<qlonglong,ChatData*> hiddenChats;
     QHash<qlonglong,ChatData*> folderFilteredChats; // chat escluse dalla cartella attiva
+    // Ultimo istante (ms) in cui abbiamo chiesto i topic per il badge di quel forum.
+    QHash<qlonglong, qint64> forumUnreadRefreshedAt;
     bool showHiddenChats;
     int activeFolderId;
     QHash<qlonglong, QHash<int, QString>> folderOrders; // chatId -> folderId -> order

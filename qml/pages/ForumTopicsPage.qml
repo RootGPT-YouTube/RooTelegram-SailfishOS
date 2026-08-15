@@ -1087,14 +1087,19 @@ Page {
                 var lastMsgId = Number(anchorMsgId) || 0
                 forumTopicsPage.lastViewedThreadId = tid
                 tdLibWrapper.setCurrentMessageThreadId(tid)
-                if (lastMsgId > 0) {
-                    // Allineato a Yottagram: forziamo subito il read del topic dalla lista
-                    tdLibWrapper.viewMessage(forumTopicsPage.chatInformation.id, lastMsgId, true)
-                }
+                // NB: qui c'era un viewMessage(..., force=true) sull'ULTIMO messaggio del
+                // topic ("allineato a Yottagram"). Marcare come letto l'ultimo messaggio
+                // segna letto TUTTO il topic, quindi bastava entrarci per perdere il segno
+                // di dove si era arrivati, anche senza leggere niente. Ora la lettura la
+                // registra il marcatore progressivo dello scroll (viewMessageTimer in
+                // ChatPage, force=false), che segna solo fin dove si e' davvero arrivati.
                 pageStack.push(Qt.resolvedUrl("ChatPage.qml"), {
                     chatInformation: forumTopicsPage.chatInformation,
                     messageThreadId: tid,
                     topicLastMessageId: lastMsgId,
+                    // Dove eravamo rimasti in QUESTO topic: e' l'ancora con cui la
+                    // ChatPage si posiziona, cosi' il topic non si apre in fondo.
+                    topicLastReadInboxMessageId: Number(lastReadInboxMessageId || 0),
                     currentTopicInfo: { name: topicName, is_closed: topicIsClosed }
                 })
             }

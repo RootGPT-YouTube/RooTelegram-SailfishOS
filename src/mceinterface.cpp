@@ -20,6 +20,8 @@
 #include "mceinterface.h"
 #include <QDBusConnection>
 #include <QDBusMessage>
+#include <QDBusReply>
+#include <QTimer>
 
 #define DEBUG_MODULE MceInterface
 #include "debuglog.h"
@@ -64,6 +66,36 @@ void MceInterface::tklockUnlock()
 {
     LOG("Unlocking touchscreen lock");
     call(QStringLiteral("req_tklock_mode_change"), QStringLiteral("unlocked"));
+}
+
+void MceInterface::tklockUnlockWhenDisplayOn(int maxWaitMs)
+{
+    // Un primo tentativo subito: se il display e' gia' acceso finisce qui.
+    QDBusReply<QString> now = call(QStringLiteral("get_display_status"));
+    if (now.isValid() && (now.value() == QLatin1String("on") || now.value() == QLatin1String("dimmed"))) {
+        tklockUnlock();
+        return;
+    }
+
+    QTimer *timer = new QTimer(this);
+    timer->setInterval(200);
+    connect(timer, &QTimer::timeout, this, [this, timer, maxWaitMs, elapsed = 0]() mutable {
+        elapsed += timer->interval();
+        QDBusReply<QString> reply = call(QStringLiteral("get_display_status"));
+        const QString status = reply.isValid() ? reply.value() : QString();
+        if (status == QLatin1String("on") || status == QLatin1String("dimmed")) {
+            qWarning() << "[CALLSTATE] display acceso dopo" << elapsed << "ms: tolgo il tklock";
+            tklockUnlock();
+            timer->stop();
+            timer->deleteLater();
+        } else if (elapsed >= maxWaitMs) {
+            qWarning() << "[CALLSTATE] display ancora" << status << "dopo" << elapsed
+                       << "ms: rinuncio a togliere il tklock";
+            timer->stop();
+            timer->deleteLater();
+        }
+    });
+    timer->start();
 }
 
 void MceInterface::callStateChange(const QString &state, const QString &type)

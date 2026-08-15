@@ -1245,8 +1245,15 @@ void TDLibReceiver::processForumTopics(const QVariantMap &receivedInformation)
     if (nextOffsetMessageThreadId == 0) {
         nextOffsetMessageThreadId = receivedInformation.value("next_offset_message_thread_id").toLongLong();
     }
-    LOG("Forum topics received, count:" << totalCount);
-    emit forumTopicsReceived(0, topics, totalCount, nextOffsetDate, nextOffsetMessageId, nextOffsetMessageThreadId);
+    // chat_id non c'e' nella risposta: lo riprendiamo dall'@extra che abbiamo
+    // inviato con la richiesta ("getForumTopics:<chatId>").
+    qlonglong chatId = 0;
+    const QString extra = receivedInformation.value(_EXTRA).toString();
+    if (extra.startsWith("getForumTopics:")) {
+        chatId = extra.section(':', 1, 1).toLongLong();
+    }
+    LOG("Forum topics received for chat" << chatId << "count:" << totalCount);
+    emit forumTopicsReceived(chatId, topics, totalCount, nextOffsetDate, nextOffsetMessageId, nextOffsetMessageThreadId);
 }
 
 void TDLibReceiver::processForumTopic(const QVariantMap &receivedInformation)

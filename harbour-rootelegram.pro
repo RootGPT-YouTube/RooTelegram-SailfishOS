@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.9.1
+RT_APP_VERSION = 2.9.2
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -65,6 +65,7 @@ SOURCES += src/harbour-rootelegram.cpp \
     src/tdlibfile.cpp \
     src/tdlibreceiver.cpp \
     src/tdlibwrapper.cpp \
+    src/systemcallbridge.cpp \
     src/textfiltermodel.cpp \
     src/tgsplugin.cpp \
     src/qrimageprovider.cpp \
@@ -280,6 +281,12 @@ exists($$PWD/bundledlibs/$${TARGET_ARCHITECTURE}) {
 # dipendenze (GPL/LGPL/MIT) devono essere raggiungibili da chi riceve l'RPM.
 licenses.files = $$PWD/LICENSE $$PWD/NOTICE
 licenses.path = /usr/share/$${TARGET}/licenses
+# Script chiamato dallo scriptlet RPM per riavviare voicecall-manager, senza
+# il quale il plugin provider resterebbe inerte fino al reboot.
+voicecallrestart.files = $$PWD/bin/restart-voicecall.sh
+voicecallrestart.path = /usr/share/$${TARGET}/bin
+INSTALLS += voicecallrestart
+
 INSTALLS += licenses
 
 # [2.8.8] Servizio systemd utente per l'autostart in background al boot del device.
@@ -369,6 +376,7 @@ HEADERS += \
     src/tdlibreceiver.h \
     src/tdlibsecrets.h \
     src/tdlibwrapper.h \
+    src/systemcallbridge.h \
     src/textfiltermodel.h \
     src/tgsplugin.h \
     src/qrimageprovider.h \

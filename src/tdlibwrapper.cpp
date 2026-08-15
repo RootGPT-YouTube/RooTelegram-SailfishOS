@@ -4957,6 +4957,10 @@ void TDLibWrapper::getForumTopics(qlonglong chatId, const QString &query, qlongl
     // Compatibilità con versioni TDLib che usano ancora message_thread_id
     requestObject.insert("offset_message_thread_id", offsetMessageThreadId);
     requestObject.insert("limit", limit);
+    // Attribuzione via @extra: pendingForumTopicsChatId e' uno slot SINGOLO, quindi
+    // due richieste concorrenti (es. il badge di piu' forum) si attribuirebbero a
+    // vicenda. L'@extra viaggia con la risposta e non si puo' confondere.
+    requestObject.insert(_EXTRA, QString("getForumTopics:%1").arg(chatId));
     this->sendRequest(requestObject);
 }
 
@@ -5042,9 +5046,11 @@ void TDLibWrapper::setCurrentChatIsForum(bool isForum)
     this->currentChatIsForum = isForum;
 }
 
-void TDLibWrapper::handleForumTopicsReceived(qlonglong, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId)
+void TDLibWrapper::handleForumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId)
 {
-    // Il receiver non ha il chatId dalla risposta TDLib - lo aggiungiamo qui
-    LOG("Forwarding forum topics for chat" << pendingForumTopicsChatId << "count:" << totalCount);
-    emit forumTopicsReceived(pendingForumTopicsChatId, topics, totalCount, nextOffsetDate, nextOffsetMessageId, nextOffsetMessageThreadId);
+    // TDLib non mette chat_id nella risposta: lo recuperiamo dall'@extra (via
+    // receiver) e, solo se manca, ripieghiamo sullo slot singolo di prima.
+    const qlonglong resolvedChatId = chatId != 0 ? chatId : pendingForumTopicsChatId;
+    LOG("Forwarding forum topics for chat" << resolvedChatId << "count:" << totalCount);
+    emit forumTopicsReceived(resolvedChatId, topics, totalCount, nextOffsetDate, nextOffsetMessageId, nextOffsetMessageThreadId);
 }

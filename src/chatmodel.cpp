@@ -354,6 +354,7 @@ ChatModel::ChatModel(TDLibWrapper *tdLibWrapper) :
     chatId(0),
     messageThreadId(0),
     topicLastMessageId(0),
+    topicLastReadInboxMessageId(0),
     inReload(false),
     inIncrementalUpdate(false),
     searchModeActive(false)
@@ -485,13 +486,25 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
     emit chatIdChanged();
     emit smallPhotoChanged();
     if (messageThreadId) {
+        // Ancora di apertura del topic: l'ultimo messaggio LETTO, non l'ultimo
+        // esistente. E' lo stesso criterio delle chat normali (vedi il ramo else,
+        // che parte da LAST_READ_INBOX_MESSAGE_ID con offset -1, cioe' carica la
+        // finestra ATTORNO all'ultimo letto).
+        // Prima si ancorava a topicLastMessageId = l'ultimo messaggio ESISTENTE:
+        // il topic si apriva percio' sempre in fondo, e il marcatore di lettura
+        // dello scroll segnava subito come letto tutto, azzerando il contatore
+        // anche senza aver letto niente (segnalato dall'utente il 2026-08-15).
+        // Fallback invariati quando non sappiamo dove eravamo rimasti.
+        const qlonglong topicAnchor = topicLastReadInboxMessageId > 0
+            ? topicLastReadInboxMessageId
+            : topicLastMessageId;
         if (messageThreadId == 1) {
-            // General topic: usa getChatHistory partendo dall'ultimo messaggio del topic
-            qlonglong startFrom = topicLastMessageId > 0 ? topicLastMessageId : this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong();
+            // General topic: getMessageThreadHistory non lo supporta, si usa getChatHistory
+            qlonglong startFrom = topicAnchor > 0 ? topicAnchor : this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong();
             tdLibWrapper->getChatHistory(chatId, startFrom);
         } else {
             // Altri topic / discussion thread canale: usa getMessageThreadHistory
-            qlonglong anchorMessageId = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
+            qlonglong anchorMessageId = topicAnchor > 0 ? topicAnchor : messageThreadId;
             tdLibWrapper->getMessageThreadHistory(chatId, anchorMessageId);
         }
     } else {
@@ -694,6 +707,17 @@ void ChatModel::setTopicLastMessageId(qlonglong lastMsgId)
 {
     topicLastMessageId = lastMsgId;
     emit topicLastMessageIdChanged();
+}
+
+qlonglong ChatModel::getTopicLastReadInboxMessageId() const
+{
+    return topicLastReadInboxMessageId;
+}
+
+void ChatModel::setTopicLastReadInboxMessageId(qlonglong lastReadId)
+{
+    topicLastReadInboxMessageId = lastReadId;
+    emit topicLastReadInboxMessageIdChanged();
 }
 
 void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCount)

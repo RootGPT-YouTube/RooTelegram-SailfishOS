@@ -30,6 +30,10 @@ class ChatModel : public QAbstractListModel
     Q_PROPERTY(QVariantMap smallPhoto READ smallPhoto NOTIFY smallPhotoChanged)
     Q_PROPERTY(qlonglong messageThreadId READ getMessageThreadId WRITE setMessageThreadId NOTIFY messageThreadIdChanged)
     Q_PROPERTY(qlonglong topicLastMessageId READ getTopicLastMessageId WRITE setTopicLastMessageId NOTIFY topicLastMessageIdChanged)
+    // Ultimo messaggio LETTO del topic (forumTopic.last_read_inbox_message_id).
+    // E' l'ancora giusta per aprire un topic dove si era rimasti; da non
+    // confondere con topicLastMessageId, che e' l'ultimo messaggio ESISTENTE.
+    Q_PROPERTY(qlonglong topicLastReadInboxMessageId READ getTopicLastReadInboxMessageId WRITE setTopicLastReadInboxMessageId NOTIFY topicLastReadInboxMessageIdChanged)
     // Se !=0, l'apertura della chat ancora il caricamento iniziale a QUESTO messaggio
     // (deep-link da notifica) invece che all'ultimo letto: evita di caricare centinaia
     // di messaggi intermedi (freeze su cold-start). Azzerato dopo l'uso in initialize().
@@ -63,6 +67,8 @@ public:
     void setMessageThreadId(qlonglong threadId);
     qlonglong getTopicLastMessageId() const;
     void setTopicLastMessageId(qlonglong lastMsgId);
+    qlonglong getTopicLastReadInboxMessageId() const;
+    void setTopicLastReadInboxMessageId(qlonglong lastReadId);
 
 signals:
     void messagesReceived(int modelIndex, int lastReadSentIndex, int totalCount);
@@ -77,6 +83,7 @@ signals:
     void pinnedMessageChanged();
     void messageThreadIdChanged();
     void topicLastMessageIdChanged();
+    void topicLastReadInboxMessageIdChanged();
 
 private slots:
     void handleMessagesReceived(const QVariantList &messages, int totalCount);
@@ -123,6 +130,7 @@ private:
     qlonglong chatId;
     qlonglong messageThreadId;
     qlonglong topicLastMessageId;
+    qlonglong topicLastReadInboxMessageId;
     qlonglong initialMessageId = 0;
     bool inReload;
     bool inIncrementalUpdate;

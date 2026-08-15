@@ -28,6 +28,7 @@ class CallVideoRenderer;
 }
 
 class TDLibWrapper;
+class SystemCallBridge;
 class MceInterface;
 class QTimer;
 
@@ -36,6 +37,9 @@ class CallManager : public QObject
     Q_OBJECT
     // V3c: flussi video esposti a QML (VideoOutput.source). Remoto = interlocutore,
     // locale = anteprima della propria camera.
+    // true se la chiamata la gestisce la UI di SISTEMA (plugin voicecall attivo):
+    // in quel caso suoneria e schermata di risposta NON devono farle anche noi.
+    Q_PROPERTY(bool systemCallUiActive READ systemCallUiActive CONSTANT)
     Q_PROPERTY(QObject* remoteVideo READ remoteVideo CONSTANT)
     Q_PROPERTY(QObject* localVideo READ localVideo CONSTANT)
     // V4/V5: camera in uso (per il mirror selfie dell'anteprima locale).
@@ -47,6 +51,7 @@ public:
     explicit CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface, QObject *parent = nullptr);
     ~CallManager() override;
 
+    bool systemCallUiActive() const;
     QObject *remoteVideo() const;
     QObject *localVideo() const;
     bool frontCamera() const { return m_frontCamera; }
@@ -70,6 +75,11 @@ signals:
     void remoteVideoActiveChanged();
 
 private slots:
+    void handleSystemAnswerRequested();
+
+    void handleSystemHangupRequested();
+    void handleSystemSpeakerModeRequested(bool on);
+    void handleSystemMuteRequested(bool muted);
     void handleCallUpdated(const QVariantMap &call);
     // V4: aggiornato (sul thread GUI) dallo stato media remoto di tgcalls.
     void setRemoteVideoActive(bool active);
@@ -95,7 +105,13 @@ private:
     QByteArray decodeTdlibBytes(const QString &data) const;
 
 private:
+    // Nome da mostrare nella UI di chiamata di sistema.
+    QString callerDisplayName() const;
+
     TDLibWrapper *tdLibWrapper;
+    // Ponte verso il nostro plugin dentro voicecall-manager: e' cio' che rende
+    // la chiamata una telefonata di sistema (UI sopra il PIN, prossimita').
+    SystemCallBridge *systemCallBridge;
     MceInterface *mceInterface;
     QTimer *m_audioUnmuteTimer;   // ritenta lo smute finché lo stream compare
     QTimer *m_displayOnTimer;     // rinnova la pausa blanking ogni ~50s

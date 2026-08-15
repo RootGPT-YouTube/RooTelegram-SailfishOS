@@ -12,7 +12,7 @@ Name:       harbour-rootelegram
 %define _binary_payload w6.xzdio
 
 Summary:    RooTelegram is a Telegram client for Sailfish OS
-Version:    2.9.1
+Version:    2.9.2
 Release:    1
 Group:      Qt/Qt
 License:    GPL-3.0
@@ -59,6 +59,7 @@ for u in /home/*; do
   [ -d "$u"/.local/share/applications ] && update-desktop-database "$u"/.local/share/applications >/dev/null 2>&1 || true
 done
 systemctl --global enable harbour-rootelegram.service >/dev/null 2>&1 || true
+sh /usr/share/harbour-rootelegram/bin/restart-voicecall.sh >/dev/null 2>&1 || true
 exit 0
 
 %postun
@@ -85,6 +86,16 @@ touch rlottie/src/vector/config.h
 make %{?_smp_mflags}
 
 # >> build post
+# Plugin voicecall: vive nello stesso progetto e nello stesso RPM dell'app, ma
+# il .so DEVE stare in /usr/lib64/voicecall/plugins perche' voicecall-manager
+# carica i provider dentro il proprio processo (non esiste un modo per
+# registrarsi da fuori: il suo D-Bus e' di sola consultazione).
+%ifarch aarch64
+cd voicecallplugin
+%qmake5
+make %{?_smp_mflags}
+cd ..
+%endif
 # << build post
 
 %install
@@ -94,6 +105,11 @@ rm -rf %{buildroot}
 %qmake5_install
 
 # >> install post
+%ifarch aarch64
+mkdir -p %{buildroot}/usr/lib64/voicecall/plugins
+install -m 644 voicecallplugin/librootelegram-voicecall-plugin.so \
+    %{buildroot}/usr/lib64/voicecall/plugins/librootelegram-voicecall-plugin.so
+%endif
 # Harbour: gli asset (SVG emoji) non devono essere eseguibili
 find %{buildroot}%{_datadir}/%{name} -name '*.svg' -exec chmod 644 {} +
 # << install post
@@ -111,4 +127,7 @@ desktop-file-install --delete-original       \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 /usr/lib/systemd/user/%{name}.service
 # >> files
+%ifarch aarch64
+/usr/lib64/voicecall/plugins/librootelegram-voicecall-plugin.so
+%endif
 # << files

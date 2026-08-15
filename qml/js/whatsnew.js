@@ -13,68 +13,68 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.9.1";
+var version = "2.9.2";
 
 var changelogByLang = {
     "it": [
-        "I messaggi vocali ora vengono registrati nel formato che Telegram richiede: dovrebbero finalmente sentirsi anche sugli iPhone, che prima li ricevevano vuoti. Se ti capitava, riprova e fai sapere.",
-        "Nei gruppi con i topic, il contatore dei messaggi non letti ora si azzera davvero dopo che hai letto: prima restava spesso appiccicato.",
-        "L'app non si chiude più all'improvviso mentre libera memoria in background. Chi la vedeva ripartire «come al primo avvio» non dovrebbe più vederlo.",
-        "Durante una chiamata lo schermo ora si spegne quando avvicini il telefono all'orecchio, come per una telefonata normale.",
-        "Corrette alcune icone che non comparivano e ripulite alcune segnalazioni interne."
+        "Le chiamate ora si comportano come una telefonata normale: lo schermo si accende da solo e la schermata per rispondere compare sopra il blocco, anche se hai il codice di sicurezza. Rispondi, riaggancia, vivavoce e microfono si comandano dai controlli di sistema.",
+        "Nei gruppi con i topic, aprendone uno torni dove eri rimasto invece di finire in fondo, e il contatore dei non letti scala man mano che leggi.",
+        "Il numero di messaggi non letti di un gruppo con topic ora e' giusto gia' nella lista delle chat, senza dover entrare nel gruppo.",
+        "I messaggi vocali ora vengono registrati nel formato richiesto da Telegram: dovrebbero sentirsi anche sugli iPhone, che prima li ricevevano vuoti.",
+        "L'app non si chiude piu' all'improvviso mentre libera memoria in background, e sono state corrette alcune icone che non comparivano."
     ],
     "en": [
-        "Voice messages are now recorded in the format Telegram requires: they should finally play on iPhones too, which used to receive them empty. If this happened to you, please try again and let us know.",
-        "In groups with topics, the unread counter now really resets after you read: before, it often stayed stuck.",
-        "The app no longer closes unexpectedly while freeing memory in the background. If you saw it restart \"as if it were the first launch\", that should be gone.",
-        "During a call the screen now switches off when you hold the phone to your ear, like on a regular phone call.",
-        "Fixed a few icons that were not showing up, and cleaned up some internal warnings."
+        "Calls now behave like a regular phone call: the screen turns on by itself and the answer screen appears above the lock screen, even with a security code set. Answer, hang up, speaker and microphone are all controlled from the system controls.",
+        "In groups with topics, opening one takes you back to where you left off instead of jumping to the end, and the unread counter goes down as you read.",
+        "The unread count of a group with topics is now correct already in the chat list, without having to enter the group.",
+        "Voice messages are now recorded in the format Telegram requires: they should play on iPhones too, which used to receive them empty.",
+        "The app no longer closes unexpectedly while freeing memory in the background, and a few missing icons have been fixed."
     ],
     "de": [
-        "Sprachnachrichten werden jetzt in dem Format aufgenommen, das Telegram verlangt: sie sollten endlich auch auf iPhones abspielbar sein, die sie bisher leer empfingen. Falls dir das passiert ist, versuche es erneut und melde dich.",
-        "In Gruppen mit Themen wird der Zähler ungelesener Nachrichten jetzt wirklich zurückgesetzt, nachdem du gelesen hast: vorher blieb er oft hängen.",
-        "Die App schließt sich nicht mehr unerwartet, während sie im Hintergrund Speicher freigibt.",
-        "Während eines Anrufs schaltet sich der Bildschirm jetzt aus, wenn du das Telefon ans Ohr hältst, wie bei einem normalen Telefonat.",
-        "Einige fehlende Symbole korrigiert und interne Warnungen aufgeräumt."
+        "Anrufe verhalten sich jetzt wie ein normales Telefonat: der Bildschirm schaltet sich von selbst ein und der Annahmebildschirm erscheint uber dem Sperrbildschirm, auch mit Sicherheitscode. Annehmen, Auflegen, Lautsprecher und Mikrofon werden uber die Systemsteuerung bedient.",
+        "In Gruppen mit Themen landest du beim Offnen wieder dort, wo du aufgehort hast, statt am Ende, und der Zahler ungelesener Nachrichten sinkt beim Lesen.",
+        "Die Anzahl ungelesener Nachrichten einer Themengruppe stimmt jetzt schon in der Chatliste, ohne die Gruppe zu offnen.",
+        "Sprachnachrichten werden jetzt in dem von Telegram verlangten Format aufgenommen: sie sollten auch auf iPhones abspielbar sein.",
+        "Die App schliesst sich nicht mehr unerwartet beim Freigeben von Speicher, und einige fehlende Symbole wurden korrigiert."
     ],
     "pl": [
-        "Wiadomości głosowe są teraz nagrywane w formacie wymaganym przez Telegram: powinny wreszcie odtwarzać się także na iPhone'ach, które dotąd otrzymywały je puste. Jeśli ci się to zdarzało, spróbuj ponownie i daj znać.",
-        "W grupach z tematami licznik nieprzeczytanych wiadomości teraz naprawdę się zeruje po przeczytaniu: wcześniej często się zacinał.",
-        "Aplikacja nie zamyka się już niespodziewanie podczas zwalniania pamięci w tle.",
-        "Podczas połączenia ekran wyłącza się teraz, gdy przykładasz telefon do ucha, jak przy zwykłej rozmowie.",
-        "Poprawiono kilka brakujących ikon i uporządkowano wewnętrzne ostrzeżenia."
+        "Polaczenia zachowuja sie teraz jak zwykla rozmowa telefoniczna: ekran wlacza sie sam, a ekran odbierania pojawia sie nad ekranem blokady, nawet z kodem zabezpieczajacym. Odbieranie, rozlaczanie, glosnik i mikrofon obslugujesz z panelu systemowego.",
+        "W grupach z tematami po otwarciu wracasz tam, gdzie skonczyles, zamiast na koniec, a licznik nieprzeczytanych maleje w miare czytania.",
+        "Liczba nieprzeczytanych wiadomosci grupy z tematami jest teraz poprawna juz na liscie czatow.",
+        "Wiadomosci glosowe sa nagrywane w formacie wymaganym przez Telegram: powinny odtwarzac sie takze na iPhone'ach.",
+        "Aplikacja nie zamyka sie juz niespodziewanie podczas zwalniania pamieci, poprawiono tez kilka brakujacych ikon."
     ],
     "ru": [
-        "Голосовые сообщения теперь записываются в формате, который требует Telegram: они должны наконец воспроизводиться и на iPhone, которые раньше получали их пустыми. Если с вами такое случалось, попробуйте снова и сообщите.",
-        "В группах с темами счётчик непрочитанных теперь действительно обнуляется после прочтения: раньше он часто застревал.",
-        "Приложение больше не закрывается неожиданно, освобождая память в фоне.",
-        "Во время звонка экран теперь гаснет, когда вы подносите телефон к уху, как при обычном разговоре.",
-        "Исправлены несколько не отображавшихся значков и убраны внутренние предупреждения."
+        "Звонки теперь ведут себя как обычный телефонный вызов: экран включается сам, а экран ответа появляется поверх блокировки, даже с кодом безопасности. Ответ, отбой, громкая связь и микрофон управляются системными кнопками.",
+        "В группах с темами при открытии вы возвращаетесь туда, где остановились, а не в конец, и счётчик непрочитанных уменьшается по мере чтения.",
+        "Число непрочитанных в группе с темами теперь верное уже в списке чатов, без входа в группу.",
+        "Голосовые сообщения записываются в формате, который требует Telegram: они должны воспроизводиться и на iPhone.",
+        "Приложение больше не закрывается неожиданно при освобождении памяти, исправлены несколько отсутствовавших значков."
     ],
     "fr": [
-        "Les messages vocaux sont désormais enregistrés dans le format exigé par Telegram : ils devraient enfin s'entendre aussi sur iPhone, qui les recevait vides. Si cela vous arrivait, réessayez et dites-le nous.",
-        "Dans les groupes avec sujets, le compteur de non-lus se remet vraiment à zéro après lecture : avant, il restait souvent bloqué.",
-        "L'application ne se ferme plus à l'improviste pendant qu'elle libère de la mémoire en arrière-plan.",
-        "Pendant un appel, l'écran s'éteint maintenant quand vous portez le téléphone à l'oreille, comme pour un appel normal.",
-        "Correction de quelques icônes manquantes et nettoyage d'avertissements internes."
+        "Les appels se comportent maintenant comme un vrai appel telephonique : l'ecran s'allume tout seul et l'ecran de reponse apparait par-dessus le verrouillage, meme avec un code de securite. Repondre, raccrocher, haut-parleur et micro se commandent depuis les controles du systeme.",
+        "Dans les groupes avec sujets, en ouvrir un vous ramene la ou vous en etiez au lieu d'aller a la fin, et le compteur de non-lus diminue au fil de la lecture.",
+        "Le nombre de non-lus d'un groupe avec sujets est desormais correct des la liste des conversations.",
+        "Les messages vocaux sont enregistres dans le format exige par Telegram : ils devraient s'entendre aussi sur iPhone.",
+        "L'application ne se ferme plus a l'improviste en liberant de la memoire, et quelques icones manquantes ont ete corrigees."
     ],
     "sk": [
-        "Hlasové správy sa teraz nahrávajú vo formáte, ktorý Telegram vyžaduje: mali by sa konečne prehrať aj na iPhonoch, ktoré ich doteraz dostávali prázdne. Ak sa vám to stávalo, skúste to znova a dajte vedieť.",
-        "V skupinách s témami sa počítadlo neprečítaných teraz naozaj vynuluje po prečítaní: predtým často zostávalo visieť.",
-        "Aplikácia sa už nezatvára nečakane, keď na pozadí uvoľňuje pamäť.",
-        "Počas hovoru sa obrazovka teraz vypne, keď si priložíte telefón k uchu, ako pri bežnom telefonáte.",
-        "Opravených niekoľko chýbajúcich ikon a upratané interné upozornenia."
+        "Hovory sa teraz spravaju ako bezny telefonat: obrazovka sa zapne sama a obrazovka na prijatie sa zobrazi nad uzamknutou obrazovkou, aj s bezpecnostnym kodom. Prijatie, zavesenie, hlasity odposluch a mikrofon ovladate zo systemovych prvkov.",
+        "V skupinach s temami sa po otvoreni vratite tam, kde ste skoncili, namiesto na koniec, a pocitadlo neprecitanych klesa pri citani.",
+        "Pocet neprecitanych v skupine s temami je teraz spravny uz v zozname chatov.",
+        "Hlasove spravy sa nahravaju vo formate, ktory Telegram vyzaduje: mali by sa prehrat aj na iPhonoch.",
+        "Aplikacia sa uz nezatvara necakane pri uvolnovani pamate a opravenych bolo niekolko chybajucich ikon."
     ]
 };
 
 var messageByLang = {
-    "it": "Aggiornamento di correzioni: vocali finalmente compatibili con iPhone, contatori dei topic che si azzerano, niente più chiusure improvvise.",
-    "en": "Bugfix update: voice messages finally compatible with iPhone, topic counters that actually reset, no more unexpected closures.",
-    "de": "Fehlerbehebungen: Sprachnachrichten endlich iPhone-kompatibel, Themen-Zähler die sich zurücksetzen, keine unerwarteten Abstürze mehr.",
-    "pl": "Aktualizacja poprawek: wiadomości głosowe wreszcie zgodne z iPhone'em, działające liczniki tematów, koniec nieoczekiwanych zamknięć.",
-    "ru": "Обновление с исправлениями: голосовые наконец совместимы с iPhone, счётчики тем обнуляются, больше нет внезапных закрытий.",
-    "fr": "Mise à jour de corrections : messages vocaux enfin compatibles iPhone, compteurs de sujets qui se remettent à zéro, plus de fermetures inopinées.",
-    "sk": "Aktualizácia opráv: hlasové správy konečne kompatibilné s iPhonom, fungujúce počítadlá tém, koniec nečakaných zatvorení."
+    "it": "Le chiamate ora si comportano come vere telefonate, anche a schermo bloccato. Sistemati i topic e i loro contatori.",
+    "en": "Calls now behave like real phone calls, even on the lock screen. Topics and their counters fixed.",
+    "de": "Anrufe verhalten sich jetzt wie echte Telefonate, auch am Sperrbildschirm. Themen und ihre Zahler korrigiert.",
+    "pl": "Polaczenia zachowuja sie jak prawdziwe rozmowy, takze na ekranie blokady. Naprawiono tematy i ich liczniki.",
+    "ru": "Звонки теперь как настоящие телефонные вызовы, даже на экране блокировки. Исправлены темы и их счётчики.",
+    "fr": "Les appels se comportent comme de vrais appels, meme sur l'ecran de verrouillage. Sujets et compteurs corriges.",
+    "sk": "Hovory sa spravaju ako skutocne telefonaty, aj na uzamknutej obrazovke. Opravene temy a ich pocitadla."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

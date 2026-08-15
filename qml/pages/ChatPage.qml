@@ -128,6 +128,8 @@ Page {
     // Testo da inviare: traduci sempre in inglese (per i gruppi internazionali)
     property string translateOutgoingLanguage: "en"
     property var topicLastMessageId: 0
+    // Ultimo messaggio LETTO del topic: e' l'ancora di apertura (vedi ChatModel).
+    property var topicLastReadInboxMessageId: 0
     property var currentTopicInfo: null
     property var pinnedMessagesByThread: ({})
     property var availableReactions
@@ -1686,10 +1688,11 @@ Page {
             // di canale (linked supergroup non-forum) deve essere false: il send deve
             // mettere reply_to=threadId, non topic_id forum.
             tdLibWrapper.setCurrentChatIsForum(!!(chatGroupInformation && chatGroupInformation.is_forum));
-            if (chatPage.messageThreadId > 0 && chatPage.topicLastMessageId > 0) {
-                // Mark-as-read immediato nel topic: evita dipendenza esclusiva dal timer UI
-                tdLibWrapper.viewMessage(chatInformation.id, chatPage.topicLastMessageId, true);
-            }
+            // NB: qui c'era un mark-as-read immediato dell'ULTIMO messaggio del topic con
+            // force=true. Siccome segnare letto l'ultimo messaggio segna letto tutto il
+            // topic, aprire un topic ne azzerava il contatore anche senza leggere nulla.
+            // La lettura la registra ora il solo viewMessageTimer (force=false), che segue
+            // lo scroll e marca fin dove si e' arrivati davvero.
             // chatModel è un singleton C++ condiviso da tutte le ChatPage nello stack:
             // se una pagina figlio (es. discussion chat dei commenti) lo ha riassegnato,
             // tornando qui dobbiamo re-inizializzarlo per la nostra chat/thread.
@@ -1700,6 +1703,7 @@ Page {
             if (!chatPage.isInitialized || modelMismatch) {
                 chatModel.messageThreadId = chatPage.messageThreadId;
                 chatModel.topicLastMessageId = chatPage.topicLastMessageId;
+                chatModel.topicLastReadInboxMessageId = chatPage.topicLastReadInboxMessageId;
                 // Deep-link da notifica (vai-a-messaggio): ancora il caricamento
                 // iniziale al messaggio target così non carica le centinaia di
                 // messaggi intermedi (evita il freeze su cold-start).

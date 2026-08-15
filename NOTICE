@@ -52,6 +52,24 @@ DISTRIBUTION  : compiled and linked into the RPM (excluded from this repo via
                 build-dependencies archive (GitHub Releases: build-deps-aarch64).
 
 --------------------------------------------------------------------------------
+COMPONENT     : voicecall (plugin API for voicecall-manager)
+LICENSE       : LGPL v2.1 or later
+COPYRIGHT     : Copyright (C) 2011-2012 Tom Swindell <t.swindell@rubyx.co.uk>
+                and the Sailfish OS / Nemo Mobile contributors
+SOURCE        : https://github.com/sailfishos/voicecall  (lib/src: the abstract
+                provider/handler/plugin interfaces; unmodified)
+PURPOSE       : RooTelegram registers its calls with the system so that an
+                incoming call behaves like a phone call — the screen turns on and
+                the system answer UI is shown above the lock screen. Providers
+                are loaded as plugins inside voicecall-manager, so this cannot be
+                done from the application process.
+DISTRIBUTION  : the interface headers are compiled into
+                librootelegram-voicecall-plugin.so, which links against the
+                system libvoicecall.so already present on the device. The
+                vendored copy is excluded from this repo via .gitignore
+                (/vendor/); the plugin's own source is in voicecallplugin/.
+
+--------------------------------------------------------------------------------
 COMPONENT     : rlottie (animated Lottie stickers)
 LICENSE       : MIT License
 COPYRIGHT     : Copyright (c) 2020 Samsung Electronics Co., Ltd. and other

@@ -231,6 +231,12 @@ ApplicationWindow
         if (appWindow.ringtoneEventId !== 0) {
             return;
         }
+        // Con il plugin voicecall attivo la suoneria la suona il sistema (plugin
+        // ngf di voicecall, per ogni chiamata in stato INCOMING): se suonassimo
+        // anche noi si sentirebbe doppia.
+        if (typeof callManager !== 'undefined' && callManager.systemCallUiActive) {
+            return;
+        }
         callFeedback.typedCall("Play",
             [ {"type": "s", "value": "voip_ringtone"}, {"type": "a{sv}", "value": {}} ],
             function(result) { appWindow.ringtoneEventId = result; },

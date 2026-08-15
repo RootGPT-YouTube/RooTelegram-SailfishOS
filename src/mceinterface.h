@@ -38,6 +38,14 @@ public:
     // chiamata in arrivo è subito usabile senza sbloccare prima. Non bypassa
     // l'eventuale codice di sicurezza (gestito da lipstick, non da MCE).
     void tklockUnlock();
+    // Come tklockUnlock, ma aspetta che il display sia davvero acceso.
+    // Serve perche' MCE RIFIUTA il tkunlock a schermo spento
+    // ("tkunlock denied due to display=OFF") e sia displayOn() sia
+    // l'accensione automatica dovuta al call state sono ASINCRONE: al primo
+    // tentativo il display e' quasi sempre ancora OFF, e senza un nuovo
+    // tentativo il blocco resta su (visto sul campo il 2026-08-15: schermo
+    // acceso ma lockscreen ancora presente).
+    void tklockUnlockWhenDisplayOn(int maxWaitMs = 3000);
     // Dichiara a MCE che è in corso una chiamata. È ciò che accende le
     // politiche di chiamata del sistema, in primis lo spegnimento dello
     // schermo quando ci si porta il telefono all'orecchio: il modulo

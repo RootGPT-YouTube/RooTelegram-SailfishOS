@@ -30,6 +30,7 @@
 #include <tgcalls/VideoCaptureInterface.h>
 #include <tgcalls/StaticThreads.h>
 #include "videocalls/callvideorenderer.h"
+#include "systemcallbridge.h"
 #include <tgcalls/v2/InstanceV2Impl.h>
 #include <tgcalls/v2/InstanceV2ReferenceImpl.h>
 
@@ -43,6 +44,7 @@ CallManager::CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface,
     : QObject(parent)
     , tdLibWrapper(tdLibWrapper)
     , mceInterface(mceInterface)
+    , systemCallBridge(new SystemCallBridge(this))
     , m_audioUnmuteTimer(new QTimer(this))
     , m_displayOnTimer(new QTimer(this))
     , remoteVideoRenderer(new rootelegram::CallVideoRenderer(this))
@@ -79,6 +81,13 @@ CallManager::CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface,
             m_audioUnmuteTimer->stop();
         }
     });
+    // Comandi che arrivano dalla UI di chiamata di SISTEMA (rispondi/riaggancia):
+    // vanno tradotti in azioni su TDLib, altrimenti i pulsanti non fanno nulla.
+    connect(systemCallBridge, &SystemCallBridge::answerRequested, this, &CallManager::handleSystemAnswerRequested);
+    connect(systemCallBridge, &SystemCallBridge::hangupRequested, this, &CallManager::handleSystemHangupRequested);
+    connect(systemCallBridge, &SystemCallBridge::speakerModeRequested, this, &CallManager::handleSystemSpeakerModeRequested);
+    connect(systemCallBridge, &SystemCallBridge::muteMicrophoneRequested, this, &CallManager::handleSystemMuteRequested);
+
     // V3: rinnovo della pausa blanking (MCE garantisce ~60s per chiamata).
     m_displayOnTimer->setInterval(50000);
     connect(m_displayOnTimer, &QTimer::timeout, this, [this]() {
@@ -91,6 +100,11 @@ CallManager::CallManager(TDLibWrapper *tdLibWrapper, MceInterface *mceInterface,
 CallManager::~CallManager()
 {
     stopInstance();
+}
+
+bool CallManager::systemCallUiActive() const
+{
+    return systemCallBridge && systemCallBridge->isAvailable();
 }
 
 QObject *CallManager::remoteVideo() const
@@ -124,20 +138,36 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         // Chiamata IN ARRIVO: accendi lo schermo (anche se spento) e togli il
         // blocco-touch, così la UI di risposta è visibile e usabile SUBITO sopra
         // il lockscreen, senza dover sbloccare prima. Tieni acceso finché squilla.
-        if (mceInterface) {
-            mceInterface->displayOn();
-            mceInterface->tklockUnlock();
-            // Dichiara la chiamata in arrivo a MCE: da qui in poi il sistema
-            // applica le politiche di chiamata (vedi callStateChange).
+        // Se il plugin voicecall c'e', la chiamata la gestisce il SISTEMA: sua la
+        // suoneria, sua la UI (che compare anche sopra il PIN), suo il call state
+        // verso MCE. Toccare MCE anche noi sarebbe dannoso: saremmo due client
+        // sullo stesso stato globale e l'ultimo che scrive vince.
+        if (systemCallBridge && systemCallBridge->isAvailable()) {
+            systemCallBridge->startCall(callerDisplayName(), true);
+        } else if (mceInterface) {
+            // Percorso di ripiego, senza plugin: acceso schermo e tolto il blocco
+            // a mano. ORDINE IMPORTANTE (corretto il 2026-08-15 leggendo il journal
+            // di una chiamata vera). Prima si dichiara lo stato di chiamata: e'
+            // quello che fa accendere lo schermo a MCE, tramite l'eccezione UI di
+            // tipo "call". Poi si chiede l'accensione esplicita. Il tkunlock va per
+            // ULTIMO e solo a display acceso, perche' MCE lo RIFIUTA a schermo
+            // spento ("tkunlock denied due to display=OFF") e le accensioni sono
+            // asincrone: chiedendolo subito veniva scartato e non veniva piu'
+            // ritentato -> schermo acceso ma lockscreen ancora presente.
             mceInterface->callStateChange(QStringLiteral("ringing"));
+            mceInterface->displayOn();
+            mceInterface->tklockUnlockWhenDisplayOn();
         }
         startKeepDisplayOn();
     }
 
     if (callStateType == "callStateReady") {
-        // Chiamata connessa: "active" e' lo stato che fa entrare in gioco
-        // proximity.so, cioe' lo schermo che si spegne all'orecchio.
-        if (mceInterface) {
+        // Chiamata connessa. Con il plugin e' il sistema a impostare il call
+        // state; senza, lo facciamo noi ("active" e' cio' che fa entrare in gioco
+        // proximity.so, cioe' lo schermo che si spegne all'orecchio).
+        if (systemCallBridge && systemCallBridge->isAvailable()) {
+            systemCallBridge->setCallActive();
+        } else if (mceInterface) {
             mceInterface->callStateChange(QStringLiteral("active"));
         }
         ensureInstanceForReadyCall(callState);
@@ -145,6 +175,49 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         stopInstance();
         pendingSignalingData.clear();
     }
+}
+
+QString CallManager::callerDisplayName() const
+{
+    if (!tdLibWrapper || currentUserId == 0) {
+        return QStringLiteral("RooTelegram");
+    }
+    const QVariantMap user = tdLibWrapper->getUserInformation(QString::number(currentUserId));
+    const QString firstName = user.value("first_name").toString();
+    const QString lastName = user.value("last_name").toString();
+    const QString name = (firstName + QLatin1Char(' ') + lastName).trimmed();
+    return name.isEmpty() ? QStringLiteral("RooTelegram") : name;
+}
+
+void CallManager::handleSystemAnswerRequested()
+{
+    qWarning() << "[SYSCALL] rispondi richiesto dalla UI di sistema, call" << currentCallId;
+    if (tdLibWrapper && currentCallId > 0) {
+        tdLibWrapper->acceptVoiceCall(currentCallId, currentIsVideo);
+    }
+}
+
+void CallManager::handleSystemHangupRequested()
+{
+    qWarning() << "[SYSCALL] riaggancia richiesto dalla UI di sistema, call" << currentCallId;
+    if (tdLibWrapper && currentCallId > 0) {
+        tdLibWrapper->discardVoiceCall(currentCallId, false, 0, currentIsVideo, 0);
+    }
+}
+
+void CallManager::handleSystemSpeakerModeRequested(bool on)
+{
+    // Il pulsante vivavoce sta sulla UI di SISTEMA, che lo instrada via ohm;
+    // l'audio della chiamata pero' lo governiamo noi in PulseAudio, quindi il
+    // comando va applicato qui o non succede nulla.
+    qWarning() << "[SYSCALL] vivavoce richiesto dalla UI di sistema:" << on;
+    setSpeakerphoneOn(on);
+}
+
+void CallManager::handleSystemMuteRequested(bool muted)
+{
+    qWarning() << "[SYSCALL] muto richiesto dalla UI di sistema:" << muted;
+    setMicrophoneMuted(muted);
 }
 
 void CallManager::handleCallSignalingDataReceived(qlonglong callId, const QByteArray &data)
@@ -513,7 +586,10 @@ void CallManager::stopInstance()
     // Imbuto unico di fine chiamata (ci passano callStateDiscarded/Error e il
     // distruttore): riporta a "none" lo stato dichiarato a MCE, altrimenti il
     // sistema resterebbe convinto che la chiamata sia in corso.
-    if (mceInterface) {
+    if (systemCallBridge) {
+        systemCallBridge->endCall();
+    }
+    if (!(systemCallBridge && systemCallBridge->isAvailable()) && mceInterface) {
         mceInterface->callStateChange(QStringLiteral("none"));
     }
     // flat-volumes: ripristina il volume di sistema del sink salvato prima della

@@ -91,6 +91,7 @@ public:
     qlonglong draftMessageDate() const;
     QString draftMessageText() const;
     bool isChannel() const;
+    bool isForum() const;
     bool isHidden() const;
     bool isMarkedAsUnread() const;
     bool isPinned() const;
@@ -299,6 +300,19 @@ bool ChatListModel::ChatData::isChannel() const
     return chatData.value(TYPE).toMap().value(IS_CHANNEL).toBool();
 }
 
+bool ChatListModel::ChatData::isForum() const
+{
+    // is_forum vive sul SUPERGRUPPO, non sulla chat: va risolto dalla cache.
+    if (chatType != TDLibWrapper::ChatTypeSupergroup) {
+        return false;
+    }
+    const qlonglong groupId = chatData.value(TYPE).toMap().value(SUPERGROUP_ID).toLongLong();
+    if (!groupId) {
+        return false;
+    }
+    return tdLibWrapper->getSuperGroup(groupId).value("is_forum").toBool();
+}
+
 bool ChatListModel::ChatData::isHidden() const
 {
     // Cover all enum values so that compiler warns us when/if enum gets extended
@@ -430,6 +444,7 @@ ChatListModel::ChatListModel(TDLibWrapper *tdLibWrapper, AppSettings *appSetting
     connect(tdLibWrapper, SIGNAL(chatOrderUpdated(QString, QString)), this, SLOT(handleChatOrderUpdated(QString, QString)));
     connect(tdLibWrapper, SIGNAL(chatFolderPositionUpdated(QString, int, QString, bool)), this, SLOT(handleChatFolderPositionUpdated(QString, int, QString, bool)));
     connect(tdLibWrapper, SIGNAL(chatReadInboxUpdated(QString, QString, int)), this, SLOT(handleChatReadInboxUpdated(QString, QString, int)));
+    connect(tdLibWrapper, SIGNAL(forumTopicsReceived(qlonglong, QVariantList, int, qlonglong, qlonglong, qlonglong)), this, SLOT(handleForumTopicsReceived(qlonglong, QVariantList, int, qlonglong, qlonglong, qlonglong)));
     connect(tdLibWrapper, SIGNAL(chatOpened(qlonglong)), this, SLOT(handleChatOpened(qlonglong)));
     connect(tdLibWrapper, SIGNAL(chatReadOutboxUpdated(QString, QString)), this, SLOT(handleChatReadOutboxUpdated(QString, QString)));
     connect(tdLibWrapper, SIGNAL(chatPhotoUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatPhotoUpdated(qlonglong, QVariantMap)));
@@ -708,6 +723,14 @@ QString ChatListModel::getChatTitle(qlonglong chatId) const
 
 void ChatListModel::addVisibleChat(ChatData *chat)
 {
+    // Badge dei forum: il conteggio chat-level non e' quello giusto, e la somma
+    // dei topic finora si calcolava SOLO aprendo la pagina dei topic (per questo
+    // il badge non combaciava finche' non si entrava nel gruppo). Qui la
+    // chiediamo appena la chat compare, ma solo se ha davvero dei non letti:
+    // sui forum gia' letti non ha senso spendere un round-trip.
+    if (chat && chat->unreadCount() > 0 && chat->isForum()) {
+        requestForumUnreadRefresh(chat->chatId);
+    }
     const int n = chatList.size();
     int pos;
     for (pos = 0; pos < n && chat->compareTo(chatList.at(pos)) >= 0; pos++);
@@ -998,7 +1021,16 @@ void ChatListModel::handleChatReadInboxUpdated(const QString &id, const QString 
             ChatData *chat = chatList.at(chatIndex);
             QVector<int> changedRoles;
             changedRoles.append(ChatListModel::RoleDisplay);
-            if (chat->updateUnreadCount(unreadCount)) {
+            // d1: per i FORUM il conteggio chat-level di TDLib e' inaffidabile
+            // (misurato sul campo: 600 a fronte di 867 non letti in un solo topic).
+            // Il badge di un forum e' la SOMMA degli unread dei topic, scritta da
+            // setForumUnreadCount(). Senza questa guardia i due valori si
+            // sovrascrivevano a vicenda e il badge "ballava" a seconda di chi
+            // scriveva per ultimo. Qui il chat-level diventa solo un TRIGGER per
+            // ricalcolare la somma.
+            if (chat->isForum()) {
+                requestForumUnreadRefresh(chatId);
+            } else if (chat->updateUnreadCount(unreadCount)) {
                 changedRoles.append(ChatListModel::RoleUnreadCount);
             }
             if (chat->updateLastReadInboxMessageId(messageId)) {
@@ -1133,6 +1165,39 @@ void ChatListModel::markChatReadOptimistically(qlonglong chatId)
         }
         this->calculateUnreadState();
     }
+}
+
+void ChatListModel::requestForumUnreadRefresh(qlonglong chatId)
+{
+    // Throttle: updateChatReadInbox puo' arrivare in raffica, e ogni richiesta e'
+    // un round-trip a TDLib. Al massimo una ogni 5 secondi per chat.
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 last = forumUnreadRefreshedAt.value(chatId, 0);
+    if (last != 0 && (now - last) < 5000) {
+        return;
+    }
+    forumUnreadRefreshedAt.insert(chatId, now);
+    // limit 50: nessuna paginazione (i gruppi in uso hanno meno di 50 topic).
+    // ⚠️ Con piu' di 50 topic la somma resterebbe incompleta: vedi task 2.9.1 #7.
+    tdLibWrapper->getForumTopics(chatId);
+}
+
+void ChatListModel::handleForumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong, qlonglong, qlonglong)
+{
+    Q_UNUSED(totalCount)
+    if (!chatId) {
+        return;
+    }
+    // Somma degli unread dei topic: e' il badge corretto per un forum.
+    int unread = 0;
+    int mentions = 0;
+    for (const QVariant &entry : topics) {
+        const QVariantMap topic = entry.toMap();
+        unread += topic.value("unread_count").toInt();
+        mentions += topic.value("unread_mention_count").toInt();
+    }
+    LOG("Forum badge for chat" << chatId << "= sum of" << topics.size() << "topics:" << unread << "unread," << mentions << "mentions");
+    setForumUnreadCount(chatId, unread, mentions);
 }
 
 void ChatListModel::setForumUnreadCount(qlonglong chatId, int unreadCount, int unreadMentionCount)
