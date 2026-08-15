@@ -115,6 +115,14 @@
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -4120,6 +4128,14 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

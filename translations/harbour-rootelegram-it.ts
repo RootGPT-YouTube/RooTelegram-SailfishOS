@@ -115,6 +115,14 @@
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Questo progetto usa la libreria QR Code generator di Project Nayuki per l&apos;accesso tramite QR code. Grazie per averla resa disponibile secondo i termini della licenza MIT!</translation>
     </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Apri voicecall su GitHub</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Questo progetto utilizza le interfacce dei plugin voicecall di Jolla, così che le chiamate siano gestite dal sistema: lo schermo si accende e la schermata di risposta compare sopra il blocco. Grazie per averle rese disponibili secondo le condizioni della LGPL v2.1+!</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -4125,6 +4133,14 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Questo progetto usa la libreria QR Code generator di Project Nayuki per l&apos;accesso tramite QR code. Grazie per averla resa disponibile secondo i termini della licenza MIT!</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Questo progetto utilizza le interfacce dei plugin voicecall di Jolla, così che le chiamate siano gestite dal sistema: lo schermo si accende e la schermata di risposta compare sopra il blocco. Grazie per averle rese disponibili secondo le condizioni della LGPL v2.1+!</translation>
+    </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Apri voicecall su GitHub</translation>
     </message>
 </context>
 <context>

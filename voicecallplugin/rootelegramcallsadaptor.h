@@ -17,7 +17,7 @@ class RooTelegramVoiceCallProvider;
  * un xdg-dbus-proxy, e puo' parlare solo con i nomi concessi da un permesso.
  * Esiste gia' Phone.permission, che concede esattamente:
  *     dbus-user.talk      org.nemomobile.voicecall
- *     dbus-user.broadcast org.nemomobile.voicecall=org.nemomobile.voicecall.*@/*
+ *     dbus-user.broadcast org.nemomobile.voicecall=org.nemomobile.voicecall.<any>
  * Un nome tutto nostro non sarebbe raggiungibile (provato il 2026-08-15: il
  * plugin si registrava e l'app non lo vedeva), e il filtro dei SEGNALI accetta
  * solo interfacce che iniziano per org.nemomobile.voicecall — da cui il nome

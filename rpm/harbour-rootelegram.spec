@@ -90,8 +90,13 @@ make %{?_smp_mflags}
 # il .so DEVE stare in /usr/lib64/voicecall/plugins perche' voicecall-manager
 # carica i provider dentro il proprio processo (non esiste un modo per
 # registrarsi da fuori: il suo D-Bus e' di sola consultazione).
-%ifarch aarch64
+%ifarch aarch64 armv7hl
 cd voicecallplugin
+# Pulizia obbligatoria: se nel tarball sono finiti oggetti di una build
+# precedente (magari di UN'ALTRA architettura), make li riuserebbe e il link
+# fallirebbe con simboli dalla firma sbagliata, tipo operator new(unsigned int)
+# su aarch64. Successo il 2026-08-15.
+rm -f *.o moc_* Makefile *.so
 %qmake5
 make %{?_smp_mflags}
 cd ..
@@ -105,7 +110,7 @@ rm -rf %{buildroot}
 %qmake5_install
 
 # >> install post
-%ifarch aarch64
+%ifarch aarch64 armv7hl
 mkdir -p %{buildroot}/usr/lib64/voicecall/plugins
 install -m 644 voicecallplugin/librootelegram-voicecall-plugin.so \
     %{buildroot}/usr/lib64/voicecall/plugins/librootelegram-voicecall-plugin.so
@@ -127,7 +132,7 @@ desktop-file-install --delete-original       \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 /usr/lib/systemd/user/%{name}.service
 # >> files
-%ifarch aarch64
+%ifarch aarch64 armv7hl
 /usr/lib64/voicecall/plugins/librootelegram-voicecall-plugin.so
 %endif
 # << files

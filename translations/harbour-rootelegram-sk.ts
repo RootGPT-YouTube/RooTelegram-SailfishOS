@@ -115,6 +115,14 @@
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Tento projekt používa knižnicu QR Code generator od Project Nayuki na prihlásenie QR kódom. Ďakujeme za jej sprístupnenie za podmienok licencie MIT!</translation>
     </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Otvoriť voicecall na GitHube</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Tento projekt používa rozhrania pluginov voicecall od Jolly, takže hovory spravuje systém: obrazovka sa zapne a obrazovka na prijatie sa zobrazí nad uzamknutou obrazovkou. Ďakujeme za ich sprístupnenie za podmienok LGPL v2.1+!</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -4159,6 +4167,14 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Tento projekt používa knižnicu QR Code generator od Project Nayuki na prihlásenie QR kódom. Ďakujeme za jej sprístupnenie za podmienok licencie MIT!</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Tento projekt používa rozhrania pluginov voicecall od Jolly, takže hovory spravuje systém: obrazovka sa zapne a obrazovka na prijatie sa zobrazí nad uzamknutou obrazovkou. Ďakujeme za ich sprístupnenie za podmienok LGPL v2.1+!</translation>
+    </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Otvoriť voicecall na GitHube</translation>
     </message>
 </context>
 <context>

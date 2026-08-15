@@ -448,11 +448,11 @@ SSE2 = $$system(g++ -dM -E -x c++ - < /dev/null | grep __SSE2__)
 
 # ── Chiamate vocali (tgcalls + tg_owt) — T0 wire-up, OPT-IN ───────────────────
 # Abilitare con:  qmake CONFIG+=rt_voicecalls
-# Solo aarch64 (arm64): il prebuild vendor/tg_owt/prebuilds/arm64/libtg_owt.a
-# esiste solo per il 64 bit. Di default OFF → la build spedibile resta intatta
-# finché il link non è verde. Vedi roadmap chiamate vocali (T0).
-# Chiamate vocali abilitate di default: lo scope sotto è arm64-only (richiede il
-# prebuild vendor/tg_owt), quindi su armv7hl/i486 è un no-op automatico.
+# Attivo su arm64 E arm (armv7hl): esistono i prebuild vendor/tg_owt/prebuilds/
+# per entrambi. Su i486 no, quindi li' lo scope e' un no-op automatico.
+# ⚠️ I commenti precedenti dicevano "solo arm64" ed erano rimasti indietro
+# rispetto alla condizione qui sotto: e' costato una guardia %ifarch sbagliata
+# nello spec, che avrebbe lasciato armv7hl senza il plugin voicecall (2026-08-15).
 CONFIG += rt_voicecalls
 rt_voicecalls {
     equals(QT_ARCH, arm64)|equals(QT_ARCH, arm) {
@@ -494,6 +494,6 @@ rt_voicecalls {
                 -l:libavcodec.so.59 \
                 -l:libavutil.so.57
     } else {
-        warning(rt_voicecalls richiesto ma QT_ARCH != arm64: scope ignorato)
+        warning(rt_voicecalls richiesto ma QT_ARCH non e arm/arm64: scope ignorato)
     }
 }

@@ -115,6 +115,14 @@
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Этот проект использует библиотеку QR Code generator от Project Nayuki для входа по QR-коду. Спасибо за предоставление её на условиях лицензии MIT!</translation>
     </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Открыть voicecall на GitHub</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Этот проект использует интерфейсы плагинов voicecall от Jolla, благодаря чему звонками управляет система: экран включается, а экран ответа появляется поверх блокировки. Спасибо, что сделали их доступными на условиях LGPL v2.1+!</translation>
+    </message>
 </context>
 <context>
     <name>AddChatMembersPage</name>
@@ -4159,6 +4167,14 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>This project uses the QR Code generator library by Project Nayuki for QR-code login. Thanks for making it available under the conditions of the MIT License!</source>
         <translation>Этот проект использует библиотеку QR Code generator от Project Nayuki для входа по QR-коду. Спасибо за предоставление её на условиях лицензии MIT!</translation>
+    </message>
+    <message>
+        <source>This project uses the voicecall plugin interfaces by Jolla, so that calls are handled by the system: the screen turns on and the answer screen appears above the lock screen. Thanks for making them available under the conditions of the LGPL v2.1+!</source>
+        <translation>Этот проект использует интерфейсы плагинов voicecall от Jolla, благодаря чему звонками управляет система: экран включается, а экран ответа появляется поверх блокировки. Спасибо, что сделали их доступными на условиях LGPL v2.1+!</translation>
+    </message>
+    <message>
+        <source>Open voicecall on GitHub</source>
+        <translation>Открыть voicecall на GitHub</translation>
     </message>
 </context>
 <context>
