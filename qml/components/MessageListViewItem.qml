@@ -767,6 +767,16 @@ ListItem {
         }
     }
 
+    // NB sui Loader asincroni di questo delegate (ce ne sono 8): durante lo
+    // scroll veloce capita che il delegate venga distrutto mentre un Loader sta
+    // ancora incubando, e Qt logga "Object destroyed during incubation".
+    // E' RUMORE ATTESO, non un difetto: sono tutti gia' gated (active/setSource
+    // condizionali, piu' un timer di 500 ms su extraContentLoader), quindi non
+    // incubano mai contenuti che il messaggio non ha. Quando il messaggio ce
+    // l'aveva davvero, l'incubazione interrotta e' il prezzo normale dell'async.
+    // ⛔ NON togliere "asynchronous: true" per far tacere il log: si pagherebbe
+    // lo scroll della chat, che e' il punto caldo dell'app, per un messaggio
+    // cosmetico. Nei grep post-deploy quel messaggio va filtrato.
     Loader {
         id: contextMenuLoader
         active: false
@@ -1443,12 +1453,12 @@ ListItem {
                     height: item ? item.height : defaultExtraContentHeight
                 }
 
-                Binding {
-                    target: extraContentLoader.item
-                    when: extraContentLoader.item && ("highlighted" in extraContentLoader.item) && (typeof extraContentLoader.item.highlighted === "boolean")
-                    property: "highlighted"
-                    value: messageListItem.highlighted
-                }
+                // NB: qui c'era un Binding che scriveva "highlighted" sul contenuto
+                // caricato. La sua condizione "when" leggeva quella stessa proprieta'
+                // (typeof ... === "boolean"), quindi ogni scrittura rivalutava il when
+                // -> "Binding loop detected for property when" a ogni evidenziazione.
+                // Ora e' MessageContentBase a seguire messageListItem.highlighted
+                // direttamente: tutti i contenuti caricabili derivano da quella base.
 
                 // PROTOTIPO selezione nativa Sailfish: in modalità selezione il testo
                 // del messaggio selezionato viene mostrato con una Silica TextArea

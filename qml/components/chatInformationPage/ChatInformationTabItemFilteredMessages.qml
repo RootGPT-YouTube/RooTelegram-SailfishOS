@@ -450,7 +450,11 @@ ChatInformationTabItemBase {
                     rightMargin: Theme.paddingSmall
                     bottomMargin: Theme.paddingSmall
                 }
-                source: "image://theme/icon-s-play"
+                // icon-s-play non esiste nel tema di SFOS 5.1 (la taglia -s- non
+                // c'e'): usiamo icon-m-simple-play ridimensionata a iconSizeSmall
+                source: "image://theme/icon-m-simple-play"
+                width: Theme.iconSizeSmall
+                height: Theme.iconSizeSmall
                 highlighted: true
                 visible: mediaItem.messageContentType === "messageVideo"
             }

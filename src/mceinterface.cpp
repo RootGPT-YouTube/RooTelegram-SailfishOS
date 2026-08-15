@@ -19,6 +19,7 @@
 
 #include "mceinterface.h"
 #include <QDBusConnection>
+#include <QDBusMessage>
 
 #define DEBUG_MODULE MceInterface
 #include "debuglog.h"
@@ -63,4 +64,18 @@ void MceInterface::tklockUnlock()
 {
     LOG("Unlocking touchscreen lock");
     call(QStringLiteral("req_tklock_mode_change"), QStringLiteral("unlocked"));
+}
+
+void MceInterface::callStateChange(const QString &state, const QString &type)
+{
+    // Volutamente qWarning e non LOG: serve a diagnosticare sul campo se MCE
+    // accetta la richiesta, e i qCDebug possono essere soppressi dalle
+    // logging rules (patchmanager forza *.debug=false).
+    QDBusMessage reply = call(QStringLiteral("req_call_state_change"), state, type);
+    bool accepted = false;
+    if (reply.type() == QDBusMessage::ReplyMessage && !reply.arguments().isEmpty()) {
+        accepted = reply.arguments().first().toBool();
+    }
+    qWarning() << "[CALLSTATE] richiesto a MCE:" << state << type << "-> accettato:" << accepted
+               << (reply.type() == QDBusMessage::ErrorMessage ? reply.errorMessage() : QString());
 }

@@ -83,12 +83,28 @@ RooTelegramUtils::RooTelegramUtils(QObject *parent)
         temporaryDirectory.mkpath(temporaryDirectoryPath);
     }
 
+    // I voice note DEVONO essere OGG/Opus mono: e' un requisito dell'API
+    // (td_api: "must be encoded with the Opus codec and stored inside an OGG
+    // container with a single audio channel"). Fino alla 2.9 registravamo in
+    // OGG/Vorbis, e i client rigidi -- Telegram iOS in testa -- mostravano un
+    // messaggio vuoto.
+    // "audio/opus" e' il nome esatto della tabella codec del plugin Qt
+    // Multimedia di SailfishOS (libgstmediacapture.so -> opusenc): minuscolo,
+    // e NON "audio/x-opus".
+    // Bitrate esplicito invece di setQuality(): opusenc non ha una proprieta'
+    // "quality", quindi il mapping di LowQuality non e' garantito. 32 kbps
+    // mono e' la stessa configurazione gia' provata sul device.
     QAudioEncoderSettings encoderSettings;
-    encoderSettings.setCodec("audio/vorbis");
+    encoderSettings.setCodec("audio/opus");
     encoderSettings.setChannelCount(1);
-    encoderSettings.setQuality(QMultimedia::LowQuality);
+    encoderSettings.setEncodingMode(QMultimedia::AverageBitRateEncoding);
+    encoderSettings.setBitRate(32000);
     this->audioRecorder.setEncodingSettings(encoderSettings);
     this->audioRecorder.setContainerFormat("ogg");
+
+    qWarning() << "[VOICENOTE] codec richiesto:" << encoderSettings.codec()
+               << "- codec supportati dal backend:" << this->audioRecorder.supportedAudioCodecs()
+               << "- container supportati:" << this->audioRecorder.supportedContainers();
 
     QMediaRecorder::Status audioRecorderStatus = this->audioRecorder.status();
     this->handleAudioRecorderStatusChanged(audioRecorderStatus);

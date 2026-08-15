@@ -37,13 +37,20 @@ Page {
     property int lastRenamedTopicId: 0
     property double lastRenamedTime: 0
     property bool actionBusy: false
-    // TDLib 1.8.62 usa message_thread_id per tutte le operazioni sui topic
-    property string topicRequestIdField: "message_thread_id"
+    // Nome del campo id nelle richieste sui topic. TDLib 1.8.62 (quello che
+    // impacchettiamo su tutte e 3 le arch) vuole "forum_topic_id"; il vecchio
+    // "message_thread_id" resta come compatibilita' per versioni piu' datate.
+    // Vengono inviati ENTRAMBI (vedi assignTopicIdentifier): TDLib ignora le
+    // chiavi che non conosce, quindi mandarli insieme non costa nulla.
+    property string topicRequestIdField: "forum_topic_id"
 
-    // Topic che hanno restituito "Invalid forum topic identifier specified":
-    // sono permanentemente stali per questa sessione. Marcandoli evitiamo
-    // burst ripetuti di getForumTopic ogni volta che TDLib ci pusha
-    // updateForumTopic per quegli ID. Reset alla riapertura della pagina.
+    // Topic che hanno restituito "Invalid forum topic identifier specified".
+    // Marcandoli evitiamo burst ripetuti di getForumTopic ogni volta che TDLib
+    // ci pusha updateForumTopic per quegli ID. Reset alla riapertura della pagina.
+    // NOTA: fino alla 2.9 qui ci finivano TUTTI i topic al primo caricamento,
+    // perche' mandavamo solo "message_thread_id" e TDLib rispondeva 400 per
+    // ognuno: non erano affatto "stali", era la nostra richiesta a essere
+    // malformata. Era la causa dei contatori che non si azzeravano.
     property var failedTopicIds: ({})
 
     function getChatId() {
@@ -161,7 +168,11 @@ Page {
         if (!idValue || idValue <= 0) {
             return false
         }
+        // Entrambe le chiavi: TDLib ignora quella che non conosce. Lo stesso
+        // fa gia' il C++ (TDLibWrapper::getForumTopic e getForumTopics).
         target[topicRequestIdField] = idValue
+        target["forum_topic_id"] = idValue
+        target["message_thread_id"] = idValue
         return true
     }
     function switchTopicRequestIdField(errorMessage) {

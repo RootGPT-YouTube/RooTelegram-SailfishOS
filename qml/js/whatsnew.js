@@ -13,61 +13,68 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.9";
+var version = "2.9.1";
 
 var changelogByLang = {
     "it": [
-        "L'app non si apre più da sola a tutto schermo mentre stai facendo altro: quando si riavvia in background per liberare memoria, ora resta in background.",
-        "Se scarichi due file diversi con lo stesso nome, ora li apri davvero entrambi: il secondo viene salvato come «Nome (1).pdf» invece di riaprire il primo.",
-        "Foto e video salvati: probabile miglioramento per le app Android che li rifiutavano dicendo «formato non supportato». Se ti capitava, riprova e fai sapere se è risolto.",
-        "Corretta la dicitura del conteggio delle Storie."
+        "I messaggi vocali ora vengono registrati nel formato che Telegram richiede: dovrebbero finalmente sentirsi anche sugli iPhone, che prima li ricevevano vuoti. Se ti capitava, riprova e fai sapere.",
+        "Nei gruppi con i topic, il contatore dei messaggi non letti ora si azzera davvero dopo che hai letto: prima restava spesso appiccicato.",
+        "L'app non si chiude più all'improvviso mentre libera memoria in background. Chi la vedeva ripartire «come al primo avvio» non dovrebbe più vederlo.",
+        "Durante una chiamata lo schermo ora si spegne quando avvicini il telefono all'orecchio, come per una telefonata normale.",
+        "Corrette alcune icone che non comparivano e ripulite alcune segnalazioni interne."
     ],
     "en": [
-        "The app no longer opens by itself in fullscreen while you are doing something else: when it restarts in the background to free memory, it now stays in the background.",
-        "If you download two different files with the same name, you now really get both: the second one is saved as \"Name (1).pdf\" instead of reopening the first.",
-        "Saved photos and videos: likely improvement for the Android apps that refused them saying \"format not supported\". If this happened to you, please try again and let us know whether it is fixed.",
-        "Fixed the wording of the story counter."
+        "Voice messages are now recorded in the format Telegram requires: they should finally play on iPhones too, which used to receive them empty. If this happened to you, please try again and let us know.",
+        "In groups with topics, the unread counter now really resets after you read: before, it often stayed stuck.",
+        "The app no longer closes unexpectedly while freeing memory in the background. If you saw it restart \"as if it were the first launch\", that should be gone.",
+        "During a call the screen now switches off when you hold the phone to your ear, like on a regular phone call.",
+        "Fixed a few icons that were not showing up, and cleaned up some internal warnings."
     ],
     "de": [
-        "Die App öffnet sich nicht mehr von selbst im Vollbild, während du etwas anderes tust: wenn sie im Hintergrund neu startet, um Speicher freizugeben, bleibt sie jetzt im Hintergrund.",
-        "Wenn du zwei verschiedene Dateien mit gleichem Namen herunterlädst, erhältst du jetzt wirklich beide: die zweite wird als „Name (1).pdf“ gespeichert, statt die erste erneut zu öffnen.",
-        "Gespeicherte Fotos und Videos: wahrscheinliche Verbesserung für Android-Apps, die sie mit „Format nicht unterstützt“ abgelehnt haben. Falls dir das passiert ist, versuche es erneut und melde, ob es behoben ist.",
-        "Formulierung der Story-Zählung korrigiert."
+        "Sprachnachrichten werden jetzt in dem Format aufgenommen, das Telegram verlangt: sie sollten endlich auch auf iPhones abspielbar sein, die sie bisher leer empfingen. Falls dir das passiert ist, versuche es erneut und melde dich.",
+        "In Gruppen mit Themen wird der Zähler ungelesener Nachrichten jetzt wirklich zurückgesetzt, nachdem du gelesen hast: vorher blieb er oft hängen.",
+        "Die App schließt sich nicht mehr unerwartet, während sie im Hintergrund Speicher freigibt.",
+        "Während eines Anrufs schaltet sich der Bildschirm jetzt aus, wenn du das Telefon ans Ohr hältst, wie bei einem normalen Telefonat.",
+        "Einige fehlende Symbole korrigiert und interne Warnungen aufgeräumt."
     ],
     "pl": [
-        "Aplikacja nie otwiera się już sama na pełnym ekranie, gdy robisz coś innego: gdy uruchamia się ponownie w tle, aby zwolnić pamięć, teraz pozostaje w tle.",
-        "Jeśli pobierzesz dwa różne pliki o tej samej nazwie, otrzymasz teraz naprawdę oba: drugi zostanie zapisany jako „Nazwa (1).pdf”, zamiast otwierać ponownie pierwszy.",
-        "Zapisane zdjęcia i filmy: prawdopodobna poprawa dla aplikacji Android, które odrzucały je z komunikatem „format nieobsługiwany”. Jeśli ci się to zdarzało, spróbuj ponownie i daj znać, czy problem zniknął.",
-        "Poprawiono brzmienie licznika relacji."
+        "Wiadomości głosowe są teraz nagrywane w formacie wymaganym przez Telegram: powinny wreszcie odtwarzać się także na iPhone'ach, które dotąd otrzymywały je puste. Jeśli ci się to zdarzało, spróbuj ponownie i daj znać.",
+        "W grupach z tematami licznik nieprzeczytanych wiadomości teraz naprawdę się zeruje po przeczytaniu: wcześniej często się zacinał.",
+        "Aplikacja nie zamyka się już niespodziewanie podczas zwalniania pamięci w tle.",
+        "Podczas połączenia ekran wyłącza się teraz, gdy przykładasz telefon do ucha, jak przy zwykłej rozmowie.",
+        "Poprawiono kilka brakujących ikon i uporządkowano wewnętrzne ostrzeżenia."
     ],
     "ru": [
-        "Приложение больше не открывается само на весь экран, пока вы заняты другим: перезапускаясь в фоне для освобождения памяти, оно теперь остаётся в фоне.",
-        "Если скачать два разных файла с одинаковым именем, теперь вы действительно получите оба: второй сохраняется как «Имя (1).pdf», а не открывает первый заново.",
-        "Сохранённые фото и видео: вероятное улучшение для Android-приложений, которые отклоняли их с сообщением «формат не поддерживается». Если с вами такое случалось, попробуйте снова и сообщите, помогло ли это.",
-        "Исправлена формулировка счётчика историй."
+        "Голосовые сообщения теперь записываются в формате, который требует Telegram: они должны наконец воспроизводиться и на iPhone, которые раньше получали их пустыми. Если с вами такое случалось, попробуйте снова и сообщите.",
+        "В группах с темами счётчик непрочитанных теперь действительно обнуляется после прочтения: раньше он часто застревал.",
+        "Приложение больше не закрывается неожиданно, освобождая память в фоне.",
+        "Во время звонка экран теперь гаснет, когда вы подносите телефон к уху, как при обычном разговоре.",
+        "Исправлены несколько не отображавшихся значков и убраны внутренние предупреждения."
     ],
     "fr": [
-        "L'application ne s'ouvre plus d'elle-même en plein écran pendant que vous faites autre chose : lorsqu'elle redémarre en arrière-plan pour libérer de la mémoire, elle y reste désormais.",
-        "Si vous téléchargez deux fichiers différents portant le même nom, vous obtenez maintenant vraiment les deux : le second est enregistré sous « Nom (1).pdf » au lieu de rouvrir le premier.",
-        "Photos et vidéos enregistrées : amélioration probable pour les applications Android qui les refusaient en indiquant « format non pris en charge ». Si cela vous arrivait, réessayez et dites-nous si c'est réglé.",
-        "Correction du libellé du compteur de stories."
+        "Les messages vocaux sont désormais enregistrés dans le format exigé par Telegram : ils devraient enfin s'entendre aussi sur iPhone, qui les recevait vides. Si cela vous arrivait, réessayez et dites-le nous.",
+        "Dans les groupes avec sujets, le compteur de non-lus se remet vraiment à zéro après lecture : avant, il restait souvent bloqué.",
+        "L'application ne se ferme plus à l'improviste pendant qu'elle libère de la mémoire en arrière-plan.",
+        "Pendant un appel, l'écran s'éteint maintenant quand vous portez le téléphone à l'oreille, comme pour un appel normal.",
+        "Correction de quelques icônes manquantes et nettoyage d'avertissements internes."
     ],
     "sk": [
-        "Aplikácia sa už neotvára sama na celú obrazovku, kým robíte niečo iné: keď sa na pozadí restartuje, aby uvolnila pamäť, teraz zostáva na pozadí.",
-        "Ak si stiahnete dva rôzne súbory s rovnakým názvom, teraz dostanete skutočne oba: druhý sa uloží ako „Názov (1).pdf“, namiesto opätovného otvorenia prvého.",
-        "Uložené fotografie a videá: pravdepodobné zlepšenie pre aplikácie Android, ktoré ich odmietali s hlásením „nepodporovaný formát“. Ak sa vám to stávalo, skúste to znova a dajte vedieť, či je to vyriešené.",
-        "Opravená formulácia počítadla príbehov."
+        "Hlasové správy sa teraz nahrávajú vo formáte, ktorý Telegram vyžaduje: mali by sa konečne prehrať aj na iPhonoch, ktoré ich doteraz dostávali prázdne. Ak sa vám to stávalo, skúste to znova a dajte vedieť.",
+        "V skupinách s témami sa počítadlo neprečítaných teraz naozaj vynuluje po prečítaní: predtým často zostávalo visieť.",
+        "Aplikácia sa už nezatvára nečakane, keď na pozadí uvoľňuje pamäť.",
+        "Počas hovoru sa obrazovka teraz vypne, keď si priložíte telefón k uchu, ako pri bežnom telefonáte.",
+        "Opravených niekoľko chýbajúcich ikon a upratané interné upozornenia."
     ]
 };
 
 var messageByLang = {
-    "it": "Aggiornamento medio: l'app non salta più in primo piano da sola, e i file con lo stesso nome non si sovrappongono più.",
-    "en": "Medium update: the app no longer jumps to the foreground by itself, and files with the same name no longer overwrite each other.",
-    "de": "Mittleres Update: die App springt nicht mehr von selbst in den Vordergrund, und Dateien mit gleichem Namen überdecken sich nicht mehr.",
-    "pl": "Średnia aktualizacja: aplikacja nie wyskakuje już sama na pierwszy plan, a pliki o tej samej nazwie nie nadpisują się wzajemnie.",
-    "ru": "Среднее обновление: приложение больше не выходит на передний план само, а файлы с одинаковым именем больше не перекрывают друг друга.",
-    "fr": "Mise à jour intermédiaire : l'application ne passe plus au premier plan d'elle-même, et les fichiers de même nom ne se recouvrent plus.",
-    "sk": "Stredná aktualizácia: aplikácia už sama neskočí do popredia a súbory s rovnakým názvom sa už neprekrývajú."
+    "it": "Aggiornamento di correzioni: vocali finalmente compatibili con iPhone, contatori dei topic che si azzerano, niente più chiusure improvvise.",
+    "en": "Bugfix update: voice messages finally compatible with iPhone, topic counters that actually reset, no more unexpected closures.",
+    "de": "Fehlerbehebungen: Sprachnachrichten endlich iPhone-kompatibel, Themen-Zähler die sich zurücksetzen, keine unerwarteten Abstürze mehr.",
+    "pl": "Aktualizacja poprawek: wiadomości głosowe wreszcie zgodne z iPhone'em, działające liczniki tematów, koniec nieoczekiwanych zamknięć.",
+    "ru": "Обновление с исправлениями: голосовые наконец совместимы с iPhone, счётчики тем обнуляются, больше нет внезапных закрытий.",
+    "fr": "Mise à jour de corrections : messages vocaux enfin compatibles iPhone, compteurs de sujets qui se remettent à zéro, plus de fermetures inopinées.",
+    "sk": "Aktualizácia opráv: hlasové správy konečne kompatibilné s iPhonom, fungujúce počítadlá tém, koniec nečakaných zatvorení."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

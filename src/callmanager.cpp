@@ -24,6 +24,7 @@
 #include <QMetaObject>
 #include <QVariantList>
 #include <QStringList>
+#include <QStandardPaths>
 #include <tgcalls/Instance.h>
 #include <tgcalls/InstanceImpl.h>
 #include <tgcalls/VideoCaptureInterface.h>
@@ -126,11 +127,19 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         if (mceInterface) {
             mceInterface->displayOn();
             mceInterface->tklockUnlock();
+            // Dichiara la chiamata in arrivo a MCE: da qui in poi il sistema
+            // applica le politiche di chiamata (vedi callStateChange).
+            mceInterface->callStateChange(QStringLiteral("ringing"));
         }
         startKeepDisplayOn();
     }
 
     if (callStateType == "callStateReady") {
+        // Chiamata connessa: "active" e' lo stato che fa entrare in gioco
+        // proximity.so, cioe' lo schermo che si spegne all'orecchio.
+        if (mceInterface) {
+            mceInterface->callStateChange(QStringLiteral("active"));
+        }
         ensureInstanceForReadyCall(callState);
     } else if (callStateType == "callStateDiscarded" || callStateType == "callStateError") {
         stopInstance();
@@ -501,6 +510,12 @@ void CallManager::stopInstance()
 {
     m_audioUnmuteTimer->stop();
     stopKeepDisplayOn();
+    // Imbuto unico di fine chiamata (ci passano callStateDiscarded/Error e il
+    // distruttore): riporta a "none" lo stato dichiarato a MCE, altrimenti il
+    // sistema resterebbe convinto che la chiamata sia in corso.
+    if (mceInterface) {
+        mceInterface->callStateChange(QStringLiteral("none"));
+    }
     // flat-volumes: ripristina il volume di sistema del sink salvato prima della
     // forzatura WEBRTC. Senza questo, a chiamata finita il volume di sistema
     // resta alto (bug segnalato: pactl sempre ~100%, minimo alzato).
@@ -594,6 +609,15 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
 
     descriptor.config.initializationTimeout = 30.0;
     descriptor.config.receiveTimeout = 20.0;
+    // DIAGNOSTICA (task 2.9.1 #5 — audio assente verso iPhone).
+    // tgcalls tiene spento il proprio log finche' logPath e' vuoto, e con esso
+    // butta via il JSON grezzo di TUTTA la negoziazione, compresa l'answer del
+    // peer con i suoi payloadTypes: e' l'unico punto peer-dipendente della
+    // catena audio, quindi l'unico modo per capire perche' con un iPhone non
+    // trasmettiamo. Non cambia alcun comportamento, scrive solo un file.
+    // ⚠️ Il file cresce a ogni chiamata: da togliere a diagnosi conclusa.
+    descriptor.config.logPath.data = (QStandardPaths::writableLocation(QStandardPaths::CacheLocation)
+                                      + QStringLiteral("/tgcalls-last.log")).toStdString();
     descriptor.config.enableP2P = callState.contains("allow_p2p") ? callState.value("allow_p2p").toBool() : true;
     descriptor.config.allowTCP = true;
     descriptor.config.enableStunMarking = true;
@@ -735,9 +759,12 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         }
     }
 
-    LOG("Creating tgcalls instance for call" << currentCallId << "version" << selectedVersion
-        << "endpoints" << static_cast<int>(descriptor.endpoints.size())
-        << "rtcServers" << static_cast<int>(descriptor.rtcServers.size()));
+    // qWarning e non LOG: la versione negoziata e' il primo dato da leggere per
+    // la task 2.9.1 #5, e i qCDebug possono essere soppressi dalle logging rules.
+    qWarning() << "[CALLDBG] Creating tgcalls instance for call" << currentCallId
+               << "version" << selectedVersion
+               << "endpoints" << static_cast<int>(descriptor.endpoints.size())
+               << "rtcServers" << static_cast<int>(descriptor.rtcServers.size());
 
     instance = tgcalls::Meta::Create(selectedVersion.toStdString(), std::move(descriptor));
     if (!instance) {

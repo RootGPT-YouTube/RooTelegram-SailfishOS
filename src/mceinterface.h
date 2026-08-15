@@ -38,6 +38,15 @@ public:
     // chiamata in arrivo è subito usabile senza sbloccare prima. Non bypassa
     // l'eventuale codice di sicurezza (gestito da lipstick, non da MCE).
     void tklockUnlock();
+    // Dichiara a MCE che è in corso una chiamata. È ciò che accende le
+    // politiche di chiamata del sistema, in primis lo spegnimento dello
+    // schermo quando ci si porta il telefono all'orecchio: il modulo
+    // proximity.so di MCE non guarda l'audio, guarda il call_state.
+    // stato: "none" | "ringing" | "active" | "service"
+    // tipo:  "normal" | "emergency"
+    // NB: MCE lega lo stato alla vita di QUESTA connessione D-Bus, quindi se
+    // l'app muore (o si ricicla con execv) lo stato torna da solo a "none".
+    void callStateChange(const QString &state, const QString &type = QStringLiteral("normal"));
 };
 
 #endif // MCE_INTERFACE_H

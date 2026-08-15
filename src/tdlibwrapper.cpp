@@ -28,6 +28,7 @@
 #include <climits>
 #include <malloc.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <cerrno>
 #include <QTimer>
 #include <QDateTime>
@@ -759,15 +760,29 @@ void TDLibWrapper::restartProcess()
     }
     argv.append(nullptr);
 
-    // Chiudi tutti gli FD ereditabili (D-Bus, Wayland, socket/thread TDLib, file
-    // del DB): senza questo il nuovo processo non riacquisirebbe il nome di
-    // servizio D-Bus (resterebbe su un socket ereditato). stdin/out/err restano.
+    // Marca tutti gli FD ereditabili come close-on-exec (D-Bus, Wayland,
+    // socket/thread TDLib, file del DB): senza questo il nuovo processo non
+    // riacquisirebbe il nome di servizio D-Bus (resterebbe su un socket
+    // ereditato). stdin/out/err restano.
+    //
+    // ⚠️ NON usare ::close() qui, come si faceva fino alla 2.9: i thread di
+    // TDLib sono ancora vivi (il client viene distrutto DOPO, nel chiamante),
+    // e chiudergli sotto l'eventfd dello scheduler faceva fallire la read di
+    // ServiceActor2 con EBADF -> TDLib andava in LOG(FATAL) -> abort().
+    // Era una gara con l'execv, che l'execv perdeva quando c'era molta RAM da
+    // smontare (visto sul campo il 2026-08-12: crash a 694 MB di RSS).
+    // Con FD_CLOEXEC la gara sparisce per costruzione: in execve il kernel fa
+    // de_thread() -- cioe' uccide tutti gli altri thread -- PRIMA di
+    // do_close_on_exec(), quindi nessun thread puo' piu' vedere un fd chiuso.
+    // In piu' rende finalmente utilizzabile il fallback qui sotto: se execv
+    // fallisce, gli fd sono ancora validi e il riciclo in-place puo' davvero
+    // funzionare (con il close() ereditavamo un processo senza D-Bus ne' DB).
     long maxFd = sysconf(_SC_OPEN_MAX);
     if (maxFd < 3) {
         maxFd = 1024;
     }
     for (int fd = 3; fd < maxFd; ++fd) {
-        ::close(fd);
+        ::fcntl(fd, F_SETFD, FD_CLOEXEC);
     }
 
     ::execv("/proc/self/exe", argv.data());

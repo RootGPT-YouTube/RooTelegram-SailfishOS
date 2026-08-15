@@ -26,6 +26,11 @@ Item {
     property ListItem messageListItem
     property MessageOverlayFlickable overlayFlickable
     property var rawMessage: messageListItem ? messageListItem.myMessage : overlayFlickable.overlayMessage
-    property bool highlighted
+    // Segue l'evidenziazione del delegate che ci ospita. Nell'overlay
+    // messageListItem e' null -> false, come si comportava prima.
+    // NB: fino alla 2.9 questo valore lo scriveva un Binding in
+    // MessageListViewItem.qml, la cui condizione "when" leggeva la proprieta'
+    // che il Binding stesso scriveva -> binding loop a ogni evidenziazione.
+    property bool highlighted: messageListItem ? messageListItem.highlighted : false
     signal clicked()
 }

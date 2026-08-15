@@ -55,7 +55,9 @@ Dialog {
                     id: novaIcon
                     anchors.verticalCenter: parent.verticalCenter
                     x: Theme.horizontalPageMargin
-                    source: "image://theme/icon-l-about?" + Theme.highlightColor
+                    // icon-l-about non esiste nel tema di SFOS 5.1 (c'e' solo la
+                    // taglia -m-): qui ci sta meglio l'icona dell'app
+                    source: Qt.resolvedUrl("../../images/rootelegram.svg")
                     width: Theme.iconSizeLarge
                     height: Theme.iconSizeLarge
                 }

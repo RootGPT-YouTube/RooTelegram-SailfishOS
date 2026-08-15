@@ -1352,7 +1352,9 @@ SilicaFlickable {
                     visible: chatInformationPage.isSuperGroup
                     title: qsTr("Reactions")
                     value: getReactionsSummaryText()
-                    iconSource: "image://theme/icon-m-sticker"
+                    // icon-m-sticker non esiste nel tema di SFOS 5.1: usiamo
+                    // l'asset che gia' impacchettiamo, come fa ChatPage.qml
+                    iconSource: Qt.resolvedUrl("../../../images/icon-m-sticker.svg")
                     showDisclosure: true
                     onClicked: {
                         toggleReactionsAvailability();
