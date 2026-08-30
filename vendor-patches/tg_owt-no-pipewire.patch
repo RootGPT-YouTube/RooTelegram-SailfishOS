@@ -1,0 +1,35 @@
+From: RooTelegram build notes
+Subject: [PATCH] tg_owt: togliere i file PipeWire da video_capture/linux
+
+Sailfish OS non ha PipeWire: i sorgenti device_info_pipewire.*, pipewire_session.*
+e video_capture_pipewire.* non compilano contro il target SDK (mancano gli header
+di libpipewire e le relative dipendenze GLib/portal).
+
+Questa e' l'UNICA modifica locale a tg_owt: senza di essa la libreria non si
+ricompila. Il resto del checkout e' identico al remoto.
+
+Si applica con:
+    git -C vendor/tg_owt/upstream apply ../../../vendor-patches/tg_owt-no-pipewire.patch
+
+Base: github.com/Michal-Szczepaniak/tg_owt, ramo yottagram-tmp, commit 3215153.
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2b64eea..4c35b9d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1457,15 +1457,9 @@ PRIVATE
+     modules/video_capture/linux/camera_portal.cc
+     modules/video_capture/linux/camera_portal.h
+     modules/video_capture/linux/device_info_linux.cc
+-    modules/video_capture/linux/device_info_pipewire.cc
+-    modules/video_capture/linux/device_info_pipewire.h
+     modules/video_capture/linux/device_info_v4l2.cc
+     modules/video_capture/linux/device_info_v4l2.h
+-    modules/video_capture/linux/pipewire_session.cc
+-    modules/video_capture/linux/pipewire_session.h
+     modules/video_capture/linux/video_capture_linux.cc
+-    modules/video_capture/linux/video_capture_pipewire.cc
+-    modules/video_capture/linux/video_capture_pipewire.h
+     modules/video_capture/linux/video_capture_v4l2.cc
+     modules/video_capture/linux/video_capture_v4l2.h
+     modules/video_capture/windows/device_info_ds.cc
