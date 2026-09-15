@@ -358,6 +358,13 @@ int main(int argc, char *argv[])
             replaySignalAfterUiBootstrap([&]() {
                 dBusAdaptor->triggerActivateApp();
             });
+        } else {
+            // Gia' visibile NON vuol dire gia' davanti: durante una chiamata la
+            // schermata di voicecall-ui ci sta sopra, e chi chiede di attivare
+            // l'app si aspetta di vederla. Senza questo ramo la richiesta veniva
+            // semplicemente ignorata (task 2.9.5 #10, leva 2).
+            view->raise();
+            view->requestActivate();
         }
     });
 

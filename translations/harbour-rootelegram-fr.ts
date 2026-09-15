@@ -5653,10 +5653,6 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <translation>a envoyé une vidéo éphémère qui a expiré</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Impossible de trouver l&apos;utilisateur %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>a envoyé une note vidéo</translation>

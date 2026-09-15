@@ -97,10 +97,39 @@ std::pair<int, int> CallCameraGrabber::resolution() const
     return { m_width.load(), m_height.load() };
 }
 
+// ⭐⭐⭐ 14/09/2026 — UNA SOLA CAMERA APERTA PER VOLTA NEL PROCESSO.
+// Il cambio camera in videochiamata passa da tgcalls, che crea un capturer NUOVO
+// (con il suo grabber) e distrugge il VECCHIO. Ognuno dei due manda al proprio
+// grabber una invocazione ACCODATA sul thread GUI: `start` per il nuovo, `stop`
+// per il vecchio. L'ordine fra le due non e' garantito ⇒ meta' delle volte si
+// prova ad aprire la camera nuova mentre la vecchia e' ancora aperta.
+// ⛔ Sull'HAL camera Android del POCO due `QCamera` insieme non stanno: la nuova
+// viene selezionata ma non consegna un frame. Misurato il 14/09 nel registro di
+// una videochiamata vera:
+//     10:46:26  uso camera: "0" pos=1   ← posteriore aperta
+//               (nessun frame per 2 s)
+//     10:46:28  uso camera: "1" pos=2   ← si torna alla frontale
+// mentre quando l'ordine capitava giusto la posteriore restava e i frame
+// cambiavano risoluzione (2320x1304 → 2560x1440), prova che il sensore era
+// davvero un altro:
+//     10:50:41  uso camera: "0" pos=1
+//     10:50:42  frame 1  2560 x 1440
+// ⇒ Non e' «non commuta»: e' una CORSA, e si vedeva solo lo specchio perche'
+// quello segue `m_frontCamera` e cambia comunque.
+// ⭐ Sull'Xperia 10 III lo stesso codice funziona, quindi la corsa la perde solo
+// questo HAL: la cura non e' cambiare la logica, e' togliere la sovrapposizione.
+// Qui si serializza: prima di aprire la propria, si chiude quella dell'altro
+// grabber. Entrambi vivono sul thread GUI, quindi non serve alcun lock.
+CallCameraGrabber *CallCameraGrabber::s_aperta = nullptr;
+
 void CallCameraGrabber::start(bool front)
 {
     if (m_camera) {
         return;
+    }
+    if (s_aperta && s_aperta != this) {
+        qWarning() << "[V3-call-camera] chiudo la camera del grabber precedente prima di aprire la mia";
+        s_aperta->stop();
     }
     // Frontale e posteriore sono montate a 180° l'una dall'altra.
     m_rotation.store(front ? 270 : 90);
@@ -114,6 +143,14 @@ void CallCameraGrabber::start(bool front)
         qWarning() << "[V3-call-camera] nessuna camera disponibile";
         return;
     }
+    // ⚠️ Si stampa anche l'ELENCO: senza, davanti a un cambio che non avviene non
+    // si puo' distinguere «la posteriore non esiste» da «la posteriore non parte».
+    QString elenco;
+    for (const QCameraInfo &ci : cams) {
+        elenco += QStringLiteral("[%1 pos=%2] ").arg(ci.deviceName()).arg(int(ci.position()));
+    }
+    qWarning() << "[V3-call-camera] chiesta" << (front ? "frontale" : "posteriore")
+               << "- disponibili:" << cams.size() << elenco;
     qWarning() << "[V3-call-camera] uso camera:" << chosen.deviceName() << "pos=" << int(chosen.position());
 
     m_surface = new CallCameraSurface(this, this);
@@ -121,10 +158,14 @@ void CallCameraGrabber::start(bool front)
     m_camera->setViewfinder(m_surface);
     m_camera->setCaptureMode(QCamera::CaptureVideo);
     m_camera->start();
+    s_aperta = this;
 }
 
 void CallCameraGrabber::stop()
 {
+    if (s_aperta == this) {
+        s_aperta = nullptr;
+    }
     if (m_camera) {
         m_camera->stop();
         m_camera->deleteLater();

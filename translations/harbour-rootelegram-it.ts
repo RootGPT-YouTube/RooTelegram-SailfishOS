@@ -5653,10 +5653,6 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <translation>ha inviato un video effimero già scaduto</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Impossibile trovare l&apos;utente %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>hai inviato un videomessaggio</translation>

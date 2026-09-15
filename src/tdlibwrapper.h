@@ -395,6 +395,11 @@ public:
     static ChatType chatTypeFromString(const QString &type);
     static ChatMemberStatus chatMemberStatusFromString(const QString &status);
     static SecretChatState secretChatStateFromString(const QString &state);
+    // Le versioni del runtime di chiamata che DICHIARIAMO a Telegram, dalla piu'
+    // nuova alla piu' vecchia. ⛔ UNICA FONTE DI VERITA': la usa `buildCallProtocol()`
+    // per annunciarle e `CallManager` per SCEGLIERE quale istanziare. Tenerle in due
+    // posti diverse e' il difetto che questa funzione esiste per impedire (2.9.5).
+    static QStringList supportedCallLibraryVersions();
 
 signals:
     void versionDetected(const QString &version);

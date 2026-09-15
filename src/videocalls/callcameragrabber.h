@@ -51,6 +51,10 @@ public slots:
     void stop();
 
 private:
+    // Il grabber che in questo momento tiene aperta la camera (uno solo per
+    // processo: vedi il .cpp). Tocco solo dal thread GUI, quindi niente lock.
+    static CallCameraGrabber *s_aperta;
+
     QPointer<QCamera> m_camera;
     CallCameraSurface *m_surface;
     std::function<void(const webrtc::VideoFrame &)> m_cb;

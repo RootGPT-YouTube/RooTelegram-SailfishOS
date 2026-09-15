@@ -41,6 +41,11 @@ public:
 
     // true se il plugin e' vivo sul bus e possiamo dichiarargli le chiamate.
     bool isAvailable() const;
+    // ⭐ Domanda di FATTO, da non confondere con `isAvailable()`, che e' una domanda
+    // di CAPACITA'. `isAvailable()` dice «il sistema saprebbe gestire chiamate»;
+    // questa dice «QUESTA chiamata gliel'abbiamo dichiarata davvero». Solo la
+    // seconda decide chi deve parlare a MCE (2.9.5 #18).
+    bool isCallDeclared() const;
 
     void startCall(const QString &callerName, bool incoming);
     void setCallActive();

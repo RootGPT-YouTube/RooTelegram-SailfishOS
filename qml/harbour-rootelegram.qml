@@ -234,7 +234,10 @@ ApplicationWindow
         // Con il plugin voicecall attivo la suoneria la suona il sistema (plugin
         // ngf di voicecall, per ogni chiamata in stato INCOMING): se suonassimo
         // anche noi si sentirebbe doppia.
-        if (typeof callManager !== 'undefined' && callManager.systemCallUiActive) {
+        // ⚠️ ...ma solo per le VOCALI: le videochiamate non le diamo al sistema
+        // (task 2.9.5 #10), quindi la loro suoneria resta nostra.
+        if (typeof callManager !== 'undefined' && callManager.systemCallUiActive
+                && !callScreen.isVideo) {
             return;
         }
         callFeedback.typedCall("Play",
@@ -309,6 +312,7 @@ ApplicationWindow
                     callScreen.connectedAt = 0;
                     callScreen.elapsed = 0;
                     callScreen.verifyEmojis = [];
+                    callScreen.broughtToFront = false;
                     if (!outgoing) {
                         appWindow.startCallRingtone();   // entrante: squilla + vibra
                     } else {
@@ -332,8 +336,26 @@ ApplicationWindow
                         && callScreen.verifyEmojis.length === 0) {
                     callScreen.verifyEmojis = call.state.emojis;
                 }
-                callScreen.visible = true;
-                appWindow.activate();
+                // Mentre squilla ed e' il sistema a gestirla, la UI e' sua: non
+                // sovrapporre la nostra (task 2.9.5 #10a).
+                if (!callScreen.systemHandlesRinging) {
+                    callScreen.visible = true;
+                    appWindow.activate();
+                    // ⭐ appWindow.activate() (Silica) e' la richiesta DEBOLE: in
+                    // modalita' daemon la finestra e' caricata ma non mostrata, e da
+                    // sola puo' non bastare. Chiediamo la ribalta anche per la via del
+                    // launcher (pleaseActivateApp -> show + raise + requestActivate
+                    // sulla QQuickView vera), che il 2026-09-05 e' stata MISURATA
+                    // funzionare con l'app in background.
+                    // ⚠️ Funziona pero' solo quando NON c'e' una chiamata di sistema in
+                    // corso, perche' in quel caso lipstick tiene il primo piano a
+                    // voicecall-ui: per questo le videochiamate sono state tolte al
+                    // sistema (CallManager::callHandledBySystem). Una volta per chiamata.
+                    if (!callScreen.broughtToFront && typeof dBusAdaptor !== 'undefined') {
+                        callScreen.broughtToFront = true;
+                        dBusAdaptor.activateApp();
+                    }
+                }
                 // Blocca l'orientamento a portrait per la durata della chiamata
                 // (l'overlay è disegnato verticale). Salva il precedente una volta.
                 if (callScreen.savedOrientations === undefined && pageStack.currentPage) {
@@ -404,7 +426,26 @@ ApplicationWindow
         // combaciano con quelle dell'interlocutore la chiamata è cifrata e non
         // intercettata. Azzerate a ogni nuova chiamata / a fine chiamata.
         property var verifyEmojis: []
+        // Ribalta chiesta una sola volta per chiamata (vedi sotto): senza questa
+        // guardia la chiederemmo a ogni updateCall, rubando il focus di continuo
+        // a chi volesse tornare alla UI di sistema.
+        property bool broughtToFront: false   // ribalta chiesta una volta sola per chiamata
         readonly property bool ringingIncoming: callState === "callStatePending" && !outgoing
+        // Con il plugin voicecall attivo la fase di SQUILLO appartiene al sistema:
+        // sua la suoneria, sua la UI di risposta (che compare anche sopra il PIN).
+        // Se mostrassimo anche la nostra si risponderebbe DUE volte - e' quel che
+        // ha visto un tester sulla 2.9.2 (task 2.9.5 #10a). Il nostro overlay entra
+        // in scena da callStateExchangingKeys in poi, dove serve davvero (video,
+        // muto, vivavoce, riaggancia). Senza plugin nulla cambia: la guardia si
+        // aggiunge al percorso esistente, non lo sostituisce.
+        // ⚠️ !isVideo: le videochiamate NON vanno alla UI di sistema (task 2.9.5 #10,
+        // e il predicato gemello in C++ e' CallManager::callHandledBySystem), quindi
+        // per loro la UI di risposta torna a essere la nostra.
+        // ⭐ La condizione la valuta il QML da call.is_video, non chiedendola al
+        // CallManager: cosi' non dipende dall'ordine con cui il segnale di TDLib
+        // raggiunge C++ e QML, che sarebbe una corsa sottile e fragile.
+        readonly property bool systemHandlesRinging: ringingIncoming && !isVideo
+                && typeof callManager !== 'undefined' && callManager.systemCallUiActive
         readonly property bool connected: callState === "callStateReady"
         // V3c: videochiamata connessa → layout dedicato (info in alto, controlli in basso).
         readonly property bool videoConnected: isVideo && connected
@@ -637,10 +678,11 @@ ApplicationWindow
             Item { width: 1; height: Theme.paddingLarge }
 
             // Entrante che squilla: Accetta / Rifiuta.
+            // Nascosta se a rispondere e' la UI di sistema (task 2.9.5 #10a).
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Theme.paddingLarge * 2
-                visible: callScreen.ringingIncoming
+                visible: callScreen.ringingIncoming && !callScreen.systemHandlesRinging
                 Button {
                     text: qsTr("Decline")
                     color: "#ff4444"

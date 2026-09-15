@@ -5649,10 +5649,6 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation>sent a self-destructing video that is expired</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Unable to find user %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>sent a video note</translation>

@@ -5698,10 +5698,6 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation>отправил самоуничтожающееся видео, срок которого истёк</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Не удалось найти пользователя %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>отправил видеозаметку</translation>

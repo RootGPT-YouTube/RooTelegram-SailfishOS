@@ -93,6 +93,19 @@ private:
     // smutiamo via libpulse, così il toggle vivavoce (porta speaker/earpiece di
     // primary_output) funziona come nelle vocali. Ritenta finché lo stream compare.
     bool routeWebrtcToCallSink();
+    // ⭐ 14/09/2026 — il ponte verso il sistema: pubblica la volonta' dell'utente
+    // su `audioMode` di org.nemomobile.voicecall. Vedi il .cpp per il perche'.
+    void publishAudioModeToSystem(bool on);
+    // ⭐ Dice al sistema quando l'audio della NOSTRA chiamata e' in onda. Serve al
+    // presidio `fleur-uscita-ponte` per sapere che c'e' una chiamata: vedi il .cpp.
+    void publishAudioRoutedToSystem(bool on);
+    // Rompe l'anello: quando e' il SISTEMA a chiederci il vivavoce non gli
+    // rimandiamo indietro la stessa notizia.
+    bool m_applyingSystemAudioMode = false;
+    // ⭐ Vero solo dove l'enumerazione NON ha trovato porte speaker/earpiece,
+    // cioe' dove il giro PulseAudio non puo' funzionare. E' l'interruttore che
+    // tiene il ponte di sistema spento su tutti gli altri telefoni.
+    bool m_portsMissing = false;
     // V3: tiene lo schermo acceso durante la videochiamata (MCE blanking pause,
     // rinnovata periodicamente) e lo rilascia a fine chiamata.
     void startKeepDisplayOn();
@@ -107,6 +120,12 @@ private:
 private:
     // Nome da mostrare nella UI di chiamata di sistema.
     QString callerDisplayName() const;
+    // Etichetta passata alla UI di SISTEMA (lineId): nome del chiamante preceduto
+    // da un glifo che dice se e' video o voce. Vedi callmanager.cpp per il perche'.
+    QString systemCallLabel() const;
+    // Questa chiamata la gestisce la UI di sistema? Vale per le VOCALI, non per le
+    // videochiamate. Vedi callmanager.cpp per il perche' (task 2.9.5 #10).
+    bool callHandledBySystem() const;
 
     TDLibWrapper *tdLibWrapper;
     // Ponte verso il nostro plugin dentro voicecall-manager: e' cio' che rende
@@ -124,6 +143,11 @@ private:
     qlonglong currentCallId;
     qlonglong currentUserId;
     bool currentIsOutgoing;
+    // ⛔ Vero solo se QUESTA chiamata e' stata dichiarata al sistema da `startCall()`.
+    // NON si puo' rileggere dal ponte a fine chiamata: `stopInstance()` chiama prima
+    // `endCall()`, che azzera `m_callDeclared`, e il controllo successivo leggerebbe
+    // sempre falso. Va quindi tenuto qui e catturato PRIMA della chiusura (2.9.5 #18).
+    bool m_declaredToSystem = false;
     bool currentIsVideo;
     bool m_frontCamera;   // V4: camera attiva (true=frontale)
     bool m_remoteVideoActive;  // V4: il remoto invia video

@@ -21,6 +21,10 @@
 #include <cstring>
 #include <pulse/pulseaudio.h>
 #include <QDebug>
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusPendingCall>
+#include <QDBusVariant>
 #include <QMetaObject>
 #include <QVariantList>
 #include <QStringList>
@@ -142,8 +146,11 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         // suoneria, sua la UI (che compare anche sopra il PIN), suo il call state
         // verso MCE. Toccare MCE anche noi sarebbe dannoso: saremmo due client
         // sullo stesso stato globale e l'ultimo che scrive vince.
-        if (systemCallBridge && systemCallBridge->isAvailable()) {
-            systemCallBridge->startCall(callerDisplayName(), true);
+        if (callHandledBySystem()) {
+            systemCallBridge->startCall(systemCallLabel(), true);
+            // Il fatto, non l'intenzione: `startCall()` esce senza far nulla se il
+            // plugin non e' valido, e in quel caso deve valere il ripiego MCE.
+            m_declaredToSystem = systemCallBridge->isCallDeclared();
         } else if (mceInterface) {
             // Percorso di ripiego, senza plugin: acceso schermo e tolto il blocco
             // a mano. ORDINE IMPORTANTE (corretto il 2026-08-15 leggendo il journal
@@ -165,7 +172,16 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         // Chiamata connessa. Con il plugin e' il sistema a impostare il call
         // state; senza, lo facciamo noi ("active" e' cio' che fa entrare in gioco
         // proximity.so, cioe' lo schermo che si spegne all'orecchio).
-        if (systemCallBridge && systemCallBridge->isAvailable()) {
+        // ⛔ Qui NON si chiede `callHandledBySystem()` (2.9.5 #18). Quella e' una
+        // domanda di CAPACITA' e su una chiamata in USCITA risponde SI', ma al
+        // sistema non abbiamo dichiarato nulla: `startCall()` la invoca solo per le
+        // ENTRANTI (`callStatePending && !currentIsOutgoing`). Col vecchio `else if`
+        // si entrava quindi nel primo ramo, `setCallActive()` usciva subito perche'
+        // `m_callDeclared` era falso, e il ripiego MCE non veniva NEMMENO PROVATO:
+        // nessuno riceveva "active", quindi `proximity.so` non entrava in gioco e
+        // lo schermo non si spegneva all'orecchio. ⭐ Il difetto compariva SOLO dove
+        // l'integrazione col sistema funziona, cioe' dove si smetterebbe di cercarlo.
+        if (m_declaredToSystem) {
             systemCallBridge->setCallActive();
         } else if (mceInterface) {
             mceInterface->callStateChange(QStringLiteral("active"));
@@ -187,6 +203,55 @@ QString CallManager::callerDisplayName() const
     const QString lastName = user.value("last_name").toString();
     const QString name = (firstName + QLatin1Char(' ') + lastName).trimmed();
     return name.isEmpty() ? QStringLiteral("RooTelegram") : name;
+}
+
+bool CallManager::callHandledBySystem() const
+{
+    // ⛔ Le VIDEOCHIAMATE non vanno date alla UI di sistema. Non e' una preferenza:
+    // e' stato misurato il 2026-09-05 su chiamate vere (task 2.9.5 #10).
+    // 1. voicecall-ui non sa mostrare il video - il framework voicecall non ha
+    //    nemmeno un flag video (zero occorrenze negli header).
+    // 2. E soprattutto IMPEDISCE alla nostra UI, che il video lo disegna, di venire
+    //    davanti: mentre una chiamata di sistema e' in corso lipstick tiene il primo
+    //    piano a voicecall-ui e non lo cede. Provato e FALSIFICATO che fosse una gara
+    //    di tempi: due richieste di attivazione (subito e dopo 1,8s) partono entrambe
+    //    - si vedono nel journal - e nessuna delle due vince, mentre la STESSA
+    //    richiesta funziona benissimo a chiamata spenta.
+    // ⇒ Le videochiamate seguono il percorso "senza plugin" (MCE), che e' quello
+    // gia' collaudato e che prima della 2.9.2 mostrava il video correttamente.
+    // Le VOCALI restano al sistema, dove la sua UI e' perfetta: risponde sopra il
+    // PIN, ha muto, vivavoce e riaggancia (ed e' il lavoro di #6/#8, che resta).
+    return systemCallBridge && systemCallBridge->isAvailable() && !currentIsVideo;
+}
+
+QString CallManager::systemCallLabel() const
+{
+    // Il framework voicecall di Sailfish NON conosce il video: negli header
+    // (abstractvoicecallhandler/provider, voicecallmanagerinterface) non esiste
+    // alcun flag video - zero occorrenze, verificato. L'unico canale che abbiamo
+    // verso la UI di sistema e' la STRINGA lineId, cioe' il nome che passiamo qui.
+    // Un glifo davanti al nome dice a chi riceve, PRIMA di rispondere, se deve
+    // prepararsi a una videochiamata (inquadrarsi) o a una vocale (task 2.9.5 #10b).
+    //
+    // NON tradotto e soprattutto NON dentro tr(): e' un carattere, uguale in tutte
+    // le lingue. Avvolgerlo in tr() lo farebbe raccogliere da lupdate e marcare
+    // type="unfinished" in tutti e 7 i .ts, cioe' esattamente il rumore che questa
+    // scelta serviva a evitare.
+    //
+    // Perche' 📹 e 📞 e non 🎥 e ☎: interrogando fontconfig per codepoint sul
+    // device (fc-list ":charset=<cp>" family - NON fc-match, che con un emoji
+    // risponde sempre il font di default e non prova nulla) U+1F4F9 e U+1F4DE
+    // stanno ENTRAMBI solo nei font emoji (Twitter Color Emoji, Symbola) => resa
+    // coerente, tutti e due a colori. ☎ U+260E invece sta anche in DejaVu Sans e
+    // verrebbe reso monocromatico accanto a un glifo a colori.
+    // Un glifo occupa 1-2 caratteri invece dei ~10 di "Video call": non mangia il
+    // nome in una UI stretta.
+    // ⚠️ Che voicecall-ui lo DISEGNI davvero lo decide il widget che disegna, non
+    // fontconfig: va guardato il dialogo vero durante una chiamata. Se comparisse
+    // un tofu, il ripiego e' il prefisso testuale "Video call ".
+    static const QString videoGlyph = QString::fromUtf8("\xF0\x9F\x93\xB9"); // 📹 U+1F4F9
+    static const QString voiceGlyph = QString::fromUtf8("\xF0\x9F\x93\x9E"); // 📞 U+1F4DE
+    return (currentIsVideo ? videoGlyph : voiceGlyph) + QLatin1Char(' ') + callerDisplayName();
 }
 
 void CallManager::handleSystemAnswerRequested()
@@ -211,7 +276,10 @@ void CallManager::handleSystemSpeakerModeRequested(bool on)
     // l'audio della chiamata pero' lo governiamo noi in PulseAudio, quindi il
     // comando va applicato qui o non succede nulla.
     qWarning() << "[SYSCALL] vivavoce richiesto dalla UI di sistema:" << on;
+    // La notizia arriva GIA' dal sistema: ripubblicarla la' sarebbe un'eco.
+    m_applyingSystemAudioMode = true;
     setSpeakerphoneOn(on);
+    m_applyingSystemAudioMode = false;
 }
 
 void CallManager::handleSystemMuteRequested(bool muted)
@@ -456,8 +524,12 @@ void CallManager::ensurePulseConnection()
         m_audioSink = QStringLiteral("sink.primary_output");
         m_speakerPort = QStringLiteral("output-speaker");
         m_earpiecePort = QStringLiteral("output-earpiece");
+        // ⭐ Qui si e' capito che su QUESTO telefono il vivavoce via porte non
+        // puo' funzionare: solo da qui in poi si usa il ponte di sistema.
+        m_portsMissing = true;
         WARN("Voice call: audio port enumeration empty, using droid fallback names");
     } else {
+        m_portsMissing = false;
         LOG("Voice call audio routing: sink" << m_audioSink
             << "speaker" << m_speakerPort << "earpiece" << m_earpiecePort);
     }
@@ -466,7 +538,16 @@ void CallManager::ensurePulseConnection()
 void CallManager::setSpeakerphoneOn(bool on)
 {
     m_speakerOn = on;
+    // ⚠️ ensurePulseConnection() PRIMA del ponte, non dopo: e' lei che enumera le
+    // porte e quindi arma `m_portsMissing`. Invertendo, alla primissima pressione
+    // l'interruttore sarebbe ancora falso e il ponte non partirebbe.
     ensurePulseConnection();
+    // ⭐⭐⭐ 14/09/2026 — Il giro qui sotto (cambio di PORTA del sink) e' quello
+    // giusto sull'Xperia 10 III, dove il sink e' un `module-droid-sink` e le
+    // porte esistono: li' il tasto funziona da sempre. Su fleur il sink e' un
+    // `module-alsa-sink` e porte NON NE HA, quindi la richiesta viene accettata e
+    // cade nel vuoto in silenzio. Solo LA' si passa dal canale di sistema.
+    publishAudioModeToSystem(on);
     pa_context *ctx = static_cast<pa_context *>(m_pulseContext);
     pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop *>(m_pulseMainloop);
     if (!ctx || !ml || m_audioSink.isEmpty() || pa_context_get_state(ctx) != PA_CONTEXT_READY) {
@@ -487,6 +568,92 @@ void CallManager::setSpeakerphoneOn(bool on)
     if (currentIsVideo) {
         routeWebrtcToCallSink();
     }
+}
+
+// ── il ponte verso il sistema ────────────────────────────────────────────────
+// Su fleur (POCO M4 Pro 4G) il sink PulseAudio non ha porte, quindi il vivavoce
+// non si puo' commutare da dentro l'app: l'instradamento vero e' la rotta UCM
+// della scheda, e li' l'app non arriva. Sailjail la chiude con
+// `--private-bin=harbour-rootelegram`, cioe' dentro la sandbox /usr/bin contiene
+// SOLO il nostro eseguibile: niente `sh`, niente `alsaucm`, niente `amixer`.
+// ⇒ L'unica via d'uscita e' D-Bus, e il permesso `Phone` ce ne concede una:
+//   `dbus-user.talk org.nemomobile.voicecall`
+// che e' esattamente il canale su cui il MUTO gia' funziona. Si scrive quindi
+// `audioMode` (`ihf` = vivavoce, terminologia Nokia/Meego), e il presidio di
+// sistema `fleur-uscita-ponte` lo traduce in un cambio di rotta.
+//
+// ⛔ Si usa `Properties.Set` e NON il metodo `setAudioMode`: quest'ultimo, sul
+// telefono, ACCETTA E MENTE — ritorna senza errore e la proprieta' non cambia
+// (provato il 14/09/2026). `Properties.Set` invece attacca ed emette
+// `audioModeChanged`, che e' il segnale su cui il ponte si sveglia.
+//
+// ⛔ NON si presume che altrove sia innocuo. Dove le porte esistono il route
+// manager e' VIVO, e scrivere `audioMode` li' commuterebbe per davvero: due
+// meccanismi sullo stesso bersaglio, mai provati insieme. Percio' la funzione
+// esce subito se `m_portsMissing` e' falso — il ponte si accende SOLO sui
+// telefoni dove il giro PulseAudio non puo' funzionare. Su tutti gli altri il
+// comportamento resta identico a prima, riga per riga.
+void CallManager::publishAudioModeToSystem(bool on)
+{
+    if (!m_portsMissing) {
+        // ⭐⭐ Le porte ci sono ⇒ il giro PulseAudio funziona da solo, come
+        // sull'Xperia 10 III. Qui NON si tocca il canale di sistema: la' e'
+        // vivo davvero (lo governa il route manager) e due meccanismi che
+        // commutano lo stesso bersaglio non li ho mai provati insieme. Dove
+        // non serve, non si entra.
+        return;
+    }
+    if (m_applyingSystemAudioMode) {
+        return;   // la richiesta VIENE dal sistema: non gliela rimandiamo
+    }
+    const QString mode = on ? QStringLiteral("ihf") : QStringLiteral("earpiece");
+    // ⚠️ Messaggio costruito a mano invece di QDBusInterface: quest'ultimo fa una
+    // Introspect BLOCCANTE alla costruzione, e qui siamo sul thread della UI
+    // mentre e' in corso una chiamata. Cosi' non si blocca nulla: si spedisce e
+    // basta, senza aspettare risposta.
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+                QStringLiteral("org.nemomobile.voicecall"),
+                QStringLiteral("/"),
+                QStringLiteral("org.freedesktop.DBus.Properties"),
+                QStringLiteral("Set"));
+    msg << QStringLiteral("org.nemomobile.voicecall.VoiceCallManager")
+        << QStringLiteral("audioMode")
+        << QVariant::fromValue(QDBusVariant(mode));
+    QDBusConnection::sessionBus().asyncCall(msg);
+    LOG("Voice call: audioMode di sistema ->" << mode);
+}
+
+// ⛔⛔ 14/09 sera — PERCHE' SERVE ANCHE QUESTA. Il presidio di sistema deve
+// sapere che c'e' una chiamata in corso, altrimenti riporta l'uscita
+// all'altoparlante (giusto per la musica, sbagliato in chiamata). Il primo
+// tentativo si fidava di `activeVoiceCall` del gestore di sistema: ⛔ VUOTO per
+// tutta la chiamata. La ragione, trovata nel nostro stesso codice:
+// `SystemCallBridge::setCallActive()` esce subito se `!m_callDeclared`, e
+// `m_callDeclared` lo accende solo `startCall()`, invocata SOLO per le chiamate
+// in ARRIVO (`callStatePending && !currentIsOutgoing`). ⇒ su una chiamata in
+// USCITA al sistema non diciamo NULLA: niente `newCall`, niente `callReady`,
+// niente `discardCall`. Il sistema rimanda comunque `speakerModeRequested`
+// perche' il PROVIDER e' registrato, e questo inganna: sembra esserci una
+// chiamata, e invece non c'e'.
+// ⇒ Lo dichiariamo noi, su `isAudioRouted` (provato: scrivibile, il valore
+// tiene, ed emette `audioRoutedChanged`). Semanticamente e' proprio questo:
+// "l'audio della chiamata e' instradato".
+void CallManager::publishAudioRoutedToSystem(bool on)
+{
+    ensurePulseConnection();
+    if (!m_portsMissing) {
+        return;   // stesso interruttore della gemella: altrove non si entra
+    }
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+                QStringLiteral("org.nemomobile.voicecall"),
+                QStringLiteral("/"),
+                QStringLiteral("org.freedesktop.DBus.Properties"),
+                QStringLiteral("Set"));
+    msg << QStringLiteral("org.nemomobile.voicecall.VoiceCallManager")
+        << QStringLiteral("isAudioRouted")
+        << QVariant::fromValue(QDBusVariant(on));
+    QDBusConnection::sessionBus().asyncCall(msg);
+    LOG("Voice call: isAudioRouted di sistema ->" << on);
 }
 
 bool CallManager::routeWebrtcToCallSink()
@@ -583,13 +750,36 @@ void CallManager::stopInstance()
 {
     m_audioUnmuteTimer->stop();
     stopKeepDisplayOn();
+    // Fine chiamata: si spegne l'indicatore (il presidio riporta l'uscita
+    // all'altoparlante) e si riporta `audioMode` a `earpiece`. ⚠️ Il secondo non
+    // e' pignoleria: `fleur-voicecall-auto` rilegge quella proprieta', e
+    // lasciandola a `ihf` la prossima telefonata CELLULARE partirebbe in vivavoce.
+    // ⚠️ ORDINE: prima si spegne l'indicatore, poi si riporta `audioMode`. Al
+    // contrario, l'evento di `audioMode` arriverebbe con la chiamata ancora
+    // "aperta" e il presidio commuterebbe in capsula per un istante, per poi
+    // tornare indietro: un salto inutile e udibile.
+    publishAudioRoutedToSystem(false);
+    publishAudioModeToSystem(false);
     // Imbuto unico di fine chiamata (ci passano callStateDiscarded/Error e il
     // distruttore): riporta a "none" lo stato dichiarato a MCE, altrimenti il
     // sistema resterebbe convinto che la chiamata sia in corso.
+    // ⚠️ Il fatto va letto PRIMA di chiudere: `endCall()` azzera `m_callDeclared`,
+    // quindi qualunque controllo fatto DOPO direbbe sempre «non dichiarata» e
+    // manderebbe "none" a MCE anche per le entranti gestite dal plugin — due client
+    // sullo stesso stato globale, l'ultimo che scrive vince.
+    const bool wasDeclaredToSystem = m_declaredToSystem;
     if (systemCallBridge) {
         systemCallBridge->endCall();
     }
-    if (!(systemCallBridge && systemCallBridge->isAvailable()) && mceInterface) {
+    m_declaredToSystem = false;
+    // ⚠️ Il ripristino a "none" deve seguire la STESSA regola dell'andata: se lo stato
+    // a MCE l'abbiamo dichiarato noi, tocca a noi riportarlo indietro. Vale per le
+    // videochiamate (che non passano dal plugin per scelta, vedi #10) e — dal 2.9.5
+    // #18 — anche per le AUDIOCHIAMATE IN USCITA, che ora prendono il ripiego MCE.
+    // ⛔ Con la vecchia condizione `!callHandledBySystem()` una uscente avrebbe
+    // dichiarato "active" e non l'avrebbe MAI tolto: il sistema sarebbe rimasto
+    // convinto di essere in chiamata a chiamata finita.
+    if (!wasDeclaredToSystem && mceInterface) {
         mceInterface->callStateChange(QStringLiteral("none"));
     }
     // flat-volumes: ripristina il volume di sistema del sink salvato prima della
@@ -634,15 +824,48 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         return;
     }
 
+    // L'audio della chiamata sta per partire: dillo al sistema.
+    publishAudioRoutedToSystem(true);
+
     const QVariantMap protocol = callState.value("protocol").toMap();
     const QVariantList remoteVersions = protocol.value("library_versions").toList();
+    // ⛔ NON si sceglie dentro `tgcalls::Meta::Versions()`: quello e' il REGISTRO
+    // COMPLETO (2.7.7, 5.0.0 | 7/8/9 | 10/11), e contiene le 10/11 della reference
+    // impl perche' le registriamo a :42-44. Ma a Telegram dichiariamo al massimo la
+    // 9.0.0. La lista che arriva qui e' quella del PEER ("Call protocols supported by
+    // the other call participant", td_api.tl) nel SUO ordine: un client moderno mette
+    // le piu' nuove per prime, e la vecchia intersezione col registro completo ci
+    // faceva selezionare la 11.0.0 — cioe' proprio lo stack che il cap escludeva —
+    // mentre l'altro capo ci credeva fermi alla 9.0.0. Risultato: callStateReady e
+    // poi "disconnected" dopo ~20s. Si interseca quindi con cio' che ABBIAMO
+    // DICHIARATO, che e' anche gia' ordinato dalla piu' nuova alla piu' vecchia.
+    // ⚠️ Nota storica sul vecchio ripiego: `Meta::Versions()` restituisce le chiavi di
+    // una std::map<std::string>, ordinate LESSICOGRAFICAMENTE ("10.0.0" < "2.7.7"), e
+    // il `std::reverse` faceva finire "9.0.0" in testa per COINCIDENZA, non per
+    // scelta. Ora l'ordine e' esplicito e non dipende piu' da quell'accidente.
+    const QStringList advertisedVersions = TDLibWrapper::supportedCallLibraryVersions();
     std::vector<std::string> localVersions = tgcalls::Meta::Versions();
-    std::reverse(localVersions.begin(), localVersions.end());
 
     QStringList localVersionList;
-    for (std::vector<std::string>::const_iterator it = localVersions.cbegin(); it != localVersions.cend(); ++it) {
-        localVersionList.append(QString::fromStdString(*it));
+    for (QStringList::const_iterator it = advertisedVersions.cbegin(); it != advertisedVersions.cend(); ++it) {
+        // Cintura e bretelle: una versione dichiarata ma non piu' registrata nel
+        // tgcalls imbarcato non deve essere selezionabile.
+        if (std::find(localVersions.cbegin(), localVersions.cend(), it->toStdString()) != localVersions.cend()) {
+            localVersionList.append(*it);
+        } else {
+            WARN("Advertised call library version not registered in tgcalls:" << *it);
+        }
     }
+
+    // La lista del peer nel journal: e' l'UNICO modo per sapere se qualcuno ci
+    // offre davvero 10/11 prima della 9.0.0 (cioe' se il difetto stava per
+    // innescarsi). qWarning e non LOG, come la riga [CALLDBG] piu' sotto.
+    QStringList remoteVersionList;
+    for (QList<QVariant>::const_iterator it = remoteVersions.cbegin(); it != remoteVersions.cend(); ++it) {
+        remoteVersionList.append(it->toString());
+    }
+    qWarning() << "[CALLDBG] peer library_versions" << remoteVersionList
+               << "| ours (advertised)" << localVersionList;
 
     QString selectedVersion;
     for (QList<QVariant>::const_iterator it = remoteVersions.cbegin(); it != remoteVersions.cend(); ++it) {
@@ -685,15 +908,6 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
 
     descriptor.config.initializationTimeout = 30.0;
     descriptor.config.receiveTimeout = 20.0;
-    // DIAGNOSTICA (task 2.9.1 #5 — audio assente verso iPhone).
-    // tgcalls tiene spento il proprio log finche' logPath e' vuoto, e con esso
-    // butta via il JSON grezzo di TUTTA la negoziazione, compresa l'answer del
-    // peer con i suoi payloadTypes: e' l'unico punto peer-dipendente della
-    // catena audio, quindi l'unico modo per capire perche' con un iPhone non
-    // trasmettiamo. Non cambia alcun comportamento, scrive solo un file.
-    // ⚠️ Il file cresce a ogni chiamata: da togliere a diagnosi conclusa.
-    descriptor.config.logPath.data = (QStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-                                      + QStringLiteral("/tgcalls-last.log")).toStdString();
     descriptor.config.enableP2P = callState.contains("allow_p2p") ? callState.value("allow_p2p").toBool() : true;
     descriptor.config.allowTCP = true;
     descriptor.config.enableStunMarking = true;

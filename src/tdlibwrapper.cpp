@@ -96,12 +96,14 @@ namespace {
         // "disconnected" after ~20s because no compatible instance connects.
         // We cap at 9.0.0 to force the native InstanceV2Impl path (7/8/9)
         // rather than the libwebrtc-based reference impl (10/11).
+        // ⛔ L'elenco NON sta piu' qui: sta in TDLibWrapper::supportedCallLibraryVersions(),
+        // perche' CallManager deve scegliere DENTRO questo stesso insieme. Vedi il
+        // commento qui sopra: il cap a 9.0.0 vale solo se lo applicano ENTRAMBI.
         QVariantList supportedLibraryVersions;
-        supportedLibraryVersions.append(QStringLiteral("9.0.0"));
-        supportedLibraryVersions.append(QStringLiteral("8.0.0"));
-        supportedLibraryVersions.append(QStringLiteral("7.0.0"));
-        supportedLibraryVersions.append(QStringLiteral("5.0.0"));
-        supportedLibraryVersions.append(QStringLiteral("2.7.7"));
+        const QStringList advertised = TDLibWrapper::supportedCallLibraryVersions();
+        for (QStringList::const_iterator it = advertised.cbegin(); it != advertised.cend(); ++it) {
+            supportedLibraryVersions.append(*it);
+        }
 
         QVariantMap callProtocol;
         callProtocol.insert(_TYPE, "callProtocol");
@@ -4885,6 +4887,22 @@ TDLibWrapper::ChatMemberStatus TDLibWrapper::chatMemberStatusFromString(const QS
         (status == QStringLiteral("chatMemberStatusRestricted")) ? ChatMemberStatusRestricted :
         (status == QStringLiteral("chatMemberStatusBanned")) ?  ChatMemberStatusBanned :
                                                                 ChatMemberStatusUnknown;
+}
+
+QStringList TDLibWrapper::supportedCallLibraryVersions()
+{
+    // Deve rispecchiare cio' che il tgcalls imbarcato sa DAVVERO parlare, dalla piu'
+    // nuova alla piu' vecchia. Ci fermiamo a 9.0.0 per restare sul percorso nativo
+    // `InstanceV2Impl` (7/8/9) e NON sulla reference impl basata su libwebrtc (10/11),
+    // che pure e' registrata in `callmanager.cpp` e quindi presente in
+    // `tgcalls::Meta::Versions()`.
+    static const QStringList versions = QStringList()
+            << QStringLiteral("9.0.0")
+            << QStringLiteral("8.0.0")
+            << QStringLiteral("7.0.0")
+            << QStringLiteral("5.0.0")
+            << QStringLiteral("2.7.7");
+    return versions;
 }
 
 TDLibWrapper::SecretChatState TDLibWrapper::secretChatStateFromString(const QString &state)

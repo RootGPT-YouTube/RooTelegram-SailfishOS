@@ -5698,10 +5698,6 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <translation>poslal(a) samodeštrukčné video, ktorého platnosť vypršala</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Nemožno nájsť používateľa %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>poslal(a) video poznámku</translation>

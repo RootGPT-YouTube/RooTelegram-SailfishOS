@@ -5698,10 +5698,6 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <translation>wysłał samoznikający film, który wygasł</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Nie można znaleźć użytkownika %1</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>wysłał notatkę wideo</translation>

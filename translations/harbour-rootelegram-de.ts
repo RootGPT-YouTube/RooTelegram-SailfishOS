@@ -5655,10 +5655,6 @@ Nachrichten</numerusform>
         <translation>hat ein selbstzerstörendes Video gesendet (abgelaufen)</translation>
     </message>
     <message>
-        <source>Unable to find user %1</source>
-        <translation>Nutzer %1 konnte nicht gefunden werden.</translation>
-    </message>
-    <message>
         <source>sent a video note</source>
         <comment>myself</comment>
         <translation>hat eine Videonachricht gesendet</translation>

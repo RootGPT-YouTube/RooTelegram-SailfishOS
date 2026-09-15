@@ -72,6 +72,11 @@ bool SystemCallBridge::isAvailable() const
     return m_plugin && m_plugin->isValid();
 }
 
+bool SystemCallBridge::isCallDeclared() const
+{
+    return m_callDeclared;
+}
+
 void SystemCallBridge::startCall(const QString &callerName, bool incoming)
 {
     if (!isAvailable()) {

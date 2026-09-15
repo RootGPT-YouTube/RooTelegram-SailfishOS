@@ -562,7 +562,13 @@ function handleLink(link) {
         var userName = link.substring(8);
         var userInformation = tdLibWrapper.getUserInformationByName(userName);
         if (typeof userInformation.id === "undefined") {
-            appNotification.show(qsTr("Unable to find user %1").arg(userName));
+            // getUserInformationByName legge solo la cache locale usersByName, che
+            // contiene i soli utenti gia' noti al client: una menzione a un canale,
+            // a un gruppo o a un bot non ci sara' MAI. Prima di arrenderci chiediamo
+            // al server, cioe' facciamo quel che handleTMeLink fa da sempre per i
+            // link t.me/<nome> qui sopra: stessa destinazione, stessa strada.
+            Debug.log("User not in local cache, resolving on the server: " + userName);
+            tdLibWrapper.searchPublicChat(userName, true);
         } else {
             tdLibWrapper.createPrivateChat(userInformation.id, "openDirectly");
         }

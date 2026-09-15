@@ -2261,11 +2261,17 @@ Page {
             contentWidth: width
 
             PullDownMenu {
-                visible: chatInformation.id !== chatPage.myUserId && !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
+                // ⚠️ Niente guardia su myUserId qui: nei Messaggi salvati (la chat
+                // con se' stessi) nascondere il menu INTERO portava via anche la
+                // ricerca, che li' serve piu' che altrove. La guardia sta ora sulle
+                // singole voci che in quella chat non hanno senso.
+                visible: !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
 
                 MenuItem {
                     id: deleteChatMenuItem
-                    visible: chatPage.isPrivateChat
+                    // isPrivateChat e' vero anche nei Messaggi salvati: senza la
+                    // seconda condizione si offrirebbe di cancellare il proprio archivio.
+                    visible: chatPage.isPrivateChat && chatInformation.id !== chatPage.myUserId
                     onClicked: {
                         var privateChatId = chatInformation.id;
                         Remorse.popupAction(chatPage, qsTr("Deleting chat"), function() {
@@ -2306,7 +2312,9 @@ Page {
 
                 MenuItem {
                     id: muteChatMenuItem
-                    visible: chatPage.userIsMember
+                    // Idem: userIsMember e' vero nei Messaggi salvati, ma silenziare
+                    // se stessi non vuol dire niente.
+                    visible: chatPage.userIsMember && chatInformation.id !== chatPage.myUserId
                     onClicked: {
                         var newNotificationSettings = chatInformation.notification_settings;
                         if (newNotificationSettings.mute_for > 0) {
