@@ -31,17 +31,39 @@ PhotoTextsListItem {
         return "";
     }
 
+    // ⛔ Le due voci di lettura qui sotto lavorano a livello di CHAT e nei gruppi non
+    // servono (decisione dell'utente, 2026-09-16: «non servono a molto quelle voci,
+    // meglio eliminarle dai gruppi e dai forum»). Sui FORUM erano anche proprio SBAGLIATE:
+    // i contatori di non letto stanno PER TOPIC e il badge e' la somma dei topic
+    // (ForumTopicsPage.qml:582), quindi una viewMessages chat-level su UN solo messaggio
+    // non fa nulla — misurato sul POCO il 2026-09-15 con le sonde [VIEWMSG]/[TDERR]:
+    // TDLib accetta la richiesta senza errori e i topic restano non letti (55 e 131,
+    // invariati dopo il gesto).
+    // ⭐ Restano dove hanno senso: chat con un singolo utente, chat segrete e canali.
+    // ⭐ Non serve piu' risolvere il supergruppo dalla cache: basta il tipo della chat.
+    function chatIsGroup() {
+        var chatType = display["type"] || {};
+        var typeName = chatType["@type"];
+        if (typeName === "chatTypeBasicGroup") {
+            return true;
+        }
+        if (typeName === "chatTypeSupergroup") {
+            return !chatType.is_channel;   // supergruppi e forum si', canali no
+        }
+        return false;
+    }
+
     // Azioni del menù long-press (per il NeonMenuOverlay): array di {text, visible, callback}.
     function buildChatMenuActions() {
         var anyUnread = unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0;
         var actions = [];
-        actions.push({ text: qsTr("Mark all messages as read"), visible: anyUnread, callback: function() {
+        actions.push({ text: qsTr("Mark all messages as read"), visible: anyUnread && !chatIsGroup(), callback: function() {
             tdLibWrapper.viewMessage(chat_id, display.last_message.id, true);
             tdLibWrapper.readAllChatMentions(chat_id);
             tdLibWrapper.readAllChatReactions(chat_id);
             tdLibWrapper.toggleChatIsMarkedAsUnread(chat_id, false);
         }});
-        actions.push({ text: is_marked_as_unread ? qsTr("Mark chat as read") : qsTr("Mark chat as unread"), visible: !anyUnread, callback: function() {
+        actions.push({ text: is_marked_as_unread ? qsTr("Mark chat as read") : qsTr("Mark chat as unread"), visible: !anyUnread && !chatIsGroup(), callback: function() {
             tdLibWrapper.toggleChatIsMarkedAsUnread(chat_id, !is_marked_as_unread);
         }});
         actions.push({ text: is_pinned ? qsTr("Unpin chat") : qsTr("Pin chat"), callback: function() {
@@ -131,7 +153,7 @@ PhotoTextsListItem {
         sourceComponent: Component {
             ContextMenu {
                 MenuItem {
-                    visible: unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0
+                    visible: (unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0) && !chatIsGroup()
                     onClicked: {
                         tdLibWrapper.viewMessage(chat_id, display.last_message.id, true);
                         tdLibWrapper.readAllChatMentions(chat_id);
@@ -142,7 +164,7 @@ PhotoTextsListItem {
                 }
 
                 MenuItem {
-                    visible: unread_count === 0 && unread_reaction_count === 0 && unread_mention_count === 0
+                    visible: unread_count === 0 && unread_reaction_count === 0 && unread_mention_count === 0 && !chatIsGroup()
                     onClicked: {
                         tdLibWrapper.toggleChatIsMarkedAsUnread(chat_id, !is_marked_as_unread);
                     }

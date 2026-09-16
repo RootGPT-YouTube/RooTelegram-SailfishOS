@@ -899,7 +899,14 @@ void TDLibReceiver::processPollVoters(const QVariantMap &receivedInformation)
 
 void TDLibReceiver::processError(const QVariantMap &receivedInformation)
 {
-    LOG("Received an error");
+    // ⛔ Prima qui c'era un LOG() che (a) non stampava NULLA dell'errore e (b) e'
+    // un qCDebug su categoria: misurato sul POCO il 2026-09-15, le categorie
+    // `rootelegram.*` NON arrivano al journal (600 righe dell'app in un boot, ZERO
+    // con prefisso [tdlibwrapper]), mentre i qWarning nudi ci arrivano tutti.
+    // ⇒ un rifiuto di TDLib era letteralmente impossibile da vedere sul device.
+    qWarning() << "[TDERR] code" << receivedInformation.value("code").toInt()
+               << "|" << receivedInformation.value(MESSAGE).toString()
+               << "| @extra" << receivedInformation.value(_EXTRA).toString();
     emit errorReceived(receivedInformation.value("code").toInt(), receivedInformation.value(MESSAGE).toString(), receivedInformation.value(_EXTRA).toString());
 }
 

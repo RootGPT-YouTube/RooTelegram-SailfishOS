@@ -19,6 +19,10 @@ Page {
     allowedOrientations: defaultAllowedOrientations
 
     property var myUserId: tdLibWrapper.getUserInformation().id
+    // Ricerca gia' pronta all'apertura: la pagina puo' essere spinta con una query
+    // (tap su un #hashtag o su un $cashtag dentro una bolla, vedi handleSearchLink in
+    // MessageListViewItem). Vuota = apertura normale dal menu della home.
+    property string initialQuery: ""
     property string currentQuery: ""
     property bool searching: false
     property var seenMessageIds: ({})
@@ -157,5 +161,12 @@ Page {
         running: messageSearchPage.searching && resultsModel.count === 0
     }
 
-    Component.onCompleted: searchField.forceActiveFocus()
+    Component.onCompleted: {
+        if (messageSearchPage.initialQuery !== "") {
+            // Assegnare il testo fa scattare onTextChanged e quindi il debounce: la
+            // ricerca parte da sola, senza duplicare la chiamata a doSearch().
+            searchField.text = messageSearchPage.initialQuery;
+        }
+        searchField.forceActiveFocus();
+    }
 }

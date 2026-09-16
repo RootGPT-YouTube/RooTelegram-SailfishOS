@@ -2757,6 +2757,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>Code copied to clipboard</source>
         <translation>Skopiowano kod do schowka</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Numer skopiowany do schowka</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5866,6 +5870,104 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>changed the chat background</source>
         <translation>zmienił tło czatu</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>udostępnił relację</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>udostępnił relację</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>wspomniał o Tobie w relacji</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>wysłał konkurs</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>wysłał konkurs</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>rozpoczął konkurs</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>konkurs zakończony</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>zwycięzcy konkursu</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Faktura: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>wysłał fakturę</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>wysłał fakturę</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>płatność zrealizowana</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>udostępnił czat</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>udostępnił czat</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>udostępnił kontakt</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>udostępnił kontakt</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>jest w pobliżu</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>wygasła wiadomość głosowa</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>wygasła wiadomość wideo</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>włączył automatyczne usuwanie wiadomości</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>wyłączył automatyczne usuwanie wiadomości</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>czat wideo</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>połączenie grupowe</translation>
     </message>
 </context>
 <context>

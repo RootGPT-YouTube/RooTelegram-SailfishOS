@@ -324,14 +324,51 @@ ListItem {
         }
         var offset = parseInt(parts[0], 10);
         var length = parseInt(parts[1], 10);
+        // Terzo campo opzionale: che COSA stiamo copiando, serve solo a scegliere la
+        // notifica. Assente = blocco di codice, come nei link gia' in circolazione.
+        var copyKind = (parts.length > 2) ? parts[2] : "code";
         var ft = myMessage.content.text ? myMessage.content.text
                : (myMessage.content.caption ? myMessage.content.caption : null);
         if (ft && typeof ft.text === "string") {
             var code = ft.text.substring(offset, offset + length);
             if (code.length > 0) {
                 Clipboard.text = code;
-                appNotification.show(qsTr("Code copied to clipboard"));
+                appNotification.show(copyKind === "num" ? qsTr("Number copied to clipboard") : qsTr("Code copied to clipboard"));
             }
+        }
+        return true;
+    }
+
+    // Intercetta i link "rtsearch://<testo codificato>" emessi dai render di #hashtag e
+    // $cashtag (#19): al tap apre la ricerca GLOBALE nei messaggi gia' compilata con quel
+    // testo, come fa Telegram. Stessa forma di handleSpoilerLink/handleCopyLink: torna
+    // true quando il link e' suo, cosi' il chiamante non lo passa a Functions.handleLink.
+    function handleSearchLink(link) {
+        if (typeof link !== "string" || link.indexOf("rtsearch://") !== 0) {
+            return false;
+        }
+        var searchQuery = decodeURIComponent(link.substring("rtsearch://".length));
+        if (searchQuery.length > 0) {
+            pageStack.push(Qt.resolvedUrl("../pages/MessageSearchPage.qml"), { "initialQuery": searchQuery });
+        }
+        return true;
+    }
+
+    // Intercetta i link "rtseek://SECONDI" emessi dai timestamp scritti nel testo
+    // ("1:23"): salta a quell'istante nel media di QUESTO messaggio. Il componente del
+    // media sta in extraContentLoader e risponde solo se sa saltare (video, audio,
+    // vocali); per tutti gli altri il tap non fa nulla, di proposito.
+    function handleMediaTimestampLink(link) {
+        if (typeof link !== "string" || link.indexOf("rtseek://") !== 0) {
+            return false;
+        }
+        var seekSeconds = parseInt(link.substring("rtseek://".length), 10);
+        if (isNaN(seekSeconds) || seekSeconds < 0) {
+            return true;
+        }
+        var mediaItem = extraContentLoader.item;
+        if (mediaItem && (typeof mediaItem.seekToTimestamp === "function")) {
+            mediaItem.seekToTimestamp(seekSeconds);
         }
         return true;
     }
@@ -1512,6 +1549,12 @@ ListItem {
                             return;
                         }
                         if (messageListItem.handleCopyLink(link)) {
+                            return;
+                        }
+                        if (messageListItem.handleSearchLink(link)) {
+                            return;
+                        }
+                        if (messageListItem.handleMediaTimestampLink(link)) {
                             return;
                         }
                         var chatCommand = Functions.handleLink(link);

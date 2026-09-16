@@ -2740,6 +2740,10 @@ messages</numerusform>
         <source>Code copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Number copied to clipboard</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5822,6 +5826,104 @@ messages</numerusform>
     <message>
         <source>changed the chat background</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>shared a story</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>shared a story</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>mentioned you in a story</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>sent a giveaway</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>sent a giveaway</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>started a giveaway</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>giveaway ended</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>giveaway winners</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Invoice: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>sent an invoice</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>sent an invoice</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>payment completed</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>shared a chat</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>shared a chat</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>shared a user</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>shared a user</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>is now nearby</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>expired voice note</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>expired video note</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>enabled auto-delete of messages</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>disabled auto-delete of messages</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>video chat</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>group call</translation>
     </message>
 </context>
 <context>

@@ -2738,6 +2738,10 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <source>Code copied to clipboard</source>
         <translation>Codice copiato negli appunti</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Numero copiato negli appunti</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5820,6 +5824,104 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
     <message>
         <source>changed the chat background</source>
         <translation>ha cambiato lo sfondo della chat</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>ha condiviso una storia</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>hai condiviso una storia</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>ti ha menzionato in una storia</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>ha inviato un giveaway</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>hai inviato un giveaway</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>ha avviato un giveaway</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>giveaway terminato</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>vincitori del giveaway</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Fattura: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>ha inviato una fattura</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>hai inviato una fattura</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>pagamento completato</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>ha condiviso una chat</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>hai condiviso una chat</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>ha condiviso un contatto</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>hai condiviso un contatto</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>è nelle vicinanze</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>messaggio vocale scaduto</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>videomessaggio scaduto</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>ha attivato l&apos;eliminazione automatica dei messaggi</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>ha disattivato l&apos;eliminazione automatica dei messaggi</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>videochiamata di gruppo</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>chiamata di gruppo</translation>
     </message>
 </context>
 <context>

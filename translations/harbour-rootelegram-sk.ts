@@ -2757,6 +2757,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Code copied to clipboard</source>
         <translation>Kód skopírovaný do schránky</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Číslo skopírované do schránky</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5866,6 +5870,104 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>changed the chat background</source>
         <translation>zmenil(a) pozadie četu</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>zdieľal(a) príbeh</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>zdieľal(a) príbeh</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>spomenul(a) vás v príbehu</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>poslal(a) súťaž</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>poslal(a) súťaž</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>spustil(a) súťaž</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>súťaž ukončená</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>výhercovia súťaže</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Faktúra: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>poslal(a) faktúru</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>poslal(a) faktúru</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>platba dokončená</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>zdieľal(a) chat</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>zdieľal(a) chat</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>zdieľal(a) kontakt</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>zdieľal(a) kontakt</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>je v blízkosti</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>hlasová správa vypršala</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>videospráva vypršala</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>zapol(a) automatické mazanie správ</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>vypol(a) automatické mazanie správ</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>videochat</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>skupinový hovor</translation>
     </message>
 </context>
 <context>

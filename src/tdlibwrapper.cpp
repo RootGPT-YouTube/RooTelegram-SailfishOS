@@ -835,11 +835,13 @@ void TDLibWrapper::getChatHistory(qlonglong chatId, qlonglong fromMessageId, int
 
 void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force)
 {
-    LOG("Mark message as viewed" << chatId << messageId << "thread:" << currentMessageThreadId);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "viewMessages");
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert("force_read", force);
+    // SONDA 2.9.5 #16: l'@extra torna indietro dentro l'eventuale errore, cosi'
+    // [TDERR] dice QUALE viewMessages e' stato rifiutato e per quale thread.
+    requestObject.insert(_EXTRA, QStringLiteral("viewMessages:%1:%2").arg(chatId).arg(currentMessageThreadId));
     QVariantMap sourceObject;
     // Se siamo in un topic forum (incluso "General" = 1), passa sempre
     // message_thread_id per aggiornare correttamente i contatori unread del topic.
@@ -856,6 +858,13 @@ void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force
     QVariantList messageIds;
     messageIds.append(messageId);
     requestObject.insert("message_ids", messageIds);
+    // qWarning e non LOG: vedi la nota in TDLibReceiver::processError — le
+    // categorie `rootelegram.*` non arrivano al journal del device.
+    qWarning() << "[VIEWMSG] chat" << chatId << "msg" << messageId
+               << "| thread" << currentMessageThreadId
+               << "| forum" << currentChatIsForum
+               << "| source" << sourceObject.value(_TYPE).toString()
+               << "| force" << force;
     this->sendRequest(requestObject);
 }
 
@@ -1240,7 +1249,12 @@ void TDLibWrapper::applyPendingReplyQuote(QVariantMap &replyTo)
     quote.insert(_TYPE, "inputTextQuote");
     quote.insert("text", formattedText);
     if (pendingReplyQuotePosition >= 0) {
-        quote.insert("quote_position", pendingReplyQuotePosition);
+        // #20: il campo di inputTextQuote si chiama "position" (td_api.tl: inputTextQuote
+        // text:formattedText position:int32). "quote_position" esiste in TDLib, ma e' un
+        // parametro della funzione searchQuote: dentro la quote veniva ignorato in
+        // silenzio => la posizione calcolata non arrivava mai e valeva 0, e una porzione
+        // ripetuta nel messaggio finiva evidenziata sull'occorrenza sbagliata.
+        quote.insert("position", pendingReplyQuotePosition);
     }
     replyTo.insert("quote", quote);
     // Consumo one-shot: la quote vale solo per questo invio.

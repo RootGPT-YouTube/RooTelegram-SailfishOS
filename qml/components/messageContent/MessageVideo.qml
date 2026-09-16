@@ -248,6 +248,23 @@ MessageContentBase {
         }
     }
 
+    // Salto a un istante (#19), dal tap su un timestamp scritto nel testo.
+    // A player SPENTO non si smonta nulla: basta dire da dove partire e lasciare che
+    // sia il preroll-seek alla nascita del player a posizionarsi (l'unico momento in
+    // cui il seek e' digeribile per il decoder droid). A player VIVO si passa per
+    // seekViaRebuild, cioe' la stessa strada del tap sulla timeline, con il suo
+    // debounce e il suo single-flight: niente teardown sovrapposti.
+    function seekToTimestamp(seconds) {
+        var targetMs = Math.max(0, Math.floor(seconds * 1000));
+        if (!videoComponentLoader.active) {
+            resumePositionMs = targetMs;
+            lastSeekTarget = targetMs;
+            handlePlay();
+            return;
+        }
+        seekViaRebuild(targetMs);
+    }
+
     function handlePlay() {
         playRequested = true;
         errorRetryDone = false;

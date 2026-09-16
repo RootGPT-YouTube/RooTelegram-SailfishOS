@@ -2740,6 +2740,10 @@ Nachrichten</numerusform>
         <source>Code copied to clipboard</source>
         <translation>Code in die Zwischenablage kopiert</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Nummer in die Zwischenablage kopiert</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5822,6 +5826,104 @@ Nachrichten</numerusform>
     <message>
         <source>changed the chat background</source>
         <translation>hat den Chat-Hintergrund geändert</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>hat eine Story geteilt</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>hat eine Story geteilt</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>hat dich in einer Story erwähnt</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>hat ein Gewinnspiel gesendet</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>hat ein Gewinnspiel gesendet</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>hat ein Gewinnspiel gestartet</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>Gewinnspiel beendet</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>Gewinner des Gewinnspiels</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Rechnung: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>hat eine Rechnung gesendet</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>hat eine Rechnung gesendet</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>Zahlung abgeschlossen</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>hat einen Chat geteilt</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>hat einen Chat geteilt</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>hat einen Kontakt geteilt</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>hat einen Kontakt geteilt</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>ist jetzt in der Nähe</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>abgelaufene Sprachnachricht</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>abgelaufene Videonachricht</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>hat das automatische Löschen von Nachrichten aktiviert</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>hat das automatische Löschen von Nachrichten deaktiviert</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>Videochat</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>Gruppenanruf</translation>
     </message>
 </context>
 <context>

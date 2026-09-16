@@ -2734,6 +2734,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Code copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5815,6 +5819,104 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>changed the chat background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>group call</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

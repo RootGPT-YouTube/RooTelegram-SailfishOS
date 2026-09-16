@@ -2738,6 +2738,10 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <source>Code copied to clipboard</source>
         <translation>Code copié dans le presse-papiers</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Numéro copié dans le presse-papiers</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5820,6 +5824,104 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     <message>
         <source>changed the chat background</source>
         <translation>a modifié le fond de la discussion</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>a partagé une story</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>a partagé une story</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>vous a mentionné dans une story</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>a envoyé un tirage au sort</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>a envoyé un tirage au sort</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>a lancé un tirage au sort</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>tirage au sort terminé</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>gagnants du tirage au sort</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Facture : %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>a envoyé une facture</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>a envoyé une facture</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>paiement effectué</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>a partagé une discussion</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>a partagé une discussion</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>a partagé un contact</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>a partagé un contact</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>est à proximité</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>message vocal expiré</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>message vidéo expiré</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>a activé la suppression automatique des messages</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>a désactivé la suppression automatique des messages</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>chat vidéo</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>appel de groupe</translation>
     </message>
 </context>
 <context>

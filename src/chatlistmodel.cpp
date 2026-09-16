@@ -728,7 +728,21 @@ void ChatListModel::addVisibleChat(ChatData *chat)
     // il badge non combaciava finche' non si entrava nel gruppo). Qui la
     // chiediamo appena la chat compare, ma solo se ha davvero dei non letti:
     // sui forum gia' letti non ha senso spendere un round-trip.
-    if (chat && chat->unreadCount() > 0 && chat->isForum()) {
+    // ⛔⛔ La condizione `unreadCount() > 0` era SBAGLIATA proprio qui: su un forum il
+    // conteggio chat-level e' ESATTAMENTE quello inaffidabile che ci ha costretti a
+    // sommare i topic (vedi setForumUnreadCount e il commento a :1026). Spesso vale 0
+    // mentre i topic hanno messaggi da leggere ⇒ il refresh non partiva e il badge
+    // nasceva solo aprendo la pagina dei topic, che se lo calcola per conto suo
+    // (ForumTopicsPage.qml:582) — da cui «non compare finche' non entro ed esco».
+    // ⭐ Misurato dall'utente il 2026-09-15: DUE gruppi forum, comportamento DIVERSO e
+    // stabile fra riavvii — «Libreitalia gamers» col badge subito, «Raspberry Pi Italia»
+    // senza. Una differenza per gruppo, non globale: e' il filtro, non un guasto.
+    // Il costo e' un getForumTopics per forum all'avvio, gia' limitato dal throttle di
+    // 5 s per chat dentro requestForumUnreadRefresh().
+    if (chat && chat->isForum()) {
+        qWarning() << "[FORUMBADGE] inserimento chat" << chat->chatId
+                   << "| unread chat-level" << chat->unreadCount()
+                   << "| forum true -> chiedo il refresh";
         requestForumUnreadRefresh(chat->chatId);
     }
     const int n = chatList.size();
@@ -1349,6 +1363,26 @@ void ChatListModel::handleChatNotificationSettingsUpdated(const QString &id, con
 void ChatListModel::handleGroupUpdated(qlonglong groupId)
 {
     updateChatVisibility(tdLibWrapper->getGroup(groupId));
+
+    // ⚠️ Secondo buco, indipendente dal primo: `ChatData::isForum()` (:303) risponde
+    // leggendo la CACHE dei supergruppi. All'inserimento della chat quella cache puo'
+    // essere ancora vuota ⇒ isForum() dice `false` ⇒ niente refresh, e il badge del
+    // forum non nasce comunque. Qui l'informazione e' appena arrivata: se la chat e'
+    // un forum, ricalcoliamo adesso. Il throttle di requestForumUnreadRefresh() evita
+    // le raffiche, quindi ripassare di qui piu' volte non costa round-trip.
+    for (int i = 0; i < chatList.size(); i++) {
+        ChatData *chat = chatList.at(i);
+        if (!chat) {
+            continue;
+        }
+        const qlonglong chatGroupId = chat->chatData.value(TYPE).toMap().value(SUPERGROUP_ID).toLongLong();
+        if (chatGroupId == groupId && chat->isForum()) {
+            qWarning() << "[FORUMBADGE] info supergruppo arrivata per la chat" << chat->chatId
+                       << "| unread chat-level" << chat->unreadCount()
+                       << "-> chiedo il refresh";
+            requestForumUnreadRefresh(chat->chatId);
+        }
+    }
 }
 
 void ChatListModel::handleSecretChatUpdated(qlonglong secretChatId, const QVariantMap &secretChat)

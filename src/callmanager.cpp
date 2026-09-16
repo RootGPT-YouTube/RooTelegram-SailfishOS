@@ -864,10 +864,8 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
     for (QList<QVariant>::const_iterator it = remoteVersions.cbegin(); it != remoteVersions.cend(); ++it) {
         remoteVersionList.append(it->toString());
     }
-    qWarning() << "[CALLDBG] peer library_versions" << remoteVersionList
-               << "| ours (advertised)" << localVersionList;
-
     QString selectedVersion;
+    bool usedFallback = false;
     for (QList<QVariant>::const_iterator it = remoteVersions.cbegin(); it != remoteVersions.cend(); ++it) {
         const QString remoteVersion = it->toString();
         if (!remoteVersion.isEmpty() && localVersionList.contains(remoteVersion)) {
@@ -876,12 +874,45 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         }
     }
     if (selectedVersion.isEmpty() && !localVersionList.isEmpty()) {
+        // Nessuna versione in comune col peer: parliamo comunque la nostra piu'
+        // nuova. E' un caso che merita di essere VISTO nel journal, perche' e' un
+        // modo reale di far cadere la chiamata dopo ~20s.
         selectedVersion = localVersionList.first();
+        usedFallback = true;
     }
     if (selectedVersion.isEmpty()) {
         WARN("Unable to negotiate a call runtime version");
         return;
     }
+
+    // --- SONDA della "bomba latente" (coda minore 2 di 2.9.5) -----------------
+    // La riga di prima stampava solo le due liste e lasciava l'intersezione a chi
+    // legge, settimane dopo. Qui il VERDETTO lo calcola il telefono: si simula la
+    // scelta del VECCHIO codice — intersezione col REGISTRO COMPLETO
+    // `tgcalls::Meta::Versions()`, che contiene anche 10/11 perche' le registriamo
+    // a :42-44 — e la si confronta con quella nuova. Se divergono, in QUESTA
+    // chiamata il difetto era INNESCATO. ⇒ `grep -F '[CALLBOMB] ARMED'`, una sola
+    // parola invece di un confronto a mente.
+    // qWarning e non LOG: i qCDebug sono soppressi dalle logging rules di patchmanager.
+    QString legacyPick;
+    for (QList<QVariant>::const_iterator it = remoteVersions.cbegin(); it != remoteVersions.cend(); ++it) {
+        const QString remoteVersion = it->toString();
+        if (!remoteVersion.isEmpty()
+                && std::find(localVersions.cbegin(), localVersions.cend(),
+                             remoteVersion.toStdString()) != localVersions.cend()) {
+            legacyPick = remoteVersion;
+            break;
+        }
+    }
+    const bool bombWasArmed = (!legacyPick.isEmpty() && legacyPick != selectedVersion);
+    qWarning() << "[CALLBOMB]" << (bombWasArmed ? "ARMED" : "safe")
+               << "| peer" << remoteVersionList
+               << "| ours" << localVersionList
+               << "| picked" << selectedVersion
+               << "| legacy-would-pick" << legacyPick
+               << "| fallback" << usedFallback
+               << "|" << (currentIsOutgoing ? "outgoing" : "incoming")
+               << (currentIsVideo ? "video" : "audio");
 
     QByteArray encryptionKeyData = decodeTdlibBytes(callState.value("encryption_key").toString());
     if (encryptionKeyData.isEmpty()) {

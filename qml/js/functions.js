@@ -248,6 +248,48 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         return message.content.is_closed ? qsTr("closed topic") : qsTr("reopened topic");
     case 'messageForumTopicIsHiddenToggled':
         return message.content.is_hidden ? qsTr("hid topic") : qsTr("unhid topic");
+    // --- #19(B): tipi di contenuto che un utente normale incontra davvero. Prima
+    // finivano nel ramo default qui sotto, cioe' "ha inviato un messaggio non
+    // supportato: <tipo>". I campi si leggono in modo difensivo: uno snapshot di
+    // TDLib diverso puo' non averli, e un undefined non deve rompere l'anteprima.
+    case 'messageStory':
+        if (message.content.via_mention) {
+            return qsTr("mentioned you in a story");
+        }
+        return myself ? qsTr("shared a story", "myself") : qsTr("shared a story");
+    case 'messageGiveaway':
+        return myself ? qsTr("sent a giveaway", "myself") : qsTr("sent a giveaway");
+    case 'messageGiveawayCreated':
+        return qsTr("started a giveaway");
+    case 'messageGiveawayCompleted':
+        return qsTr("giveaway ended");
+    case 'messageGiveawayWinners':
+        return qsTr("giveaway winners");
+    case 'messageInvoice':
+        var invoiceTitle = (message.content.product_info && message.content.product_info.title) ? message.content.product_info.title : "";
+        if (invoiceTitle !== "") {
+            return qsTr("Invoice: %1", "%1 is the name of the product").arg(simple ? invoiceTitle : enhanceHtmlEntities(invoiceTitle));
+        }
+        return myself ? qsTr("sent an invoice", "myself") : qsTr("sent an invoice");
+    case 'messagePaymentSuccessful':
+        return qsTr("payment completed");
+    case 'messageDice':
+        // Il dado non ha niente da tradurre: e' l'emoji stessa, col risultato.
+        return (message.content.emoji || "\ud83c\udfb2") + ((typeof message.content.value === "number" && message.content.value > 0) ? (" (" + message.content.value + ")") : "");
+    case 'messageChatShared':
+        return myself ? qsTr("shared a chat", "myself") : qsTr("shared a chat");
+    case 'messageUsersShared':
+        return myself ? qsTr("shared a user", "myself") : qsTr("shared a user");
+    case 'messageProximityAlertTriggered':
+        return qsTr("is now nearby");
+    case 'messageExpiredVoiceNote':
+        return qsTr("expired voice note");
+    case 'messageExpiredVideoNote':
+        return qsTr("expired video note");
+    case 'messageChatSetMessageAutoDeleteTime':
+        return (message.content.message_auto_delete_time > 0) ? qsTr("enabled auto-delete of messages") : qsTr("disabled auto-delete of messages");
+    case 'messageGroupCall':
+        return message.content.is_video ? qsTr("video chat") : qsTr("group call");
     case 'messageUnsupported':
         return myself ? qsTr("sent an unsupported message", "myself") : qsTr("sent an unsupported message");
     default:
@@ -500,6 +542,72 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers, mon
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
+            case "textEntityTypeHashtag":
+            case "textEntityTypeCashtag":
+                // #hashtag e $cashtag (#19): tappabili come in Telegram — il tap apre la
+                // ricerca GLOBALE nei messaggi (MessageSearchPage) gia' compilata con quel
+                // testo. Il testo viaggia dentro l'href codificato, altrimenti "#" e "&"
+                // spezzerebbero il link; a intercettare "rtsearch://" e' il componente che
+                // disegna la bolla, come per rtcopy:// e rtspoiler://.
+                messageInsertions.push(
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"rtsearch://" + encodeURIComponent(messageText.substring(entity.offset, ( entity.offset + entity.length ))) + "\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
+                );
+            break;
+            case "textEntityTypeBankCardNumber":
+                // Numero di carta: tap-to-copy con lo stesso meccanismo dei blocchi
+                // monospace. Il TERZO campo del link ("num") serve solo a scegliere la
+                // notifica giusta: "rtcopy://OFFSET/LENGTH" senza terzo campo resta il
+                // codice, quindi i link gia' in giro continuano a funzionare.
+                messageInsertions.push(
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"rtcopy://" + entity.offset + "/" + entity.length + "/num\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
+                );
+            break;
+            case "textEntityTypeMediaTimestamp":
+                // "1:23" scritto nel testo: il tap salta a quell'istante nel media DI
+                // QUESTO messaggio (video, audio, vocale). ATTENZIONE: la variante che apre il media
+                // del messaggio CITATO non e' implementata: li' il tap non fa nulla.
+                var mediaTimestampSeconds = (typeof entity.type.media_timestamp === "number") ? entity.type.media_timestamp : -1;
+                if (mediaTimestampSeconds < 0) {
+                    break;
+                }
+                messageInsertions.push(
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"rtseek://" + mediaTimestampSeconds + "\">", removeLength: 0 },
+                    { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
+                );
+            break;
+            case "textEntityTypeBlockQuote":
+            case "textEntityTypeExpandableBlockQuote":
+                // Citazione (#19). Qt 5.6 non sa disegnare un bordo sul lato di un BLOCCO
+                // (border-left per lato arriva molto dopo, e blockquote e' un blocco, non un
+                // frame) => la barra verticale e' uno spazio con background-color, che non
+                // dipende da nessun glifo, ripetuta su OGNI riga della citazione; il
+                // <blockquote> mette il rientro e stacca il blocco dal testo nuovo.
+                // Le newline dentro la citazione vanno convertite qui, perche' ognuna deve
+                // riportare la barra; quelle che confinano col blocco si mangiano, altrimenti
+                // il <blockquote> aggiunge una riga vuota di troppo sopra o sotto.
+                // ⚠️ La variante "expandable" si vede per intero: il collasso con "espandi"
+                // non e' implementato.
+                var quoteBar = "<span style=\"background-color:" + messageLinkColor() + ";\">&#160;</span>&#160;";
+                var quoteEnd = entity.offset + entity.length;
+                messageInsertions.push(
+                    { offset: entity.offset, insertionString: "<blockquote>" + quoteBar, removeLength: 0 },
+                    { offset: quoteEnd, insertionString: "</blockquote>", removeLength: (messageText.charAt(quoteEnd) === "\n") ? 1 : 0 }
+                );
+                if (entity.offset > 0 && messageText.charAt(entity.offset - 1) === "\n") {
+                    messageInsertions.push(
+                        { offset: (entity.offset - 1), insertionString: "", removeLength: 1 }
+                    );
+                }
+                for (var quoteNewLine = messageText.indexOf("\n", entity.offset);
+                     quoteNewLine !== -1 && quoteNewLine < quoteEnd;
+                     quoteNewLine = messageText.indexOf("\n", quoteNewLine + 1)) {
+                    messageInsertions.push(
+                        { offset: quoteNewLine, insertionString: "<br>" + quoteBar, removeLength: 1 }
+                    );
+                }
+            break;
         }
     }
 
@@ -548,6 +656,15 @@ function handleLink(link) {
 
     // Checking if we have a direct message link...
     Debug.log("URL open requested: " + link);
+
+    // Schemi INTERNI alla bolla (rtcopy/rtspoiler/rtsearch): li intercetta il componente
+    // che disegna il messaggio. Qui arrivano solo dai contesti che non li intercettano
+    // (risposta citata, messaggio fissato, anteprima di un link) e non vanno MAI passati
+    // a Qt.openUrlExternally, che proverebbe ad aprirli nel browser.
+    if (link.indexOf("rtcopy://") === 0 || link.indexOf("rtspoiler://") === 0 || link.indexOf("rtsearch://") === 0 || link.indexOf("rtseek://") === 0) {
+        Debug.log("Internal bubble link, nothing to do here: " + link);
+        return;
+    }
     if ( (link.indexOf(tMePrefix) === 0 && link.substring(tMePrefix.length).indexOf("/") > 0) ||
          (link.indexOf(tMePrefixHttp) === 0 && link.substring(tMePrefixHttp.length).indexOf("/") > 0) ||
           link.indexOf("tg://privatepost") === 0 ||

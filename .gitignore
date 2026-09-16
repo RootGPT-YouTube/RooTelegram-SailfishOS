@@ -86,3 +86,4 @@ _ffmpeg_build/
 # dagli alberi git (RooTelegram/memory/), questa e' la rete di sicurezza se ci
 # finisse dentro per una copia distratta.
 memory/
+elfbins.list

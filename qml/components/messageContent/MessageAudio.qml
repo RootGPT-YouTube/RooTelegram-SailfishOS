@@ -41,6 +41,31 @@ MessageContentFileInfoBase {
     // menù Premium "Ascolta/Trascrivi" e la trascrizione.
     property bool isVoiceNote: false
 
+    // Istante a cui posizionarsi appena il player lo permette (-1 = nessuno): il
+    // tap su un timestamp puo' arrivare a file non ancora scaricato o a player non
+    // ancora "seekable", e in quel caso la richiesta aspetta invece di perdersi.
+    property int pendingSeekMs: -1
+
+    // Salto a un istante (#19), dal tap su un timestamp scritto nel testo. Nessun
+    // meccanismo nuovo: e' lo stesso player della barra di scorrimento.
+    function seekToTimestamp(seconds) {
+        var targetMs = Math.max(0, Math.floor(seconds * 1000));
+        if (!file.isDownloadingCompleted) {
+            contentItem.pendingSeekMs = targetMs;
+            if (!file.isDownloadingActive) {
+                file.load();
+            }
+            audioPlayer.autoPlay = true;
+            return;
+        }
+        if (audioPlayer.seekable) {
+            audioPlayer.seek(targetMs);
+        } else {
+            contentItem.pendingSeekMs = targetMs;
+        }
+        audioPlayer.play();
+    }
+
     function playPause() {
         if (audioPlayer.playbackState === Audio.PlayingState) {
             audioPlayer.pause();
@@ -91,6 +116,14 @@ MessageContentFileInfoBase {
         onPlaybackStateChanged: {
             if (playbackState === Audio.PlayingState) {
                 playbackRate = Qt.binding(function() { return appWindow.mediaPlaybackRate; });
+            }
+        }
+        // Il salto chiesto da un timestamp arriva spesso prima che la pipeline sia
+        // pronta: lo applichiamo appena il player diventa seekable.
+        onSeekableChanged: {
+            if (seekable && contentItem.pendingSeekMs >= 0) {
+                seek(contentItem.pendingSeekMs);
+                contentItem.pendingSeekMs = -1;
             }
         }
     }

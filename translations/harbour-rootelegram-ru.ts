@@ -2757,6 +2757,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Code copied to clipboard</source>
         <translation>Код скопирован в буфер обмена</translation>
     </message>
+    <message>
+        <source>Number copied to clipboard</source>
+        <translation>Номер скопирован в буфер обмена</translation>
+    </message>
 </context>
 <context>
     <name>MessageListViewItemSimple</name>
@@ -5866,6 +5870,104 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>changed the chat background</source>
         <translation>изменил фон чата</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <translation>поделился историей</translation>
+    </message>
+    <message>
+        <source>shared a story</source>
+        <comment>myself</comment>
+        <translation>поделился историей</translation>
+    </message>
+    <message>
+        <source>mentioned you in a story</source>
+        <translation>упомянул вас в истории</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <translation>отправил розыгрыш</translation>
+    </message>
+    <message>
+        <source>sent a giveaway</source>
+        <comment>myself</comment>
+        <translation>отправил розыгрыш</translation>
+    </message>
+    <message>
+        <source>started a giveaway</source>
+        <translation>начал розыгрыш</translation>
+    </message>
+    <message>
+        <source>giveaway ended</source>
+        <translation>розыгрыш завершён</translation>
+    </message>
+    <message>
+        <source>giveaway winners</source>
+        <translation>победители розыгрыша</translation>
+    </message>
+    <message>
+        <source>Invoice: %1</source>
+        <comment>%1 is the name of the product</comment>
+        <translation>Счёт: %1</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <translation>отправил счёт</translation>
+    </message>
+    <message>
+        <source>sent an invoice</source>
+        <comment>myself</comment>
+        <translation>отправил счёт</translation>
+    </message>
+    <message>
+        <source>payment completed</source>
+        <translation>платёж выполнен</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <translation>поделился чатом</translation>
+    </message>
+    <message>
+        <source>shared a chat</source>
+        <comment>myself</comment>
+        <translation>поделился чатом</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <translation>поделился контактом</translation>
+    </message>
+    <message>
+        <source>shared a user</source>
+        <comment>myself</comment>
+        <translation>поделился контактом</translation>
+    </message>
+    <message>
+        <source>is now nearby</source>
+        <translation>сейчас рядом</translation>
+    </message>
+    <message>
+        <source>expired voice note</source>
+        <translation>голосовое сообщение истекло</translation>
+    </message>
+    <message>
+        <source>expired video note</source>
+        <translation>видеосообщение истекло</translation>
+    </message>
+    <message>
+        <source>enabled auto-delete of messages</source>
+        <translation>включил автоудаление сообщений</translation>
+    </message>
+    <message>
+        <source>disabled auto-delete of messages</source>
+        <translation>отключил автоудаление сообщений</translation>
+    </message>
+    <message>
+        <source>video chat</source>
+        <translation>видеочат</translation>
+    </message>
+    <message>
+        <source>group call</source>
+        <translation>групповой звонок</translation>
     </message>
 </context>
 <context>
