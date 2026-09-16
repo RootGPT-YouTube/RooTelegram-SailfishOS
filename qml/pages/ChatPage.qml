@@ -111,6 +111,9 @@ Page {
     readonly property bool isSelecting: selectedMessages.length > 0
     // Testo selezionato nel singolo messaggio attivo (popolato dal delegate
     // MessageListViewItem); guida l'icona "copia testo selezionato" nella barra azioni.
+    // Composer vuoto: serve alle BINDING, che non possono chiamare una funzione
+    // (nessun segnale di notifica => resterebbero ferme al primo valore).
+    property bool composerIsEmpty: true
     property string activeSelectedText: ""
     // Offset di inizio della selezione attiva (hint posizione per la quote nativa).
     property int activeSelectedTextPosition: 0
@@ -413,7 +416,7 @@ Page {
     Timer { id: selfTypingThrottle; interval: 4000 }
     Timer { id: selfTypingIdle; interval: 5000; onTriggered: chatPage.stopTyping() }
     function notifyTyping() {
-        if (newMessageTextField.text === "") {
+        if (composerText() === "") {
             stopTyping();
             return;
         }
@@ -657,7 +660,7 @@ Page {
     }
 
     function controlSendButton() {
-        var hasContent = newMessageTextField.text.length !== 0
+        var hasContent = composerText().length !== 0
                 || attachmentPreviewRow.isPicture
                 || attachmentPreviewRow.isDocument
                 || attachmentPreviewRow.isVideo
@@ -680,22 +683,22 @@ Page {
             return;
         }
         chatPage.stopTyping();   // #17: ferma "sta scrivendo" all'invio
-        var customEmojiEntities = getComposerCustomEmojiEntitiesForSend();
+        var messageEntities = getComposerEntitiesForSend();
         tdLibWrapper.setPendingScheduledSendDate(sendDate ? Math.floor(sendDate) : 0);
         if (newMessageColumn.editMessageId !== "0") {
             if (newMessageColumn.editMessageIsMedia) {
                 // Foto/video/animazione/audio/documento/vocale: si modifica la
                 // didascalia (editMessageCaption), non il testo (editMessageText
                 // fallirebbe su questi tipi).
-                if (customEmojiEntities.length > 0) {
-                    tdLibWrapper.editMessageCaptionWithCustomEmoji(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text, customEmojiEntities);
+                if (messageEntities.length > 0) {
+                    tdLibWrapper.editMessageCaptionWithEntities(chatInformation.id, newMessageColumn.editMessageId, composerText(), messageEntities);
                 } else {
-                    tdLibWrapper.editMessageCaption(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
+                    tdLibWrapper.editMessageCaption(chatInformation.id, newMessageColumn.editMessageId, composerText());
                 }
-            } else if (customEmojiEntities.length > 0) {
-                tdLibWrapper.editMessageTextWithCustomEmoji(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text, customEmojiEntities);
+            } else if (messageEntities.length > 0) {
+                tdLibWrapper.editMessageTextWithEntities(chatInformation.id, newMessageColumn.editMessageId, composerText(), messageEntities);
             } else {
-                tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, newMessageTextField.text);
+                tdLibWrapper.editMessageText(chatInformation.id, newMessageColumn.editMessageId, composerText());
             }
         } else {
             // Citazione nativa (#2): se l'utente ha quotato una porzione, la passa
@@ -710,9 +713,9 @@ Page {
             if (attachmentPreviewRow.visible) {
                 if (attachmentPreviewRow.isPicture) {
                     if (attachmentPreviewRow.imagePaths && attachmentPreviewRow.imagePaths.length > 1) {
-                        tdLibWrapper.sendPhotoAlbum(chatInformation.id, attachmentPreviewRow.imagePaths, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                        tdLibWrapper.sendPhotoAlbum(chatInformation.id, attachmentPreviewRow.imagePaths, composerText(), newMessageColumn.replyToMessageId);
                     } else {
-                        tdLibWrapper.sendPhotoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                        tdLibWrapper.sendPhotoMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, composerText(), newMessageColumn.replyToMessageId);
                     }
                 }
                 if (attachmentPreviewRow.isVideo) {
@@ -754,7 +757,7 @@ Page {
                             vThumbPath = videoTranscoder.extractThumbnail(vPath, vThumbW, vThumbH);
                         }
                     }
-                    tdLibWrapper.sendVideoMessage(chatInformation.id, vPath, newMessageTextField.text, newMessageColumn.replyToMessageId, vDuration, vWidth, vHeight, vThumbPath, vThumbW, vThumbH);
+                    tdLibWrapper.sendVideoMessage(chatInformation.id, vPath, composerText(), newMessageColumn.replyToMessageId, vDuration, vWidth, vHeight, vThumbPath, vThumbW, vThumbH);
                 }
                 if (attachmentPreviewRow.isAnimation) {
                     // GIF -> inputMessageAnimation (Telegram la converte in MP4 animato).
@@ -770,23 +773,23 @@ Page {
                             aH = aInfo.height ? aInfo.height : 0;
                         }
                     }
-                    tdLibWrapper.sendAnimationMessage(chatInformation.id, aPath, newMessageTextField.text, newMessageColumn.replyToMessageId, aDur, aW, aH);
+                    tdLibWrapper.sendAnimationMessage(chatInformation.id, aPath, composerText(), newMessageColumn.replyToMessageId, aDur, aW, aH);
                 }
                 if (attachmentPreviewRow.isDocument) {
-                    tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendDocumentMessage(chatInformation.id, attachmentPreviewRow.fileProperties.filePath, composerText(), newMessageColumn.replyToMessageId);
                 }
                 if (attachmentPreviewRow.isVoiceNote) {
-                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, rootelegramUtils.voiceNotePath(), newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendVoiceNoteMessage(chatInformation.id, rootelegramUtils.voiceNotePath(), composerText(), newMessageColumn.replyToMessageId);
                 }
                 if (attachmentPreviewRow.isLocation) {
                     tdLibWrapper.sendLocationMessage(chatInformation.id, attachmentPreviewRow.locationData.latitude, attachmentPreviewRow.locationData.longitude, attachmentPreviewRow.locationData.horizontalAccuracy, newMessageColumn.replyToMessageId);
                 }
                 clearAttachmentPreviewRow();
             } else {
-                if (customEmojiEntities.length > 0) {
-                    tdLibWrapper.sendTextMessageWithCustomEmoji(chatInformation.id, newMessageTextField.text, customEmojiEntities, newMessageColumn.replyToMessageId);
+                if (messageEntities.length > 0) {
+                    tdLibWrapper.sendTextMessageWithEntities(chatInformation.id, composerText(), messageEntities, newMessageColumn.replyToMessageId);
                 } else {
-                    tdLibWrapper.sendTextMessage(chatInformation.id, newMessageTextField.text, newMessageColumn.replyToMessageId);
+                    tdLibWrapper.sendTextMessage(chatInformation.id, composerText(), newMessageColumn.replyToMessageId);
                 }
             }
 
@@ -807,7 +810,7 @@ Page {
         newMessageColumn.quickPremiumEmojiPickerVisible = false;
         newMessageColumn.customEmojiEntities = [];
         newMessageColumn.activeFormatMarkers = [];
-        newMessageColumn.previousComposerText = newMessageTextField.text || "";
+        newMessageColumn.previousComposerText = composerText();
     }
 
     function getWordBoundaries(text, cursorPosition) {
@@ -863,22 +866,86 @@ Page {
 
     }
 
+    // --- Proiezione del composer (#4) --------------------------------------------
+    // Con textFormat=RichText la property `.text` del campo diventa il documento HTML
+    // INTERO di Qt (491 byte a campo vuoto) e durante la composizione IME e' pure
+    // CORROTTA: il PreeditText applica l'offset del cursore, calcolato sul testo plain,
+    // alla stringa HTML e infila le lettere dentro il markup (misurato nello spike
+    // dell'11/09). Da qui in poi il testo del composer si legge e si scrive SOLO con
+    // queste funzioni, che parlano col QTextDocument tramite composerFormatter e
+    // valgono identiche in PlainText e in RichText.
+    function composerEditor() {
+        return newMessageTextField ? newMessageTextField._editor : null;
+    }
+
+    function composerText() {
+        var editor = composerEditor();
+        return editor ? composerFormatter.plainText(editor) : (newMessageTextField.text || "");
+    }
+
+    function setComposerText(text) {
+        var editor = composerEditor();
+        if (editor) {
+            composerFormatter.setFormattedText(editor, text || "", []);
+        } else {
+            newMessageTextField.text = text || "";
+        }
+        refreshComposerState();
+    }
+
+    // Sostituisce la porzione [start, end) con `insertion`. NON si ricostruisce tutta
+    // la stringa: con RichText una riscrittura totale butterebbe via la formattazione
+    // di tutto il resto del messaggio.
+    function composerSplice(start, end, insertion) {
+        var editor = composerEditor();
+        var text = composerText();
+        if (start < 0) { start = 0; }
+        if (end > text.length) { end = text.length; }
+        if (end < start) { end = start; }
+        if (!editor) {
+            newMessageTextField.text = text.substring(0, start) + insertion + text.substring(end);
+            refreshComposerState();
+            return;
+        }
+        // ⚠️ NON si usa editor.insert(): in RichText interpreterebbe la stringa come
+        // HTML, e un messaggio che contiene "<b>" verrebbe mangiato invece che scritto.
+        composerFormatter.spliceText(editor, start, end, insertion);
+        refreshComposerState();
+    }
+
+    // ⛔ Le BINDING non possono chiamare composerText(): una funzione non notifica, e il
+    // binding resterebbe fermo al primo valore letto. Chi deve reagire al composer vuoto
+    // (il tasto della posizione, il microfono) si aggancia a questa property.
+    // ⭐ Quello che l'utente VEDE in questo istante: documento piu' la parola in
+    // composizione. Durante la digitazione con l'IME le lettere non sono ancora nel
+    // documento, quindi chi deve reagire LIVE (@menzioni, "sta scrivendo", sostituzione
+    // testo) deve chiedere questo, non composerText().
+    function composerLiveText() {
+        var editor = composerEditor();
+        return editor ? composerFormatter.liveText(editor) : (newMessageTextField.text || "");
+    }
+
+    function refreshComposerState() {
+        chatPage.composerIsEmpty = (composerText() === "");
+    }
+
     function replaceMessageText(text, cursorPosition, newText) {
         var wordBoundaries = getWordBoundaries(text, cursorPosition);
-        var newCompleteText = text.substring(0, wordBoundaries.beginIndex) + newText + " " + text.substring(wordBoundaries.endIndex);
         var newIndex = wordBoundaries.beginIndex + newText.length + 1;
-        newMessageTextField.text = newCompleteText;
+        // Sostituisce SOLO la parola: una riscrittura totale butterebbe via la
+        // formattazione di tutto il resto del messaggio.
+        composerSplice(wordBoundaries.beginIndex, wordBoundaries.endIndex, newText + " ");
         newMessageTextField.cursorPosition = newIndex;
         lostFocusTimer.start();
     }
 
     function insertTextAtCursor(newText) {
-        var currentText = newMessageTextField.text || "";
+        var currentText = composerText();
         var position = Number(newMessageTextField.cursorPosition);
         if (position < 0 || position > currentText.length) {
             position = currentText.length;
         }
-        newMessageTextField.text = currentText.substring(0, position) + newText + currentText.substring(position);
+        composerSplice(position, position, newText);
         newMessageTextField.cursorPosition = position + newText.length;
         lostFocusTimer.start();
     }
@@ -904,8 +971,27 @@ Page {
         return extractedEntities;
     }
 
+    // #4 stadio 2: cio' che viaggia insieme al testo all'invio. Due sorgenti che si
+    // sommano: le emoji personalizzate, che il composer traccia per offset da sempre, e
+    // gli STILI, che ComposerFormatter legge direttamente dal documento del campo.
+    // ⭐ I marcatori scritti a mano (**grassetto**) continuano a funzionare: li converte
+    // il C++ dopo, e nel farlo sposta gli offset delle entita' che gli passiamo qui.
+    function getComposerEntitiesForSend() {
+        var entities = getComposerCustomEmojiEntitiesForSend();
+        var editor = composerEditor();
+        if (!editor) {
+            return entities;
+        }
+        var documentEntities = composerFormatter.toFormattedText(editor).entities || [];
+        for (var i = 0; i < documentEntities.length; i++) {
+            entities.push(documentEntities[i]);
+        }
+        entities.sort(function(a, b) { return a.offset - b.offset; });
+        return entities;
+    }
+
     function getComposerCustomEmojiEntitiesForSend() {
-        var messageText = newMessageTextField.text || "";
+        var messageText = composerText();
         var result = [];
         var customEmojiEntities = newMessageColumn.customEmojiEntities || [];
         for (var i = 0; i < customEmojiEntities.length; i++) {
@@ -993,7 +1079,7 @@ Page {
         if (!customEmojiFallback || customEmojiFallback.length === 0) {
             customEmojiFallback = "⬜";
         }
-        var currentText = newMessageTextField.text || "";
+        var currentText = composerText();
         var cursorPosition = Number(newMessageTextField.cursorPosition);
         if (isNaN(cursorPosition) || cursorPosition < 0 || cursorPosition > currentText.length) {
             cursorPosition = currentText.length;
@@ -1020,12 +1106,12 @@ Page {
         shiftedEntities.sort(function(a, b) { return a.offset - b.offset; });
 
         newMessageColumn.suspendCustomEmojiTracking = true;
-        newMessageTextField.text = currentText.substring(0, cursorPosition) + customEmojiFallback + currentText.substring(cursorPosition);
+        composerSplice(cursorPosition, cursorPosition, customEmojiFallback);
         newMessageTextField.cursorPosition = cursorPosition + customEmojiFallback.length;
         newMessageColumn.suspendCustomEmojiTracking = false;
 
         newMessageColumn.customEmojiEntities = shiftedEntities;
-        newMessageColumn.previousComposerText = newMessageTextField.text || "";
+        newMessageColumn.previousComposerText = composerText();
         tdLibWrapper.ensureCustomEmoji(customEmojiId);
         controlSendButton();
         lostFocusTimer.start();
@@ -1045,15 +1131,20 @@ Page {
         // content.caption (media).
         var editFormattedText = (message && message.content) ? (message.content.text || message.content.caption) : null;
         var editText;
+        var editEntities = [];
         if (editFormattedText && Functions.formattedTextHasFormatting(editFormattedText)) {
-            // Modifica che PRESERVA la formattazione: ricostruisco i marcatori
-            // markdown (** __ ...) dalle entità, così non si perde grassetto/corsivo.
-            editText = Functions.formattedTextToComposerMarkdown(editFormattedText);
+            // #4 stadio 3: la formattazione si ricarica come STILI sul documento, non
+            // piu' come marcatori markdown da leggere a occhio.
+            editText = editFormattedText.text || "";
+            editEntities = editFormattedText.entities || [];
         } else {
             editText = Functions.getMessageText(message, false, chatPage.myUserId, true);
         }
         newMessageColumn.suspendCustomEmojiTracking = true;
-        newMessageTextField.text = editText;
+        setComposerText(editText);
+        if (editEntities.length > 0 && composerEditor()) {
+            composerFormatter.setFormattedText(composerEditor(), editText, editEntities);
+        }
         newMessageTextField.cursorPosition = editText.length;
         newMessageColumn.suspendCustomEmojiTracking = false;
         // Custom emoji tracciati solo quando NON c'è formattazione (con i marcatori
@@ -1063,7 +1154,7 @@ Page {
         } else {
             newMessageColumn.customEmojiEntities = extractCustomEmojiEntitiesFromFormattedText(editFormattedText);
         }
-        newMessageColumn.previousComposerText = newMessageTextField.text || "";
+        newMessageColumn.previousComposerText = composerText();
         newMessageTextField.focus = true;
         controlSendButton();
     }
@@ -1099,7 +1190,88 @@ Page {
     //   (quel che scrivi finisce dentro), il pulsante resta premuto; ri-premendo
     //   DISATTIVA saltando oltre il marcatore di chiusura. Più formati insieme si
     //   annidano (LIFO): B poi I → **__testo__**.
-    function toggleFormat(marker) {
+    // #4 stadio 3: i pulsanti della barra non scrivono piu' i marcatori, marcano il
+    // DOCUMENTO. Con una selezione lo stile si applica subito; senza selezione resta
+    // "armato": lo mette il filtro sugli eventi della tastiera sul testo digitato dopo.
+    function toggleFormat(style) {
+        var tf = newMessageTextField;
+        var editor = composerEditor();
+        var selStart = Number(tf.selectionStart);
+        var selEnd = Number(tf.selectionEnd);
+        if (!editor) {
+            return;
+        }
+        if (selStart === selEnd && (style === "code" || style === "spoiler")) {
+            // Monospazio e spoiler valgono SOLO su una selezione: senza, non si armano.
+            return;
+        }
+        if (selStart !== selEnd) {
+            composerFormatter.toggleStyle(editor, style, Math.min(selStart, selEnd), Math.max(selStart, selEnd));
+            newMessageColumn.activeStyles = [];
+            composerFormatter.setArmedStyles([]);
+            lostFocusTimer.start();
+            controlSendButton();
+            return;
+        }
+        var styles = newMessageColumn.activeStyles.slice();
+        var idx = styles.indexOf(style);
+        if (idx === -1) {
+            styles.push(style);
+        } else {
+            styles.splice(idx, 1);
+        }
+        newMessageColumn.activeStyles = styles;
+        composerFormatter.setArmedStyles(styles);
+        // Su una riga vuota si arma anche il formato del BLOCCO: cosi' la parola in
+        // composizione si vede gia' formattata, invece di cambiare aspetto allo spazio.
+        composerFormatter.armStyleForTyping(editor, style, idx === -1);
+        lostFocusTimer.start();
+        controlSendButton();
+    }
+
+    // Il testo appena digitato eredita gli stili "armati" dalla barra. Si applica al
+    // pezzo INSERITO, che si trova confrontando prima e dopo: il prefisso e il suffisso
+    // in comune restano fuori.
+    readonly property var composerAllStyles: ["bold", "italic", "underline", "strike", "code", "spoiler"]
+
+    // Quando il cursore si sposta, la barra mostra com'e' il testo LI': e' cosi' che
+    // l'utente capisce in che formato sta per scrivere, ed e' anche il modo per
+    // spegnere uno stile ereditato (il pulsante si accende, lo si ripreme, si spegne).
+    function syncActiveStylesFromCursor() {
+        var editor = composerEditor();
+        if (!editor) {
+            return;
+        }
+        // ⛔ Se il testo e' cambiato e non e' ancora stato "assestato", questo segnale
+        // arriva IN MEZZO a una battuta: sincronizzarsi ora cancellerebbe lo stile che
+        // l'utente ha appena armato col pulsante. Misurato: il cursore si sposta prima
+        // che arrivi onTextChanged.
+        if (composerText().length !== (newMessageColumn.previousComposerText || "").length) {
+            return;
+        }
+        var position = Number(newMessageTextField.cursorPosition);
+        if (isNaN(position) || position <= 0) {
+            newMessageColumn.activeStyles = [];
+            composerFormatter.setArmedStyles([]);
+            return;
+        }
+        var found = [];
+        for (var i = 0; i < chatPage.composerAllStyles.length; i++) {
+            var candidate = chatPage.composerAllStyles[i];
+            if (candidate === "code" || candidate === "spoiler") {
+                continue;   // non si armano: valgono solo sulla selezione
+            }
+            if (composerFormatter.hasStyle(editor, candidate, position - 1, position)) {
+                found.push(candidate);
+            }
+        }
+        newMessageColumn.activeStyles = found;
+        composerFormatter.setArmedStyles(found);
+    }
+
+    // (storico) La vecchia toggleFormat a marcatori, tenuta per i pochi punti che
+    // ancora inseriscono coppie di marcatori a mano.
+    function toggleFormatMarker(marker) {
         var tf = newMessageTextField;
         var selStart = Number(tf.selectionStart);
         var selEnd = Number(tf.selectionEnd);
@@ -1107,7 +1279,7 @@ Page {
             applyInlineFormatting(marker, marker);
             return;
         }
-        var cur = tf.text || "";
+        var cur = composerText();
         var pos = Number(tf.cursorPosition);
         if (isNaN(pos) || pos < 0 || pos > cur.length) {
             pos = cur.length;
@@ -1118,7 +1290,7 @@ Page {
             // Attiva: inserisci coppia, cursore tra i due marcatori.
             markers.push(marker);
             newMessageColumn.activeFormatMarkers = markers;
-            tf.text = cur.substring(0, pos) + marker + marker + cur.substring(pos);
+            composerSplice(pos, pos, marker + marker);
             tf.cursorPosition = pos + marker.length;
             lostFocusTimer.pendingCursorPosition = pos + marker.length;
         } else {
@@ -1129,11 +1301,11 @@ Page {
             var before = cur.substr(Math.max(0, pos - marker.length), marker.length);
             var after = cur.substr(pos, marker.length);
             if (before === marker && after === marker) {
-                tf.text = cur.substring(0, pos - marker.length) + cur.substring(pos + marker.length);
+                composerSplice(pos - marker.length, pos + marker.length, "");
             }
             newMessageColumn.activeFormatMarkers = [];
-            tf.cursorPosition = (tf.text || "").length;
-            lostFocusTimer.pendingCursorPosition = (tf.text || "").length;
+            tf.cursorPosition = composerText().length;
+            lostFocusTimer.pendingCursorPosition = composerText().length;
         }
         // lostFocusTimer (refocus differito) mantiene la tastiera in vista; un
         // forceActiveFocus immediato qui la farebbe invece sparire. La posizione
@@ -1144,7 +1316,7 @@ Page {
     }
 
     function applyInlineFormatting(prefix, suffix) {
-        var currentText = newMessageTextField.text || "";
+        var currentText = composerText();
         var selectionStart = Number(newMessageTextField.selectionStart);
         var selectionEnd = Number(newMessageTextField.selectionEnd);
         var cursorPosition = Number(newMessageTextField.cursorPosition);
@@ -1167,12 +1339,12 @@ Page {
         }
         if (selectionStart === selectionEnd) {
             var insertion = prefix + suffix;
-            newMessageTextField.text = currentText.substring(0, selectionStart) + insertion + currentText.substring(selectionEnd);
+            composerSplice(selectionStart, selectionEnd, insertion);
             newMessageTextField.cursorPosition = selectionStart + prefix.length;
         } else {
             var selectedText = currentText.substring(selectionStart, selectionEnd);
             var replacement = prefix + selectedText + suffix;
-            newMessageTextField.text = currentText.substring(0, selectionStart) + replacement + currentText.substring(selectionEnd);
+            composerSplice(selectionStart, selectionEnd, replacement);
             var newSelectionStart = selectionStart + prefix.length;
             var newSelectionEnd = newSelectionStart + selectedText.length;
             if (typeof newMessageTextField.select === "function") {
@@ -1213,7 +1385,7 @@ Page {
         else {
             newMessageColumn.customEmojiEntities = [];
             newMessageColumn.previousComposerText = text || "";
-            newMessageTextField.text = text
+            setComposerText(text)
             newMessageTextField.cursorPosition = text.length
             lostFocusTimer.start();
         }
@@ -1584,7 +1756,7 @@ Page {
             return;
         }
         if (chatPage.canSendMessages && !chatPage.isDeletedUser) {
-            tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, newMessageTextField.text,
+            tdLibWrapper.setChatDraftMessage(chatInformation.id, 0, newMessageColumn.replyToMessageId, composerText(),
                 newMessageInReplyToRow.inReplyToMessage ? newMessageInReplyToRow.inReplyToMessage.id : 0);
         }
     }
@@ -1665,7 +1837,7 @@ Page {
             if(!chatPage.isInitialized) {
                 if(chatInformation.draft_message) {
                     if(chatInformation.draft_message && chatInformation.draft_message.input_message_text) {
-                        newMessageTextField.text = chatInformation.draft_message.input_message_text.text.text;
+                        setComposerText(chatInformation.draft_message.input_message_text.text.text);
                         if(chatInformation.draft_message.reply_to_message_id) {
                             tdLibWrapper.getMessage(chatInformation.id, chatInformation.draft_message.reply_to_message_id);
                         }
@@ -2005,7 +2177,7 @@ Page {
         onTriggered: {
             newMessageTextField.forceActiveFocus();
             if (pendingCursorPosition >= 0) {
-                var len = (newMessageTextField.text || "").length;
+                var len = composerLiveText().length;
                 newMessageTextField.cursorPosition = Math.min(pendingCursorPosition, len);
                 pendingCursorPosition = -1;
             }
@@ -2018,7 +2190,7 @@ Page {
         running: false
         repeat: false
         onTriggered: {
-            handleMessageTextReplacement(newMessageTextField.text, newMessageTextField.cursorPosition);
+            handleMessageTextReplacement(composerLiveText(), newMessageTextField.cursorPosition);
         }
     }
 
@@ -3143,7 +3315,7 @@ Page {
                             if (converted.trim() === "" || converted.trim() === newMessageColumn.originalInputText.trim()) {
                                 appNotification.show(qsTr("RooTelegram couldn't detect the language of the text — maybe you wrote a multilingual message?"))
                             } else {
-                                newMessageTextField.text = converted
+                                setComposerText(converted)
                             }
                         }
                         onErrorReceived: {
@@ -3218,6 +3390,24 @@ Page {
                     // stack LIFO dei marker (es. ["**","__"]) inseriti come coppia col
                     // cursore in mezzo; ciò che si digita finisce dentro la formattazione.
                     property var activeFormatMarkers: [];
+                    // Il monospazio non si combina con gli altri stili (ne' Telegram lo fa):
+                    // se la selezione e' gia' monospazio, B/I/U/S si spengono. Il pulsante M
+                    // invece resta ACCESO, perche' deve poter TOGLIERE il monospazio.
+                    // ⚠️ Queste due property devono stare QUI, in newMessageColumn: messe nella
+                    // riga dei pulsanti, i delegate leggevano newMessageColumn.selectionIsMono
+                    // = undefined, e "!undefined" e' true => pulsanti sempre attivi, in silenzio.
+                    property bool selectionIsMono: newMessageTextField.selectedText.length > 0
+                                                   && newMessageTextField._editor
+                                                   && composerFormatter.hasStyle(newMessageTextField._editor, "code",
+                                                                                 Math.min(newMessageTextField.selectionStart, newMessageTextField.selectionEnd),
+                                                                                 Math.max(newMessageTextField.selectionStart, newMessageTextField.selectionEnd))
+                    property bool selectionIsSpoiler: newMessageTextField.selectedText.length > 0
+                                                      && newMessageTextField._editor
+                                                      && composerFormatter.hasStyle(newMessageTextField._editor, "spoiler",
+                                                                                    Math.min(newMessageTextField.selectionStart, newMessageTextField.selectionEnd),
+                                                                                    Math.max(newMessageTextField.selectionStart, newMessageTextField.selectionEnd))
+                    // Stili "armati" dalla barra: vanno sul testo che si digita dopo.
+                    property var activeStyles: [];
                     property bool quickEmojiPickerVisible: false;
                     property bool quickPremiumEmojiPickerVisible: false;
                     property bool quickStickerPickerVisible: false;
@@ -3708,7 +3898,7 @@ Page {
                                 }
                             }
                             IconButton {
-                                visible: rootelegramUtils.supportsGeoLocation() && appSettings.isPermissionGranted("location") && newMessageTextField.text === ""
+                                visible: rootelegramUtils.supportsGeoLocation() && appSettings.isPermissionGranted("location") && chatPage.composerIsEmpty
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
                                 icon.source: "image://theme/icon-m-location"
@@ -3745,7 +3935,7 @@ Page {
                             }
                             IconButton {
                                 // Invia un contatto dalla rubrica di Sailfish (#7B).
-                                visible: newMessageTextField.text === ""
+                                visible: chatPage.composerIsEmpty
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
                                 icon.source: "image://theme/icon-m-contact"
@@ -4489,7 +4679,7 @@ Page {
                                         MouseArea {
                                             anchors.fill: parent
                                             onClicked: {
-                                                replaceMessageText(newMessageTextField.text, newMessageTextField.cursorPosition, modelData.emoji);
+                                                replaceMessageText(composerLiveText(), newMessageTextField.cursorPosition, modelData.emoji);
                                                 emojiProposals = null;
                                             }
                                         }
@@ -4568,7 +4758,7 @@ Page {
                                         MouseArea {
                                             anchors.fill: parent
                                             onClicked: {
-                                                replaceMessageText(newMessageTextField.text, newMessageTextField.cursorPosition, knownUserItem.atMentionText);
+                                                replaceMessageText(composerLiveText(), newMessageTextField.cursorPosition, knownUserItem.atMentionText);
                                                 knownUsersRepeater.model = undefined;
                                             }
                                         }
@@ -4603,7 +4793,7 @@ Page {
                                 newMessageColumn.editMessageId = "0";
                                 newMessageColumn.customEmojiEntities = [];
                                 newMessageColumn.previousComposerText = "";
-                                newMessageTextField.text = "";
+                                setComposerText("");
                             }
                         }
                     }
@@ -4655,12 +4845,69 @@ Page {
                                 anchors.fill: parent
                                 enabled: !newMessageColumn.translatingInput
                                 onClicked: {
-                                    if (newMessageTextField.text.length > 0) {
+                                    if (composerText().length > 0) {
                                         newMessageColumn.translatingInput = true
-                                        newMessageColumn.originalInputText = newMessageTextField.text
-                                        tdLibWrapper.translateText(newMessageTextField.text, chatPage.translateOutgoingLanguage)
+                                        newMessageColumn.originalInputText = composerText()
+                                        tdLibWrapper.translateText(composerText(), chatPage.translateOutgoingLanguage)
                                     } else {
                                         appNotification.show(qsTr("Type your message first, then tap this button to translate it to English!"))
+                                    }
+                                }
+                            }
+                        }
+
+
+                        Row {
+                            id: selectionOnlyButtonsRow
+                            // ⚠️ NON al bordo sinistro: li' c'e' gia' il globo della traduzione e i
+                            // due si sovrapponevano. Si parte da dove finisce il globo.
+                            anchors.left: translateFormatButton.right
+                            anchors.leftMargin: newMessageColumn.compactAttachmentSpacing
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: Theme.itemSizeExtraSmall
+                            spacing: newMessageColumn.compactAttachmentSpacing
+                            // Senza testo selezionato non hanno nulla su cui agire: spenti.
+                            property bool hasSelection: newMessageTextField.selectedText.length > 0
+
+                            Repeater {
+                                model: [
+                                    { "label": "M",  "style": "code" },
+                                    { "label": "||", "style": "spoiler" }
+                                ]
+                                delegate: Item {
+                                    id: selBtn
+                                    width: newMessageColumn.compactAttachmentButtonSize
+                                    height: width
+                                    opacity: selectionOnlyButtonsRow.hasSelection ? 1.0 : 0.35
+                                    Behavior on opacity { FadeAnimation {} }
+                                    // Acceso = la selezione ha GIA' quello stile, quindi premendo
+                                    // lo si toglie. Senza questo, "si puo' togliere" resterebbe
+                                    // vero ma invisibile.
+                                    property bool active: modelData.style === "code" ? newMessageColumn.selectionIsMono
+                                                                                     : newMessageColumn.selectionIsSpoiler
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: width / 2
+                                        color: chatPage.neon ? Theme.rgba("#ffffff", selBtn.active ? 0.18 : 0.06)
+                                                             : (selBtn.active ? Theme.rgba(Theme.highlightColor, 0.2) : "transparent")
+                                        border.width: selBtn.active ? 2 : 1
+                                        border.color: chatPage.neon ? Theme.rgba("#ff8a3d", selBtn.active ? 0.9 : 0.4)
+                                                                    : Theme.rgba(selBtn.active ? Theme.highlightColor : Theme.primaryColor,
+                                                                                 selBtn.active ? 0.9 : 0.4)
+                                    }
+                                    Label {
+                                        anchors.centerIn: parent
+                                        text: modelData.label
+                                        font.family: modelData.style === "code" ? "monospace" : Theme.fontFamily
+                                        font.bold: modelData.style === "spoiler"
+                                        font.pixelSize: Theme.fontSizeExtraSmall
+                                        color: selBtn.active ? (chatPage.neon ? "#fff3e6" : Theme.highlightColor) : Theme.primaryColor
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        enabled: selectionOnlyButtonsRow.hasSelection
+                                        onClicked: chatPage.toggleFormat(modelData.style)
                                     }
                                 }
                             }
@@ -4675,20 +4922,26 @@ Page {
                             spacing: newMessageColumn.compactAttachmentSpacing
 
                         Repeater {
+                            // ⭐ Decisione dell'utente (16/09): monospazio e spoiler funzionano SOLO
+                            // sulla selezione, e i loro pulsanti stanno a SINISTRA, staccati dagli
+                            // altri. Sono i due che stanno male "in corsa": il monospazio cambia la
+                            // metrica del testo sotto le dita, e lo spoiler non ha un aspetto che Qt
+                            // sappia disegnare mentre si scrive. Limitarli alla selezione toglie il
+                            // problema invece di rincorrerlo.
                             model: [
                                 { "label": "B",   "marker": "**", "style": "bold" },
                                 { "label": "I",   "marker": "__", "style": "italic" },
                                 { "label": "U",   "marker": "++", "style": "underline" },
-                                { "label": "S",   "marker": "~~", "style": "strike" },
-                                { "label": "{ }", "marker": "`",  "style": "mono" },
-                                { "label": "||",  "marker": "||", "style": "spoiler" }
+                                { "label": "S",   "marker": "~~", "style": "strike" }
                             ]
                             delegate: Item {
                                 id: fmtBtn
                                 width: newMessageColumn.compactAttachmentButtonSize
                                 height: width
                                 // Toggle attivo = marcatore presente nello stack.
-                                property bool active: newMessageColumn.activeFormatMarkers.indexOf(modelData.marker) !== -1
+                                property bool active: newMessageColumn.activeStyles.indexOf(modelData.style === "mono" ? "code" : modelData.style) !== -1
+                                opacity: newMessageColumn.selectionIsMono ? 0.35 : 1.0
+                                Behavior on opacity { FadeAnimation {} }
 
                                 Rectangle {
                                     anchors.fill: parent
@@ -4723,12 +4976,14 @@ Page {
                                 }
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: chatPage.toggleFormat(modelData.marker)
+                                    enabled: !newMessageColumn.selectionIsMono
+                                    onClicked: chatPage.toggleFormat(modelData.style === "mono" ? "code" : modelData.style)
                                 }
                             }
                         }
                         }
                     }
+
 
                     Row {
                         id: newMessageRow
@@ -4747,28 +5002,52 @@ Page {
                             textTopMargin: 0
                             enabled: !attachmentPreviewRow.isLocation
                             focus: appSettings.focusTextAreaOnChatOpen
+                            // #4 stadio 3: da qui il campo MOSTRA gli stili invece dei
+                            // marcatori. `_editor` e' il QQuickTextEdit interno di TextArea,
+                            // pubblico e scrivibile (verificato nei plugins.qmltypes di Silica).
+                            Component.onCompleted: {
+                                if (newMessageTextField._editor) {
+                                    newMessageTextField._editor.textFormat = TextEdit.RichText;
+                                    // Filtro sugli eventi della tastiera: e' l'unico punto in cui
+                                    // si puo' imporre il formato della parola in COMPOSIZIONE.
+                                    composerFormatter.watchComposer(newMessageTextField._editor);
+                                }
+                            }
+
                             EnterKey.onClicked: {
                                 if (appSettings.sendByEnter) {
-                                    var messageText = newMessageTextField.text;
-                                    newMessageTextField.text = messageText.substring(0, newMessageTextField.cursorPosition -1) + messageText.substring(newMessageTextField.cursorPosition);
+                                    composerSplice(newMessageTextField.cursorPosition - 1, newMessageTextField.cursorPosition, "");
                                     sendMessage();
-                                    newMessageTextField.text = "";
+                                    setComposerText("");
                                     if(!appSettings.focusTextAreaAfterSend) {
                                         newMessageTextField.focus = false;
                                     }
                                 }
                             }
 
-                            EnterKey.enabled: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || text.length)
+                            EnterKey.enabled: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || !chatPage.composerIsEmpty)
                             EnterKey.iconSource: appSettings.sendByEnter ? "image://theme/icon-m-chat" : "image://theme/icon-m-enter"
 
                             onTextChanged: {
-                                adjustComposerCustomEmojiEntities(newMessageColumn.previousComposerText, newMessageTextField.text);
-                                newMessageColumn.previousComposerText = newMessageTextField.text || "";
+                                adjustComposerCustomEmojiEntities(newMessageColumn.previousComposerText, composerText());
+                                // ⛔ Lo stile NON si applica qui: si modificherebbe il documento
+                                // mentre Qt sta ancora emettendo il segnale della modifica in
+                                // corso, e si finisce in SIGSEGV (misurato sul device, non
+                                // dedotto). Si rimanda al giro successivo del loop.
+                                // ⛔ Qui NON si applica nessuno stile: ci pensa il filtro
+                                // sugli eventi della tastiera, che sa con che formato l'utente
+                                // ha VISTO la parola mentre la scriveva. Un secondo meccanismo
+                                // qui glielo toglieva subito dopo (misurato con IMEDBG il 16/09).
+                                newMessageColumn.previousComposerText = composerText();
+                                // Tiene allineata la property su cui sono agganciate le binding
+                                // (tasto posizione, microfono): una funzione non le notificherebbe.
+                                chatPage.refreshComposerState();
                                 controlSendButton();
                                 textReplacementTimer.restart();
                                 chatPage.notifyTyping();
                             }
+                            onCursorPositionChanged: chatPage.syncActiveStylesFromCursor()
+
                             onActiveFocusChanged: {
                                 if (activeFocus) {
                                     messageOptionsDrawer.open = false
@@ -4814,7 +5093,7 @@ Page {
                             onClicked: {
                                 if (!hasContent) return;
                                 sendMessage();
-                                newMessageTextField.text = "";
+                                setComposerText("");
                                 if(!appSettings.focusTextAreaAfterSend) {
                                     newMessageTextField.focus = false;
                                 }
@@ -4826,7 +5105,7 @@ Page {
                                 dialog.accepted.connect(function() {
                                     var ts = Math.floor(dialog.selectedDateTime.getTime() / 1000);
                                     sendMessage(ts);
-                                    newMessageTextField.text = "";
+                                    setComposerText("");
                                     if(!appSettings.focusTextAreaAfterSend) {
                                         newMessageTextField.focus = false;
                                     }
@@ -4852,15 +5131,15 @@ Page {
                                 Behavior on opacity { FadeAnimation {} }
                                 onClicked: {
                                     if(inlineQuery.query !== "") {
-                                        newMessageTextField.text = "@" + inlineQuery.userName + " "
-                                        newMessageTextField.cursorPosition = newMessageTextField.text.length
+                                        setComposerText("@" + inlineQuery.userName + " ")
+                                        newMessageTextField.cursorPosition = composerText().length
                                         lostFocusTimer.start();
                                     } else {
-                                        newMessageTextField.text = ""
+                                        setComposerText("")
                                     }
                                 }
                                 onPressAndHold: {
-                                    newMessageTextField.text = ""
+                                    setComposerText("")
                                 }
                             }
 

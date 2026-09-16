@@ -203,7 +203,7 @@ public:
     Q_INVOKABLE void pinMessage(const QString &chatId, const QString &messageId, bool disableNotification = false, bool onlyForSelf = false);
     Q_INVOKABLE void unpinMessage(const QString &chatId, const QString &messageId);
     Q_INVOKABLE void sendTextMessage(qlonglong chatId, const QString &message, qlonglong replyToMessageId = 0);
-    Q_INVOKABLE void sendTextMessageWithCustomEmoji(qlonglong chatId, const QString &message, const QVariantList &customEmojiEntities, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void sendTextMessageWithEntities(qlonglong chatId, const QString &message, const QVariantList &messageEntities, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void translateText(const QString &text, const QString &toLanguageCode);
     Q_INVOKABLE void translateMessageText(qlonglong chatId, qlonglong messageId, const QString &toLanguageCode);
     Q_INVOKABLE void getMessageProperties(qlonglong chatId, qlonglong messageId);
@@ -237,9 +237,9 @@ public:
     Q_INVOKABLE void setOptionBoolean(const QString &optionName, bool optionValue);
     Q_INVOKABLE void setChatNotificationSettings(const QString &chatId, const QVariantMap &notificationSettings);
     Q_INVOKABLE void editMessageText(const QString &chatId, const QString &messageId, const QString &message);
-    Q_INVOKABLE void editMessageTextWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &customEmojiEntities);
+    Q_INVOKABLE void editMessageTextWithEntities(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &messageEntities);
     Q_INVOKABLE void editMessageCaption(const QString &chatId, const QString &messageId, const QString &caption);
-    Q_INVOKABLE void editMessageCaptionWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &customEmojiEntities);
+    Q_INVOKABLE void editMessageCaptionWithEntities(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &messageEntities);
     Q_INVOKABLE void deleteMessages(const QString &chatId, const QVariantList messageIds, bool revoke = true);
     Q_INVOKABLE void deleteChatMessagesBySender(qlonglong chatId, qlonglong senderUserId);
     Q_INVOKABLE void banChatMember(qlonglong chatId, qlonglong userId, qlonglong bannedUntilDate = 0);

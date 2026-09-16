@@ -13,10 +13,13 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "2.9.3";
+var version = "2.9.5";
 
 var changelogByLang = {
     "it": [
+        "Ora puoi formattare il testo mentre lo scrivi: premi B, I, U o S e la parola si vede gia' in grassetto, corsivo, sottolineato o barrato sotto le dita. Ripremi il tasto e torni a scrivere normale.",
+        "Monospazio e spoiler si applicano selezionando prima le parole: i loro due tasti, a sinistra, si accendono quando la selezione ha gia' quello stile, cosi' basta ripremerli per toglierlo. Lo spoiler si vede grigio gia' nel campo di scrittura.",
+        "Modificando un messaggio formattato lo ritrovi formattato, invece che pieno di simboli come **questo**.",
         "Le citazioni ora si vedono: quando un messaggio cita un pezzo di un altro messaggio compare la barra colorata e il rientro, invece di sembrare testo scritto sul momento.",
         "Molti messaggi che prima dicevano soltanto \"messaggio non supportato\" ora si leggono: storie condivise, giveaway, pagamenti, dadi, chiamate di gruppo, vocali e videomessaggi scaduti, contatti e chat condivisi.",
         "Gli hashtag si toccano: un tocco su #qualcosa apre la ricerca nei messaggi gia' pronta con quella parola.",
@@ -24,6 +27,9 @@ var changelogByLang = {
         "Corretta la citazione in invio: quando citi una frase che nel messaggio originale compare piu' volte, ora viene evidenziata quella che hai scelto tu."
     ],
     "en": [
+        "You can now format text while you type it: press B, I, U or S and the word appears bold, italic, underlined or struck through under your fingers. Press again to go back to plain text.",
+        "Monospace and spoiler apply to selected words: their two buttons, on the left, light up when the selection already has that style, so pressing again removes it. Spoilers show up grey right in the text box.",
+        "Editing a formatted message now gives it back to you formatted, instead of full of symbols like **this**.",
         "Quotes are visible at last: when a message quotes part of another one you now get the coloured bar and the indent, instead of text that looks freshly written.",
         "Many messages that only said \"unsupported message\" can now be read: shared stories, giveaways, payments, dice, group calls, expired voice and video notes, shared contacts and chats.",
         "Hashtags are tappable: tapping #something opens the message search already filled in with that word.",
@@ -31,6 +37,9 @@ var changelogByLang = {
         "Fixed quoting when sending: if you quote a sentence that appears more than once in the original message, the one you picked is now the one highlighted."
     ],
     "de": [
+        "Text laesst sich jetzt beim Schreiben formatieren: B, I, U oder S drucken und das Wort erscheint fett, kursiv, unterstrichen oder durchgestrichen unter den Fingern. Nochmal drucken und es geht normal weiter.",
+        "Monospace und Spoiler gelten fur ausgewahlte Worter: ihre beiden Tasten links leuchten, wenn die Auswahl den Stil schon hat, also nimmt ein zweiter Druck ihn weg. Spoiler erscheinen grau schon im Textfeld.",
+        "Eine formatierte Nachricht zu bearbeiten gibt sie formatiert zuruck, statt voller Zeichen wie **diesem**.",
         "Zitate sind endlich sichtbar: zitiert eine Nachricht einen Teil einer anderen, erscheinen jetzt der farbige Balken und der Einzug statt frisch geschriebenem Text.",
         "Viele Nachrichten, die nur \"nicht unterstutzte Nachricht\" anzeigten, sind jetzt lesbar: geteilte Storys, Gewinnspiele, Zahlungen, Wurfel, Gruppenanrufe, abgelaufene Sprach- und Videonachrichten, geteilte Kontakte und Chats.",
         "Hashtags sind antippbar: ein Tipp auf #etwas offnet die Nachrichtensuche bereits mit diesem Wort.",
@@ -38,6 +47,9 @@ var changelogByLang = {
         "Zitieren beim Senden korrigiert: kommt der zitierte Satz mehrfach in der Originalnachricht vor, wird jetzt der von dir gewahlte hervorgehoben."
     ],
     "pl": [
+        "Tekst mozna teraz formatowac podczas pisania: nacisnij B, I, U albo S, a slowo pojawia sie pogrubione, pochylone, podkreslone lub przekreslone pod palcami. Nacisnij ponownie, by wrocic do zwyklego pisania.",
+        "Czcionka o stalej szerokosci i spoiler dzialaja na zaznaczonych slowach: ich dwa przyciski po lewej swieca, gdy zaznaczenie juz ma ten styl, wiec ponowne nacisniecie go usuwa. Spoiler widac na szaro juz w polu tekstowym.",
+        "Edycja sformatowanej wiadomosci zwraca ja sformatowana, a nie pelna znakow w rodzaju **takich**.",
         "Cytaty wreszcie widac: gdy wiadomosc cytuje fragment innej, pojawia sie kolorowy pasek i wciecie, zamiast tekstu wygladajacego na nowo napisany.",
         "Wiele wiadomosci, ktore wczesniej mowily tylko \"nieobslugiwana wiadomosc\", teraz da sie przeczytac: udostepnione relacje, konkursy, platnosci, kostki, polaczenia grupowe, wygasle wiadomosci glosowe i wideo, udostepnione kontakty i czaty.",
         "Hashtagi sa klikalne: dotkniecie #czegos otwiera wyszukiwanie wiadomosci juz wypelnione tym slowem.",
@@ -45,6 +57,9 @@ var changelogByLang = {
         "Poprawione cytowanie przy wysylaniu: jesli cytujesz zdanie wystepujace w oryginale kilka razy, podswietlone zostanie to wybrane przez ciebie."
     ],
     "ru": [
+        "Текст теперь форматируется прямо во время набора: нажмите B, I, U или S — и слово сразу становится жирным, курсивным, подчёркнутым или зачёркнутым. Нажмите ещё раз, чтобы вернуться к обычному письму.",
+        "Моноширинный шрифт и спойлер применяются к выделенным словам: их две кнопки слева загораются, если у выделения уже есть этот стиль, так что повторное нажатие его снимает. Спойлер виден серым прямо в поле ввода.",
+        "Редактирование форматированного сообщения возвращает его отформатированным, а не с символами вроде **таких**.",
         "Цитаты наконец видно: когда сообщение цитирует часть другого, появляются цветная полоса и отступ, а не текст, похожий на только что написанный.",
         "Многие сообщения, которые раньше показывали лишь «сообщение не поддерживается», теперь читаются: истории, розыгрыши, платежи, кубики, групповые звонки, истёкшие голосовые и видеосообщения, пересланные контакты и чаты.",
         "Хештеги стали нажимаемыми: касание #чего-нибудь открывает поиск по сообщениям, уже заполненный этим словом.",
@@ -52,6 +67,9 @@ var changelogByLang = {
         "Исправлено цитирование при отправке: если цитируемая фраза встречается в исходном сообщении несколько раз, теперь выделяется именно выбранная вами."
     ],
     "fr": [
+        "Le texte se met en forme pendant que vous l'ecrivez : appuyez sur B, I, U ou S et le mot apparait en gras, italique, souligne ou barre sous vos doigts. Rappuyez pour revenir a l'ecriture normale.",
+        "Chasse fixe et spoiler s'appliquent aux mots selectionnes : leurs deux boutons, a gauche, s'allument quand la selection a deja ce style, il suffit donc de rappuyer pour l'enlever. Le spoiler apparait en gris des la zone de saisie.",
+        "Modifier un message mis en forme vous le rend mis en forme, au lieu d'etre plein de symboles comme **celui-ci**.",
         "Les citations se voient enfin : quand un message cite un morceau d'un autre, la barre coloree et le retrait apparaissent, au lieu d'un texte qui semble tout juste ecrit.",
         "Beaucoup de messages qui affichaient seulement \"message non pris en charge\" se lisent maintenant : stories partagees, tirages au sort, paiements, des, appels de groupe, messages vocaux et video expires, contacts et discussions partages.",
         "Les hashtags sont tactiles : toucher #quelquechose ouvre la recherche dans les messages deja remplie avec ce mot.",
@@ -59,6 +77,9 @@ var changelogByLang = {
         "Citation corrigee a l'envoi : si la phrase citee apparait plusieurs fois dans le message d'origine, c'est bien celle que vous avez choisie qui est mise en avant."
     ],
     "sk": [
+        "Text sa da teraz formatovat pocas pisania: stlac B, I, U alebo S a slovo sa zobrazi tucne, sikmo, podciarknuto alebo precarknuto priamo pod prstami. Stlac znova a pokracujes normalne.",
+        "Monospace a spoiler platia na oznacene slova: ich dve tlacidla vlavo sa rozsvietia, ked oznacenie uz ten styl ma, takze dalsim stlacenim sa odstrani. Spoiler vidno sivo uz v poli na pisanie.",
+        "Uprava formatovanej spravy ti ju vrati formatovanu, nie plnu znakov ako **tychto**.",
         "Citacie je konecne vidiet: ked sprava cituje cast inej, objavi sa farebny pruh a odsadenie namiesto textu, ktory vyzera ako prave napisany.",
         "Mnohe spravy, ktore predtym hovorili len \"nepodporovana sprava\", sa teraz daju precitat: zdielane pribehy, sutaze, platby, kocky, skupinove hovory, vyprsane hlasove a videospravy, zdielane kontakty a chaty.",
         "Hashtagy sa daju tuknut: tuknutie na #nieco otvori vyhladavanie v spravach uz vyplnene tym slovom.",
@@ -68,13 +89,13 @@ var changelogByLang = {
 };
 
 var messageByLang = {
-    "it": "Le citazioni ora si vedono davvero, e molti messaggi che dicevano \"non supportato\" finalmente si leggono.",
-    "en": "Quotes are finally visible, and many messages that said \"unsupported\" can now be read.",
-    "de": "Zitate sind endlich sichtbar, und viele \"nicht unterstutzte\" Nachrichten sind jetzt lesbar.",
-    "pl": "Cytaty wreszcie widac, a wiele \"nieobslugiwanych\" wiadomosci da sie teraz przeczytac.",
-    "ru": "Цитаты наконец видны, и многие «неподдерживаемые» сообщения теперь читаются.",
-    "fr": "Les citations se voient enfin, et beaucoup de messages \"non pris en charge\" se lisent maintenant.",
-    "sk": "Citacie je konecne vidiet a mnohe \"nepodporovane\" spravy sa teraz daju precitat."
+    "it": "Ora la formattazione si vede mentre scrivi: grassetto, corsivo, sottolineato e barrato sotto le dita.",
+    "en": "Formatting is now visible as you type: bold, italic, underline and strikethrough under your fingers.",
+    "de": "Formatierung ist jetzt beim Tippen sichtbar: fett, kursiv, unterstrichen und durchgestrichen.",
+    "pl": "Formatowanie widac teraz podczas pisania: pogrubienie, kursywa, podkreslenie i przekreslenie.",
+    "ru": "Форматирование теперь видно во время набора: жирный, курсив, подчёркнутый и зачёркнутый.",
+    "fr": "La mise en forme se voit pendant la frappe : gras, italique, souligne et barre.",
+    "sk": "Formatovanie vidno uz pocas pisania: tucne, sikme, podciarknute a precarknute."
 };
 
 // Restituisce il changelog/messaggio per la lingua data (codice a 2 lettere),

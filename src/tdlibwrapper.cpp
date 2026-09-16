@@ -1039,13 +1039,29 @@ static QVariantMap formattedTextFromMessage(const QString &message, const QVaria
     QString processedMessage = message;
     QVariantList entities;
     if (!additionalEntities.isEmpty()) {
-        QListIterator<QVariant> customEntitiesIterator(additionalEntities);
-        while (customEntitiesIterator.hasNext()) {
-            const QVariantMap nextEntity = customEntitiesIterator.next().toMap();
+        QListIterator<QVariant> additionalEntitiesIterator(additionalEntities);
+        while (additionalEntitiesIterator.hasNext()) {
+            const QVariantMap nextEntity = additionalEntitiesIterator.next().toMap();
             const int offset = nextEntity.value("offset").toInt();
             const int length = nextEntity.value("length").toInt();
+            if (offset < 0 || length <= 0 || (offset + length) > processedMessage.length()) {
+                continue;
+            }
+            // #4 stadio 2: la lista non contiene piu' solo emoji personalizzate. Chi ha
+            // gia' il suo `type` (gli stili che ComposerFormatter legge dal documento del
+            // composer) passa di qui intatto; chi ha solo un custom_emoji_id e' la vecchia
+            // forma, e gli costruiamo il tipo come si e' sempre fatto.
+            const QVariantMap providedType = nextEntity.value(TYPE).toMap();
+            if (!providedType.value(_TYPE).toString().isEmpty()) {
+                QVariantMap entity;
+                entity.insert("offset", offset);
+                entity.insert("length", length);
+                entity.insert(TYPE, providedType);
+                entities.append(entity);
+                continue;
+            }
             const QString customEmojiId = nextEntity.value("custom_emoji_id").toString();
-            if (customEmojiId.isEmpty() || offset < 0 || length <= 0 || (offset + length) > processedMessage.length()) {
+            if (customEmojiId.isEmpty()) {
                 continue;
             }
             QVariantMap entity;
@@ -1328,7 +1344,7 @@ void TDLibWrapper::sendTextMessage(qlonglong chatId, const QString &message, qlo
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::editMessageTextWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &customEmojiEntities)
+void TDLibWrapper::editMessageTextWithEntities(const QString &chatId, const QString &messageId, const QString &message, const QVariantList &messageEntities)
 {
     LOG("Editing message text with custom emojis" << chatId << messageId);
     QVariantMap requestObject;
@@ -1337,7 +1353,7 @@ void TDLibWrapper::editMessageTextWithCustomEmoji(const QString &chatId, const Q
     requestObject.insert(MESSAGE_ID, messageId);
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageText");
-    inputMessageContent.insert("text", formattedTextFromMessage(message, customEmojiEntities));
+    inputMessageContent.insert("text", formattedTextFromMessage(message, messageEntities));
     inputMessageContent.insert("disable_web_page_preview", false);
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
@@ -1354,14 +1370,14 @@ void TDLibWrapper::editMessageCaption(const QString &chatId, const QString &mess
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::editMessageCaptionWithCustomEmoji(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &customEmojiEntities)
+void TDLibWrapper::editMessageCaptionWithEntities(const QString &chatId, const QString &messageId, const QString &caption, const QVariantList &messageEntities)
 {
     LOG("Editing message caption with custom emojis" << chatId << messageId);
     QVariantMap requestObject;
     requestObject.insert(_TYPE, "editMessageCaption");
     requestObject.insert(CHAT_ID, chatId);
     requestObject.insert(MESSAGE_ID, messageId);
-    requestObject.insert("caption", formattedTextFromMessage(caption, customEmojiEntities));
+    requestObject.insert("caption", formattedTextFromMessage(caption, messageEntities));
     this->sendRequest(requestObject);
 }
 
@@ -1917,13 +1933,13 @@ void TDLibWrapper::editMessageText(const QString &chatId, const QString &message
     this->sendRequest(requestObject);
 }
 
-void TDLibWrapper::sendTextMessageWithCustomEmoji(qlonglong chatId, const QString &message, const QVariantList &customEmojiEntities, qlonglong replyToMessageId)
+void TDLibWrapper::sendTextMessageWithEntities(qlonglong chatId, const QString &message, const QVariantList &messageEntities, qlonglong replyToMessageId)
 {
     LOG("Sending text message with custom emojis" << chatId << message << replyToMessageId);
     QVariantMap requestObject(newSendMessageRequest(chatId, replyToMessageId));
     QVariantMap inputMessageContent;
     inputMessageContent.insert(_TYPE, "inputMessageText");
-    inputMessageContent.insert("text", formattedTextFromMessage(message, customEmojiEntities));
+    inputMessageContent.insert("text", formattedTextFromMessage(message, messageEntities));
     inputMessageContent.insert("disable_web_page_preview", false);
     requestObject.insert("input_message_content", inputMessageContent);
     this->sendRequest(requestObject);
