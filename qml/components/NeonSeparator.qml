@@ -16,6 +16,7 @@
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import "."
 
 Item {
     id: neonSeparator
@@ -23,6 +24,8 @@ Item {
     height: Math.round(Theme.paddingSmall / 2)
 
     readonly property bool neon: appSettings.useNeonTheme
+    // Barbara: linea singola da 1px nel colore del bordo del vetro, senza bloom.
+    readonly property bool barbara: BarbaraTheme.active
 
     // Alone (bloom): due linee bianche tenui sopra/sotto — solo in tema Neon.
     Separator {
@@ -39,11 +42,13 @@ Item {
         color: Qt.rgba(1, 1, 1, 0.18)
         horizontalAlignment: Qt.AlignHCenter
     }
-    // Linea centrale: bianca neon nitida, oppure Separator Silica standard.
+    // Linea centrale: bianca neon nitida, bordo del vetro in Barbara, oppure
+    // Separator Silica standard.
     Separator {
         anchors { horizontalCenter: parent.horizontalCenter; verticalCenter: parent.verticalCenter }
         width: parent.width
-        color: neonSeparator.neon ? Qt.rgba(1, 1, 1, 0.9) : Theme.primaryColor
+        color: neonSeparator.barbara ? BarbaraTheme.glassBorder
+             : (neonSeparator.neon ? Qt.rgba(1, 1, 1, 0.9) : Theme.primaryColor)
         horizontalAlignment: Qt.AlignHCenter
     }
 }

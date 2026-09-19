@@ -224,6 +224,10 @@ public:
     Q_INVOKABLE void sendContactMessage(qlonglong chatId, const QString &firstName, const QString &lastName, const QString &phoneNumber, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendStickerMessage(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void sendSavedAnimation(qlonglong chatId, const QString &fileId, qlonglong replyToMessageId = 0);
+    // Articolo (messageRichMessage, TDLib 1.8.67, funzione Premium): `blocks` sono
+    // gia' InputPageBlock costruiti da RichMessageComposerPage.qml.
+    Q_INVOKABLE void sendRichMessage(qlonglong chatId, const QVariantList &blocks, qlonglong replyToMessageId = 0);
+    Q_INVOKABLE void editRichMessage(const QString &chatId, const QString &messageId, const QVariantList &blocks);
     Q_INVOKABLE void sendPollMessage(qlonglong chatId, const QString &question, const QVariantList &options, bool anonymous, int correctOption, bool multiple, const QString &explanation, qlonglong replyToMessageId = 0);
     Q_INVOKABLE void forwardMessages(const QString &chatId, const QString &fromChatId, const QVariantList &messageIds, bool sendCopy, bool removeCaption);
     Q_INVOKABLE void getMessage(qlonglong chatId, qlonglong messageId);
@@ -357,6 +361,16 @@ public:
     Q_INVOKABLE void setChatArchived(qlonglong chatId, bool archived);
     Q_INVOKABLE void getForumTopic(qlonglong chatId, int forumTopicId);
     Q_INVOKABLE void getMessageThreadHistory(qlonglong chatId, qlonglong messageThreadId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50);
+    // Cronologia di UN SOLO topic di un forum, General compreso (TDLib 1.8.62).
+    // getMessageThreadHistory non accetta il General (thread id 1), e ripiegare su
+    // getChatHistory significa ricevere TUTTO il gruppo e filtrare a mano: nei forum
+    // molto attivi un'intera pagina puo' essere di altri topic e la paginazione si
+    // ferma. Qui e' TDLib a filtrare, quindi ogni pagina contiene solo il topic.
+    Q_INVOKABLE void getForumTopicHistory(qlonglong chatId, int forumTopicId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50);
+    // Segna letto un INTERO topic senza aprirlo (long-press nella lista topic):
+    // viewMessages sull'ultimo messaggio del topic con force_read, piu' la
+    // pulizia di menzioni e reazioni non lette.
+    Q_INVOKABLE void markForumTopicAsRead(qlonglong chatId, int forumTopicId, qlonglong lastMessageId);
     Q_INVOKABLE void setCurrentMessageThreadId(qlonglong threadId);
     Q_INVOKABLE void setPendingScheduledSendDate(int sendDate);
     Q_INVOKABLE void setPendingReplyQuote(const QString &text, int position);
@@ -483,6 +497,10 @@ signals:
     void usersReceived(const QString &extra, const QVariantList &userIds, int totalUsers);
     void messageSendersReceived(const QString &extra, const QVariantList &senders, int totalUsers);
     void errorReceived(int code, const QString &message, const QString &extra);
+    // getForumTopicHistory rifiutato da TDLib (snapshot che non lo conosce): porta
+    // con se' i parametri della richiesta fallita, cosi' ChatModel puo' ripiegare
+    // su getChatHistory senza mostrare un errore all'utente.
+    void forumTopicHistoryFailed(qlonglong chatId, int forumTopicId, qlonglong fromMessageId, int offset, int limit);
     void contactsImported(const QVariantList &importerCount, const QVariantList &userIds);
     void messageNotFound(qlonglong chatId, qlonglong messageId);
     // Emesso a OGNI apertura di chat (openChat): ChatListModel azzera subito il
@@ -490,6 +508,7 @@ signals:
     void chatOpened(qlonglong chatId);
     void chatIsMarkedAsUnreadUpdated(qlonglong chatId, bool chatIsMarkedAsUnread);
     void chatDraftMessageUpdated(qlonglong chatId, const QVariantMap &draftMessage, const QString &order);
+    void chatReplyMarkupUpdated(qlonglong chatId, const QVariantMap &replyMarkupMessage);
     void inlineQueryResults(const QString &inlineQueryId, const QString &nextOffset, const QVariantList &results, const QString &switchPmText, const QString &switchPmParameter, const QString &extra);
     void callbackQueryAnswer(const QString &text, bool alert, const QString &url);
     void userPrivacySettingUpdated(UserPrivacySetting setting, UserPrivacySettingRule rule);

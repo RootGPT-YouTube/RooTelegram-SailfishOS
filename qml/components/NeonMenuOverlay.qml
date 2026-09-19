@@ -11,6 +11,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import QtGraphicalEffects 1.0
+import "."
 
 // Menù a comparsa in stile neon (card fluttuante) che sostituisce i ContextMenu
 // Silica per i long-press: i ContextMenu Silica non sono ricolorabili (opacità
@@ -24,6 +25,9 @@ Item {
     z: 1000
 
     readonly property bool neon: appSettings.useNeonTheme
+    // Barbara: stessa card, ma vetro del tema — niente bordo rosso da 4px e
+    // niente Glow sulle voci.
+    readonly property bool barbara: BarbaraTheme.active
 
     // Lista azioni: array di { text:string, visible:bool(opz), callback:function }.
     property var actions: []
@@ -54,18 +58,35 @@ Item {
         width: parent.width - 2 * Theme.horizontalPageMargin
         height: Math.min(menuColumn.height + 2 * Theme.paddingLarge, parent.height - 2 * Theme.paddingLarge)
         // Tema Silica: card opaca piatta (niente vetro/trasparenza/angoli stondati/bordo neon).
-        radius: overlay.neon ? Theme.paddingLarge : 0
-        color: overlay.neon ? Theme.rgba("#803500", 0.82) : Theme.overlayBackgroundColor
-        border.width: overlay.neon ? 4 : 0
-        border.color: "#ff2d2d"
+        radius: overlay.neon ? Theme.paddingLarge
+              : (overlay.barbara ? BarbaraTheme.radiusBubble : 0)
+        color: overlay.neon ? Theme.rgba("#803500", 0.82)
+             : (overlay.barbara ? BarbaraTheme.panel : Theme.overlayBackgroundColor)
+        border.width: overlay.neon ? 4 : (overlay.barbara ? BarbaraTheme.borderWidth : 0)
+        border.color: overlay.barbara ? BarbaraTheme.glassBorder : "#ff2d2d"
         clip: true
 
         Column {
             id: menuColumn
             anchors.top: parent.top
-            anchors.topMargin: Theme.paddingLarge
+            anchors.topMargin: overlay.barbara ? Theme.paddingMedium : Theme.paddingLarge
             anchors.left: parent.left
             anchors.right: parent.right
+
+            // Barbara: intestazione in mono accento sopra le voci.
+            Label {
+                visible: overlay.barbara
+                height: visible ? implicitHeight + Theme.paddingMedium : 0
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignBottom
+                //: Intestazione della card del menu di scelta rapida (tema Barbara)
+                text: qsTr("Actions")
+                font.family: BarbaraTheme.fontFamilyMono
+                font.pixelSize: BarbaraTheme.fontSizeMeta
+                font.capitalization: Font.AllUppercase
+                color: BarbaraTheme.accent
+            }
 
             Repeater {
                 // NB: usiamo il CONTEGGIO come model e indicizziamo overlay.actions[index]:
@@ -82,6 +103,14 @@ Item {
                         overlay.close();
                         if (cb) cb();
                     }
+                    // Barbara: voci separate da una linea di 1px.
+                    Rectangle {
+                        visible: overlay.barbara && index > 0
+                                 && (!parent.act || parent.act.visible !== false)
+                        anchors { left: parent.left; right: parent.right; top: parent.top }
+                        height: BarbaraTheme.borderWidth
+                        color: BarbaraTheme.glassBorder
+                    }
                     Label {
                         anchors.centerIn: parent
                         width: parent.width - 2 * Theme.paddingLarge
@@ -89,8 +118,12 @@ Item {
                         truncationMode: TruncationMode.Fade
                         text: act ? act.text : ""
                         font.italic: overlay.neon
+                        font.pixelSize: overlay.barbara ? Theme.fontSizeSmall : Theme.fontSizeMedium
                         color: overlay.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
-                                            : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                             : overlay.barbara ? ((act && act.destructive)
+                                                  ? BarbaraTheme.danger
+                                                  : (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink))
+                                               : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                         // Glow solo in tema Neon.
                         layer.enabled: overlay.neon
                         layer.effect: Glow {

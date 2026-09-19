@@ -127,6 +127,9 @@ signals:
     void contactsImported(const QVariantList &importerCount, const QVariantList &userIds);
     void chatIsMarkedAsUnreadUpdated(qlonglong chatId, bool chatIsMarkedAsUnread);
     void chatDraftMessageUpdated(qlonglong chatId, const QVariantMap &draftMessage, const QString &order);
+    // La tastiera personalizzata di un bot e' della CHAT: il messaggio che la porta
+    // (vuoto = tastiera tolta).
+    void chatReplyMarkupUpdated(qlonglong chatId, const QVariantMap &replyMarkupMessage);
     void inlineQueryResults(const QString &inlineQueryId, const QString &nextOffset, const QVariantList &results, const QString &switchPmText, const QString &switchPmParameter, const QString &extra);
     void callbackQueryAnswer(const QString &text, bool alert, const QString &url);
     void userPrivacySettingRules(const QVariantMap &rules);
@@ -245,6 +248,7 @@ private:
     void processImportedContacts(const QVariantMap &receivedInformation);
     void processUpdateChatIsMarkedAsUnread(const QVariantMap &receivedInformation);
     void processUpdateChatDraftMessage(const QVariantMap &receivedInformation);
+    void processUpdateChatReplyMarkup(const QVariantMap &receivedInformation);
     void processInlineQueryResults(const QVariantMap &receivedInformation);
     void processCallbackQueryAnswer(const QVariantMap &receivedInformation);
     void processUserPrivacySettingRules(const QVariantMap &receivedInformation);

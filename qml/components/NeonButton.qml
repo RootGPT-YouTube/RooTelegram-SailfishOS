@@ -24,6 +24,7 @@
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
+import "."
 
 Item {
     id: neonButton
@@ -35,22 +36,67 @@ Item {
 
     enabled: true
     readonly property bool neon: appSettings.useNeonTheme
+    // Barbara: pulsante PRIMARIO pieno in accento (niente vetro, niente Glow).
+    readonly property bool barbara: BarbaraTheme.active
 
     implicitHeight: neon ? (neonLoader.item ? neonLoader.item.implicitHeight : 0)
-                         : (silicaLoader.item ? silicaLoader.item.implicitHeight : 0)
+                  : barbara ? (barbaraLoader.item ? barbaraLoader.item.implicitHeight : 0)
+                            : (silicaLoader.item ? silicaLoader.item.implicitHeight : 0)
     implicitWidth: neon ? (neonLoader.item ? neonLoader.item.implicitWidth : 0)
-                        : (silicaLoader.item ? silicaLoader.item.implicitWidth : 0)
+                 : barbara ? (barbaraLoader.item ? barbaraLoader.item.implicitWidth : 0)
+                           : (silicaLoader.item ? silicaLoader.item.implicitWidth : 0)
     width: implicitWidth
     height: implicitHeight
 
     opacity: enabled ? 1.0 : 0.4
     Behavior on opacity { FadeAnimation {} }
 
+    // --- Tema Barbara: pastiglia piena in accento ---
+    Loader {
+        id: barbaraLoader
+        anchors.fill: parent
+        active: neonButton.barbara
+        sourceComponent: MouseArea {
+            id: barbaraArea
+            enabled: neonButton.enabled
+            implicitHeight: Math.max(Theme.itemSizeSmall,
+                                     barbaraLabel.implicitHeight + 2 * Theme.paddingMedium)
+            implicitWidth: Math.min(Screen.width - 2 * Theme.horizontalPageMargin,
+                                    barbaraLabel.implicitWidth + 4 * Theme.paddingLarge)
+            onClicked: neonButton.clicked()
+
+            Rectangle {
+                anchors.fill: parent
+                radius: BarbaraTheme.radiusBubble
+                color: barbaraArea.pressed ? Qt.darker(BarbaraTheme.accent, 1.15) : BarbaraTheme.accent
+                Behavior on color { ColorAnimation { duration: BarbaraTheme.pressDuration } }
+            }
+
+            Label {
+                id: barbaraLabel
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    verticalCenter: parent.verticalCenter
+                    leftMargin: Theme.paddingMedium
+                    rightMargin: Theme.paddingMedium
+                }
+                horizontalAlignment: Text.AlignHCenter
+                truncationMode: TruncationMode.Fade
+                text: neonButton.text
+                font.pixelSize: Theme.fontSizeSmall
+                font.bold: true
+                color: BarbaraTheme.onAccent
+                textFormat: Text.PlainText
+            }
+        }
+    }
+
     // --- Tema Silica: Button nativa ---
     Loader {
         id: silicaLoader
         anchors.fill: parent
-        active: !neonButton.neon
+        active: !neonButton.neon && !neonButton.barbara
         sourceComponent: Button {
             text: neonButton.text
             enabled: neonButton.enabled

@@ -522,6 +522,21 @@
     </message>
 </context>
 <context>
+    <name>BarbaraFilterBand</name>
+    <message>
+        <source>All</source>
+        <translation>Všetky</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Skupiny</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation>Kanály</translation>
+    </message>
+</context>
+<context>
     <name>BlacklistPage</name>
     <message>
         <source>Refresh</source>
@@ -1763,6 +1778,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>No GIFs found</source>
         <translation>Nenašli sa žiadne GIF</translation>
     </message>
+    <message>
+        <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
+        <translation>Tento článok obsahuje prvky, ktoré editor zatiaľ nedokáže zachovať (%1): úpravou by sa odstránili.</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -2259,6 +2278,11 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Close topic</source>
         <translation>Zatvoriť tému</translation>
+    </message>
+    <message>
+        <source>Mark topic as read</source>
+        <extracomment>Voce del menu a pressione prolungata su un topic di un forum</extracomment>
+        <translation>Označiť tému ako prečítanú</translation>
     </message>
     <message>
         <source>Delete topic</source>
@@ -2887,6 +2911,14 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     </message>
 </context>
 <context>
+    <name>NeonMenuOverlay</name>
+    <message>
+        <source>Actions</source>
+        <extracomment>Intestazione della card del menu di scelta rapida (tema Barbara)</extracomment>
+        <translation>Akcie</translation>
+    </message>
+</context>
+<context>
     <name>NewChatPage</name>
     <message>
         <source>Your Contacts</source>
@@ -3101,6 +3133,22 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Starting RooTelegram...</source>
         <translation>Spúšťanie RooTelegram...</translation>
+    </message>
+    <message numerus="yes">
+        <source>%Ln unread</source>
+        <translation>
+            <numerusform>%Ln neprečítaná</numerusform>
+            <numerusform>%Ln neprečítané</numerusform>
+            <numerusform>%Ln neprečítaných</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PhotoTextsListItem</name>
+    <message>
+        <source>PIN</source>
+        <extracomment>Etichetta breve sulle chat fissate in cima (tema Barbara)</extracomment>
+        <translation>PIN</translation>
     </message>
 </context>
 <context>
@@ -3524,6 +3572,65 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Unknown</source>
         <translation>Neznámy</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageComposerPage</name>
+    <message>
+        <source>Title</source>
+        <translation>Nadpis</translation>
+    </message>
+    <message>
+        <source>Subtitle</source>
+        <translation>Podnadpis</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Zoznam</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>The article is empty.</source>
+        <translation>Článok je prázdny.</translation>
+    </message>
+    <message>
+        <source>The article is too long: %1 characters, the maximum is %2.</source>
+        <translation>Článok je príliš dlhý: %1 znakov, maximum je %2.</translation>
+    </message>
+    <message>
+        <source>An article can contain at most %1 media.</source>
+        <translation>Článok môže obsahovať najviac %1 médií.</translation>
+    </message>
+    <message>
+        <source>New article</source>
+        <translation>Nový článok</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Prístup k obrázkom je vypnutý v nastaveniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>List: one item per line</source>
+        <translation>Zoznam: jedna položka na riadok</translation>
+    </message>
+    <message>
+        <source>Caption (optional)</source>
+        <translation>Popis (voliteľný)</translation>
+    </message>
+    <message>
+        <source>Paragraph</source>
+        <translation>Odsek</translation>
+    </message>
+    <message>
+        <source>Edit article</source>
+        <translation>Upraviť článok</translation>
+    </message>
+    <message>
+        <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
+        <translation>Niektoré prvky tohto článku (vlastné emoji, zvýraznený text, oddeľovače...) sa pri uložení stratia.</translation>
     </message>
 </context>
 <context>
@@ -4220,12 +4327,16 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <translation>Vybrať tému RooTelegram</translation>
     </message>
     <message>
-        <source>Silica (base theme)</source>
-        <translation>Silica (základná téma)</translation>
+        <source>Cold glass and cyan, readable with both light and dark ambiences</source>
+        <translation>Studené sklo a azúr, čitateľné pri svetlom aj tmavom ambiente</translation>
     </message>
     <message>
-        <source>Neon (cyberpunk)</source>
-        <translation>Neon (cyberpunk)</translation>
+        <source>Glow on titles</source>
+        <translation>Žiara na nadpisoch</translation>
+    </message>
+    <message>
+        <source>Barbara theme only, and only with a dark ambience</source>
+        <translation>Iba téma Barbara a iba s tmavým ambientom</translation>
     </message>
 </context>
 <context>
@@ -5257,6 +5368,18 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Apply this theme now?</source>
         <translation>Použiť túto tému?</translation>
+    </message>
+    <message>
+        <source>Barbara theme</source>
+        <translation>Téma Barbara</translation>
+    </message>
+    <message>
+        <source>Cold glass, cyan and night</source>
+        <translation>Studené sklo, azúr a noc</translation>
+    </message>
+    <message>
+        <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Riadky četov ako sklenené karty, kurzívne pätkové nadpisy, metadáta neproporcionálnym písmom, filtre podľa typu a priečinky ako štítky. Téma má vlastnú svetlú aj tmavú paletu, takže zostáva čitateľná pri akomkoľvek systémovom ambiente.</translation>
     </message>
 </context>
 <context>

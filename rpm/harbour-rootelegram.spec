@@ -12,7 +12,7 @@ Name:       harbour-rootelegram
 %define _binary_payload w6.xzdio
 
 Summary:    RooTelegram is a Telegram client for Sailfish OS
-Version:    2.9.5
+Version:    3.0
 Release:    1
 Group:      Qt/Qt
 License:    GPL-3.0
@@ -91,13 +91,28 @@ make %{?_smp_mflags}
 # carica i provider dentro il proprio processo (non esiste un modo per
 # registrarsi da fuori: il suo D-Bus e' di sola consultazione).
 %ifarch aarch64 armv7hl
+# ⭐ SHADOW BUILD (dal 2026-09-17): la cartella di compilazione NON e' quella dei
+# sorgenti, quindi "cd voicecallplugin" qui non trova niente. Ricaviamo tutto dal
+# Makefile che qmake ha appena generato, che porta scritti in testa sia il comando
+# qmake completo (con i flag della SDK) sia il .pro di partenza:
+#     # Project:  ../../harbour-rootelegram/harbour-rootelegram.pro
+#     # Command: /usr/lib64/qt5/bin/qmake '<flag>' ... -o Makefile <quel .pro>
+# Usiamo il qmake REALE (percorso assoluto): il wrapper della SDK aggiunge da se'
+# la cartella del progetto principale, e qui il progetto lo scegliamo noi.
+# In una build in-tree "# Project:" e' un nome nudo ⇒ dirname da "." e funziona uguale.
+RT_QMAKE_CMD="$(sed -n 's/^# Command: //p' Makefile | head -1)"
+RT_SRC_PRO="$(sed -n 's/^# Project: *//p' Makefile | head -1)"
+RT_SRC_DIR="$(cd "$(dirname "$RT_SRC_PRO")" && pwd)"
+test -n "$RT_QMAKE_CMD" || { echo "spec: non riesco a leggere il comando qmake dal Makefile"; exit 1; }
+test -f "$RT_SRC_DIR/voicecallplugin/rootelegram-voicecall-plugin.pro" || { echo "spec: sorgenti del plugin non trovati in $RT_SRC_DIR"; exit 1; }
+mkdir -p voicecallplugin
 cd voicecallplugin
-# Pulizia obbligatoria: se nel tarball sono finiti oggetti di una build
+# Pulizia obbligatoria: se in questa cartella sono rimasti oggetti di una build
 # precedente (magari di UN'ALTRA architettura), make li riuserebbe e il link
 # fallirebbe con simboli dalla firma sbagliata, tipo operator new(unsigned int)
 # su aarch64. Successo il 2026-08-15.
 rm -f *.o moc_* Makefile *.so
-%qmake5
+eval "${RT_QMAKE_CMD% *} $RT_SRC_DIR/voicecallplugin/rootelegram-voicecall-plugin.pro"
 make %{?_smp_mflags}
 cd ..
 %endif

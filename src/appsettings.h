@@ -50,7 +50,14 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool storyAllowScreenshots READ storyAllowScreenshots WRITE setStoryAllowScreenshots NOTIFY storyAllowScreenshotsChanged)
     Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
     Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
+    // Tema dell'app: enum a tre valori (Silica / Neon / Barbara). `useNeonTheme`
+    // resta come ALIAS di compatibilita' (== appTheme == ThemeNeon) per i
+    // componenti non ancora migrati: scriverlo sposta l'enum su Neon o Silica.
+    Q_PROPERTY(int appTheme READ appTheme WRITE setAppTheme NOTIFY appThemeChanged)
     Q_PROPERTY(bool useNeonTheme READ useNeonTheme WRITE setUseNeonTheme NOTIFY useNeonThemeChanged)
+    // Barbara: alone (Glow) sui titoli. Ha effetto solo con ambience scura;
+    // spegnerlo aiuta sui device lenti.
+    Q_PROPERTY(bool barbaraGlowTitles READ barbaraGlowTitles WRITE setBarbaraGlowTitles NOTIFY barbaraGlowTitlesChanged)
     // Quando true, chiudere/minimizzare l'app NON riporta lo stack alla Home:
     // riaprendo si resta nella chat aperta. Default false = comportamento storico.
     Q_PROPERTY(bool keepCurrentChatOnMinimize READ keepCurrentChatOnMinimize WRITE setKeepCurrentChatOnMinimize NOTIFY keepCurrentChatOnMinimizeChanged)
@@ -66,6 +73,13 @@ public:
         SponsoredMessIgnore
     };
     Q_ENUM(SponsoredMess)
+
+    enum AppTheme {
+        ThemeSilica = 0,
+        ThemeNeon = 1,
+        ThemeBarbara = 2
+    };
+    Q_ENUM(AppTheme)
 
     enum NotificationFeedback {
         NotificationFeedbackNone,
@@ -86,8 +100,14 @@ public:
     bool getUseOpenWith() const;
     void setUseOpenWith(bool useOpenWith);
 
+    int appTheme() const;
+    void setAppTheme(int appTheme);
+
     bool useNeonTheme() const;
     void setUseNeonTheme(bool useNeonTheme);
+
+    bool barbaraGlowTitles() const;
+    void setBarbaraGlowTitles(bool enable);
 
     bool keepCurrentChatOnMinimize() const;
     void setKeepCurrentChatOnMinimize(bool enable);
@@ -219,7 +239,9 @@ signals:
     void storyAllowScreenshotsChanged();
     void storyPostToProfileChanged();
     void storyPrivacyModeChanged();
+    void appThemeChanged();
     void useNeonThemeChanged();
+    void barbaraGlowTitlesChanged();
     void keepCurrentChatOnMinimizeChanged();
     void permissionsChanged(const QString &permission, bool granted);
     void lastSeenVersionChanged();

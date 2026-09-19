@@ -522,6 +522,21 @@
     </message>
 </context>
 <context>
+    <name>BarbaraFilterBand</name>
+    <message>
+        <source>All</source>
+        <translation>Wszystkie</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Grupy</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation>Kanały</translation>
+    </message>
+</context>
+<context>
     <name>BlacklistPage</name>
     <message>
         <source>Refresh</source>
@@ -1763,6 +1778,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>No GIFs found</source>
         <translation>Nie znaleziono GIF-ów</translation>
     </message>
+    <message>
+        <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
+        <translation>Ten artykuł zawiera elementy, których edytor nie potrafi jeszcze zachować (%1): edycja by je usunęła.</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -2259,6 +2278,11 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>Close topic</source>
         <translation>Zamknij temat</translation>
+    </message>
+    <message>
+        <source>Mark topic as read</source>
+        <extracomment>Voce del menu a pressione prolungata su un topic di un forum</extracomment>
+        <translation>Oznacz temat jako przeczytany</translation>
     </message>
     <message>
         <source>Delete topic</source>
@@ -2887,6 +2911,14 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     </message>
 </context>
 <context>
+    <name>NeonMenuOverlay</name>
+    <message>
+        <source>Actions</source>
+        <extracomment>Intestazione della card del menu di scelta rapida (tema Barbara)</extracomment>
+        <translation>Akcje</translation>
+    </message>
+</context>
+<context>
     <name>NewChatPage</name>
     <message>
         <source>Your Contacts</source>
@@ -3101,6 +3133,22 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>Starting RooTelegram...</source>
         <translation>Uruchamianie RooTelegram...</translation>
+    </message>
+    <message numerus="yes">
+        <source>%Ln unread</source>
+        <translation>
+            <numerusform>%Ln nieprzeczytana</numerusform>
+            <numerusform>%Ln nieprzeczytane</numerusform>
+            <numerusform>%Ln nieprzeczytanych</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PhotoTextsListItem</name>
+    <message>
+        <source>PIN</source>
+        <extracomment>Etichetta breve sulle chat fissate in cima (tema Barbara)</extracomment>
+        <translation>PIN</translation>
     </message>
 </context>
 <context>
@@ -3524,6 +3572,65 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>Unknown</source>
         <translation>Nieznany</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageComposerPage</name>
+    <message>
+        <source>Title</source>
+        <translation>Tytuł</translation>
+    </message>
+    <message>
+        <source>Subtitle</source>
+        <translation>Podtytuł</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Lista</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Tekst</translation>
+    </message>
+    <message>
+        <source>The article is empty.</source>
+        <translation>Artykuł jest pusty.</translation>
+    </message>
+    <message>
+        <source>The article is too long: %1 characters, the maximum is %2.</source>
+        <translation>Artykuł jest za długi: %1 znaków, maksimum to %2.</translation>
+    </message>
+    <message>
+        <source>An article can contain at most %1 media.</source>
+        <translation>Artykuł może zawierać najwyżej %1 plików multimedialnych.</translation>
+    </message>
+    <message>
+        <source>New article</source>
+        <translation>Nowy artykuł</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Dostęp do obrazów jest wyłączony w ustawieniach RooTelegram.</translation>
+    </message>
+    <message>
+        <source>List: one item per line</source>
+        <translation>Lista: jeden element w wierszu</translation>
+    </message>
+    <message>
+        <source>Caption (optional)</source>
+        <translation>Podpis (opcjonalnie)</translation>
+    </message>
+    <message>
+        <source>Paragraph</source>
+        <translation>Akapit</translation>
+    </message>
+    <message>
+        <source>Edit article</source>
+        <translation>Edytuj artykuł</translation>
+    </message>
+    <message>
+        <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
+        <translation>Niektóre elementy tego artykułu (niestandardowe emoji, wyróżniony tekst, separatory...) zostaną utracone po zapisaniu.</translation>
     </message>
 </context>
 <context>
@@ -4220,12 +4327,16 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <translation>Wybierz motyw RooTelegram</translation>
     </message>
     <message>
-        <source>Silica (base theme)</source>
-        <translation>Silica (motyw podstawowy)</translation>
+        <source>Cold glass and cyan, readable with both light and dark ambiences</source>
+        <translation>Zimne szkło i cyjan, czytelny przy jasnych i ciemnych ambience</translation>
     </message>
     <message>
-        <source>Neon (cyberpunk)</source>
-        <translation>Neon (cyberpunk)</translation>
+        <source>Glow on titles</source>
+        <translation>Poświata na tytułach</translation>
+    </message>
+    <message>
+        <source>Barbara theme only, and only with a dark ambience</source>
+        <translation>Tylko motyw Barbara i tylko przy ciemnym ambience</translation>
     </message>
 </context>
 <context>
@@ -5257,6 +5368,18 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>Apply this theme now?</source>
         <translation>Zastosować ten motyw teraz?</translation>
+    </message>
+    <message>
+        <source>Barbara theme</source>
+        <translation>Motyw Barbara</translation>
+    </message>
+    <message>
+        <source>Cold glass, cyan and night</source>
+        <translation>Zimne szkło, cyjan i noc</translation>
+    </message>
+    <message>
+        <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Wiersze czatów jako szklane karty, kursywne tytuły szeryfowe, metadane czcionką o stałej szerokości, filtry typu i foldery jako pastylki. Motyw ma własną jasną i ciemną paletę, więc pozostaje czytelny przy każdym ambience systemu.</translation>
     </message>
 </context>
 <context>

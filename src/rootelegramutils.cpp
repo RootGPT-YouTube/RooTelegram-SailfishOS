@@ -163,6 +163,42 @@ static QString censorSpoilersPlain(const QVariantMap &formattedText)
     return text;
 }
 
+// TDLib 1.8.67: messageRichMessage e' un albero di PageBlock/RichText. Per
+// anteprime e notifiche basta il testo: si raccolgono i richTextPlain in ordine,
+// separando i blocchi con uno spazio; gli spoiler diventano █ come altrove.
+static void collectRichMessageText(const QVariant &node, QString &out)
+{
+    if (node.type() == QVariant::List) {
+        for (const QVariant &child : node.toList()) {
+            collectRichMessageText(child, out);
+        }
+        return;
+    }
+    if (node.type() != QVariant::Map) {
+        return;
+    }
+    const QVariantMap map(node.toMap());
+    const QString type(map.value(_TYPE).toString());
+    if (type == QStringLiteral("richTextPlain")) {
+        out += map.value(TEXT).toString();
+    } else if (type == QStringLiteral("richTextCustomEmoji")) {
+        out += map.value(QStringLiteral("alternative_text")).toString();
+    } else if (type == QStringLiteral("richTextSpoiler")) {
+        QString hidden;
+        collectRichMessageText(map.value(TEXT), hidden);
+        out += QString(hidden.length(), QChar(0x2588));
+    } else {
+        for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
+            if (it.key() != _TYPE) {
+                collectRichMessageText(it.value(), out);
+            }
+        }
+        if (type.startsWith(QStringLiteral("pageBlock"))) {
+            out += QLatin1Char(' ');
+        }
+    }
+}
+
 QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const QVariantMap &messageContent, const bool isChannel, const qlonglong currentUserId, const QVariantMap &messageSender)
 {
     if (messageContent.isEmpty()) {
@@ -176,6 +212,11 @@ QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const 
 
     if (contentType == MESSAGE_CONTENT_TYPE_TEXT) {
         return censorSpoilersPlain(messageContent.value(TEXT).toMap());
+    }
+    if (contentType == QStringLiteral("messageRichMessage")) {
+        QString text;
+        collectRichMessageText(messageContent.value(QStringLiteral("message")).toMap().value(QStringLiteral("blocks")), text);
+        return text.simplified();
     }
     if (contentType == MESSAGE_CONTENT_TYPE_STICKER) {
         return messageContent.value(STICKER).toMap().value(EMOJI).toString();
@@ -204,7 +245,7 @@ QString RooTelegramUtils::getMessageShortText(TDLibWrapper *tdLibWrapper, const 
     if (contentType == MESSAGE_CONTENT_TYPE_DOCUMENT) {
         return myself ? tr("sent a document", "myself") : tr("sent a document");
     }
-    if (contentType == MESSAGE_CONTENT_TYPE_LOCATION) {
+    if (contentType == MESSAGE_CONTENT_TYPE_LOCATION || contentType == "messageLiveLocation") {
         return myself ? tr("sent a location", "myself") : tr("sent a location");
     }
     if (contentType == "messageContact") {

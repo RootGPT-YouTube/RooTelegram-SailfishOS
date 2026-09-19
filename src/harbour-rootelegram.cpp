@@ -213,6 +213,9 @@ int main(int argc, char *argv[])
 
     const char *uri = "WerkWolf.RooTelegram";
     qmlRegisterType<TDLibFile>(uri, 1, 0, "TDLibFile");
+    // Il composer della chat usa l'istanza di contesto `composerFormatter`; il
+    // composer degli articoli se ne crea una sua, cosi' i due non si rubano il campo.
+    qmlRegisterType<ComposerFormatter>(uri, 1, 0, "ComposerFormatter");
     qmlRegisterType<NamedAction>(uri, 1, 0, "NamedAction");
     qmlRegisterType<TextFilterModel>(uri, 1, 0, "TextFilterModel");
     qmlRegisterType<BoolFilterModel>(uri, 1, 0, "BoolFilterModel");

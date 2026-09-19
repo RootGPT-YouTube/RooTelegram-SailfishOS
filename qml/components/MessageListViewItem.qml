@@ -24,6 +24,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "."
 import "./messageContent"
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
@@ -50,8 +51,18 @@ ListItem {
     });
     readonly property bool isOwnMessage: page.myUserId && myMessage.sender_id ? (page.myUserId === myMessage.sender_id.user_id) : false
     readonly property bool useOutgoingLayout: isOwnMessage && !page.isChannel
-    readonly property color textColor: useOutgoingLayout ? Theme.highlightColor : Theme.primaryColor
-    readonly property int textAlign: useOutgoingLayout ? Text.AlignRight : Text.AlignLeft
+    readonly property bool barbara: BarbaraTheme.active
+    // Barbara: il testo del messaggio e' sempre in inchiostro del tema — MAI
+    // l'accento, che qui serve solo al nome dell'autore.
+    readonly property color textColor: barbara ? BarbaraTheme.ink
+                                     : (useOutgoingLayout ? Theme.highlightColor : Theme.primaryColor)
+    // ⭐ Barbara: dentro il fumetto il testo e' allineato a SINISTRA anche nei
+    // messaggi propri — cambia solo la posizione della bolla. E' una differenza
+    // voluta rispetto a Silica e Neon, non una svista.
+    readonly property int textAlign: (useOutgoingLayout && !barbara) ? Text.AlignRight : Text.AlignLeft
+    // I METADATI (orario, visualizzazioni) restano invece in fondo a destra dentro
+    // il fumetto, anche in Barbara: e' solo il TESTO a stare sempre a sinistra.
+    readonly property int metaAlign: barbara ? Text.AlignRight : textAlign
     readonly property bool senderIsUser: myMessage.sender_id && myMessage.sender_id["@type"] === "messageSenderUser"
     readonly property var senderUserId: senderIsUser ? myMessage.sender_id.user_id : 0
     readonly property var senderInformation: senderIsUser ? tdLibWrapper.getUserInformation(senderUserId) : ({})
@@ -83,7 +94,8 @@ ListItem {
     // esplicitamente questi tipi: l'eventuale rifiuto (es. troppo vecchio) arriva
     // poi dal server, come già accade per il testo.
     readonly property var editableContentTypes: ["messageText", "messagePhoto",
-        "messageVideo", "messageAnimation", "messageAudio", "messageDocument", "messageVoiceNote"]
+        "messageVideo", "messageAnimation", "messageAudio", "messageDocument", "messageVoiceNote",
+        "messageRichMessage"]
     readonly property bool canEditMessage:
         (typeof myMessage.can_be_edited !== "undefined" && myMessage.can_be_edited === true) ||
         (isOwnMessage &&
@@ -528,8 +540,8 @@ ListItem {
         actions.push({ text: qsTr("Translate message"), visible: hasTranslatableText, callback: function() { messageListItem.translateMessage(); }});
         actions.push({ text: (myMessage && myMessage.is_pinned) ? qsTr("Unpin Message") : qsTr("Pin Message"), visible: canPinMessage, callback: function() { togglePinMessage(); }});
         actions.push({ text: qsTr("Edit Message"), visible: canEditMessage, callback: function() { requestEditMessage(); }});
-        actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, callback: function() { requestDelete(false); }});
-        actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, callback: function() { requestDelete(true); }});
+        actions.push({ text: qsTr("Delete message"), visible: canDeleteMessage, destructive: true, callback: function() { requestDelete(false); }});
+        actions.push({ text: qsTr("Delete album"), visible: canDeleteMessage && isPartOfAlbum, destructive: true, callback: function() { requestDelete(true); }});
         actions.push({ text: qsTr("Select Message"), visible: true, callback: function() { page.toggleMessageSelection(myMessage); }});
         actions.push({ text: qsTr("More Options..."), visible: (numberOfExtraOptionsOtherThanDeleteMessage > 0) || (canDeleteMessage && !haveSpaceForDeleteMessageMenuItem), callback: function() { openAdditionalOptionsDrawer(); }});
         actions.push({ text: qsTr("Message info"), visible: myMessage && myMessage["@type"] !== "sponsoredMessage", callback: function() { showMessageInfo(); }});
@@ -1254,13 +1266,19 @@ ListItem {
                 // (sarebbe 1 passata per messaggio nella lista → pesante su CPU/batteria).
                 property color glassBase: Theme.colorScheme === Theme.LightOnDark ? (isUnread ? Theme.secondaryHighlightColor : Theme.secondaryColor) : (isUnread ? Theme.backgroundGlowColor : Theme.overlayBackgroundColor)
                 // Tema Silica: fumetto più solido, senza bordo neon colorato.
-                color: appSettings.useNeonTheme ? Theme.rgba(glassBase, isUnread ? 0.22 : 0.08)
-                                                : Theme.rgba(glassBase, isUnread ? 0.32 : 0.18)
-                radius: parent.width / 50
+                // Tema Barbara: vetro del TEMA (non dell'ambience), fondo e bordo
+                // diversi fra messaggio proprio e altrui.
+                color: messageListItem.barbara
+                       ? (messageListItem.useOutgoingLayout ? BarbaraTheme.bubbleOwn : BarbaraTheme.bubbleOther)
+                       : (appSettings.useNeonTheme ? Theme.rgba(glassBase, isUnread ? 0.22 : 0.08)
+                                                   : Theme.rgba(glassBase, isUnread ? 0.32 : 0.18))
+                radius: messageListItem.barbara ? BarbaraTheme.radiusBubble : parent.width / 50
                 opacity: 1
-                border.width: appSettings.useNeonTheme ? 2 : 0
+                border.width: appSettings.useNeonTheme ? 2 : (messageListItem.barbara ? BarbaraTheme.borderWidth : 0)
                 // Bordo "vetro" colorato (solo Neon): ROSSO per i propri messaggi, ARANCIONE per gli altrui.
-                border.color: Theme.rgba(messageListItem.isOwnMessage ? "#ff5252" : "#ff8a3d", 0.45)
+                border.color: messageListItem.barbara
+                              ? (messageListItem.useOutgoingLayout ? BarbaraTheme.accentBorder : BarbaraTheme.glassBorder)
+                              : Theme.rgba(messageListItem.isOwnMessage ? "#ff5252" : "#ff8a3d", 0.45)
                 visible: appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji")
                 Behavior on color { ColorAnimation { duration: 200 } }
             }
@@ -1290,7 +1308,9 @@ ListItem {
                                                 : Functions.getUserName(messageListItem.userInformation) ), font.pixelSize)
                     font.pixelSize: Theme.fontSizeExtraSmall
                     font.weight: Font.ExtraBold
-                    color: messageListItem.textColor
+                    // Barbara: l'autore e' l'unico elemento in accento dentro il fumetto.
+                    font.family: messageListItem.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
+                    color: messageListItem.barbara ? BarbaraTheme.accent : messageListItem.textColor
                     maximumLineCount: 1
                     truncationMode: TruncationMode.Elide
                     textFormat: Text.StyledText
@@ -1538,10 +1558,10 @@ ListItem {
                     text: (messageListItem.revealedSpoilersVersion, Emoji.emojify(Functions.getMessageText(myMessage, false, page.myUserId, false, messageListItem.revealedSpoilers), Theme.fontSizeMedium))
                     font.pixelSize: Theme.fontSizeSmall
                     color: messageListItem.textColor
-                    // Link/username adattivi al tema (#8): ROSSO sui temi scuri, BLU
-                    // sui temi chiari (URL e menzioni hanno già il colore inline via
-                    // Functions.messageLinkColor; questo copre mailto/tel/botCommand).
-                    linkColor: Theme.colorScheme === Theme.DarkOnLight ? "#2481cc" : "#ff6e40"
+                    // Ripiego soltanto: il colore vero dei collegamenti e' scritto
+                    // DENTRO l'HTML (Functions.messageLinkColor). Misurato il 19/09:
+                    // un <a> senza stile esce blu puro #0000ff anche con linkColor.
+                    linkColor: Functions.messageLinkColor()
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
                     onLinkActivated: {
@@ -1607,7 +1627,10 @@ ListItem {
                     width: parent.width
                     height: active ? (myMessage.reply_markup.rows.length * (Theme.itemSizeSmall + Theme.paddingSmall) - Theme.paddingSmall) : 0
                     asynchronous: true
-                    active: !!myMessage.reply_markup && myMessage.reply_markup.rows
+                    // solo i pulsanti INLINE: la tastiera personalizzata del bot
+                    // (replyMarkupShowKeyboard) e' della chat e sta sopra il composer
+                    active: !!myMessage.reply_markup && myMessage.reply_markup["@type"] === "replyMarkupInlineKeyboard"
+                            && !!myMessage.reply_markup.rows
                     source: Qt.resolvedUrl("ReplyMarkupButtons.qml")
                 }
 
@@ -1632,8 +1655,10 @@ ListItem {
 
                     id: messageDateText
                     font.pixelSize: Theme.fontSizeTiny
-                    color: messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor
-                    horizontalAlignment: messageListItem.textAlign
+                    font.family: messageListItem.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
+                    color: messageListItem.barbara ? BarbaraTheme.inkSecondary
+                         : (messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+                    horizontalAlignment: messageListItem.metaAlign
                     text: getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed)
                 }
 
@@ -1649,8 +1674,9 @@ ListItem {
                             text: getInteractionText(messageViewCount, reactions, font.pixelSize, Theme.highlightColor)
                             width: parent.width
                             font.pixelSize: Theme.fontSizeTiny
-                            color: messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor
-                            horizontalAlignment: messageListItem.textAlign
+                            color: messageListItem.barbara ? BarbaraTheme.inkSecondary
+                                 : (messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+                            horizontalAlignment: messageListItem.metaAlign
                             textFormat: Text.StyledText
                             maximumLineCount: 1
                             elide: Text.ElideRight

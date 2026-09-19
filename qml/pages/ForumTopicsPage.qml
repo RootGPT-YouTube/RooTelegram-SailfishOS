@@ -407,6 +407,31 @@ Page {
         })
     }
 
+    // Segna letto un topic INTERO dalla lista, senza doverlo aprire e scorrere
+    // (il General di un forum molto attivo puo' avere migliaia di messaggi
+    // arretrati). La richiesta la fa il C++; qui azzeriamo subito i contatori del
+    // modello per dare riscontro immediato, e ricalcoliamo il badge del gruppo in
+    // home. I valori autorevoli arrivano poi con updateForumTopic.
+    function markTopicAsRead(rowIndex, topicId, lastMessageId) {
+        if (!chatInformation || !topicId || !lastMessageId) {
+            return
+        }
+        tdLibWrapper.markForumTopicAsRead(chatInformation.id, topicId, lastMessageId)
+        if (rowIndex >= 0 && rowIndex < topicsModel.count) {
+            topicsModel.setProperty(rowIndex, "unreadCount", 0)
+            topicsModel.setProperty(rowIndex, "unreadMentionCount", 0)
+            topicsModel.setProperty(rowIndex, "lastReadInboxMessageId", lastMessageId)
+        }
+        var liveUnread = 0
+        var liveMentions = 0
+        for (var k = 0; k < topicsModel.count; k++) {
+            var tk = topicsModel.get(k)
+            liveUnread += Number(tk.unreadCount || 0)
+            liveMentions += Number(tk.unreadMentionCount || 0)
+        }
+        chatListModel.setForumUnreadCount(chatInformation.id, liveUnread, liveMentions)
+    }
+
     function toggleTopicClosed(threadId, shouldBeClosed) {
         if (!canManageTopics() || actionBusy) {
             return
@@ -616,10 +641,17 @@ Page {
             for (var i = 0; i < topicsModel.count; i++) {
                 var t = topicsModel.get(i)
                 if (t.threadId === threadId || t.forumTopicId === threadId) {
+                    // Rileggiamo il topic solo se la lettura e' davvero avanzata: la risposta
+                    // a getForumTopic fa arrivare un altro updateForumTopic identico, e
+                    // rileggere sempre creava un ciclo continuo (~4 richieste/s sul General di LIG).
+                    var readChanged = Number(t.lastReadInboxMessageId || 0) !== Number(lastReadInboxMessageId || 0)
+                                   || Number(t.unreadMentionCount || 0) !== Number(unreadMentionCount || 0)
                     topicsModel.setProperty(i, "lastReadInboxMessageId", lastReadInboxMessageId)
                     topicsModel.setProperty(i, "lastReadOutboxMessageId", lastReadOutboxMessageId)
                     topicsModel.setProperty(i, "unreadMentionCount", unreadMentionCount)
-                    lookupTopicId = Number(t.forumTopicId || t.threadId || 0)
+                    if (readChanged) {
+                        lookupTopicId = Number(t.forumTopicId || t.threadId || 0)
+                    }
                     var anchorMessageId = Number(t.anchorMsgId || 0)
                     if (anchorMessageId > 0 && Number(lastReadInboxMessageId || 0) >= anchorMessageId) {
                         topicsModel.setProperty(i, "unreadCount", 0)
@@ -1062,13 +1094,28 @@ Page {
 
             openMenuOnPressAndHold: false
             onPressAndHold: {
-                if (forumTopicsPage.canManageTopics()) {
-                    topicsNeonMenu.open(buildTopicActions());
+                // Il menu si apre per CHIUNQUE, non piu' solo per chi amministra: la
+                // voce "segna come letto" serve a tutti. Se pero' nessuna voce e'
+                // applicabile (non amministri e il topic e' gia' letto) non ha senso
+                // mostrare una card vuota.
+                var actions = buildTopicActions();
+                var visibleCount = 0;
+                for (var i = 0; i < actions.length; i++) {
+                    if (actions[i].visible !== false) visibleCount++;
+                }
+                if (visibleCount > 0) {
+                    topicsNeonMenu.open(actions);
                 }
             }
             function buildTopicActions() {
                 var topicId = topicDelegate.topicForumId > 0 ? topicDelegate.topicForumId : topicDelegate.topicThreadId;
+                var lastMsgId = Number(anchorMsgId) || 0;
+                var hasUnread = Number(unreadCount || 0) > 0 || Number(unreadMentionCount || 0) > 0;
                 return [
+                    //: Voce del menu a pressione prolungata su un topic di un forum
+                    { text: qsTr("Mark topic as read"), visible: hasUnread && topicId > 0 && lastMsgId > 0, callback: function() {
+                        forumTopicsPage.markTopicAsRead(index, topicId, lastMsgId);
+                    }},
                     { text: qsTr("Rename topic"), visible: forumTopicsPage.canManageTopics(), callback: function() {
                         forumTopicsPage.openRenameTopicEditor(topicId, topicName);
                     }},

@@ -520,6 +520,21 @@
     </message>
 </context>
 <context>
+    <name>BarbaraFilterBand</name>
+    <message>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation>Gruppen</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation>Kanäle</translation>
+    </message>
+</context>
+<context>
     <name>BlacklistPage</name>
     <message>
         <source>Refresh</source>
@@ -1749,6 +1764,10 @@ Du kannst sie aus deiner Liste entfernen. Diese Entfernung ist nur lokal: Sie l�
         <source>No GIFs found</source>
         <translation>Keine GIFs gefunden</translation>
     </message>
+    <message>
+        <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
+        <translation>Dieser Artikel enthält Elemente, die der Editor noch nicht beibehalten kann (%1): Beim Bearbeiten würden sie entfernt.</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -2244,6 +2263,11 @@ Nachrichten</numerusform>
     <message>
         <source>Close topic</source>
         <translation>Thema schließen</translation>
+    </message>
+    <message>
+        <source>Mark topic as read</source>
+        <extracomment>Voce del menu a pressione prolungata su un topic di un forum</extracomment>
+        <translation>Thema als gelesen markieren</translation>
     </message>
     <message>
         <source>Delete topic</source>
@@ -2866,6 +2890,14 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>NeonMenuOverlay</name>
+    <message>
+        <source>Actions</source>
+        <extracomment>Intestazione della card del menu di scelta rapida (tema Barbara)</extracomment>
+        <translation>Aktionen</translation>
+    </message>
+</context>
+<context>
     <name>NewChatPage</name>
     <message>
         <source>Your Contacts</source>
@@ -3079,6 +3111,21 @@ Nachrichten</numerusform>
     <message>
         <source>Starting RooTelegram...</source>
         <translation>RooTelegram wird gestartet...</translation>
+    </message>
+    <message numerus="yes">
+        <source>%Ln unread</source>
+        <translation>
+            <numerusform>%Ln ungelesen</numerusform>
+            <numerusform>%Ln ungelesen</numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PhotoTextsListItem</name>
+    <message>
+        <source>PIN</source>
+        <extracomment>Etichetta breve sulle chat fissate in cima (tema Barbara)</extracomment>
+        <translation>PIN</translation>
     </message>
 </context>
 <context>
@@ -3496,6 +3543,65 @@ Nachrichten</numerusform>
     <message>
         <source>Unknown</source>
         <translation>Unbekannt</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageComposerPage</name>
+    <message>
+        <source>Title</source>
+        <translation>Titel</translation>
+    </message>
+    <message>
+        <source>Subtitle</source>
+        <translation>Untertitel</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Liste</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>The article is empty.</source>
+        <translation>Der Artikel ist leer.</translation>
+    </message>
+    <message>
+        <source>The article is too long: %1 characters, the maximum is %2.</source>
+        <translation>Der Artikel ist zu lang: %1 Zeichen, das Maximum ist %2.</translation>
+    </message>
+    <message>
+        <source>An article can contain at most %1 media.</source>
+        <translation>Ein Artikel kann höchstens %1 Medien enthalten.</translation>
+    </message>
+    <message>
+        <source>New article</source>
+        <translation>Neuer Artikel</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Der Bildzugriff ist in den RooTelegram-Einstellungen ausgeschaltet.</translation>
+    </message>
+    <message>
+        <source>List: one item per line</source>
+        <translation>Liste: ein Eintrag pro Zeile</translation>
+    </message>
+    <message>
+        <source>Caption (optional)</source>
+        <translation>Bildunterschrift (optional)</translation>
+    </message>
+    <message>
+        <source>Paragraph</source>
+        <translation>Absatz</translation>
+    </message>
+    <message>
+        <source>Edit article</source>
+        <translation>Artikel bearbeiten</translation>
+    </message>
+    <message>
+        <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
+        <translation>Einige Elemente dieses Artikels (benutzerdefinierte Emojis, hervorgehobener Text, Trennlinien...) gehen beim Speichern verloren.</translation>
     </message>
 </context>
 <context>
@@ -4188,12 +4294,16 @@ Nachrichten</numerusform>
         <translation>RooTelegrams Thema wählen</translation>
     </message>
     <message>
-        <source>Silica (base theme)</source>
-        <translation>Silica (Basisthema)</translation>
+        <source>Cold glass and cyan, readable with both light and dark ambiences</source>
+        <translation>Kaltes Glas und Cyan, lesbar mit hellen wie dunklen Ambiences</translation>
     </message>
     <message>
-        <source>Neon (cyberpunk)</source>
-        <translation>Neon (Cyberpunk)</translation>
+        <source>Glow on titles</source>
+        <translation>Leuchten auf Titeln</translation>
+    </message>
+    <message>
+        <source>Barbara theme only, and only with a dark ambience</source>
+        <translation>Nur im Barbara-Thema und nur mit dunklem Ambiente</translation>
     </message>
 </context>
 <context>
@@ -5214,6 +5324,18 @@ Nachrichten</numerusform>
     <message>
         <source>Apply this theme now?</source>
         <translation>Dieses Thema jetzt anwenden?</translation>
+    </message>
+    <message>
+        <source>Barbara theme</source>
+        <translation>Barbara-Thema</translation>
+    </message>
+    <message>
+        <source>Cold glass, cyan and night</source>
+        <translation>Kaltes Glas, Cyan und Nacht</translation>
+    </message>
+    <message>
+        <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Chat-Zeilen als Glaskarten, kursive Serifentitel, Metadaten in Monospace, Typfilter und Ordner als Chips. Es bringt eigene helle und dunkle Paletten mit und bleibt daher bei jedem System-Ambiente lesbar.</translation>
     </message>
 </context>
 <context>

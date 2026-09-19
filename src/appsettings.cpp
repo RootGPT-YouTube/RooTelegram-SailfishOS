@@ -51,6 +51,8 @@ namespace {
     const QString KEY_STORY_POST_TO_PROFILE("storyPostToProfile");
     const QString KEY_STORY_PRIVACY_MODE("storyPrivacyMode");
     const QString KEY_USE_NEON_THEME("useNeonTheme");
+    const QString KEY_APP_THEME("appTheme");
+    const QString KEY_BARBARA_GLOW_TITLES("barbaraGlowTitles");
     const QString KEY_KEEP_CURRENT_CHAT_ON_MINIMIZE("keepCurrentChatOnMinimize");
     const QString KEY_PERMISSION_PREFIX("permissions/");
     const QString KEY_LAST_SEEN_VERSION("lastSeenVersion");
@@ -108,19 +110,73 @@ void AppSettings::setUseOpenWith(bool useOpenWith)
     }
 }
 
-// Tema Neon (cyberpunk) vs Silica nativo. Default false = Silica: look leggero,
-// niente sfondo circuiti né override neon (guadagno prestazioni su device scarsi).
+// Tema dell'app: 0 = Silica nativo (look leggero, niente sfondo circuiti né
+// override), 1 = Neon (cyberpunk), 2 = Barbara (vetro ciano, palette propria
+// chiara/scura — il DEFAULT per chi non ha mai scelto).
+//
+// Migrazione: chi arriva da una versione a booleano non ha la chiave `appTheme`;
+// in quel caso il valore si deduce dal vecchio `useNeonTheme`, se c'e' (una scelta
+// esplicita fra Silica e Neon va rispettata). Solo chi non ha NESSUNA delle due
+// chiavi — installazione nuova, o tema mai toccato — riceve il default. La chiave
+// legacy resta scritta, così un downgrade non perde la scelta fra Silica e Neon.
+int AppSettings::appTheme() const
+{
+    if (settings.contains(KEY_APP_THEME)) {
+        const int stored = settings.value(KEY_APP_THEME, (int) AppSettings::ThemeBarbara).toInt();
+        if (stored >= AppSettings::ThemeSilica && stored <= AppSettings::ThemeBarbara) {
+            return stored;
+        }
+        return AppSettings::ThemeBarbara;
+    }
+    if (settings.contains(KEY_USE_NEON_THEME)) {
+        return settings.value(KEY_USE_NEON_THEME, false).toBool()
+                ? (int) AppSettings::ThemeNeon
+                : (int) AppSettings::ThemeSilica;
+    }
+    return AppSettings::ThemeBarbara;
+}
+
+void AppSettings::setAppTheme(int appTheme)
+{
+    const int wanted = (appTheme >= AppSettings::ThemeSilica && appTheme <= AppSettings::ThemeBarbara)
+            ? appTheme : (int) AppSettings::ThemeBarbara;
+    if (this->appTheme() == wanted) {
+        return;
+    }
+    const bool neonBefore = useNeonTheme();
+    LOG(KEY_APP_THEME << wanted);
+    settings.setValue(KEY_APP_THEME, wanted);
+    // Alias legacy tenuto allineato: i componenti non ancora migrati leggono questo.
+    settings.setValue(KEY_USE_NEON_THEME, wanted == AppSettings::ThemeNeon);
+    emit appThemeChanged();
+    if (neonBefore != (wanted == AppSettings::ThemeNeon)) {
+        emit useNeonThemeChanged();
+    }
+}
+
+// Alias di compatibilità: vero SOLO sul tema Neon.
 bool AppSettings::useNeonTheme() const
 {
-    return settings.value(KEY_USE_NEON_THEME, false).toBool();
+    return appTheme() == AppSettings::ThemeNeon;
 }
 
 void AppSettings::setUseNeonTheme(bool useNeonTheme)
 {
-    if (this->useNeonTheme() != useNeonTheme) {
-        LOG(KEY_USE_NEON_THEME << useNeonTheme);
-        settings.setValue(KEY_USE_NEON_THEME, useNeonTheme);
-        emit useNeonThemeChanged();
+    setAppTheme(useNeonTheme ? (int) AppSettings::ThemeNeon : (int) AppSettings::ThemeSilica);
+}
+
+// Barbara: alone sui titoli (solo con ambience scura). Default acceso.
+bool AppSettings::barbaraGlowTitles() const
+{
+    return settings.value(KEY_BARBARA_GLOW_TITLES, true).toBool();
+}
+
+void AppSettings::setBarbaraGlowTitles(bool enable)
+{
+    if (barbaraGlowTitles() != enable) {
+        LOG(KEY_BARBARA_GLOW_TITLES << enable);
+        settings.setValue(KEY_BARBARA_GLOW_TITLES, enable);
+        emit barbaraGlowTitlesChanged();
     }
 }
 

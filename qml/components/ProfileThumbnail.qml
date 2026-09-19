@@ -25,6 +25,7 @@ import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "."
 
 Item {
     id: profileThumbnail
@@ -33,7 +34,9 @@ Item {
     property string replacementStringHint: "X"
     // 2.0 abbellimento (#3): angoli stondati (rounded-square) nel tema Neon.
     // Tema Silica: avatar quadrati (look base, più leggero).
-    property int radius: appSettings.useNeonTheme ? Math.round(width * 0.3) : 0
+    // Tema Barbara: rounded-square anche qui (mockup: 42x42 con raggio 13).
+    property int radius: (appSettings.useNeonTheme || BarbaraTheme.active)
+                         ? Math.round(width * 0.3) : 0
     property int imageStatus: -1
     property bool optimizeImageSize: true
     property bool highlighted

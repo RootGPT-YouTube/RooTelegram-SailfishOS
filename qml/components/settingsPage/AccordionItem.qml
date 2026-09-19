@@ -20,6 +20,7 @@
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
+import ".."
 
 Item {
     id: area
@@ -31,6 +32,8 @@ Item {
     property bool expanded: false
     // Tema Neon (card di vetro) vs Silica (header piatto nativo).
     readonly property bool neon: appSettings.useNeonTheme
+    // Tema Barbara: header a card col titolo in corsivo serif e l'indicatore −/+.
+    readonly property bool barbara: BarbaraTheme.active
     default property alias els: content.sourceComponent
     states: [
         State {
@@ -73,11 +76,16 @@ Item {
             anchors.topMargin: Theme.paddingSmall / 2
             anchors.bottomMargin: Theme.paddingSmall / 2
             // Tema Silica: nessuna card di vetro (trasparente, piatta).
-            radius: area.neon ? Theme.paddingLarge : 0
+            radius: area.neon ? Theme.paddingLarge
+                  : (area.barbara ? BarbaraTheme.radiusBubble : 0)
             color: area.neon ? Theme.rgba("#ffffff", (button.highlighted || area.expanded) ? 0.14 : 0.06)
-                             : (button.highlighted ? Theme.rgba(Theme.highlightColor, 0.1) : "transparent")
-            border.width: area.neon ? 2 : 0
-            border.color: Theme.rgba("#ff8a3d", (button.highlighted || area.expanded) ? 0.80 : 0.45)
+                 : area.barbara ? ((button.highlighted || area.expanded) ? BarbaraTheme.accentWash : BarbaraTheme.glass)
+                                : (button.highlighted ? Theme.rgba(Theme.highlightColor, 0.1) : "transparent")
+            border.width: area.neon ? 2 : (area.barbara ? BarbaraTheme.borderWidth : 0)
+            border.color: area.barbara
+                          ? ((button.highlighted || area.expanded)
+                             ? Theme.rgba(BarbaraTheme.accent, 0.55) : BarbaraTheme.glassBorder)
+                          : Theme.rgba("#ff8a3d", (button.highlighted || area.expanded) ? 0.80 : 0.45)
             Behavior on color { ColorAnimation { duration: 150 } }
             Behavior on border.color { ColorAnimation { duration: 150 } }
         }
@@ -118,12 +126,29 @@ Item {
                 rightMargin: Theme.paddingLarge
             }
             // Tema Silica: header allineato a sinistra, colore highlight, non corsivo.
+            // Tema Barbara: titolo in corsivo serif a sinistra, inchiostro del tema.
             horizontalAlignment: area.neon ? Text.AlignHCenter : Text.AlignLeft
             truncationMode: TruncationMode.Fade
-            font.family: area.neon ? Theme.fontFamilyHeading : Theme.fontFamily
-            font.italic: area.neon
-            color: area.neon ? "#ffffff" : ((button.highlighted || area.expanded) ? Theme.highlightColor : Theme.primaryColor)
+            font.family: (area.neon || area.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
+            font.italic: area.neon || area.barbara
+            color: area.neon ? "#ffffff"
+                 : area.barbara ? BarbaraTheme.ink
+                                : ((button.highlighted || area.expanded) ? Theme.highlightColor : Theme.primaryColor)
             textFormat: Text.PlainText
+        }
+
+        // Barbara: indicatore aperto/chiuso in mono (−/+), al posto della freccia.
+        Label {
+            visible: area.barbara
+            anchors {
+                right: glassCard.right
+                rightMargin: Theme.paddingLarge
+                verticalCenter: glassCard.verticalCenter
+            }
+            text: area.expanded ? "\u2212" : "+"
+            font.family: BarbaraTheme.fontFamilyMono
+            font.pixelSize: Theme.fontSizeSmall
+            color: BarbaraTheme.accent
         }
         // Freccia rimossa dall'UI (id mantenuto per alias `icon` e stato expanded).
         HighlightImage {

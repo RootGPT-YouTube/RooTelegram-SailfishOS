@@ -21,12 +21,16 @@
 import QtQuick 2.6
 import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
+import "."
 
 PageHeader {
     id: neonHeader
     property string text: ""
     property string description: ""
     readonly property bool neon: appSettings.useNeonTheme
+    // Barbara: stesso corsivo serif del Neon, ma inchiostro del tema e alone solo
+    // con ambience scura.
+    readonly property bool barbara: BarbaraTheme.active
 
     title: ""
     height: Theme.itemSizeLarge
@@ -64,17 +68,19 @@ PageHeader {
         text: neonHeader.text
         textFormat: Text.StyledText
         font.pixelSize: Theme.fontSizeLarge
-        font.family: neonHeader.neon ? Theme.fontFamilyHeading : Theme.fontFamily
-        font.italic: neonHeader.neon
+        font.family: (neonHeader.neon || neonHeader.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
+        font.italic: neonHeader.neon || neonHeader.barbara
         truncationMode: TruncationMode.Elide
         maximumLineCount: 1
-        color: neonHeader.neon ? "#fff3e6" : Theme.highlightColor
-        layer.enabled: neonHeader.neon
+        color: neonHeader.barbara ? BarbaraTheme.ink
+             : (neonHeader.neon ? "#fff3e6" : Theme.highlightColor)
+        // Alone: Neon sempre, Barbara solo su ambience scura, Silica mai.
+        layer.enabled: neonHeader.neon || (neonHeader.barbara && BarbaraTheme.glowTitles)
         layer.effect: Glow {
-            color: "#ff9a3d"
-            radius: 6
-            samples: 13
-            spread: 0.55
+            color: neonHeader.barbara ? BarbaraTheme.accent : "#ff9a3d"
+            radius: neonHeader.barbara ? BarbaraTheme.glowRadius : 6
+            samples: neonHeader.barbara ? BarbaraTheme.glowSamples : 13
+            spread: neonHeader.barbara ? BarbaraTheme.glowSpread : 0.55
             transparentBorder: true
         }
     }
@@ -84,7 +90,9 @@ PageHeader {
         anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin; top: parent.verticalCenter; topMargin: Theme.paddingSmall / 2 }
         horizontalAlignment: Text.AlignRight
         text: neonHeader.description
+        // Barbara: i sottotitoli sono metadati → monospace, inchiostro secondario.
+        font.family: neonHeader.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
         font.pixelSize: Theme.fontSizeSmall
-        color: Theme.secondaryColor
+        color: neonHeader.barbara ? BarbaraTheme.inkSecondary : Theme.secondaryColor
     }
 }

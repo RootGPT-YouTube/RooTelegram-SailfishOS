@@ -15,13 +15,17 @@
 
 import QtQuick 2.6
 import Sailfish.Silica 1.0
+import WerkWolf.RooTelegram 1.0
 
 Dialog {
     id: themeDialog
     allowedOrientations: Orientation.All
 
-    // true = Neon (cyberpunk), false = Silica (base).
-    property bool wantNeon: false
+    // Tema richiesto: AppSettings.ThemeSilica / ThemeNeon / ThemeBarbara.
+    property int wantTheme: AppSettings.ThemeSilica
+
+    readonly property bool wantNeon: wantTheme === AppSettings.ThemeNeon
+    readonly property bool wantBarbara: wantTheme === AppSettings.ThemeBarbara
 
     Column {
         width: parent.width
@@ -30,7 +34,8 @@ Dialog {
         DialogHeader {
             acceptText: qsTr("Apply now")
             cancelText: qsTr("No")
-            title: themeDialog.wantNeon ? qsTr("Neon theme") : qsTr("Silica theme")
+            title: themeDialog.wantBarbara ? qsTr("Barbara theme")
+                 : (themeDialog.wantNeon ? qsTr("Neon theme") : qsTr("Silica theme"))
         }
 
         Label {
@@ -39,9 +44,9 @@ Dialog {
             wrapMode: Text.WordWrap
             color: Theme.highlightColor
             font.pixelSize: Theme.fontSizeMedium
-            text: themeDialog.wantNeon
-                ? qsTr("Cyberpunk look")
-                : qsTr("Base theme")
+            text: themeDialog.wantBarbara
+                ? qsTr("Cold glass, cyan and night")
+                : (themeDialog.wantNeon ? qsTr("Cyberpunk look") : qsTr("Base theme"))
         }
 
         Label {
@@ -50,9 +55,11 @@ Dialog {
             wrapMode: Text.WordWrap
             color: Theme.secondaryColor
             font.pixelSize: Theme.fontSizeSmall
-            text: themeDialog.wantNeon
-                ? qsTr("Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.")
-                : qsTr("Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes.")
+            text: themeDialog.wantBarbara
+                ? qsTr("Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.")
+                : (themeDialog.wantNeon
+                   ? qsTr("Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.")
+                   : qsTr("Native flat menus, square avatars, no custom background, standard Silica colors. Lighter and clearly readable also on light system themes."))
         }
 
         Label {

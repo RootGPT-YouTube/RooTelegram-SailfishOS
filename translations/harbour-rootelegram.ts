@@ -520,6 +520,21 @@
     </message>
 </context>
 <context>
+    <name>BarbaraFilterBand</name>
+    <message>
+        <source>All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="unfinished">Groups</translation>
+    </message>
+    <message>
+        <source>Channels</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>BlacklistPage</name>
     <message>
         <source>Refresh</source>
@@ -1064,7 +1079,7 @@
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Image access is turned off in RooTelegram settings.</translation>
     </message>
     <message>
         <source>Removed/Banned Users</source>
@@ -1699,7 +1714,7 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Image access is turned off in RooTelegram settings.</translation>
     </message>
     <message>
         <source>Video access is turned off in RooTelegram settings.</source>
@@ -1744,6 +1759,10 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>No GIFs found</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
+        <translation>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</translation>
     </message>
 </context>
 <context>
@@ -2253,6 +2272,11 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>You don&apos;t have permission to create topics.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mark topic as read</source>
+        <extracomment>Voce del menu a pressione prolungata su un topic di un forum</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2860,6 +2884,14 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
 </context>
 <context>
+    <name>NeonMenuOverlay</name>
+    <message>
+        <source>Actions</source>
+        <extracomment>Intestazione della card del menu di scelta rapida (tema Barbara)</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>NewChatPage</name>
     <message>
         <source>Your Contacts</source>
@@ -3072,6 +3104,21 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Starting RooTelegram...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>%Ln unread</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+</context>
+<context>
+    <name>PhotoTextsListItem</name>
+    <message>
+        <source>PIN</source>
+        <extracomment>Etichetta breve sulle chat fissate in cima (tema Barbara)</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3490,6 +3537,65 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>Unknown</source>
         <translation type="unfinished">Unknown</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageComposerPage</name>
+    <message>
+        <source>Title</source>
+        <translation>Title</translation>
+    </message>
+    <message>
+        <source>Subtitle</source>
+        <translation>Subtitle</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>List</translation>
+    </message>
+    <message>
+        <source>Text</source>
+        <translation>Text</translation>
+    </message>
+    <message>
+        <source>The article is empty.</source>
+        <translation>The article is empty.</translation>
+    </message>
+    <message>
+        <source>The article is too long: %1 characters, the maximum is %2.</source>
+        <translation>The article is too long: %1 characters, the maximum is %2.</translation>
+    </message>
+    <message>
+        <source>An article can contain at most %1 media.</source>
+        <translation>An article can contain at most %1 media.</translation>
+    </message>
+    <message>
+        <source>New article</source>
+        <translation>New article</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Image access is turned off in RooTelegram settings.</translation>
+    </message>
+    <message>
+        <source>List: one item per line</source>
+        <translation>List: one item per line</translation>
+    </message>
+    <message>
+        <source>Caption (optional)</source>
+        <translation>Caption (optional)</translation>
+    </message>
+    <message>
+        <source>Paragraph</source>
+        <translation>Paragraph</translation>
+    </message>
+    <message>
+        <source>Edit article</source>
+        <translation>Edit article</translation>
+    </message>
+    <message>
+        <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
+        <translation>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</translation>
     </message>
 </context>
 <context>
@@ -4182,11 +4288,15 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Silica (base theme)</source>
+        <source>Cold glass and cyan, readable with both light and dark ambiences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Neon (cyberpunk)</source>
+        <source>Glow on titles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Barbara theme only, and only with a dark ambience</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5045,7 +5155,7 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Image access is turned off in RooTelegram settings.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Image access is turned off in RooTelegram settings.</translation>
     </message>
     <message>
         <source>Video access is turned off in RooTelegram settings.</source>
@@ -5207,6 +5317,18 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Apply this theme now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Barbara theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cold glass, cyan and night</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -39,9 +39,13 @@ Page {
 
     // Tema Neon (cyberpunk) vs Silica base. In Silica niente glow/corsivo/sfondo neon.
     readonly property bool neon: appSettings.useNeonTheme
+    // Tema Barbara (vetro ciano, palette propria chiara/scura). Vedi BarbaraTheme.qml.
+    readonly property bool barbara: BarbaraTheme.active
 
     // Sfondo a circuiti elettrici blu (#19), tenue, dietro la conversazione.
     CircuitBackground {}
+    // Sfondo del tema Barbara: superficie propria + reticolo tenue.
+    BarbaraBackground {}
 
     // Misura REALE dell'altezza di riga del testo extra-small: serve a dimensionare
     // il chip "in risposta a" (nome + anteprima = 2 righe) senza tagliarne il fondo.
@@ -660,7 +664,12 @@ Page {
     }
 
     function controlSendButton() {
-        var hasContent = composerText().length !== 0
+        // ⭐ composerLiveText(), NON composerText(): finche' la parola e' in
+        // COMPOSIZIONE nell'IME non sta nel documento, e il tasto si credeva vuoto
+        // (opacita' 0.4 e primo tocco ignorato). Difetto riscontrato il 2026-09-17:
+        // per inviare UNA parola sola servivano due tocchi — il primo chiudeva la
+        // tastiera, confermando la composizione, e solo allora il tasto si accendeva.
+        var hasContent = composerLiveText().length !== 0
                 || attachmentPreviewRow.isPicture
                 || attachmentPreviewRow.isDocument
                 || attachmentPreviewRow.isVideo
@@ -676,6 +685,16 @@ Page {
     }
 
     function sendMessage(sendDate) {
+        // ⛔ PRIMA DI TUTTO: conferma la parola ancora in COMPOSIZIONE nell'IME.
+        // composerText() legge il DOCUMENTO, e durante la digitazione le lettere
+        // non ci sono ancora (vedi il commento di composerLiveText()). Senza questa
+        // riga si invia solo cio' che era gia' confermato e il resto RESTA nel
+        // composer: difetto reale riscontrato il 2026-09-17 — "yrs" corretto in
+        // "yes" partiva come "y", con "es" rimasta nel campo; premere spazio prima
+        // dell'invio lo mascherava, perche' lo spazio conferma la composizione.
+        if (Qt.inputMethod) {
+            Qt.inputMethod.commit();
+        }
         // La posizione è ancora in fase di rilevamento: non c'è un fix da inviare
         // (locationData null → invio fallirebbe). Avvisa e attendi il fix.
         if (attachmentPreviewRow.isLocation && !attachmentPreviewRow.locationData) {
@@ -920,13 +939,30 @@ Page {
     // composizione. Durante la digitazione con l'IME le lettere non sono ancora nel
     // documento, quindi chi deve reagire LIVE (@menzioni, "sta scrivendo", sostituzione
     // testo) deve chiedere questo, non composerText().
+    // ⛔ onTextChanged NON scatta durante la composizione IME: il preedit non entra
+    // nel documento, quindi controlSendButton() non veniva piu' richiamata finche'
+    // la parola non era confermata. Qt 5.6 non espone `preeditText` e
+    // composerFormatter non emette segnali, ma il RETTANGOLO DEL CURSORE si sposta
+    // a ogni lettera composta: e' quello il segnale che si puo' ascoltare da QML.
+    Connections {
+        target: Qt.inputMethod
+        onCursorRectangleChanged: {
+            if (newMessageTextField && newMessageTextField.activeFocus) {
+                chatPage.controlSendButton();
+                chatPage.refreshComposerState();
+            }
+        }
+    }
+
     function composerLiveText() {
         var editor = composerEditor();
         return editor ? composerFormatter.liveText(editor) : (newMessageTextField.text || "");
     }
 
     function refreshComposerState() {
-        chatPage.composerIsEmpty = (composerText() === "");
+        // Anche qui conta cio' che si VEDE: con una parola in composizione il
+        // composer non e' vuoto, quindi microfono e posizione devono sparire.
+        chatPage.composerIsEmpty = (composerLiveText() === "");
     }
 
     function replaceMessageText(text, cursorPosition, newText) {
@@ -1118,6 +1154,22 @@ Page {
     }
 
     function beginMessageEdit(messageId, message) {
+        // Un articolo si modifica nel suo editor, non nella barra di scrittura
+        if (message && message.content && message.content["@type"] === "messageRichMessage") {
+            var article = Functions.richMessageToComposerBlocks(message.content);
+            if (article.unsupported.length > 0) {
+                appNotification.show(qsTr("This article contains elements the editor cannot keep yet (%1): editing it would remove them.").arg(article.unsupported.join(", ")));
+                return;
+            }
+            pageStack.push(Qt.resolvedUrl("../pages/RichMessageComposerPage.qml"), {
+                "chatId": chatInformation.id,
+                "chatTitle": chatInformation.title,
+                "editMessageId": String(messageId),
+                "initialBlocks": article.blocks,
+                "lossyFormatting": article.lossy
+            });
+            return;
+        }
         newMessageColumn.editMessageId = messageId;
         // I media con didascalia (foto/video/animazione/audio/documento/vocale)
         // si modificano via editMessageCaption: editMessageText fallirebbe.
@@ -1376,6 +1428,24 @@ Page {
         newMessageTextField.focus = true;
         controlSendButton();
         lostFocusTimer.start();
+    }
+
+    // Tastiera personalizzata del bot (replyMarkupShowKeyboard): e' della CHAT, non di
+    // un messaggio. Il messaggio che la porta arriva da chat.reply_markup_message_id
+    // all'apertura e da updateChatReplyMarkup dopo; null = nessuna tastiera.
+    property var botKeyboardMessage: null
+    property bool botKeyboardHidden: false
+    readonly property bool hasBotKeyboard: !!(botKeyboardMessage && botKeyboardMessage.reply_markup
+                                              && botKeyboardMessage.reply_markup["@type"] === "replyMarkupShowKeyboard")
+
+    function sendBotKeyboardText(text) {
+        var markup = botKeyboardMessage.reply_markup;
+        // nei gruppi una tastiera «personale» si usa rispondendo al messaggio che la porta
+        var replyTo = (!chatPage.isPrivateChat && markup.is_personal) ? botKeyboardMessage.id : "0";
+        tdLibWrapper.sendTextMessage(chatInformation.id, text, replyTo);
+        if (markup.one_time) {
+            botKeyboardHidden = true;
+        }
     }
 
     function setMessageText(text, doSend) {
@@ -1835,9 +1905,14 @@ Page {
             // live location è ancora in attesa del primo fix (gestita headless dal C++).
             chatPage.liveLocationWaitingFix = liveLocationManager.isPending(chatInformation.id);
             if(!chatPage.isInitialized) {
+                var keyboardMessageId = chatInformation.reply_markup_message_id;
+                if (keyboardMessageId && String(keyboardMessageId) !== "0") {
+                    tdLibWrapper.getMessage(chatInformation.id, keyboardMessageId);
+                }
                 if(chatInformation.draft_message) {
-                    if(chatInformation.draft_message && chatInformation.draft_message.input_message_text) {
-                        setComposerText(chatInformation.draft_message.input_message_text.text.text);
+                    var draftContent = chatInformation.draft_message.content;
+                    if (draftContent && draftContent['@type'] === "draftMessageContentText" && draftContent.text) {
+                        setComposerText(draftContent.text.text);
                         if(chatInformation.draft_message.reply_to_message_id) {
                             tdLibWrapper.getMessage(chatInformation.id, chatInformation.draft_message.reply_to_message_id);
                         }
@@ -1980,7 +2055,20 @@ Page {
             // da onChatPendingJoinRequestsUpdated, che il wrapper C++
             // emette anche dopo un reject (TDLib non lo invia da solo).
         }
+        onChatReplyMarkupUpdated: {
+            if (String(chatId) !== String(chatInformation.id)) {
+                return;
+            }
+            // tastiera nuova (o cambiata): si mostra; nessun messaggio = tastiera tolta
+            chatPage.botKeyboardMessage = (replyMarkupMessage && replyMarkupMessage.id) ? replyMarkupMessage : null;
+            chatPage.botKeyboardHidden = false;
+        }
         onReceivedMessage: {
+            if (message && String(chatId) === String(chatInformation.id)
+                    && String(messageId) === String(chatInformation.reply_markup_message_id || "0")
+                    && !chatPage.botKeyboardMessage) {
+                chatPage.botKeyboardMessage = message;
+            }
             if (message && (message.is_pinned || pinnedMessageListContains(message.id))) {
                 schedulePinnedMessagesRefresh();
             }
@@ -2233,7 +2321,20 @@ Page {
             if (messageToRead['@type'] === "sponsoredMessage") {
                 Debug.log("sponsored message to read: ", messageToRead.id);
                 tdLibWrapper.viewMessage(chatInformation.id, messageToRead.message_id, false);
-            } else {
+                // Nei canali i sponsorizzati stanno SEMPRE in fondo (ChatModel::MessageData::lessThan)
+                // e queueViewMessage tiene solo l'indice piu' alto: arrivati in fondo si leggeva
+                // solo lo sponsorizzato e l'ultimo post reale restava non letto → badge mai azzerato.
+                messageToRead = null;
+                for (var row = lastQueuedIndex - 1; row >= 0; row--) {
+                    var realIndex = chatProxyModel.mapRowToSource(row);
+                    var candidate = (realIndex !== undefined && realIndex !== null && realIndex >= 0) ? chatModel.getMessage(realIndex) : null;
+                    if (candidate && candidate.id && candidate['@type'] !== "sponsoredMessage") {
+                        messageToRead = candidate;
+                        break;
+                    }
+                }
+            }
+            if (messageToRead) {
                 Debug.log("message to read: ", messageToRead.id);
                 var messageId = messageToRead.id;
                 if (messageToRead.media_album_id !== '0') {
@@ -2624,17 +2725,20 @@ Page {
                             text: chatInformation.title !== "" ? Emoji.emojify(chatInformation.title, font.pixelSize) : qsTr("Unknown")
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
-                            font.family: chatPage.neon ? Theme.fontFamilyHeading : Theme.fontFamily
-                            font.italic: chatPage.neon
-                            color: chatPage.neon ? "#fff3e6" : Theme.highlightColor
+                            // Barbara: titoli in corsivo serif come il brand della home.
+                            font.family: (chatPage.neon || chatPage.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
+                            font.italic: chatPage.neon || chatPage.barbara
+                            color: chatPage.barbara ? BarbaraTheme.ink
+                                 : (chatPage.neon ? "#fff3e6" : Theme.highlightColor)
                             truncationMode: TruncationMode.Elide
                             maximumLineCount: 1
-                            layer.enabled: chatPage.neon
+                            // Alone: Neon sempre, Barbara solo con ambience scura.
+                            layer.enabled: chatPage.neon || (chatPage.barbara && BarbaraTheme.glowTitles)
                             layer.effect: Glow {
-                                color: "#ff9a3d"
-                                radius: 6
-                                samples: 13
-                                spread: 0.55
+                                color: chatPage.barbara ? BarbaraTheme.accent : "#ff9a3d"
+                                radius: chatPage.barbara ? BarbaraTheme.glowRadius : 6
+                                samples: chatPage.barbara ? BarbaraTheme.glowSamples : 13
+                                spread: chatPage.barbara ? BarbaraTheme.glowSpread : 0.55
                                 transparentBorder: true
                             }
                         }
@@ -2663,9 +2767,13 @@ Page {
                             text: chatPage.chatActionText !== "" ? chatPage.chatActionText : chatPage.baseStatusText
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeExtraSmall : Theme.fontSizeTiny
-                            font.family: Theme.fontFamilyHeading
-                            color: chatPage.chatActionText !== "" ? Theme.highlightColor
-                                   : (headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor)
+                            // Barbara: i metadati sono in monospace (mockup: sottotitolo
+                            // mono 10px a destra del titolo).
+                            font.family: chatPage.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamilyHeading
+                            color: chatPage.barbara
+                                   ? (chatPage.chatActionText !== "" ? BarbaraTheme.accent : BarbaraTheme.inkSecondary)
+                                   : (chatPage.chatActionText !== "" ? Theme.highlightColor
+                                      : (headerMouseArea.pressed ? Theme.secondaryHighlightColor : Theme.secondaryColor))
                             truncationMode: TruncationMode.Fade
                             maximumLineCount: 1
                         }
@@ -2765,7 +2873,7 @@ Page {
                 Item {
                     id: chatViewItem
                     width: parent.width
-                    height: parent.height - headerRow.height - pinnedMessageItem.height - joinRequestsBanner.height - newMessageColumn.height - selectedMessagesActions.height
+                    height: parent.height - headerRow.height - pinnedMessageItem.height - joinRequestsBanner.height - botKeyboardPanel.height - newMessageColumn.height - selectedMessagesActions.height
 
                     property int previousHeight;
 
@@ -2990,8 +3098,18 @@ Page {
                             case "messageGame":
                                 return parentWidth * 0.66666666 + Theme.itemSizeLarge; // 2 / 3;
                             case "messageLocation":
+                            case "messageLiveLocation":
                             case "messageVenue":
                                 return parentWidth * 0.66666666; // 2 / 3;
+                            case "messageRichMessage":
+                                // stima prima del caricamento: la foto come un messagePhoto
+                                // + i blocchi che la precedono (quasi sempre un titolo)
+                                var richLayout = Functions.getRichMessageLayout(content);
+                                if (!richLayout.photoBlock) {
+                                    return 0;
+                                }
+                                return getContentComponentHeight("messagePhoto", { photo: richLayout.photoBlock.photo }, parentWidth, 0)
+                                        + richLayout.head.length * Math.round(Theme.fontSizeLarge * 1.5);
                             case "messagePhoto":
                                 if(albumEntries > 0) {
                                     unit = (parentWidth * 0.66666666)
@@ -3036,10 +3154,12 @@ Page {
                             "messageGame",
                             // "messageInvoice",
                             "messageLocation",
+                            "messageLiveLocation",
                             // "messagePassportDataSent",
                             // "messagePaymentSuccessful",
                             "messagePhoto",
                             "messagePoll",
+                            "messageRichMessage",
                             // "messageProximityAlertTriggered",
                             "messageSticker",
                             "messageVenue",
@@ -3079,7 +3199,7 @@ Page {
                                 id: messageListViewItemComponent
                                 MessageListViewItem {
                                     precalculatedValues: chatView.precalculatedValues
-                                    neonMenu: chatPage.neon ? messageNeonMenu : null
+                                    neonMenu: (chatPage.neon || chatPage.barbara) ? messageNeonMenu : null
                                     chatId: chatModel.chatId
                                     myMessage: model.display
                                     messageId: model.message_id
@@ -3089,6 +3209,7 @@ Page {
                                     chatReactions: availableReactions
                                     messageIndex: chatProxyModel.mapRowToSource(model.index)
                                     hasContentComponent: !!myMessage.content && chatView.delegateMessagesContent.indexOf(model.content_type) > -1
+                                                         && (model.content_type !== "messageRichMessage" || !!Functions.getRichMessageFirstPhotoBlock(myMessage.content))
                                     canReplyToMessage: chatPage.canSendMessages
                                     onReplyToMessage: {
                                         newMessageInReplyToRow.inReplyToMessage = myMessage
@@ -3291,6 +3412,17 @@ Page {
                         textField: newMessageTextField
                         chatId: chatInformation.id
                     }
+                }
+
+                BotKeyboard {
+                    id: botKeyboardPanel
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    topPadding: Theme.paddingSmall
+                    markupMessage: chatPage.botKeyboardMessage
+                    visible: chatPage.hasBotKeyboard && !chatPage.botKeyboardHidden && newMessageColumn.visible
+                    height: visible ? implicitHeight : 0
+                    onTextButtonClicked: chatPage.sendBotKeyboardText(text)
                 }
 
                 Column {
@@ -3717,6 +3849,20 @@ Page {
                                 icon.source: "image://theme/icon-m-question"
                                 onClicked: {
                                     pageStack.push(Qt.resolvedUrl("../pages/PollCreationPage.qml"), { "chatId" : chatInformation.id, groupName: chatInformation.title});
+                                    attachmentOptionsFlickable.isNeeded = false;
+                                    newMessageColumn.quickEmojiPickerVisible = false;
+                                    newMessageColumn.quickPremiumEmojiPickerVisible = false;
+                                }
+                            }
+                            // Articolo (messageRichMessage): funzione Premium, e non nelle chat segrete
+                            IconButton {
+                                visible: !chatPage.isSecretChat && chatPage.canSendMessages
+                                         && !!(tdLibWrapper.userInformation && tdLibWrapper.userInformation.is_premium)
+                                width: newMessageColumn.compactAttachmentButtonSize
+                                height: width
+                                icon.source: "image://theme/icon-m-note"
+                                onClicked: {
+                                    pageStack.push(Qt.resolvedUrl("../pages/RichMessageComposerPage.qml"), { "chatId": chatInformation.id, "chatTitle": chatInformation.title });
                                     attachmentOptionsFlickable.isNeeded = false;
                                     newMessageColumn.quickEmojiPickerVisible = false;
                                     newMessageColumn.quickPremiumEmojiPickerVisible = false;
@@ -4992,11 +5138,19 @@ Page {
 
                         TextArea {
                             id: newMessageTextField
-                            width: parent.width - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
+                            width: parent.width - (botKeyboardToggleButton.visible ? botKeyboardToggleButton.width : 0) - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
                             height: Math.min(chatContainer.height / 3, implicitHeight)
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: Theme.fontSizeSmall
-                            placeholderText: qsTr("Your message")
+                            // il bot puo' suggerire cosa scrivere mentre la sua tastiera e' attiva
+                            placeholderText: (chatPage.hasBotKeyboard && !chatPage.botKeyboardHidden
+                                              && chatPage.botKeyboardMessage.reply_markup.input_field_placeholder)
+                                             ? chatPage.botKeyboardMessage.reply_markup.input_field_placeholder
+                                             : qsTr("Your message")
+                            // Barbara: il composer poggia sul pannello del tema, non
+                            // sull'ambience → testo e segnaposto vengono dai token.
+                            color: chatPage.barbara ? BarbaraTheme.ink : Theme.primaryColor
+                            placeholderColor: chatPage.barbara ? BarbaraTheme.inkSecondary : Theme.secondaryColor
                             labelVisible: false
                             textLeftMargin: 0
                             textTopMargin: 0
@@ -5055,6 +5209,16 @@ Page {
                             }
                         }
 
+                        // mostra/nasconde la tastiera personalizzata del bot
+                        IconButton {
+                            id: botKeyboardToggleButton
+                            icon.source: "image://theme/icon-m-keyboard?" + (chatPage.botKeyboardHidden ? Theme.primaryColor : Theme.highlightColor)
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: Theme.paddingSmall
+                            visible: chatPage.hasBotKeyboard
+                            onClicked: chatPage.botKeyboardHidden = !chatPage.botKeyboardHidden
+                        }
+
                         IconButton {
                             id: attachmentIconButton
                             icon.source: "image://theme/icon-m-attach?" +  (attachmentOptionsFlickable.isNeeded ? Theme.highlightColor : Theme.primaryColor)
@@ -5083,9 +5247,23 @@ Page {
 
                         IconButton {
                             id: newMessageSendButton
-                            icon.source: "image://theme/icon-m-enter"
+                            // Barbara: freccia scura sopra la pastiglia in accento.
+                            icon.source: chatPage.barbara
+                                         ? ("image://theme/icon-m-enter?" + BarbaraTheme.onAccent)
+                                         : "image://theme/icon-m-enter"
                             anchors.bottom: parent.bottom
                             anchors.bottomMargin: Theme.paddingSmall
+
+                            // Pastiglia d'accento dietro l'icona (solo Barbara).
+                            Rectangle {
+                                visible: chatPage.barbara
+                                z: -1
+                                anchors.centerIn: parent
+                                width: Math.round(Theme.iconSizeMedium * 1.15)
+                                height: width
+                                radius: BarbaraTheme.radiusAvatar
+                                color: BarbaraTheme.accent
+                            }
                             visible: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || attachmentPreviewRow.visible)
                             enabled: true
                             opacity: 0.4

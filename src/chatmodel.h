@@ -100,6 +100,7 @@ private slots:
     void handleMessageEditedUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &replyMarkup);
     void handleMessageInteractionInfoUpdated(qlonglong chatId, qlonglong messageId, const QVariantMap &updatedInfo);
     void handleMessagesDeleted(qlonglong chatId, const QList<qlonglong> &messageIds);
+    void handleForumTopicHistoryFailed(qlonglong chatId, int forumTopicId, qlonglong fromMessageId, int offset, int limit);
 
 private:
     class MessageData;
@@ -120,6 +121,10 @@ private:
     // Richiede la cronologia più vecchia partendo dal messaggio più vecchio già
     // in modello (usato dal loop di riempimento iniziale, vedi handleMessagesReceived).
     void requestOlderHistoryFromOldest();
+    // Unico punto da cui si chiede la cronologia del topic General (thread id 1):
+    // getForumTopicHistory se TDLib lo conosce, altrimenti il vecchio getChatHistory
+    // su tutto il gruppo con filtro client-side.
+    void requestGeneralTopicHistory(qlonglong fromMessageId, int offset = -1, int limit = 50);
 
 private:
     TDLibWrapper *tdLibWrapper;
@@ -146,6 +151,11 @@ private:
     // altri topic. Entrambi resettati a ogni initialize().
     qlonglong generalOldestRawId = 0;
     int generalDigAttempts = 0;
+    // false solo se lo snapshot di TDLib installato rifiuta getForumTopicHistory:
+    // in quel caso si torna al vecchio getChatHistory + filtro client-side (e allora
+    // tornano utili generalOldestRawId/generalDigAttempts qui sopra). Non si rimette
+    // a true: la capacita' di TDLib non cambia durante la vita del processo.
+    bool generalTopicHistorySupported = true;
     QString searchQuery;
 };
 

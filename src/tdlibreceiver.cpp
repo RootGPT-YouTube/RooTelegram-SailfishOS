@@ -196,6 +196,7 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("updateMessageEdited", &TDLibReceiver::processUpdateMessageEdited);
     handlers.insert("updateChatIsMarkedAsUnread", &TDLibReceiver::processUpdateChatIsMarkedAsUnread);
     handlers.insert("updateChatDraftMessage", &TDLibReceiver::processUpdateChatDraftMessage);
+    handlers.insert("updateChatReplyMarkup", &TDLibReceiver::processUpdateChatReplyMarkup);
     handlers.insert("inlineQueryResults", &TDLibReceiver::processInlineQueryResults);
     handlers.insert("callbackQueryAnswer", &TDLibReceiver::processCallbackQueryAnswer);
     handlers.insert("userPrivacySettingRules", &TDLibReceiver::processUserPrivacySettingRules);
@@ -955,6 +956,13 @@ void TDLibReceiver::processUpdateChatDraftMessage(const QVariantMap &receivedInf
 {
     LOG("Draft message was updated");
     emit chatDraftMessageUpdated(receivedInformation.value(CHAT_ID).toLongLong(), cleanupMap(receivedInformation.value(DRAFT_MESSAGE).toMap()), findChatPositionOrder(receivedInformation.value(POSITIONS).toList()));
+}
+
+void TDLibReceiver::processUpdateChatReplyMarkup(const QVariantMap &receivedInformation)
+{
+    const QVariantMap replyMarkupMessage(receivedInformation.value("reply_markup_message").toMap());
+    LOG("Reply markup of chat updated" << receivedInformation.value(CHAT_ID).toLongLong() << replyMarkupMessage.value(ID).toLongLong());
+    emit chatReplyMarkupUpdated(receivedInformation.value(CHAT_ID).toLongLong(), replyMarkupMessage);
 }
 
 void TDLibReceiver::processInlineQueryResults(const QVariantMap &receivedInformation)

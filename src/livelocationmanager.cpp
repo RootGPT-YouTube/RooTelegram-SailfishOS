@@ -173,11 +173,12 @@ void LiveLocationManager::handleMessageSendSucceeded(qlonglong messageId, qlongl
         return;
     }
     const QVariantMap content = message.value("content").toMap();
-    if (content.value("@type").toString() != QStringLiteral("messageLocation")) {
+    // TDLib 1.8.67: la posizione live e' un tipo a se' (messageLiveLocation), con
+    // posizione e durata dentro `location` (liveLocation).
+    if (content.value("@type").toString() != QStringLiteral("messageLiveLocation")) {
         return;
     }
-    // Solo i messaggi live ci interessano (live_period > 0).
-    if (content.value("live_period").toInt() <= 0) {
+    if (content.value("location").toMap().value("live_period").toInt() <= 0) {
         return;
     }
     Share &share = this->shares[chatId];

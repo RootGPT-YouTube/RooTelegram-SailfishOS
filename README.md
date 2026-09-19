@@ -135,13 +135,19 @@ archive's `PROVENANCE.txt` and in the repository `NOTICE` file.
 ### 5. Build the RPM
 From the project root, just run:
 ```bash
-bash build-rpm.sh
+bash build-rpm.sh aarch64      # or armv7hl, or i486
 ```
-The script does everything for you: it auto‑clones `rlottie`, compiles inside the
-SDK and packages the RPM. The **first** build takes several minutes. When it
-finishes, the package is here:
+The architecture is an argument (it defaults to `aarch64`). The script does
+everything for you: it auto-clones `rlottie`, compiles inside the SDK and
+packages the RPM. The **first** build takes several minutes.
+
+The build is a **shadow build**: objects and binaries are written to a sibling
+`build/<arch>/` directory, never into the source tree, so the three
+architectures can share one checkout without their object files ever meeting.
+When it finishes, the package is here:
 ```
-RPMS/harbour-rootelegram-<version>-1.aarch64.rpm
+../RPMS/harbour-rootelegram-<version>-1.<arch>.rpm      (installable package)
+../build/<arch>/RPMS/                                   (also debuginfo/debugsource)
 ```
 
 ### 6. Install it on the phone
@@ -299,8 +305,12 @@ le chiamate audio/video). Licenze e sorgenti upstream esatti sono documentati ne
 ### 5. Compila l'RPM
 Dalla radice del progetto, lancia semplicemente:
 ```bash
-bash build-rpm.sh
+bash build-rpm.sh aarch64      # oppure armv7hl, oppure i486
 ```
+L'architettura è un argomento (se manca, `aarch64`). La compilazione è una
+**shadow build**: oggetti e binari finiscono in `build/<arch>/`, accanto
+all'albero, mai dentro — così le tre architetture condividono un solo checkout
+senza che i loro oggetti si incontrino mai.
 Lo script fa tutto da sé: clona `rlottie` in automatico, compila dentro la SDK e
 pacchettizza l'RPM. La **prima** build richiede qualche minuto. Al termine il
 pacchetto è qui:

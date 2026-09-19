@@ -64,7 +64,8 @@ Page {
         case "messageDocument":      return qsTr("Document");
         case "messageSticker":       return (c.sticker && c.sticker.emoji ? c.sticker.emoji + " " : "") + qsTr("Sticker");
         case "messageAnimatedEmoji": return qsTr("Sticker");
-        case "messageLocation":      return qsTr("Location");
+        case "messageLocation":
+        case "messageLiveLocation":  return qsTr("Location");
         case "messageVenue":         return qsTr("Location");
         case "messageContact":       return qsTr("Contact");
         case "messagePoll":          return qsTr("Poll");

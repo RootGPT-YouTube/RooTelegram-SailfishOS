@@ -100,6 +100,11 @@ public:
     // intercetta e gli si aggiunge un attributo TextFormat sul preedit.
     // watchComposer() mette il filtro sull'editor, setArmedStyles() dice cosa disegnare.
     Q_INVOKABLE void watchComposer(QQuickItem *editor);
+
+    // Composer degli articoli: il blocco «elenco» e' un vero QTextList del documento,
+    // cosi' Qt disegna i pallini da se' e a capo continua l'elenco -- senza toccare
+    // il testo in onTextChanged (che qui fa SIGSEGV, vedi la nota del composer).
+    Q_INVOKABLE void setList(QQuickItem *editor, bool on);
     Q_INVOKABLE void setArmedStyles(const QStringList &styles);
 
 protected:

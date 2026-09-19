@@ -42,7 +42,7 @@ Dialog {
         if (t === 'messageVoiceNote') return "[" + qsTr("Voice") + "]";
         if (t === 'messageAnimation') return "[" + qsTr("GIF") + "]";
         if (t === 'messageSticker') return "[" + qsTr("Sticker") + "]";
-        if (t === 'messageLocation') return "[" + qsTr("Location") + "]";
+        if (t === 'messageLocation' || t === 'messageLiveLocation') return "[" + qsTr("Location") + "]";
         return "[" + t + "]";
     }
 

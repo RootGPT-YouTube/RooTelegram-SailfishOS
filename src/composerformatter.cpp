@@ -24,6 +24,7 @@
 #include <QTextCursor>
 #include <QTextCharFormat>
 #include <QTextLayout>
+#include <QTextList>
 #include <QBrush>
 #include <QColor>
 #include <QVariant>
@@ -500,4 +501,42 @@ void ComposerFormatter::setFormattedText(QQuickItem *editor, const QString &text
         setStyleOnFormat(format, style, true, document->defaultFont().family());
         entityCursor.mergeCharFormat(format);
     }
+}
+
+void ComposerFormatter::setList(QQuickItem *editor, bool on)
+{
+    QTextDocument *document = documentOf(editor);
+    if (!document) {
+        return;
+    }
+    QTextCursor cursor(document);
+    cursor.beginEditBlock();
+    if (on) {
+        QTextBlock first = document->begin();
+        QTextList *list = first.textList();
+        if (!list) {
+            QTextListFormat listFormat;
+            listFormat.setStyle(QTextListFormat::ListDisc);
+            listFormat.setIndent(1);
+            QTextCursor firstCursor(first);
+            list = firstCursor.createList(listFormat);
+        }
+        for (QTextBlock block = first.next(); block.isValid(); block = block.next()) {
+            if (block.textList() != list) {
+                list->add(block);
+            }
+        }
+    } else {
+        for (QTextBlock block = document->begin(); block.isValid(); block = block.next()) {
+            QTextList *list = block.textList();
+            if (list) {
+                list->remove(block);
+                QTextCursor blockCursor(block);
+                QTextBlockFormat blockFormat = block.blockFormat();
+                blockFormat.setIndent(0);
+                blockCursor.setBlockFormat(blockFormat);
+            }
+        }
+    }
+    cursor.endEditBlock();
 }

@@ -374,6 +374,7 @@ ChatModel::ChatModel(TDLibWrapper *tdLibWrapper) :
     connect(this->tdLibWrapper, SIGNAL(messageEditedUpdated(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageEditedUpdated(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(messageInteractionInfoUpdated(qlonglong, qlonglong, QVariantMap)), this, SLOT(handleMessageInteractionInfoUpdated(qlonglong, qlonglong, QVariantMap)));
     connect(this->tdLibWrapper, SIGNAL(messagesDeleted(qlonglong, QList<qlonglong>)), this, SLOT(handleMessagesDeleted(qlonglong, QList<qlonglong>)));
+    connect(this->tdLibWrapper, SIGNAL(forumTopicHistoryFailed(qlonglong, int, qlonglong, int, int)), this, SLOT(handleForumTopicHistoryFailed(qlonglong, int, qlonglong, int, int)));
 
     // [RAM #1 - diagnosi A] Il daemon vive per ore/giorni: senza un campione
     // periodico vediamo la RAM solo quando l'utente apre/chiude una chat o manda
@@ -499,9 +500,10 @@ void ChatModel::initialize(const QVariantMap &chatInformation)
             ? topicLastReadInboxMessageId
             : topicLastMessageId;
         if (messageThreadId == 1) {
-            // General topic: getMessageThreadHistory non lo supporta, si usa getChatHistory
+            // General topic: getMessageThreadHistory non lo supporta, si usa
+            // getForumTopicHistory (o getChatHistory come ripiego).
             qlonglong startFrom = topicAnchor > 0 ? topicAnchor : this->chatInformation.value(LAST_READ_INBOX_MESSAGE_ID).toLongLong();
-            tdLibWrapper->getChatHistory(chatId, startFrom);
+            requestGeneralTopicHistory(startFrom);
         } else {
             // Altri topic / discussion thread canale: usa getMessageThreadHistory
             qlonglong anchorMessageId = topicAnchor > 0 ? topicAnchor : messageThreadId;
@@ -527,11 +529,14 @@ void ChatModel::requestOlderHistoryFromOldest()
     const qlonglong oldest = this->messages.first()->messageId;
     if (messageThreadId) {
         if (messageThreadId == 1) {
-            // General: ancora all'oldest RAW ricevuto (puo' essere piu' vecchio del model,
-            // che contiene solo i messaggi General) cosi' la paginazione attraversa anche
-            // gli stretch di altri topic invece di restare bloccata sull'oldest del model.
-            const qlonglong from = (generalOldestRawId > 0 && generalOldestRawId < oldest) ? generalOldestRawId : oldest;
-            this->tdLibWrapper->getChatHistory(chatId, from, 0);
+            // General: col ripiego su getChatHistory ci si ancora all'oldest RAW ricevuto
+            // (puo' essere piu' vecchio del model, che contiene solo i messaggi General)
+            // cosi' la paginazione attraversa anche gli stretch di altri topic invece di
+            // restare bloccata sull'oldest del model. Con getForumTopicHistory il problema
+            // non esiste: ogni pagina e' gia' solo del topic.
+            const qlonglong from = (!generalTopicHistorySupported && generalOldestRawId > 0 && generalOldestRawId < oldest)
+                ? generalOldestRawId : oldest;
+            requestGeneralTopicHistory(from, 0);
         } else {
             const qlonglong anchor = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
             this->tdLibWrapper->getMessageThreadHistory(chatId, anchor, oldest, 0);
@@ -541,6 +546,28 @@ void ChatModel::requestOlderHistoryFromOldest()
     }
 }
 
+void ChatModel::requestGeneralTopicHistory(qlonglong fromMessageId, int offset, int limit)
+{
+    if (generalTopicHistorySupported) {
+        this->tdLibWrapper->getForumTopicHistory(chatId, 1, fromMessageId, offset, limit);
+    } else {
+        this->tdLibWrapper->getChatHistory(chatId, fromMessageId, fromMessageId == 0 ? 0 : offset, limit);
+    }
+}
+
+void ChatModel::handleForumTopicHistoryFailed(qlonglong failedChatId, int forumTopicId, qlonglong fromMessageId, int offset, int limit)
+{
+    Q_UNUSED(forumTopicId)
+    if (failedChatId != this->chatId) {
+        return;
+    }
+    // Una sola volta: da qui in avanti il General torna a viaggiare su getChatHistory,
+    // e la richiesta appena rifiutata viene rifatta subito nel modo vecchio, cosi'
+    // l'utente non vede ne' una chat vuota ne' un messaggio d'errore.
+    generalTopicHistorySupported = false;
+    this->tdLibWrapper->getChatHistory(failedChatId, fromMessageId, offset, limit);
+}
+
 void ChatModel::triggerLoadHistoryForMessage(qlonglong messageId)
 {
     if (!this->inIncrementalUpdate && !messages.isEmpty()) {
@@ -548,7 +575,7 @@ void ChatModel::triggerLoadHistoryForMessage(qlonglong messageId)
         this->inIncrementalUpdate = true;
         if (messageThreadId) {
             if (messageThreadId == 1) {
-                this->tdLibWrapper->getChatHistory(chatId, messageId);
+                requestGeneralTopicHistory(messageId);
             } else {
                 qlonglong anchor = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
                 this->tdLibWrapper->getMessageThreadHistory(chatId, anchor, messageId);
@@ -570,7 +597,7 @@ void ChatModel::triggerLoadMoreHistory()
             LOG("Trigger loading older thread history...");
             this->inIncrementalUpdate = true;
             if (messageThreadId == 1) {
-                this->tdLibWrapper->getChatHistory(chatId, messages.first()->messageId);
+                requestGeneralTopicHistory(messages.first()->messageId);
             } else {
                 qlonglong anchor1 = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
                 this->tdLibWrapper->getMessageThreadHistory(chatId, anchor1, messages.first()->messageId);
@@ -590,7 +617,11 @@ void ChatModel::triggerLoadMoreFuture()
         this->inIncrementalUpdate = true;
         if (messageThreadId) {
             if (messageThreadId == 1) {
-                this->tdLibWrapper->getChatHistory(chatId, messages.last()->messageId, -49);
+                // Verso i messaggi NUOVI il vecchio getChatHistory chiedeva 49 messaggi
+                // del GRUPPO: in un forum molto attivo potevano essere tutti di altri
+                // topic, la pagina non cresceva e il General restava fermo a mesi fa
+                // (LIG, 2026-09-18). getForumTopicHistory conta solo dentro il topic.
+                requestGeneralTopicHistory(messages.last()->messageId, -49);
             } else {
                 qlonglong anchor2 = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
                 this->tdLibWrapper->getMessageThreadHistory(chatId, anchor2, messages.last()->messageId, -49);
@@ -780,13 +811,14 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
                     }
                 }
                 if (messageId && messageData.value(CHAT_ID).toLongLong() == chatId && !messageIndexMap.contains(messageId)) {
-                    // Per General topic (threadId == 1) usiamo getChatHistory che ritorna
-                    // TUTTO il supergruppo: dobbiamo filtrare client-side per escludere
-                    // i messaggi di altri topic. Per gli altri thread (forum topics > 1 e
-                    // discussion thread di canale) TDLib usa getMessageThreadHistory e
-                    // filtra già lui: i messaggi della risposta hanno spesso
+                    // Col ripiego su getChatHistory il General riceve TUTTO il supergruppo:
+                    // li' (e solo li') dobbiamo filtrare client-side i messaggi di altri
+                    // topic. Con getForumTopicHistory filtra gia' TDLib. Per gli altri
+                    // thread (forum topics > 1 e discussion thread di canale) si usa
+                    // getMessageThreadHistory e filtra gia' lui: i messaggi della
+                    // risposta hanno spesso
                     // message_thread_id/topic_id azzerati, quindi NON filtriamo client.
-                    if (messageThreadId == 1) {
+                    if (messageThreadId == 1 && !generalTopicHistorySupported) {
                         const QVariantMap topicId = messageData.value("topic_id").toMap();
                         const qlonglong msgForumTopicId = topicId.value("forum_topic_id").toLongLong();
                         if (msgForumTopicId > 1) continue;
@@ -824,7 +856,7 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
             if (madeProgress) {
                 this->generalDigAttempts = 0;
             }
-            const bool generalNeedsDig = (messageThreadId == 1) && !madeProgress
+            const bool generalNeedsDig = (messageThreadId == 1) && !this->generalTopicHistorySupported && !madeProgress
                     && this->generalOldestRawId > 0
                     && this->generalDigAttempts < MAX_GENERAL_DIG
                     && !this->messages.isEmpty();
@@ -848,7 +880,7 @@ void ChatModel::handleMessagesReceived(const QVariantList &messages, int totalCo
                     this->tdLibWrapper->searchChatMessages(chatId, searchQuery, messagesToBeAdded.first()->messageId);
                 } else if (messageThreadId) {
                     if (messageThreadId == 1) {
-                        this->tdLibWrapper->getChatHistory(chatId, messagesToBeAdded.first()->messageId, 0);
+                        requestGeneralTopicHistory(messagesToBeAdded.first()->messageId, 0);
                     } else {
                         qlonglong anchor = topicLastMessageId > 0 ? topicLastMessageId : messageThreadId;
                         this->tdLibWrapper->getMessageThreadHistory(chatId, anchor, messagesToBeAdded.first()->messageId, 0);

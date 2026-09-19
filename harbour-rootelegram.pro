@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 2.9.5
+RT_APP_VERSION = 3.0
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -73,6 +73,10 @@ SOURCES += src/harbour-rootelegram.cpp \
     src/qrcodegen/qrcodegen.cpp
 
 DISTFILES += qml/harbour-rootelegram.qml \
+    qml/components/qmldir \
+    qml/components/BarbaraTheme.qml \
+    qml/components/BarbaraBackground.qml \
+    qml/components/BarbaraFilterBand.qml \
     qml/components/AudioPreview.qml \
     qml/components/BackgroundImage.qml \
     qml/components/ChatListViewItem.qml \
@@ -82,6 +86,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/components/ImagePreview.qml \
     qml/components/InformationEditArea.qml \
     qml/components/InformationTextItem.qml \
+    qml/components/BotKeyboard.qml \
     qml/components/InReplyToRow.qml \
     qml/components/InlineQuery.qml \
     qml/components/LocationPreview.qml \
@@ -137,8 +142,10 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/components/messageContent/MessageDocument.qml \
     qml/components/messageContent/MessageGame.qml \
     qml/components/messageContent/MessageLocation.qml \
+    qml/components/messageContent/MessageLiveLocation.qml \
     qml/components/messageContent/MessagePhoto.qml \
     qml/components/messageContent/MessagePhotoAlbum.qml \
+    qml/components/messageContent/MessageRichMessage.qml \
     qml/components/messageContent/MessagePoll.qml \
     qml/components/messageContent/MessageSticker.qml \
     qml/components/messageContent/MessageVenue.qml \
@@ -187,6 +194,7 @@ DISTFILES += qml/harbour-rootelegram.qml \
     qml/pages/SupergroupMembersPage.qml \
     qml/pages/PinScopeDialog.qml \
     qml/pages/PollCreationPage.qml \
+    qml/pages/RichMessageComposerPage.qml \
     qml/pages/PromoteAdminDialog.qml \
     qml/pages/PollResultsPage.qml \
     qml/pages/ScheduleMessageDialog.qml \
@@ -235,8 +243,9 @@ LIBS += -L$$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/ -ltdjson
 # e creiamo `libtdjson.so` come SYMLINK a install-time. Prima copiavamo l'INTERA dir
 # lib/, che conteneva DUE copie reali identiche del .so (~32MB sprecati nell'RPM, e
 # contro le regole di packaging). Il glob `libtdjson.so.*` e' arch-aware:
-# tutte e tre le arch -> .so.1.8.62 (snapshot diversi: aarch64 schema poll
-# classico, armv7hl/i486 schema nuovo; il glob resta arch-agnostico).
+# tutte e tre le arch -> .so.1.8.67 (master d1085f9ce, costruita da noi con
+# build-deps/build-tdlib.sh). ⚠️ In ogni tdlib/<arch>/lib deve esserci UN SOLO
+# libtdjson.so.<versione>: con due, il glob le prenderebbe entrambe.
 TDJSON_REAL = $$files($$PWD/tdlib/$${TARGET_ARCHITECTURE}/lib/libtdjson.so.*)
 TDJSON_SONAME = $$basename(TDJSON_REAL)
 telegram.files = $$TDJSON_REAL

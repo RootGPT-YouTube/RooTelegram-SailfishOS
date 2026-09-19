@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "."
 import "../js/functions.js" as Functions
 
 ListItem {
@@ -27,14 +28,54 @@ ListItem {
     contentHeight: Theme.itemSizeExtraLarge
     contentWidth: parent.width
 
+    // Tema Barbara: la riga della home diventa una CARD di vetro (barra di stato
+    // 3px, avatar rounded-square, metadati mono a destra). Solo dove la riga e'
+    // l'anteprima compatta della lista chat: le altre pagine che riusano questo
+    // componente restano come sono.
+    readonly property bool barbaraCard: BarbaraTheme.active && useCompactPreview
+    readonly property real barbaraCardInset: Theme.paddingMedium
+    readonly property bool hasUnread: unreadCount > 0 || isMarkedAsUnread
+
+    Rectangle {
+        id: barbaraCardBackground
+        visible: chatListViewItem.barbaraCard
+        anchors {
+            fill: parent
+            leftMargin: chatListViewItem.barbaraCardInset
+            rightMargin: chatListViewItem.barbaraCardInset
+            topMargin: Theme.paddingSmall / 2
+            bottomMargin: Theme.paddingSmall / 2
+        }
+        radius: BarbaraTheme.radiusCard
+        color: chatListViewItem.highlighted ? BarbaraTheme.accentWash : BarbaraTheme.glass
+        border.width: BarbaraTheme.borderWidth
+        border.color: BarbaraTheme.glassBorder
+        Behavior on color { ColorAnimation { duration: BarbaraTheme.pressDuration } }
+
+        // Barra di stato: ambra se la chat ha non letti, altrimenti invisibile.
+        // Lo stato non e' dato SOLO dal colore (c'e' anche il badge).
+        Rectangle {
+            anchors {
+                left: parent.left
+                top: parent.top
+                bottom: parent.bottom
+                margins: BarbaraTheme.borderWidth
+            }
+            width: BarbaraTheme.unreadBarWidth
+            radius: width / 2
+            color: chatListViewItem.hasUnread ? BarbaraTheme.attention : "transparent"
+        }
+    }
 
     ShaderEffectSource {
         id: pictureItem
-        height: Theme.itemSizeLarge
+        height: chatListViewItem.barbaraCard ? Theme.itemSizeMedium : Theme.itemSizeLarge
         width: height
         anchors {
             left: parent.left
-            leftMargin: Theme.horizontalPageMargin
+            leftMargin: chatListViewItem.barbaraCard
+                        ? (chatListViewItem.barbaraCardInset + Theme.paddingMedium)
+                        : Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
 
@@ -56,7 +97,7 @@ ListItem {
                 height: Theme.fontSizeLarge
                 anchors.top: parent.top
                 radius: parent.width / 2
-                visible: chatListViewItem.isPinned
+                visible: !chatListViewItem.barbaraCard && chatListViewItem.isPinned
             }
 
             Icon {
@@ -66,7 +107,7 @@ ListItem {
                 highlighted: chatListViewItem.highlighted
                 sourceSize: Qt.size(Theme.iconSizeExtraSmall, Theme.iconSizeExtraSmall)
                 anchors.centerIn: chatPinnedBackground
-                visible: chatListViewItem.isPinned
+                visible: !chatListViewItem.barbaraCard && chatListViewItem.isPinned
             }
 
             Rectangle {
@@ -96,7 +137,9 @@ ListItem {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 radius: parent.width / 2
-                visible: chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread
+                // In Barbara il badge sta nella colonna dei metadati a destra.
+                visible: !chatListViewItem.barbaraCard
+                         && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread)
             }
 
             Text {
@@ -105,7 +148,7 @@ ListItem {
                 font.bold: true
                 color: Theme.primaryColor
                 anchors.centerIn: chatUnreadMessagesCountBackground
-                visible: chatListViewItem.unreadCount > 0
+                visible: !chatListViewItem.barbaraCard && chatListViewItem.unreadCount > 0
                 opacity: isMuted ? Theme.opacityHigh : 1.0
                 text: Functions.formatUnreadCount(chatListViewItem.unreadCount)
             }
@@ -134,14 +177,63 @@ ListItem {
         }
     }
 
+    // Barbara: quarta colonna della card — orario in mono e badge non letti.
+    Column {
+        id: barbaraMeta
+        visible: chatListViewItem.barbaraCard
+        anchors {
+            right: parent.right
+            rightMargin: chatListViewItem.barbaraCardInset + Theme.paddingMedium
+            verticalCenter: parent.verticalCenter
+        }
+        spacing: Theme.paddingSmall
+        width: visible ? Math.max(barbaraTime.implicitWidth, barbaraUnreadBadge.width) : 0
+
+        Label {
+            id: barbaraTime
+            anchors.right: parent.right
+            text: tertiaryText.text
+            font.family: BarbaraTheme.fontFamilyMono
+            font.pixelSize: BarbaraTheme.fontSizeMetaSmall
+            color: BarbaraTheme.inkSecondary
+            textFormat: Text.StyledText
+            maximumLineCount: 1
+        }
+
+        Rectangle {
+            id: barbaraUnreadBadge
+            anchors.right: parent.right
+            visible: chatListViewItem.hasUnread
+            height: Math.round(Theme.fontSizeSmall * 1.5)
+            width: visible ? Math.max(height, barbaraUnreadLabel.implicitWidth + Theme.paddingMedium) : 0
+            radius: Math.round(height / 2)
+            color: chatListViewItem.isMuted
+                   ? Theme.rgba(BarbaraTheme.inkSecondary, 0.35)
+                   : BarbaraTheme.attention
+            Label {
+                id: barbaraUnreadLabel
+                anchors.centerIn: parent
+                text: chatListViewItem.unreadCount > 0
+                      ? Functions.formatUnreadCount(chatListViewItem.unreadCount)
+                      : ""
+                font.family: BarbaraTheme.fontFamilyMono
+                font.pixelSize: BarbaraTheme.fontSizeMeta
+                font.bold: true
+                color: chatListViewItem.isMuted ? BarbaraTheme.ink : BarbaraTheme.onAttention
+            }
+        }
+    }
+
     Column {
         id: contentColumn
         anchors {
             verticalCenter: parent.verticalCenter
             left: pictureItem.right
             leftMargin: Theme.paddingSmall
-            right: parent.right
-            rightMargin: Theme.horizontalPageMargin
+            right: chatListViewItem.barbaraCard ? barbaraMeta.left : parent.right
+            rightMargin: chatListViewItem.barbaraCard
+                         ? Theme.paddingMedium
+                         : Theme.horizontalPageMargin
         }
         spacing: Theme.paddingSmall / 2
 
@@ -188,9 +280,33 @@ ListItem {
                     // FixedHeight, che tagliava gli ascendenti in alto).
                     verticalAlignment: Text.AlignVCenter
                     anchors.verticalCenter: parent.verticalCenter
-                    width: Math.min(contentColumn.width - (verifiedImage.visible ? (verifiedImage.width + primaryTextRowInner.spacing) :  0) - (mutedImage.visible ? (mutedImage.width + primaryTextRowInner.spacing) :  0), implicitWidth)
+                    width: Math.min(contentColumn.width - (verifiedImage.visible ? (verifiedImage.width + primaryTextRowInner.spacing) :  0) - (mutedImage.visible ? (mutedImage.width + primaryTextRowInner.spacing) :  0) - (barbaraPinTag.visible ? (barbaraPinTag.width + primaryTextRowInner.spacing) : 0), implicitWidth)
                     font.bold: appSettings.highlightUnreadConversations && ( !chatListViewItem.isMuted && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread) )
                     color: (appSettings.highlightUnreadConversations && (chatListViewItem.unreadCount > 0)) ? Theme.highlightColor : Theme.primaryColor
+                }
+
+                // Barbara: etichetta PIN in mono col bordo, al posto della puntina
+                // sovrapposta all'avatar.
+                Rectangle {
+                    id: barbaraPinTag
+                    visible: chatListViewItem.barbaraCard && chatListViewItem.isPinned
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: visible ? barbaraPinLabel.implicitWidth + Theme.paddingSmall : 0
+                    height: visible ? barbaraPinLabel.implicitHeight + Theme.paddingSmall / 2 : 0
+                    radius: 2
+                    color: "transparent"
+                    border.width: BarbaraTheme.borderWidth
+                    border.color: BarbaraTheme.accent
+                    Label {
+                        id: barbaraPinLabel
+                        anchors.centerIn: parent
+                        //: Etichetta breve sulle chat fissate in cima (tema Barbara)
+                        text: qsTr("PIN")
+                        font.family: BarbaraTheme.fontFamilyMono
+                        font.pixelSize: BarbaraTheme.fontSizeMetaSmall
+                        font.bold: true
+                        color: BarbaraTheme.accent
+                    }
                 }
 
                 Image {
@@ -270,22 +386,25 @@ ListItem {
                 anchors { left: parent.left; top: parent.top }
                 // Riserva la colonna dell'orario a destra (su entrambe le righe) per non
                 // farci finire il testo sotto.
-                width: parent.width - (compactDate.text !== "" ? (compactDate.implicitWidth + Theme.paddingMedium) : 0)
+                width: parent.width - ((compactDate.visible && compactDate.text !== "")
+                                       ? (compactDate.implicitWidth + Theme.paddingMedium) : 0)
                 font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.primaryColor
+                color: chatListViewItem.barbaraCard ? BarbaraTheme.inkSecondary : Theme.primaryColor
                 // RichText (come i messaggi): allinea correttamente le emoji a INIZIO riga,
                 // che StyledText invece buttava in basso. Il cap a 2 righe è dato dal clip
                 // del contenitore (non da maximumLineCount, che con RichText non elideva).
                 textFormat: Text.RichText
                 wrapMode: Text.Wrap
                 text: (prologSecondaryText.text !== ""
-                       ? ("<font color=\"" + Theme.highlightColor + "\">" + prologSecondaryText.text + "</font> ")
+                       ? ("<font color=\"" + (chatListViewItem.barbaraCard ? BarbaraTheme.accent : Theme.highlightColor)
+                          + "\">" + prologSecondaryText.text + "</font> ")
                        : "")
                       + secondaryText.text
             }
 
             Label {
                 id: compactDate
+                visible: !chatListViewItem.barbaraCard
                 anchors { right: parent.right; bottom: parent.bottom }
                 font.pixelSize: Theme.fontSizeTiny
                 color: Theme.secondaryColor
@@ -312,6 +431,8 @@ ListItem {
 
     NeonSeparator {
         id: separator
+        // In Barbara le righe sono card con bordo proprio: nessun separatore.
+        visible: !chatListViewItem.barbaraCard
         anchors {
             bottom: parent.bottom
             bottomMargin: -1

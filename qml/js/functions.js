@@ -108,6 +108,20 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         } else {
             return enhanceMessageText(message.content.text, ignoreEntities, revealedSpoilers, monoTextColor);
         }
+    case 'messageRichMessage':
+        if (!message.content.message) {
+            return "";
+        }
+        if (simple || ignoreEntities) {
+            return pageBlocksToText(message.content.message.blocks, true);
+        }
+        // I blocchi fino alla prima foto e la foto li disegna MessageRichMessage.qml
+        // sopra il testo; qui resta il seguito (preceduto dalla didascalia della foto).
+        var richLayout = getRichMessageLayout(message.content);
+        var richCaption = (richLayout.photoBlock && richLayout.photoBlock.caption && richLayout.head.length + richLayout.tail.length < message.content.message.blocks.length)
+                ? richTextToText(richLayout.photoBlock.caption.text, false) : "";
+        var richBody = pageBlocksToText(richLayout.tail, false, richLayout.photoBlock);
+        return (richCaption && richBody) ? richCaption + "<br><br>" + richBody : (richCaption || richBody);
     case 'messageSticker':
         return simple ? message.content.sticker.emoji : ""
     case 'messageAnimatedEmoji':
@@ -151,6 +165,7 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
             return simple ? (myself ? qsTr("sent a document", "myself") : qsTr("sent a document")) : "";
         }
     case 'messageLocation':
+    case 'messageLiveLocation':
         return simple ? (myself ? qsTr("sent a location", "myself") : qsTr("sent a location")) : "";
     case 'messageContact':
         return simple ? (myself ? qsTr("sent a contact", "myself") : qsTr("sent a contact")) : "";
@@ -352,10 +367,14 @@ function getShortenedCount(count) {
     }
 }
 
-// Colore di link e username adattivo al tema (#8 v2.4): ROSSO sui temi scuri
-// (come da sempre i link), BLU sui temi chiari. Basato su Theme.colorScheme.
+// Colore di link, username e di ogni altro collegamento nei messaggi, in UN solo
+// punto. 19/09/2026, richiesta dell'utente: sui temi scuri il CELESTE #80c4ff
+// (prima rosso-arancio), cioe' il colore di evidenziazione della sua ambience,
+// scelto da lui guardando il nome di un file allegato. E' fisso apposta: preso
+// da Theme.highlightColor cambierebbe con l'ambience (rosa, salmone...). Sui temi
+// chiari un blu piu' scuro, perche' li' un celeste chiaro non si leggerebbe.
 function messageLinkColor() {
-    return (Silica.Theme.colorScheme === Silica.Theme.DarkOnLight) ? "#2481cc" : "#ff6e40";
+    return (Silica.Theme.colorScheme === Silica.Theme.DarkOnLight) ? "#1c6fb0" : "#80c4ff";
 }
 
 function getDateTimeElapsed(timestamp) {
@@ -381,6 +400,551 @@ var rawNewLineRegExp = /\r?\n/g;
 var ampRegExp = /&/g;
 var ltRegExp = /</g;
 var gtRegExp = />/g;
+
+// TDLib 1.8.67: messageRichMessage. Il contenuto e' un elenco di PageBlock (gli
+// stessi dell'Instant View) fatti di RichText annidati. Qui se ne da' una resa di
+// SOLO testo: titoli in grassetto, paragrafi, elenchi, citazioni, codice e link;
+// i media diventano un segnaposto (emoji, cosi' non servono stringhe da tradurre).
+// plain = true -> testo nudo per anteprime e notifiche.
+function richTextToText(richText, plain) {
+    if (!richText) {
+        return "";
+    }
+    var inner = function(t) { return richTextToText(t, plain); };
+    var wrap = function(tag, t) { return plain ? inner(t) : "<" + tag + ">" + inner(t) + "</" + tag + ">"; };
+    switch (richText['@type']) {
+    case 'richTextPlain':
+        return plain ? richText.text : enhanceHtmlEntities(richText.text).replace(rawNewLineRegExp, "<br>");
+    case 'richTexts':
+        var parts = [];
+        for (var i = 0; i < (richText.texts || []).length; i++) {
+            parts.push(richTextToText(richText.texts[i], plain));
+        }
+        return parts.join("");
+    case 'richTextBold': return wrap("b", richText.text);
+    case 'richTextItalic': return wrap("i", richText.text);
+    case 'richTextUnderline': return wrap("u", richText.text);
+    case 'richTextStrikethrough': return wrap("s", richText.text);
+    case 'richTextSubscript': return wrap("sub", richText.text);
+    case 'richTextSuperscript': return wrap("sup", richText.text);
+    case 'richTextFixed': return wrap("tt", richText.text);
+    case 'richTextUrl':
+    case 'richTextReferenceLink':
+    case 'richTextAnchorLink':
+        if (plain || !richText.url) {
+            return inner(richText.text);
+        }
+        return "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + enhanceHtmlEntities(richText.url) + "\">" + inner(richText.text) + "</a>";
+    case 'richTextEmailAddress':
+        return plain ? inner(richText.text) : "<a style=\"color:" + messageLinkColor() + ";\" href=\"mailto:" + enhanceHtmlEntities(richText.email_address) + "\">" + inner(richText.text) + "</a>";
+    case 'richTextPhoneNumber':
+        return plain ? inner(richText.text) : "<a style=\"color:" + messageLinkColor() + ";\" href=\"tel:" + enhanceHtmlEntities(richText.phone_number) + "\">" + inner(richText.text) + "</a>";
+    case 'richTextCustomEmoji':
+        return plain ? richText.alternative_text : enhanceHtmlEntities(richText.alternative_text || "");
+    case 'richTextMathematicalExpression':
+        return plain ? richText.expression : "<tt>" + enhanceHtmlEntities(richText.expression || "") + "</tt>";
+    case 'richTextAnchor':
+    case 'richTextIcon':
+    case 'richTextButton':
+        return "";
+    case 'richTextDiff':
+        return inner(richText.text);
+    default:
+        // richTextSpoiler/Marked/Mention/Hashtag/... : conta il testo contenuto
+        return richText.text ? inner(richText.text) : "";
+    }
+}
+
+// ---- Composer degli articoli (RichMessageComposerPage.qml) -----------------------
+// Ogni blocco di testo e' un campo WYSIWYG: il suo contenuto arriva da
+// ComposerFormatter.toFormattedText come { text, entities } (le stesse entita' dei
+// messaggi normali) e qui diventa RichText. I link con un testo proprio si scrivono
+// [testo](indirizzo); quelli nudi li riconosce il server (detect_automatic_blocks).
+
+var composerEntityRichTypes = {
+    textEntityTypeBold: 'richTextBold',
+    textEntityTypeItalic: 'richTextItalic',
+    textEntityTypeUnderline: 'richTextUnderline',
+    textEntityTypeStrikethrough: 'richTextStrikethrough',
+    textEntityTypeCode: 'richTextFixed',
+    textEntityTypeSpoiler: 'richTextSpoiler'
+};
+
+function composerRichTexts(nodes) {
+    return nodes.length === 1 ? nodes[0] : { '@type': 'richTexts', texts: nodes };
+}
+
+// { text, entities } -> RichText. Prima si trovano i link [testo](indirizzo)
+// sull'intero testo (cosi' un link col testo in grassetto resta un link), poi ogni
+// tratto si taglia ai bordi delle entita': ogni pezzo prende tutti gli stili che
+// lo coprono, cosi' anche gli stili sovrapposti (grassetto + corsivo) vengono giusti.
+function composerStyledRange(text, entities, from, to) {
+    var cuts = [from, to];
+    for (var i = 0; i < entities.length; i++) {
+        var a = entities[i].offset;
+        var b = entities[i].offset + entities[i].length;
+        if (a > from && a < to) cuts.push(a);
+        if (b > from && b < to) cuts.push(b);
+    }
+    cuts.sort(function(x, y) { return x - y; });
+    var parts = [];
+    for (var c = 0; c + 1 < cuts.length; c++) {
+        var start = cuts[c];
+        var end = cuts[c + 1];
+        if (end <= start) {
+            continue;
+        }
+        var node = { '@type': 'richTextPlain', text: text.substring(start, end) };
+        for (var e = 0; e < entities.length; e++) {
+            var entity = entities[e];
+            var richType = composerEntityRichTypes[entity.type ? entity.type['@type'] : ""];
+            if (richType && entity.offset <= start && entity.offset + entity.length >= end) {
+                node = { '@type': richType, text: node };
+            }
+        }
+        parts.push(node);
+    }
+    return parts;
+}
+
+function composerFormattedToRichText(text, entities) {
+    entities = entities || [];
+    var nodes = [];
+    var re = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+    var last = 0;
+    var match;
+    while ((match = re.exec(text)) !== null) {
+        nodes = nodes.concat(composerStyledRange(text, entities, last, match.index));
+        var labelStart = match.index + 1;
+        var label = composerStyledRange(text, entities, labelStart, labelStart + match[1].length);
+        nodes.push({ '@type': 'richTextUrl', text: composerRichTexts(label), url: match[2], is_cached: false });
+        last = re.lastIndex;
+    }
+    nodes = nodes.concat(composerStyledRange(text, entities, last, text.length));
+    return nodes.length > 0 ? composerRichTexts(nodes) : { '@type': 'richTextPlain', text: "" };
+}
+
+// Toglie spazi in testa e in coda spostando le entita' di conseguenza.
+function composerTrimFormatted(text, entities) {
+    var lead = text.length - text.replace(/^\s+/, "").length;
+    var trimmed = text.replace(/^\s+|\s+$/g, "");
+    var moved = [];
+    for (var i = 0; i < (entities || []).length; i++) {
+        var from = Math.max(entities[i].offset - lead, 0);
+        var to = Math.min(entities[i].offset + entities[i].length - lead, trimmed.length);
+        if (to > from) {
+            moved.push({ '@type': 'textEntity', offset: from, length: to - from, type: entities[i].type });
+        }
+    }
+    return { text: trimmed, entities: moved };
+}
+
+// Un elenco: una riga per voce. Le entita' di ComposerFormatter non attraversano
+// mai un a capo, quindi basta assegnarle alla riga giusta.
+function composerSplitLines(text, entities) {
+    var lines = [];
+    var start = 0;
+    var pieces = text.split("\n");
+    for (var i = 0; i < pieces.length; i++) {
+        var end = start + pieces[i].length;
+        var own = [];
+        for (var e = 0; e < (entities || []).length; e++) {
+            var entity = entities[e];
+            if (entity.offset >= start && entity.offset + entity.length <= end) {
+                own.push({ '@type': 'textEntity', offset: entity.offset - start, length: entity.length, type: entity.type });
+            }
+        }
+        lines.push({ text: pieces[i], entities: own });
+        start = end + 1;
+    }
+    return lines;
+}
+
+// Blocchi del composer -> InputPageBlock di TDLib. Un blocco di testo e'
+// { type, text, entities }, una foto { type: "photo", path | photoJson, caption }.
+// Restituisce anche lunghezza del testo e numero di media, per i limiti del server.
+function composerBlocksToInputPageBlocks(composerBlocks) {
+    var blocks = [];
+    var textLength = 0;
+    var mediaCount = 0;
+    var plain = function(t) { return { '@type': 'richTextPlain', text: t }; };
+    for (var i = 0; i < composerBlocks.length; i++) {
+        var b = composerBlocks[i];
+        if (b.type === "photo") {
+            // foto nuova = file locale; foto gia' inviata (modifica) = il suo file TDLib
+            var inputFile = null;
+            if (b.path) {
+                inputFile = { '@type': 'inputFileLocal', path: b.path };
+            } else if (b.photoJson) {
+                var sentPhoto = JSON.parse(b.photoJson);
+                var biggest = sentPhoto.sizes[sentPhoto.sizes.length - 1];
+                inputFile = { '@type': 'inputFileId', id: biggest.photo.id };
+            }
+            if (!inputFile) {
+                continue;
+            }
+            var captionText = (b.caption || "").replace(/^\s+|\s+$/g, "");
+            textLength += captionText.length;
+            mediaCount++;
+            blocks.push({
+                '@type': 'inputPageBlockPhoto',
+                photo: { '@type': 'inputPhoto', photo: inputFile },
+                caption: { '@type': 'pageBlockCaption', text: plain(captionText), credit: plain("") },
+                has_spoiler: false
+            });
+            continue;
+        }
+        var formatted = composerTrimFormatted(b.text || "", b.entities || []);
+        if (formatted.text === "") {
+            continue;
+        }
+        textLength += formatted.text.length;
+        if (b.type === "title" || b.type === "subtitle") {
+            blocks.push({ '@type': 'inputPageBlockSectionHeading', text: composerFormattedToRichText(formatted.text, formatted.entities), size: b.type === "title" ? 1 : 3 });
+        } else if (b.type === "list") {
+            var items = [];
+            var lines = composerSplitLines(formatted.text, formatted.entities);
+            for (var j = 0; j < lines.length; j++) {
+                var line = composerTrimFormatted(lines[j].text, lines[j].entities);
+                if (line.text !== "") {
+                    items.push({ '@type': 'inputPageBlockListItem',
+                                 blocks: [{ '@type': 'inputPageBlockParagraph', text: composerFormattedToRichText(line.text, line.entities) }],
+                                 has_checkbox: false, is_checked: false, value: 0, type: "" });
+                }
+            }
+            if (items.length > 0) {
+                blocks.push({ '@type': 'inputPageBlockList', items: items });
+            }
+        } else {
+            blocks.push({ '@type': 'inputPageBlockParagraph', text: composerFormattedToRichText(formatted.text, formatted.entities) });
+        }
+    }
+    return { blocks: blocks, textLength: textLength, mediaCount: mediaCount };
+}
+
+// Il contrario, per modificare un articolo inviato: RichText -> { text, entities }
+// accumulati in `acc`. Grassetto, corsivo, sottolineato, barrato, monospazio,
+// spoiler e link sopravvivono; il resto (emoji personalizzate, evidenziato,
+// apice...) diventa testo e `state.lossy` lo segnala.
+var composerRichEntityTypes = {
+    richTextBold: 'textEntityTypeBold',
+    richTextItalic: 'textEntityTypeItalic',
+    richTextUnderline: 'textEntityTypeUnderline',
+    richTextStrikethrough: 'textEntityTypeStrikethrough',
+    richTextFixed: 'textEntityTypeCode',
+    richTextSpoiler: 'textEntityTypeSpoiler'
+};
+
+function composerAppendRichText(richText, acc, state) {
+    if (!richText) {
+        return;
+    }
+    var type = richText['@type'];
+    if (type === 'richTextPlain') {
+        acc.text += richText.text;
+    } else if (type === 'richTexts') {
+        for (var i = 0; i < (richText.texts || []).length; i++) {
+            composerAppendRichText(richText.texts[i], acc, state);
+        }
+    } else if (composerRichEntityTypes[type]) {
+        var start = acc.text.length;
+        composerAppendRichText(richText.text, acc, state);
+        if (acc.text.length > start) {
+            acc.entities.push({ '@type': 'textEntity', offset: start, length: acc.text.length - start,
+                                type: { '@type': composerRichEntityTypes[type] } });
+        }
+    } else if (type === 'richTextUrl') {
+        var label = { text: "", entities: [] };
+        composerAppendRichText(richText.text, label, state);
+        var linked = richText.url && label.text !== richText.url;
+        if (linked) {
+            acc.text += "[";
+        }
+        for (var l = 0; l < label.entities.length; l++) {
+            var moved = label.entities[l];
+            acc.entities.push({ '@type': 'textEntity', offset: moved.offset + acc.text.length, length: moved.length, type: moved.type });
+        }
+        acc.text += label.text;
+        if (linked) {
+            acc.text += "](" + richText.url + ")";
+        }
+    } else if (['richTextEmailAddress', 'richTextPhoneNumber', 'richTextHashtag', 'richTextCashtag',
+                'richTextMention', 'richTextBotCommand'].indexOf(type) !== -1) {
+        // questi li ritrova il server da solo (detect_automatic_blocks)
+        composerAppendRichText(richText.text, acc, state);
+    } else if (type === 'richTextCustomEmoji') {
+        state.lossy = true;
+        acc.text += richText.alternative_text || "";
+    } else {
+        state.lossy = true;
+        if (richText.text) {
+            composerAppendRichText(richText.text, acc, state);
+        }
+    }
+}
+
+// Articolo inviato -> blocchi del composer. `unsupported` elenca i blocchi che
+// l'editor non sa ancora rifare: con quelli la modifica non si apre, perche'
+// reinviando l'articolo andrebbero persi.
+function richMessageToComposerBlocks(content) {
+    var state = { lossy: false };
+    var blocks = [];
+    var unsupported = [];
+    var source = (content && content.message && content.message.blocks) ? content.message.blocks : [];
+    var add = function(type, richText) {
+        var acc = { text: "", entities: [] };
+        composerAppendRichText(richText, acc, state);
+        blocks.push({ type: type, text: acc.text, entitiesJson: JSON.stringify(acc.entities), path: "", caption: "", photoJson: "" });
+    };
+    for (var i = 0; i < source.length; i++) {
+        var b = source[i];
+        switch (b['@type']) {
+        case 'pageBlockTitle': add("title", b.title); break;
+        case 'pageBlockHeader': add("title", b.header); break;
+        case 'pageBlockSubtitle': add("subtitle", b.subtitle); break;
+        case 'pageBlockSubheader': add("subtitle", b.subheader); break;
+        case 'pageBlockSectionHeading': add((b.size || 1) <= 1 ? "title" : "subtitle", b.text); break;
+        case 'pageBlockParagraph': add("paragraph", b.text); break;
+        case 'pageBlockList':
+            var list = { text: "", entities: [] };
+            for (var j = 0; j < (b.items || []).length; j++) {
+                var item = b.items[j];
+                if (j > 0) {
+                    list.text += "\n";
+                }
+                for (var k = 0; k < (item.blocks || []).length; k++) {
+                    var ib = item.blocks[k];
+                    if (ib['@type'] !== 'pageBlockParagraph') {
+                        state.lossy = true;
+                    }
+                    if (k > 0) {
+                        list.text += " ";
+                    }
+                    // gli a capo dentro una voce diventerebbero voci nuove
+                    var itemAcc = { text: "", entities: [] };
+                    composerAppendRichText(ib.text, itemAcc, state);
+                    for (var m = 0; m < itemAcc.entities.length; m++) {
+                        var ent = itemAcc.entities[m];
+                        list.entities.push({ '@type': 'textEntity', offset: ent.offset + list.text.length, length: ent.length, type: ent.type });
+                    }
+                    list.text += itemAcc.text.replace(/\n/g, " ");
+                }
+                if (item.has_checkbox) {
+                    state.lossy = true;
+                }
+            }
+            blocks.push({ type: "list", text: list.text, entitiesJson: JSON.stringify(list.entities), path: "", caption: "", photoJson: "" });
+            break;
+        case 'pageBlockPhoto':
+            if (b.photo && b.photo.sizes && b.photo.sizes.length > 0) {
+                var captionAcc = { text: "", entities: [] };
+                if (b.caption) {
+                    composerAppendRichText(b.caption.text, captionAcc, state);
+                }
+                if (captionAcc.entities.length > 0) {
+                    state.lossy = true;   // la didascalia e' un campo semplice
+                }
+                blocks.push({ type: "photo", text: "", entitiesJson: "[]", path: "", caption: captionAcc.text, photoJson: JSON.stringify(b.photo) });
+            }
+            break;
+        case 'pageBlockDivider':
+        case 'pageBlockAnchor':
+            state.lossy = true;
+            break;
+        default:
+            var name = b['@type'].replace(/^pageBlock/, "");
+            if (unsupported.indexOf(name) === -1) {
+                unsupported.push(name);
+            }
+        }
+    }
+    return { blocks: blocks, unsupported: unsupported, lossy: state.lossy };
+}
+
+// Il primo pageBlockPhoto di un messageRichMessage (anche dentro copertine,
+// collage, citazioni...), in ordine di lettura; null se il post non ha foto.
+function getRichMessageFirstPhotoBlock(content) {
+    var search = function(blocks) {
+        for (var i = 0; i < (blocks || []).length; i++) {
+            var block = blocks[i];
+            if (!block) {
+                continue;
+            }
+            if (block['@type'] === 'pageBlockPhoto' && block.photo && block.photo.sizes && block.photo.sizes.length > 0) {
+                return block;
+            }
+            var inner = search(block.cover ? [block.cover] : block.blocks);
+            if (inner) {
+                return inner;
+            }
+        }
+        return null;
+    };
+    return (content && content.message) ? search(content.message.blocks) : null;
+}
+
+// Come si divide un post ricco per disegnarlo nell'ordine di Telegram (titolo,
+// foto, testo): `head` sono i blocchi PRIMA della prima foto di primo livello (di
+// solito solo il titolo), che MessageRichMessage.qml disegna sopra la foto; `tail`
+// il seguito, che va nel testo del messaggio. Se la foto e' solo annidata
+// (copertina, collage...) la si mostra comunque in cima e il testo resta intero.
+function getRichMessageLayout(content) {
+    var blocks = (content && content.message && content.message.blocks) ? content.message.blocks : [];
+    for (var i = 0; i < blocks.length; i++) {
+        var block = blocks[i];
+        if (block && block['@type'] === 'pageBlockPhoto' && block.photo && block.photo.sizes && block.photo.sizes.length > 0) {
+            return { head: blocks.slice(0, i), photoBlock: block, tail: blocks.slice(i + 1) };
+        }
+    }
+    return { head: [], photoBlock: getRichMessageFirstPhotoBlock(content), tail: blocks };
+}
+
+// La foto di un messageRichMessage presentata come un messagePhoto: cosi' la
+// disegnano MessagePhoto.qml e la pagina a tutto schermo senza codice nuovo.
+function richMessageAsPhotoMessage(message) {
+    var block = message ? getRichMessageLayout(message.content).photoBlock : null;
+    if (!block) {
+        return message;
+    }
+    var photoMessage = {};
+    for (var key in message) {
+        photoMessage[key] = message[key];
+    }
+    photoMessage.content = {
+        '@type': 'messagePhoto',
+        photo: block.photo,
+        caption: { '@type': 'formattedText', text: '', entities: [] },
+        show_caption_above_media: false,
+        has_spoiler: !!block.has_spoiler
+    };
+    return photoMessage;
+}
+
+function pageBlocksToText(blocks, plain, skipBlock) {
+    var out = [];
+    var rt = function(t) { return richTextToText(t, plain); };
+    var bold = function(t) { var x = rt(t); return plain || !x ? x : "<b>" + x + "</b>"; };
+    // Titoli piu' grandi del testo (che e' fontSizeSmall), come nei client ufficiali.
+    var heading = function(t, pixelSize) {
+        var x = rt(t);
+        return plain || !x ? x : "<span style=\"font-size:" + Math.round(pixelSize) + "px\"><b>" + x + "</b></span>";
+    };
+    var theme = Silica.Theme;
+    // pageBlockSectionHeading.size: 1 = il piu' grande ... 6 = il piu' piccolo
+    var sectionSize = function(size) {
+        if (size <= 1) return theme.fontSizeLarge;
+        if (size === 2) return (theme.fontSizeLarge + theme.fontSizeMedium) / 2;
+        if (size === 3) return theme.fontSizeMedium;
+        return theme.fontSizeSmall;
+    };
+    var caption = function(c) { return c ? rt(c.text) : ""; };
+    var media = function(icon, c) { var x = caption(c); return x ? icon + " " + x : icon; };
+    for (var i = 0; i < (blocks || []).length; i++) {
+        var block = blocks[i];
+        var text = "";
+        switch (block['@type']) {
+        case 'pageBlockTitle': text = heading(block.title, theme.fontSizeLarge); break;
+        case 'pageBlockSubtitle': text = heading(block.subtitle, theme.fontSizeMedium); break;
+        case 'pageBlockHeader': text = heading(block.header, theme.fontSizeLarge); break;
+        case 'pageBlockSubheader': text = heading(block.subheader, theme.fontSizeMedium); break;
+        case 'pageBlockSectionHeading': text = heading(block.text, sectionSize(block.size || 1)); break;
+        case 'pageBlockKicker': text = rt(block.kicker); break;
+        case 'pageBlockAuthorDate': text = rt(block.author); break;
+        case 'pageBlockParagraph':
+        case 'pageBlockThinking':
+            text = rt(block.text); break;
+        case 'pageBlockFooter': text = rt(block.footer); break;
+        case 'pageBlockPreformatted':
+            text = plain ? rt(block.text) : "<tt>" + rt(block.text) + "</tt>"; break;
+        case 'pageBlockMathematicalExpression':
+            text = plain ? block.expression : "<tt>" + enhanceHtmlEntities(block.expression || "") + "</tt>"; break;
+        case 'pageBlockDivider': text = plain ? "" : "―――"; break;
+        case 'pageBlockList':
+            var items = [];
+            var bulleted = true;
+            for (var j = 0; j < (block.items || []).length; j++) {
+                var item = block.items[j];
+                var label = item.has_checkbox ? (item.is_checked ? "☑ " : "☐ ") : "";
+                if (!item.has_checkbox && item.label && item.label !== "•") {
+                    bulleted = false;
+                }
+                if (plain) {
+                    items.push((label || ((item.label || "•") + " ")) + pageBlocksToText(item.blocks, true, skipBlock));
+                } else {
+                    // dentro la voce i blocchi vanno a capo semplice: titoletto e testo
+                    // restano insieme, rientrati sotto il pallino come nei client ufficiali
+                    items.push("<li>" + label + pageBlocksToText(item.blocks, false, skipBlock).replace(/<br><br>/g, "<br>") + "</li>");
+                }
+            }
+            text = plain ? items.join(" ") : (bulleted ? "<ul>" + items.join("") + "</ul>" : "<ol>" + items.join("") + "</ol>");
+            break;
+        case 'pageBlockBlockQuote':
+            text = "“" + pageBlocksToText(block.blocks, plain, skipBlock) + "”";
+            if (block.credit) { text += " — " + rt(block.credit); }
+            break;
+        case 'pageBlockExpandableBlockQuote':
+        case 'pageBlockPullQuote':
+            text = "“" + rt(block.text) + "”";
+            if (block.credit) { text += " — " + rt(block.credit); }
+            break;
+        case 'pageBlockDetails':
+            text = bold(block.header) + (plain ? " " : "<br>") + pageBlocksToText(block.blocks, plain, skipBlock);
+            break;
+        case 'pageBlockCover': text = pageBlocksToText([block.cover], plain, skipBlock); break;
+        case 'pageBlockEmbeddedPost':
+        case 'pageBlockCollage':
+        case 'pageBlockSlideshow':
+            text = pageBlocksToText(block.blocks, plain, skipBlock);
+            if (block.caption) { text += (text ? " " : "") + caption(block.caption); }
+            break;
+        case 'pageBlockPhoto':
+            // la foto gia' disegnata sopra il testo lascia solo la sua didascalia
+            text = (block === skipBlock) ? caption(block.caption) : media("🖼", block.caption);
+            break;
+        case 'pageBlockVideo': text = media("🎬", block.caption); break;
+        case 'pageBlockAnimation': text = media("🎞", block.caption); break;
+        case 'pageBlockAudio': text = media("🎵", block.caption); break;
+        case 'pageBlockVoiceNote': text = media("🎤", block.caption); break;
+        case 'pageBlockDocument': text = media("📄", block.caption); break;
+        case 'pageBlockMap': text = media("📍", block.caption); break;
+        case 'pageBlockEmbedded':
+            text = block.url ? (plain ? block.url : "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + enhanceHtmlEntities(block.url) + "\">" + enhanceHtmlEntities(block.url) + "</a>") : "";
+            break;
+        case 'pageBlockTable':
+            var rows = [];
+            for (var r = 0; r < (block.cells || []).length; r++) {
+                var cells = [];
+                for (var c = 0; c < block.cells[r].length; c++) {
+                    cells.push(rt(block.cells[r][c].text));
+                }
+                rows.push(cells.join(" | "));
+            }
+            text = (block.caption ? bold(block.caption) + (plain ? " " : "<br>") : "") + rows.join(plain ? " " : "<br>");
+            break;
+        case 'pageBlockRelatedArticles':
+            var articles = [];
+            for (var k = 0; k < (block.articles || []).length; k++) {
+                var a = block.articles[k];
+                articles.push(plain ? (a.title || a.url) : "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + enhanceHtmlEntities(a.url) + "\">" + enhanceHtmlEntities(a.title || a.url) + "</a>");
+            }
+            text = rt(block.header) + (plain ? " " : "<br>") + articles.join(plain ? " " : "<br>");
+            break;
+        case 'pageBlockChatLink':
+            text = plain ? block.title : "<a style=\"color:" + messageLinkColor() + ";\" href=\"https://t.me/" + enhanceHtmlEntities(block.username) + "\">" + enhanceHtmlEntities(block.title) + "</a>";
+            break;
+        default:
+            // pageBlockAnchor, pageBlockButtonRow, pageBlockUnsupported: niente testo
+            break;
+        }
+        // gli a capo in testa/coda a un blocco e i blocchi vuoti non devono
+        // aggiungere righe bianche oltre alla separazione fra blocchi
+        text = plain ? text.trim() : text.replace(/^(\s|<br>)+|(\s|<br>)+$/g, "");
+        if (text) {
+            out.push(text);
+        }
+    }
+    return out.join(plain ? "\n" : "<br><br>");
+}
 
 function enhanceHtmlEntities(simpleText) {
     return simpleText.replace(ampRegExp, "&amp;").replace(ltRegExp, "&lt;").replace(gtRegExp, "&gt;");//.replace(rawNewLineRegExp, "<br>");
@@ -462,7 +1026,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers, mon
             break;
             case "textEntityTypeEmailAddress":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"mailto:" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"mailto:" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -507,7 +1071,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers, mon
             break;
             case "textEntityTypePhoneNumber":
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"tel:" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"tel:" + messageText.substring(entity.offset, ( entity.offset + entity.length )) + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;
@@ -538,7 +1102,7 @@ function enhanceMessageText(formattedText, ignoreEntities, revealedSpoilers, mon
             case "textEntityTypeBotCommand":
                 var command = messageText.substring(entity.offset, entity.offset + entity.length);
                 messageInsertions.push(
-                    { offset: entity.offset, insertionString: "<a href=\"botCommand://" + command + "\">", removeLength: 0 },
+                    { offset: entity.offset, insertionString: "<a style=\"color:" + messageLinkColor() + ";\" href=\"botCommand://" + command + "\">", removeLength: 0 },
                     { offset: (entity.offset + entity.length), insertionString: "</a>", removeLength: 0 }
                 );
             break;

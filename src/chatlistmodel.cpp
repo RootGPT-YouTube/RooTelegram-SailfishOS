@@ -91,6 +91,7 @@ public:
     qlonglong draftMessageDate() const;
     QString draftMessageText() const;
     bool isChannel() const;
+    bool isGroup() const;
     bool isForum() const;
     bool isHidden() const;
     bool isMarkedAsUnread() const;
@@ -292,12 +293,21 @@ QString ChatListModel::ChatData::draftMessageText() const
     if(draft.isEmpty()) {
         return QString();
     }
-    return draft.value("input_message_text").toMap().value(TEXT).toMap().value(TEXT).toString();
+    // draftMessageContentText (TDLib 1.8.67); le bozze vocali/video non hanno testo.
+    return draft.value(CONTENT).toMap().value(TEXT).toMap().value(TEXT).toString();
 }
 
 bool ChatListModel::ChatData::isChannel() const
 {
     return chatData.value(TYPE).toMap().value(IS_CHANNEL).toBool();
+}
+
+// "Gruppo" per il filtro per tipo di Barbara: gruppi base, supergruppi e forum.
+// I canali (supergruppi con is_channel) NO: hanno un filtro tutto loro.
+bool ChatListModel::ChatData::isGroup() const
+{
+    return chatType == TDLibWrapper::ChatTypeBasicGroup
+            || (chatType == TDLibWrapper::ChatTypeSupergroup && !isChannel());
 }
 
 bool ChatListModel::ChatData::isForum() const
@@ -517,6 +527,7 @@ QHash<int,QByteArray> ChatListModel::roleNames() const
     roles.insert(ChatListModel::RoleSecretChatState, "secret_chat_state");
     roles.insert(ChatListModel::RoleIsVerified, "is_verified");
     roles.insert(ChatListModel::RoleIsChannel, "is_channel");
+    roles.insert(ChatListModel::RoleIsGroup, "is_group");
     roles.insert(ChatListModel::RoleIsMarkedAsUnread, "is_marked_as_unread");
     roles.insert(ChatListModel::RoleIsPinned, "is_pinned");
     roles.insert(ChatListModel::RoleFilter, "filter");
@@ -555,6 +566,7 @@ QVariant ChatListModel::data(const QModelIndex &index, int role) const
         case ChatListModel::RoleSecretChatState: return data->secretChatState;
         case ChatListModel::RoleIsVerified: return data->verified;
         case ChatListModel::RoleIsChannel: return data->isChannel();
+        case ChatListModel::RoleIsGroup: return data->isGroup();
         case ChatListModel::RoleIsMarkedAsUnread: return data->isMarkedAsUnread();
         case ChatListModel::RoleIsPinned: return data->isPinned();
         case ChatListModel::RoleFilter: return data->title() + " " + data->senderMessageText();
@@ -649,6 +661,60 @@ void ChatListModel::enableRefreshTimer()
         LOG("Enabling refresh timer");
         relativeTimeRefreshTimer->start();
     }
+}
+
+int ChatListModel::getTotalUnreadCount() const
+{
+    int unreadMessages = 0;
+    for (const ChatData *chat : chatList) {
+        unreadMessages += qMax(0, chat->unreadCount());
+    }
+    // Anche le chat non visibili nella vista corrente: con una cartella o un
+    // filtro per tipo attivo le altre stanno qui, e il totale in testata deve
+    // restare il totale.
+    for (const ChatData *chat : hiddenChats.values()) {
+        unreadMessages += qMax(0, chat->unreadCount());
+    }
+    for (const ChatData *chat : folderFilteredChats.values()) {
+        unreadMessages += qMax(0, chat->unreadCount());
+    }
+    return unreadMessages;
+}
+
+QVariantMap ChatListModel::getFolderUnreadCounts() const
+{
+    QVariantMap counts;
+    QList<const ChatData*> allChats;
+    for (const ChatData *chat : chatList) {
+        allChats.append(chat);
+    }
+    for (const ChatData *chat : hiddenChats.values()) {
+        allChats.append(chat);
+    }
+    for (const ChatData *chat : folderFilteredChats.values()) {
+        allChats.append(chat);
+    }
+
+    for (const ChatData *chat : allChats) {
+        const int unread = chat->unreadCount();
+        if (unread <= 0) {
+            continue;
+        }
+        if (!folderOrders.contains(chat->chatId)) {
+            continue;
+        }
+        const QHash<int, QString> &orders = folderOrders.value(chat->chatId);
+        for (auto it = orders.constBegin(); it != orders.constEnd(); ++it) {
+            // 0 non e' una cartella ("Tutte"); un ordine vuoto o "0" significa
+            // "non in questa cartella".
+            if (it.key() == 0 || it.value().isEmpty() || it.value() == QStringLiteral("0")) {
+                continue;
+            }
+            const QString key(QString::number(it.key()));
+            counts.insert(key, counts.value(key, 0).toInt() + unread);
+        }
+    }
+    return counts;
 }
 
 void ChatListModel::calculateUnreadState()

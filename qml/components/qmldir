@@ -1,0 +1,5 @@
+# Directory-listing qmldir: serve SOLO a dichiarare il singleton del tema
+# Barbara (un singleton non e' raggiungibile senza qmldir, nemmeno con un
+# import di directory). Gli altri componenti di questa cartella continuano a
+# risolversi dal nome del file, come prima: NON vanno elencati qui.
+singleton BarbaraTheme 1.0 BarbaraTheme.qml

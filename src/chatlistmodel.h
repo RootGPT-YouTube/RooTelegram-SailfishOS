@@ -57,6 +57,7 @@ public:
         RoleSecretChatState,
         RoleIsVerified,
         RoleIsChannel,
+        RoleIsGroup,
         RoleIsMarkedAsUnread,
         RoleIsPinned,
         RoleFilter,
@@ -79,6 +80,15 @@ public:
 
     Q_INVOKABLE void calculateUnreadState();
     Q_INVOKABLE QVariantMap getPrivateUnreadCounts() const;
+    // Non letti PER CARTELLA (fascia cartelle del tema Barbara): mappa
+    // "<folderId>" -> messaggi non letti. Somma su TUTTE le chat note, non solo
+    // quelle visibili: con una cartella attiva le altre stanno in
+    // hiddenChats/folderFilteredChats e conterebbero zero.
+    Q_INVOKABLE QVariantMap getFolderUnreadCounts() const;
+    // Non letti TOTALI (riga mono sotto il brand, tema Barbara). Serve perche'
+    // `unreadStateChanged` viene emesso SOLO in modalita' online-only: fuori da
+    // quella il conteggio va chiesto, non aspettato.
+    Q_INVOKABLE int getTotalUnreadCount() const;
     Q_INVOKABLE QVariantList getAllChatIds() const;
     Q_INVOKABLE QString getChatTitle(qlonglong chatId) const;
     // Azzera SUBITO (ottimistico) il badge non letti di una chat nel modello, senza

@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
+import "."
 
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
@@ -31,16 +32,39 @@ PhotoTextsListItem {
         return "";
     }
 
-    // ⛔ Le due voci di lettura qui sotto lavorano a livello di CHAT e nei gruppi non
-    // servono (decisione dell'utente, 2026-09-16: «non servono a molto quelle voci,
-    // meglio eliminarle dai gruppi e dai forum»). Sui FORUM erano anche proprio SBAGLIATE:
+    // ⛔ Le due voci di lettura qui sotto lavorano a livello di CHAT. Nel 2026-09-16
+    // erano state tolte da gruppi e forum (decisione dell'utente: «non servono a molto
+    // quelle voci, meglio eliminarle dai gruppi e dai forum»); dal 2026-09-18 la sola
+    // "segna tutto come letto" e' tornata nei gruppi e nei supergruppi NON forum, dove
+    // fa quello che promette. Sui FORUM era anche proprio SBAGLIATA:
     // i contatori di non letto stanno PER TOPIC e il badge e' la somma dei topic
     // (ForumTopicsPage.qml:582), quindi una viewMessages chat-level su UN solo messaggio
     // non fa nulla — misurato sul POCO il 2026-09-15 con le sonde [VIEWMSG]/[TDERR]:
     // TDLib accetta la richiesta senza errori e i topic restano non letti (55 e 131,
     // invariati dopo il gesto).
-    // ⭐ Restano dove hanno senso: chat con un singolo utente, chat segrete e canali.
-    // ⭐ Non serve piu' risolvere il supergruppo dalla cache: basta il tipo della chat.
+    // ⭐ La voce "segna come non letto" (l'altra) resta invece solo dove ha senso:
+    // chat con un singolo utente, chat segrete e canali.
+    // ⭐ 2026-09-18: la voce di lettura TORNA nei gruppi e nei supergruppi non-forum
+    // (richiesta dell'utente dopo aver dovuto scorrere due mesi di arretrati a mano).
+    // Li' la viewMessages chat-level FUNZIONA: il contatore di non letto e' uno solo,
+    // quello della chat. Resta esclusa la sola famiglia dove non funzionerebbe, i
+    // FORUM, che contano per topic (vedi la nota qui sopra): li' la stessa cosa si fa
+    // con la pressione prolungata sul singolo topic, in ForumTopicsPage.
+    function chatIsForum() {
+        var chatType = display["type"] || {};
+        if (chatType["@type"] !== "chatTypeSupergroup" || chatType.is_channel) {
+            return false;
+        }
+        var groupInfo = tdLibWrapper.getSuperGroup(chatType.supergroup_id);
+        return !!(groupInfo && groupInfo.is_forum === true);
+    }
+
+    // Vero se la chat ha un ultimo messaggio a cui ancorare la lettura: senza di
+    // quello viewMessages non avrebbe su cosa lavorare.
+    function chatCanBeMarkedRead() {
+        return !chatIsForum() && !!(display.last_message && display.last_message.id);
+    }
+
     function chatIsGroup() {
         var chatType = display["type"] || {};
         var typeName = chatType["@type"];
@@ -57,7 +81,7 @@ PhotoTextsListItem {
     function buildChatMenuActions() {
         var anyUnread = unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0;
         var actions = [];
-        actions.push({ text: qsTr("Mark all messages as read"), visible: anyUnread && !chatIsGroup(), callback: function() {
+        actions.push({ text: qsTr("Mark all messages as read"), visible: anyUnread && chatCanBeMarkedRead(), callback: function() {
             tdLibWrapper.viewMessage(chat_id, display.last_message.id, true);
             tdLibWrapper.readAllChatMentions(chat_id);
             tdLibWrapper.readAllChatReactions(chat_id);
@@ -92,7 +116,7 @@ PhotoTextsListItem {
             }
             pageStack.push(Qt.resolvedUrl("../pages/ChatInformationPage.qml"), { "chatInformation" : display });
         }});
-        actions.push({ text: qsTr("Delete Chat"), visible: model.display.type['@type'] === "chatTypePrivate", callback: function() {
+        actions.push({ text: qsTr("Delete Chat"), visible: model.display.type['@type'] === "chatTypePrivate", destructive: true, callback: function() {
             var chatIdToDelete = chat_id;
             var revoke = !!model.display.can_be_deleted_for_all_users;
             Remorse.itemAction(listItem, qsTr("Deleting chat"), function() {
@@ -107,15 +131,22 @@ PhotoTextsListItem {
     // misura (fontSizeSmall) su richiesta (#5/#6 v2.4); il neon resta fontSizeMedium.
     // L'hint emoji segue la stessa misura per non disallineare le emoji nel titolo.
     readonly property real chatTitleFontSize: appSettings.useNeonTheme ? Theme.fontSizeMedium : Theme.fontSizeSmall
+    // Barbara: menu long-press con la card del tema (vedi NeonMenuOverlay).
+    readonly property bool barbara: BarbaraTheme.active
     primaryText.text: title ? Emoji.emojify(title, chatTitleFontSize) : qsTr("Unknown")
     primaryText.font.pixelSize: chatTitleFontSize
     // Nome chat: corsivo nel tema Neon (abbellimento 2.0); grassetto nel tema
     // Silica nativo (2.3 #11a). Pinnate in rosso (#8).
     primaryText.font.italic: appSettings.useNeonTheme
     primaryText.font.bold: !appSettings.useNeonTheme
-    primaryText.color: is_pinned
-                       ? "#ff5252"
-                       : ((appSettings.highlightUnreadConversations && (unread_count > 0)) ? Theme.highlightColor : Theme.primaryColor)
+    // Barbara: titolo della riga in inchiostro del tema (l'accento e' riservato
+    // agli stati attivi e agli autori, non ai titoli di lista); le chat fissate
+    // si riconoscono dall'etichetta PIN, non dal rosso di Silica.
+    primaryText.color: listItem.barbara
+                       ? BarbaraTheme.ink
+                       : (is_pinned
+                          ? "#ff5252"
+                          : ((appSettings.highlightUnreadConversations && (unread_count > 0)) ? Theme.highlightColor : Theme.primaryColor))
     // last user
     prologSecondaryText.text: showDraft ? "<i>"+qsTr("Draft")+"</i>" : (is_channel ? "" : ( last_message_sender_id ? ( last_message_sender_id !== ownUserId ? Emoji.emojify(Functions.getUserName(tdLibWrapper.getUserInformation(last_message_sender_id)), Theme.fontSizeExtraSmall) : qsTr("You") ) : "" ))
     // last message
@@ -153,7 +184,7 @@ PhotoTextsListItem {
         sourceComponent: Component {
             ContextMenu {
                 MenuItem {
-                    visible: (unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0) && !chatIsGroup()
+                    visible: (unread_count > 0 || unread_reaction_count > 0 || unread_mention_count > 0) && chatCanBeMarkedRead()
                     onClicked: {
                         tdLibWrapper.viewMessage(chat_id, display.last_message.id, true);
                         tdLibWrapper.readAllChatMentions(chat_id);

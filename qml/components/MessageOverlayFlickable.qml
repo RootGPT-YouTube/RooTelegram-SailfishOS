@@ -41,6 +41,7 @@ Flickable {
     readonly property bool isOwnMessage: tdLibWrapper.getUserInformation().id === overlayMessage.sender_id.user_id;
     readonly property bool isAnonymous: overlayMessage.sender_id["@type"] === "messageSenderChat"
     property bool hasContentComponent: overlayMessage.content && chatView.delegateMessagesContent.indexOf(overlayMessage.content['@type']) > -1
+                                       && (overlayMessage.content['@type'] !== "messageRichMessage" || !!Functions.getRichMessageFirstPhotoBlock(overlayMessage.content))
     readonly property var overlayWebPageData: resolveOverlayWebPageData()
     signal requestClose;
 
@@ -218,7 +219,8 @@ Flickable {
             width: parent.width
             height: active ? (overlayMessage.reply_markup.rows.length * (Theme.itemSizeSmall + Theme.paddingSmall) - Theme.paddingSmall) : 0
             asynchronous: true
-            active: !!overlayMessage.reply_markup && myMessage.reply_markup.rows
+            active: !!overlayMessage.reply_markup && overlayMessage.reply_markup["@type"] === "replyMarkupInlineKeyboard"
+                    && !!overlayMessage.reply_markup.rows
             source: Qt.resolvedUrl("ReplyMarkupButtons.qml")
         }
 

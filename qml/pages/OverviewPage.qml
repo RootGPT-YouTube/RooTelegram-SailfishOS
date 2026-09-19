@@ -39,10 +39,27 @@ Page {
     property bool loading: true;
     // Tema Neon (cyberpunk) vs Silica base. In Silica niente glow/corsivo/sfondo neon.
     readonly property bool neon: appSettings.useNeonTheme
+    // Tema Barbara (vetro ciano, palette propria chiara/scura). Vedi BarbaraTheme.qml.
+    readonly property bool barbara: BarbaraTheme.active
+    // Filtro per TIPO della fascia Barbara: 0 = tutte, 1 = gruppi, 2 = canali.
+    // Con gli altri due temi resta 0 e la catena dei proxy non viene nemmeno creata.
+    property int barbaraTypeFilter: 0
+    // Non letti complessivi, per la riga mono sotto il brand (solo Barbara).
+    property int totalUnreadMessages: 0
+    // Non letti PER CARTELLA, per i badge dei chip (solo Barbara): "<id>" -> conteggio.
+    property var folderUnreadCounts: ({})
     property bool logoutLoading: false;
     property int connectionState: TelegramAPI.WaitingForNetwork
     property int ownUserId;
     property int activeFolderId: 0;
+    // Warm-up cartelle (tema Barbara): vedi startFolderWarmup(). TDLib calcola i
+    // non letti di una cartella per bene solo dopo che la sua chat-list e' stata
+    // "aperta" almeno una volta (switchChatList + getChats) — altrimenti
+    // getFolderUnreadCounts() riflette solo le chat gia' note per altre vie, un
+    // numero parziale. Qui le apriamo noi una alla volta cosi' i badge sono
+    // gia' giusti senza che l'utente debba toccare nulla.
+    property var foldersToWarmUp: []
+    property bool folderWarmupActive: false
     property bool chatListCreated: false;
 
     // link handler:
@@ -79,8 +96,16 @@ Page {
     }
 
     onStatusChanged: {
-        if (status === PageStatus.Active && initializationCompleted && !chatListCreated && !logoutLoading) {
-            updateContent();
+        if (status === PageStatus.Active) {
+            // Badge cartella del tema Barbara: fin qui si ricalcolava solo di
+            // riflesso (cambio cartella, arrivo messaggio con chat aperta).
+            // Ricalcoliamo anche ad ogni apertura della home, cosi' i chip non
+            // mostrano contatori vecchi di quando l'utente e' stato via.
+            chatListModel.calculateUnreadState();
+            overviewPage.startFolderWarmup();
+            if (initializationCompleted && !chatListCreated && !logoutLoading) {
+                updateContent();
+            }
         }
     }
 
@@ -135,6 +160,7 @@ Page {
             }
             chatListView.scrollToTop();
             updateSecondaryContentTimer.start();
+            overviewPage.startFolderWarmup();
             var remainingInteractionHints = appSettings.remainingInteractionHints;
             Debug.log("Remaining interaction hints: " + remainingInteractionHints);
             if (remainingInteractionHints > 0) {
@@ -175,9 +201,57 @@ Page {
         }
     }
 
+    // Conteggio non letti per l'header Barbara (riga mono sotto il brand).
+    // ⚠️ `unreadStateChanged` NON basta: chatlistmodel.cpp lo emette SOLO in
+    // modalita' online-only. Il segnale che arriva sempre e' invece
+    // `privateUnreadStateChanged` (lo emette ogni calculateUnreadState), quindi
+    // il totale lo CHIEDIAMO al modello a ogni passaggio.
+    Connections {
+        target: chatListModel
+        onUnreadStateChanged: overviewPage.refreshUnreadCounters()
+        onPrivateUnreadStateChanged: overviewPage.refreshUnreadCounters()
+        onCountChanged: overviewPage.refreshUnreadCounters()
+    }
+
+    // Badge cartella (tema Barbara): il ricalcolo su onStatusChanged NON basta
+    // per il caso "riapro l'app dallo switcher" — la home resta la Page ATTIVA
+    // sullo stack anche quando l'intera applicazione va in background (kill
+    // "morbido" dallo switcher, il processo/daemon resta vivo: vedi RECYCLE),
+    // quindi il suo `status` non cambia mai e onStatusChanged non riscatta.
+    // Qt.application.active e' il segnale giusto: e' lo stesso gia' usato da
+    // ChatPage.qml per le bozze nell'identico scenario (swipe-away).
+    Connections {
+        target: Qt.application
+        onActiveChanged: {
+            if (Qt.application.active && overviewPage.status === PageStatus.Active) {
+                chatListModel.calculateUnreadState();
+                overviewPage.startFolderWarmup();
+            }
+        }
+    }
+
+    Connections {
+        target: chatFoldersModel
+        onCountChanged: overviewPage.refreshUnreadCounters()
+    }
+
+    // Filtro per TIPO (fascia Barbara): riusa il BoolFilterModel gia' presente nel
+    // progetto su due ruoli booleani del modello, `is_group` e `is_channel`.
+    // A filtro "Tutte" il sourceModel resta null: nessun proxy, nessun costo.
+    BoolFilterModel {
+        id: chatTypeFilterModel
+        sourceModel: (overviewPage.barbara && overviewPage.barbaraTypeFilter !== 0) ? chatListModel : null
+        filterRoleName: overviewPage.barbaraTypeFilter === 2 ? "is_channel" : "is_group"
+        filterValue: true
+    }
+
+    // Ricerca testuale: si innesta SOPRA il filtro per tipo, cosi' i due si
+    // compongono (cercare dentro "Canali" cerca solo fra i canali).
     TextFilterModel {
         id: chatListProxyModel
-        sourceModel: (chatSearchField.opacity > 0) ? chatListModel : null
+        sourceModel: (chatSearchField.opacity > 0)
+                     ? (chatTypeFilterModel.sourceModel ? chatTypeFilterModel : chatListModel)
+                     : null
         filterRoleName: "filter"
         filterText: chatSearchField.text
     }
@@ -436,6 +510,86 @@ Page {
         }
     }
 
+    // Cambio cartella: ri-tappare la cartella attiva torna a "tutte". Unica
+    // implementazione, condivisa dalla fascia Barbara e dalla riga cartelle
+    // degli altri due temi.
+    function switchToFolder(fid) {
+        if (overviewPage.activeFolderId === fid) {
+            // Tornare a "tutte" non richiede TDLib: chatListModel.setActiveFolder(0)
+            // ripristina già in modo sincrono l'ordine principale (tenuto sempre
+            // aggiornato anche a cartella attiva, vedi handleChatOrderUpdated in
+            // chatlistmodel.cpp). Le chiamate switchChatList(0)+getChats() qui erano
+            // ridondanti e innescavano il ciclo di paginazione di onChatsReceived,
+            // che e' la causa dei 2-3s di ritardo percepito nel tornare a "tutte".
+            folderSwitchTimer.stop();
+            overviewPage.activeFolderId = 0;
+            chatListModel.setActiveFolder(0);
+        } else {
+            overviewPage.activeFolderId = fid;
+            tdLibWrapper.switchChatList(2, fid);
+            folderSwitchTimer.targetFolderId = fid;
+            folderSwitchTimer.restart();
+        }
+    }
+
+    // Contatori dei non letti dell'header Barbara: totale sotto il brand e badge
+    // dei chip cartella. Solo in Barbara: altrove nessuno li legge.
+    function refreshUnreadCounters() {
+        if (overviewPage.barbara) {
+            overviewPage.totalUnreadMessages = chatListModel.getTotalUnreadCount();
+            overviewPage.folderUnreadCounts = chatListModel.getFolderUnreadCounts();
+        }
+    }
+
+    // Apre in sequenza la chat-list di ogni cartella (switchChatList + getChats,
+    // esattamente cio' che fa un tap su un chip) cosi' TDLib calcola i non letti
+    // reali per tutte, non solo per quella eventualmente gia' aperta dall'utente.
+    // Non tocca chatListModel.setActiveFolder(): la lista VISIBILE resta quella
+    // che l'utente ha gia' selezionata, nessun flicker. onChatsReceived viene
+    // messo in pausa (folderWarmupActive) per non confondere la sua logica di
+    // paginazione/primo-avvio con queste risposte.
+    function startFolderWarmup() {
+        if (!overviewPage.barbara || overviewPage.folderWarmupActive || !overviewPage.chatListCreated) {
+            return;
+        }
+        var ids = [];
+        for (var i = 0; i < chatFoldersModel.count; i++) {
+            var fid = chatFoldersModel.getId(i);
+            if (fid > 0) {
+                ids.push(fid);
+            }
+        }
+        if (ids.length === 0) {
+            return;
+        }
+        overviewPage.foldersToWarmUp = ids;
+        overviewPage.folderWarmupActive = true;
+        folderWarmupTimer.restart();
+    }
+
+    Timer {
+        id: folderWarmupTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            if (overviewPage.foldersToWarmUp.length === 0) {
+                // Fatto: torniamo alla chat-list che l'utente ha davvero attiva.
+                tdLibWrapper.switchChatList(overviewPage.activeFolderId === 0 ? 0 : 2,
+                                             overviewPage.activeFolderId);
+                tdLibWrapper.getChats();
+                overviewPage.folderWarmupActive = false;
+                chatListModel.calculateUnreadState();
+                return;
+            }
+            var remaining = overviewPage.foldersToWarmUp.slice();
+            var fid = remaining.shift();
+            overviewPage.foldersToWarmUp = remaining;
+            tdLibWrapper.switchChatList(2, fid);
+            tdLibWrapper.getChats();
+            folderWarmupTimer.restart();
+        }
+    }
+
     function updateContent() {
         tdLibWrapper.getChats();
     }
@@ -552,6 +706,16 @@ Page {
         onOwnUserIdFound: {
             overviewPage.ownUserId = ownUserId;
         }
+        onUnreadMessageCountUpdated: {
+            // Notifica push di TDLib all'arrivo di nuovi messaggi non letti
+            // (stesso segnale gia' usato da CoverPage.qml): innesca il
+            // ricalcolo cosi' i badge cartella del tema Barbara si aggiornano
+            // anche a home aperta, non solo quando si cambia cartella.
+            chatListModel.calculateUnreadState();
+        }
+        onUnreadChatCountUpdated: {
+            chatListModel.calculateUnreadState();
+        }
         onChatLastMessageUpdated: {
             if (!overviewPage.chatListCreated) {
                 chatListCreatedTimer.restart();
@@ -567,6 +731,13 @@ Page {
             }
         }
         onChatsReceived: {
+            // Warm-up cartelle in corso (vedi startFolderWarmup): e' un driver a
+            // tempo (Timer), non a esaurimento — queste risposte le ignoriamo,
+            // altrimenti la logica sotto (pensata per la paginazione della lista
+            // principale / primo avvio) scatterebbe a sproposito.
+            if (overviewPage.folderWarmupActive) {
+                return;
+            }
             // Le risposte di ricerca globale portano il loro @extra: vanno nei
             // risultati, NON nella paginazione della chat-list.
             var chatsExtra = (chats && chats["@extra"] !== undefined && chats["@extra"] !== null) ? chats["@extra"].toString() : "";
@@ -634,6 +805,8 @@ Page {
 
     // Sfondo a circuiti elettrici blu (#19), tenue, dietro la lista.
     CircuitBackground {}
+    // Sfondo del tema Barbara: superficie propria + reticolo tenue.
+    BarbaraBackground {}
 
     SilicaFlickable {
         id: overviewContainer
@@ -653,7 +826,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("Debug")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -664,7 +839,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("Settings")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -679,7 +856,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("Stories")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -706,7 +885,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("New Group")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -717,7 +898,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("New Channel")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -728,7 +911,9 @@ Page {
                     anchors.centerIn: parent
                     text: qsTr("New Chat")
                     font.italic: overviewPage.neon
-                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                    color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                     layer.enabled: overviewPage.neon
                     layer.effect: Glow { color: "#ffffff"; radius: 6; samples: 13; spread: 0.2; transparentBorder: true }
                 }
@@ -742,7 +927,23 @@ Page {
             visible: opacity > 0
             // Non lasciare che l'altezza fissa di default schiacci il titolo neon: cresce col label
             height: Math.max(implicitHeight, brandNeon.visible ? brandNeon.implicitHeight + 2 * Theme.paddingLarge : 0)
+            // Barbara: il brand e' su due righe (nome + non letti in mono), quindi
+            // l'header cresce quanto basta e non le schiaccia.
             Behavior on opacity { FadeAnimation {} }
+
+            // Barbara: l'header e' un pannello translucido DEL TEMA con bordo
+            // inferiore da 1px — non eredita il fondo dell'ambience.
+            Rectangle {
+                visible: overviewPage.barbara
+                anchors.fill: parent
+                z: -1
+                color: BarbaraTheme.panelTranslucent
+                Rectangle {
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+                    height: BarbaraTheme.borderWidth
+                    color: BarbaraTheme.glassBorder
+                }
+            }
 
             // Testo degli stati di connessione ("Connecting…"): il title nativo del
             // PageHeader sarebbe allineato a destra; qui lo mostriamo CENTRATO e su
@@ -768,7 +969,10 @@ Page {
             // connection.png) tinto col colore del tema via ColorOverlay.
             Image {
                 id: connectionIcon
-                visible: !overviewPage.neon
+                // Barbara RIPRENDE il pallino di Silica (in Neon resta nascosto):
+                // la condizione e' scritta per esteso perche' e' una scelta di
+                // design, non una conseguenza del fatto che Barbara non e' Neon.
+                visible: !overviewPage.neon || overviewPage.barbara
                 source: Qt.resolvedUrl("../../images/icon-m-rt-connection.png")
                 sourceSize.width: Theme.iconSizeSmall * 2
                 sourceSize.height: Theme.iconSizeSmall * 2
@@ -782,7 +986,9 @@ Page {
                     verticalCenter: parent.verticalCenter
                 }
                 layer.enabled: true
-                layer.effect: ColorOverlay { color: Theme.primaryColor }
+                layer.effect: ColorOverlay {
+                    color: overviewPage.barbara ? BarbaraTheme.ink : Theme.primaryColor
+                }
             }
 
             // Puntino di stato connessione — SOLO Silica — subito a destra dell'icona,
@@ -792,7 +998,7 @@ Page {
             // Nel Neon non compare.
             Rectangle {
                 id: connectionDot
-                visible: !overviewPage.neon
+                visible: !overviewPage.neon || overviewPage.barbara
                 width: Theme.paddingMedium * 1.3
                 height: width
                 radius: width / 2
@@ -811,7 +1017,8 @@ Page {
             // l'alone. Solo Silica e solo nello stato ambra.
             Item {
                 id: connectionDotPulse
-                visible: !overviewPage.neon && overviewPage.connectionIsConnecting()
+                visible: (!overviewPage.neon || overviewPage.barbara)
+                         && overviewPage.connectionIsConnecting()
                 width: connectionDot.width * 2.8
                 height: width
                 anchors.centerIn: connectionDot
@@ -834,7 +1041,8 @@ Page {
                 SequentialAnimation on pulseRadius {
                     running: connectionDotPulse.visible
                     loops: Animation.Infinite
-                    NumberAnimation { to: 20; duration: 750; easing.type: Easing.InOutSine }
+                    // Barbara: alone piu' contenuto (14 invece di 20), stesso ciclo 1.5s.
+                    NumberAnimation { to: overviewPage.barbara ? 14 : 20; duration: 750; easing.type: Easing.InOutSine }
                     NumberAnimation { to: 6;  duration: 750; easing.type: Easing.InOutSine }
                 }
                 SequentialAnimation on opacity {
@@ -851,10 +1059,13 @@ Page {
             // se non c'è spazio fino al brand.
             Label {
                 id: connectionDescLabel
-                visible: !overviewPage.neon && overviewPage.connectionState !== TelegramAPI.ConnectionReady
+                visible: (!overviewPage.neon || overviewPage.barbara)
+                         && overviewPage.connectionState !== TelegramAPI.ConnectionReady
                 text: overviewPage.connectionDescription()
-                font.pixelSize: Theme.fontSizeExtraSmall
-                color: Theme.highlightColor
+                // Barbara: metadati in monospace, inchiostro secondario del tema.
+                font.family: overviewPage.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
+                font.pixelSize: overviewPage.barbara ? BarbaraTheme.fontSizeMeta : Theme.fontSizeExtraSmall
+                color: overviewPage.barbara ? BarbaraTheme.inkSecondary : Theme.highlightColor
                 truncationMode: TruncationMode.Fade
                 anchors {
                     left: connectionDot.right
@@ -876,8 +1087,12 @@ Page {
                 // testo "Connecting…" non serve (connectionLabel si nasconde da solo
                 // perché brandNeon.visible diventa true).
                 visible: overviewPage.neon ? (overviewPage.connectionState === TelegramAPI.ConnectionReady) : true
-                implicitWidth: neonCore.implicitWidth
-                implicitHeight: neonCore.implicitHeight
+                implicitWidth: overviewPage.barbara
+                               ? Math.max(neonCore.implicitWidth, barbaraUnreadLabel.implicitWidth)
+                               : neonCore.implicitWidth
+                implicitHeight: overviewPage.barbara
+                                ? (neonCore.implicitHeight + barbaraUnreadLabel.implicitHeight)
+                                : neonCore.implicitHeight
                 width: implicitWidth
                 height: implicitHeight
 
@@ -939,9 +1154,13 @@ Page {
                 // Nucleo: la scritta quasi bianca/luminosa con un glow stretto rosa acceso
                 Label {
                     id: neonCore
-                    // In Neon segue lo sfarfallio; in Silica sempre pieno (sobrio).
+                    // In Neon segue lo sfarfallio; in Silica e Barbara sempre pieno.
                     opacity: overviewPage.neon ? brandNeon.glowOn : 1.0
-                    anchors.centerIn: parent
+                    // Barbara: il brand sta in alto, la riga dei non letti sotto.
+                    anchors.horizontalCenter: overviewPage.barbara ? undefined : parent.horizontalCenter
+                    anchors.verticalCenter: overviewPage.barbara ? undefined : parent.verticalCenter
+                    anchors.right: overviewPage.barbara ? parent.right : undefined
+                    anchors.top: overviewPage.barbara ? parent.top : undefined
                     // Silica: "R∞Telegram" (col simbolo dell'infinito come il Neon) in
                     // grassetto+corsivo, allineato a destra, di misura Large (un gradino
                     // di font più piccolo di prima, su richiesta). Neon: "R∞Telegram"
@@ -950,17 +1169,37 @@ Page {
                     font.pixelSize: overviewPage.neon
                                     ? Theme.fontSizeHuge
                                     : Theme.fontSizeLarge
+                    // Barbara: titoli in corsivo serif (font heading), mai in grassetto.
+                    font.family: overviewPage.barbara ? BarbaraTheme.fontFamilyTitle : Theme.fontFamily
                     font.italic: true
-                    font.bold: !overviewPage.neon
-                    color: overviewPage.neon ? "#fff3e6" : Theme.highlightColor
-                    layer.enabled: overviewPage.neon
+                    font.bold: !overviewPage.neon && !overviewPage.barbara
+                    color: overviewPage.barbara ? BarbaraTheme.ink
+                         : (overviewPage.neon ? "#fff3e6" : Theme.highlightColor)
+                    // Alone: Neon sempre, Barbara solo con ambience scura (e se non
+                    // e' stato spento dalle impostazioni), Silica mai.
+                    layer.enabled: overviewPage.neon || (overviewPage.barbara && BarbaraTheme.glowTitles)
                     layer.effect: Glow {
-                        color: "#ff9a3d"
-                        radius: 8
-                        samples: 17
-                        spread: 0.55
+                        color: overviewPage.barbara ? BarbaraTheme.accent : "#ff9a3d"
+                        radius: overviewPage.barbara ? BarbaraTheme.glowRadius : 8
+                        samples: overviewPage.barbara ? BarbaraTheme.glowSamples : 17
+                        spread: overviewPage.barbara ? BarbaraTheme.glowSpread : 0.55
                         transparentBorder: true
                     }
+                }
+
+                // Barbara: conteggio non letti in monospace sotto il brand.
+                Label {
+                    id: barbaraUnreadLabel
+                    visible: overviewPage.barbara
+                    anchors { right: parent.right; top: neonCore.bottom }
+                    horizontalAlignment: Text.AlignRight
+                    text: overviewPage.totalUnreadMessages > 0
+                          ? qsTr("%Ln unread", "", overviewPage.totalUnreadMessages)
+                          : ""
+                    font.family: BarbaraTheme.fontFamilyMono
+                    font.pixelSize: BarbaraTheme.fontSizeMetaSmall
+                    color: BarbaraTheme.inkSecondary
+                    maximumLineCount: 1
                 }
 
                 // Una "raffica" di sfarfallio: spegnimenti rapidi e riaccensioni
@@ -1030,11 +1269,15 @@ Page {
             width: overviewPage.neon
                    ? undefined
                    : Math.min(parent.width - 2 * Theme.horizontalPageMargin, Theme.itemSizeHuge * 2.4)
-            radius: overviewPage.neon ? Theme.paddingLarge : 0
+            // Barbara: card del tema (pannello opaco + bordo del vetro), coerente
+            // col menu long-press.
+            radius: overviewPage.neon ? Theme.paddingLarge
+                  : (overviewPage.barbara ? BarbaraTheme.radiusBubble : 0)
             color: overviewPage.neon ? Theme.rgba("#803500", 0.82)
-                                     : Theme.rgba(Theme.overlayBackgroundColor, 1.0)
-            border.width: overviewPage.neon ? 4 : 0
-            border.color: "#ff2d2d"
+                 : overviewPage.barbara ? BarbaraTheme.panel
+                                        : Theme.rgba(Theme.overlayBackgroundColor, 1.0)
+            border.width: overviewPage.neon ? 4 : (overviewPage.barbara ? BarbaraTheme.borderWidth : 0)
+            border.color: overviewPage.barbara ? BarbaraTheme.glassBorder : "#ff2d2d"
             z: 100
             clip: true
             height: opened ? titleMenuColumn.height + 2 * Theme.paddingMedium : 0
@@ -1097,7 +1340,9 @@ Page {
                             text: modelData.text
                             font.italic: overviewPage.neon
                             // Scritte bianche al neon su sfondo arancione.
-                            color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff") : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                            color: overviewPage.neon ? (parent.highlighted ? "#fff3e6" : "#ffffff")
+                             : overviewPage.barbara ? (parent.highlighted ? BarbaraTheme.accent : BarbaraTheme.ink)
+                                                    : (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
                             layer.enabled: overviewPage.neon
                             layer.effect: Glow {
                                 color: "#ffffff"
@@ -1150,12 +1395,14 @@ Page {
         SilicaListView {
             id: chatFolderList
             width: parent.width
-            height: chatFoldersModel.count > 0 ? Theme.itemSizeExtraLarge : 0
+            // In Barbara le cartelle stanno nella fascia a chip (BarbaraFilterBand),
+            // sotto i filtri per tipo: qui non si istanzia nulla.
+            height: visible ? Theme.itemSizeExtraLarge : 0
             model: chatFoldersModel
             orientation: Qt.Horizontal
             layoutDirection: Qt.LeftToRight
             anchors.top: pageHeader.bottom
-            visible: chatFoldersModel.count > 0
+            visible: !overviewPage.barbara && chatFoldersModel.count > 0
             clip: true
 
             HorizontalScrollDecorator {}
@@ -1315,27 +1562,40 @@ Page {
                     opacity: activeFolderId === folderId ? 1.0 : 0.6
                 }
 
-                onClicked: {
-                    var fid = folderId
-                    if (activeFolderId === fid) {
-                        folderSwitchTimer.stop()
-                        activeFolderId = 0
-                        chatListModel.setActiveFolder(0)
-                        tdLibWrapper.switchChatList(0)
-                        tdLibWrapper.getChats()
-                    } else {
-                        activeFolderId = fid
-                        tdLibWrapper.switchChatList(2, fid)
-                        folderSwitchTimer.targetFolderId = fid
-                        folderSwitchTimer.restart()
-                    }
-                }
+                onClicked: overviewPage.switchToFolder(folderId)
             }
         }
+        // ── Fascia Barbara: filtri per tipo + cartelle a chip ──────────────
+        BarbaraFilterBand {
+            id: barbaraFilterBand
+            visible: overviewPage.barbara
+            // La larghezza la impone il componente (width: parent.width): qui si
+            // ancora solo il bordo superiore, come fa la riga cartelle classica.
+            // Ancorare anche left/right renderebbe morta quella binding.
+            anchors.top: pageHeader.bottom
+            activeFolderId: overviewPage.activeFolderId
+            typeFilter: overviewPage.barbaraTypeFilter
+            folderUnread: overviewPage.folderUnreadCounts
+
+            onTypeFilterClicked: {
+                overviewPage.barbaraTypeFilter = filterType;
+                // "Tutte" azzera anche l'eventuale filtro per cartella, cosi'
+                // non serve ritoccare la cartella attiva per tornare a vederle
+                // tutte: riusa switchToFolder, che la spegne se e' gia' attiva.
+                if (filterType === 0 && overviewPage.activeFolderId !== 0) {
+                    overviewPage.switchToFolder(overviewPage.activeFolderId);
+                }
+            }
+            onFolderClicked: overviewPage.switchToFolder(folderId)
+            onEditFoldersClicked: pageStack.push(Qt.resolvedUrl("../pages/ChatFoldersPage.qml"))
+        }
+
         SilicaListView {
             id: chatListView
             anchors {
-                top: chatFoldersModel.count > 0 ? chatFolderList.bottom : pageHeader.bottom
+                top: overviewPage.barbara
+                     ? barbaraFilterBand.bottom
+                     : (chatFoldersModel.count > 0 ? chatFolderList.bottom : pageHeader.bottom)
                 bottom: parent.bottom
                 left: parent.left
                 right: parent.right
@@ -1343,7 +1603,8 @@ Page {
             clip: true
             opacity: (overviewPage.chatListCreated && !overviewPage.logoutLoading) ? 1 : 0
             Behavior on opacity { FadeAnimation {} }
-            model: chatListProxyModel.sourceModel ? chatListProxyModel : chatListModel
+            model: chatListProxyModel.sourceModel ? chatListProxyModel
+                 : (chatTypeFilterModel.sourceModel ? chatTypeFilterModel : chatListModel)
 
             // Sezione "Le mie chat": intestazione sopra i match locali (solo
             // durante la ricerca e se ci sono risultati locali).
@@ -1401,9 +1662,10 @@ Page {
             delegate: ChatListViewItem {
                 ownUserId: overviewPage.ownUserId
                 activeFolderId: overviewPage.activeFolderId
-                // Tema Neon: menù long-press a comparsa (NeonMenuOverlay), invariato.
+                // Tema Neon e Barbara: menù long-press a comparsa (NeonMenuOverlay),
+                // con la card del rispettivo tema.
                 // Tema Silica: null → fallback al ContextMenu Silica nativo (2.3 #11b).
-                neonMenu: overviewPage.neon ? chatNeonMenu : null
+                neonMenu: (overviewPage.neon || overviewPage.barbara) ? chatNeonMenu : null
                 isVerified: is_verified
                 onClicked: {
                     // Se è un supergruppo forum, mostra prima la lista dei topic
