@@ -16,7 +16,6 @@
 #include <QList>
 #include <memory>
 #include <vector>
-#include <pulse/volume.h>   // pa_cvolume (volume di sistema del sink salvato per il restore)
 
 namespace tgcalls {
 class Instance;
@@ -141,6 +140,9 @@ private:
     rootelegram::CallVideoRenderer *remoteVideoRenderer;
     rootelegram::CallVideoRenderer *localVideoRenderer;
     qlonglong currentCallId;
+    // Ultima chiamata chiusa da noi (HangingUp/Discarded/Error): i suoi
+    // aggiornamenti e la sua segnalazione tardivi si ignorano.
+    qlonglong m_endedCallId = 0;
     qlonglong currentUserId;
     bool currentIsOutgoing;
     // ⛔ Vero solo se QUESTA chiamata e' stata dichiarata al sistema da `startCall()`.
@@ -160,12 +162,12 @@ private:
     QString m_speakerPort;
     QString m_earpiecePort;
     bool m_speakerOn;   // V4: stato vivavoce (per riapplicare la porta al routing)
-    // flat-volumes=yes su SFOS accoppia il volume dello stream WEBRTC a quello del
-    // sink di sistema: forzando su lo stream trasciniamo su il sink e resta alto a
-    // chiamata finita. Salviamo qui il volume "pulito" del sink prima della forzatura
-    // e lo ripristiniamo in stopInstance().
-    pa_cvolume m_savedSinkVolume;
-    bool m_sinkVolumeSaved = false;
+    // Porta del sink prima della chiamata (letta al primo cambio) e ultima porta
+    // messa da noi: stopInstance() rimette la prima solo se c'e' ancora la seconda.
+    // ⛔ I volumi (sink e stream) NON si salvano ne' si scrivono: vedi il .cpp.
+    QString m_savedPort;
+    QString m_lastPortSet;
+    bool m_portSaved = false;
 };
 
 #endif // CALLMANAGER_H

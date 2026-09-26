@@ -129,6 +129,25 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
         return;
     }
 
+    // ⭐⭐ 26/09/2026 — Una chiamata chiusa da noi (HangingUp) puo' restare
+    // aperta sul server a lungo: misurato sull'Xperia, 64 s fra HangingUp e
+    // Discarded. I suoi aggiornamenti tardivi vanno IGNORATI: prima arrivavano
+    // quando era gia' partita la chiamata successiva e chiamavano stopInstance(),
+    // che fermava l'istanza della chiamata NUOVA.
+    if (callId == m_endedCallId) {
+        LOG("Ignoring update for call already ended locally" << callId);
+        return;
+    }
+    // ⛔ E una seconda chiamata non si prende quella in corso: prima
+    // `currentCallId` passava a lei, e l'istanza WebRTC della prima mandava la
+    // sua segnalazione con l'id della seconda («Call is not active» a raffica).
+    if (currentCallId > 0 && currentCallId != m_endedCallId && callId != currentCallId) {
+        qWarning() << "[CALLAUDIO] ignoro l'aggiornamento della chiamata" << callId
+                   << call.value("state").toMap().value("@type").toString()
+                   << "mentre e' in corso la" << currentCallId;
+        return;
+    }
+
     currentCallId = callId;
     currentUserId = call.value("user_id").toLongLong();
     currentIsOutgoing = call.value("is_outgoing").toBool();
@@ -187,7 +206,13 @@ void CallManager::handleCallUpdated(const QVariantMap &call)
             mceInterface->callStateChange(QStringLiteral("active"));
         }
         ensureInstanceForReadyCall(callState);
-    } else if (callStateType == "callStateDiscarded" || callStateType == "callStateError") {
+    } else if (callStateType == "callStateHangingUp" || callStateType == "callStateDiscarded"
+               || callStateType == "callStateError") {
+        // ⭐ 26/09/2026 — Si chiude GIA' a HangingUp (= abbiamo chiesto noi
+        // `discardCall`): audio, porta, stato a MCE e UI di sistema non devono
+        // aspettare la conferma del server, che puo' tardare un minuto. E' quello
+        // che fa l'utente premendo Termina: per lui la chiamata e' finita li'.
+        m_endedCallId = callId;
         stopInstance();
         pendingSignalingData.clear();
     }
@@ -294,11 +319,17 @@ void CallManager::handleCallSignalingDataReceived(qlonglong callId, const QByteA
         return;
     }
 
-    if (currentCallId != 0 && callId != currentCallId) {
+    // Una chiamata chiusa da noi non riceve piu' nulla; e se quella in corso e'
+    // chiusa, si comporta come «nessuna chiamata» (vedi handleCallUpdated).
+    if (callId == m_endedCallId) {
+        return;
+    }
+    const bool currentLive = currentCallId > 0 && currentCallId != m_endedCallId;
+    if (currentLive && callId != currentCallId) {
         LOG("Ignoring signaling data for non-active call" << callId << "active:" << currentCallId);
         return;
     }
-    if (currentCallId == 0) {
+    if (!currentLive) {
         currentCallId = callId;
     }
 
@@ -429,6 +460,7 @@ struct SinkInputScan {
     uint32_t index = PA_INVALID_INDEX;
     bool found = false;
     uint8_t channels = 2;
+    pa_volume_t volumeAvg = PA_VOLUME_NORM;
 };
 
 void sinkInputInfoCb(pa_context * /*c*/, const pa_sink_input_info *info, int eol, void *userdata)
@@ -445,21 +477,22 @@ void sinkInputInfoCb(pa_context * /*c*/, const pa_sink_input_info *info, int eol
     if (app && (std::strstr(app, "WEBRTC") || std::strstr(app, "VoiceEngine"))) {
         scan->index = info->index;
         scan->channels = info->volume.channels > 0 ? info->volume.channels : 2;
+        scan->volumeAvg = pa_cvolume_avg(&info->volume);
         scan->found = true;
     }
 }
 
-// Legge il volume corrente di un sink per nome (per salvarlo prima della
-// forzatura WEBRTC in flat-volumes e ripristinarlo a chiamata finita).
-struct SinkVolumeScan {
+// Legge la porta attiva di un sink per nome: serve a rimettere a fine chiamata
+// la porta che c'era prima che la chiamata la cambiasse (vedi stopInstance()).
+struct SinkPortScan {
     pa_threaded_mainloop *ml = nullptr;
-    pa_cvolume volume;
+    QString activePort;
     bool found = false;
 };
 
-void sinkVolumeInfoCb(pa_context * /*c*/, const pa_sink_info *info, int eol, void *userdata)
+void sinkPortInfoCb(pa_context * /*c*/, const pa_sink_info *info, int eol, void *userdata)
 {
-    SinkVolumeScan *scan = static_cast<SinkVolumeScan *>(userdata);
+    SinkPortScan *scan = static_cast<SinkPortScan *>(userdata);
     if (eol) {
         pa_threaded_mainloop_signal(scan->ml, 0);
         return;
@@ -467,8 +500,26 @@ void sinkVolumeInfoCb(pa_context * /*c*/, const pa_sink_info *info, int eol, voi
     if (!info) {
         return;
     }
-    scan->volume = info->volume;
     scan->found = true;
+    if (info->active_port && info->active_port->name) {
+        scan->activePort = QString::fromUtf8(info->active_port->name);
+    }
+}
+
+// Chiamare col mainloop BLOCCATO.
+QString readActivePort(pa_context *ctx, pa_threaded_mainloop *ml, const QString &sink)
+{
+    SinkPortScan scan;
+    scan.ml = ml;
+    pa_operation *op = pa_context_get_sink_info_by_name(ctx, sink.toUtf8().constData(),
+                                                        &sinkPortInfoCb, &scan);
+    if (op) {
+        while (pa_operation_get_state(op) == PA_OPERATION_RUNNING) {
+            pa_threaded_mainloop_wait(ml);
+        }
+        pa_operation_unref(op);
+    }
+    return scan.activePort;
 }
 } // namespace
 
@@ -556,6 +607,16 @@ void CallManager::setSpeakerphoneOn(bool on)
     }
     const QString port = on ? m_speakerPort : m_earpiecePort;
     pa_threaded_mainloop_lock(ml);
+    // ⭐ 26/09/2026 — Prima del PRIMO cambio di porta si annota quella che c'era:
+    // senza, sugli Xperia/Jolla (sink droid con porte) la chiamata in uscita
+    // lasciava il sink su `output-earpiece` e suoneria/notifiche/media uscivano
+    // dalla capsula fino al prossimo evento di rotta (segnalato: «suoneria -90%»).
+    if (!m_portSaved) {
+        m_savedPort = readActivePort(ctx, ml, m_audioSink);
+        m_portSaved = true;
+        qWarning() << "[CALLAUDIO] porta attiva prima della chiamata" << m_savedPort;
+    }
+    m_lastPortSet = port;
     pa_operation *op = pa_context_set_sink_port_by_name(ctx, m_audioSink.toUtf8().constData(),
                                                         port.toUtf8().constData(), nullptr, nullptr);
     if (op) {
@@ -689,38 +750,17 @@ bool CallManager::routeWebrtcToCallSink()
         if (o2) {
             pa_operation_unref(o2);
         }
-        // flat-volumes=yes su SFOS: alzare lo stream WEBRTC trascina in alto anche
-        // il volume del SINK di sistema (sono accoppiati) e quel valore resta alto
-        // a chiamata finita. Salviamo UNA volta il volume "pulito" del sink PRIMA di
-        // forzarlo: lo stream nasce a 0% e in flat-volume non abbassa il sink, quindi
-        // qui il valore e' ancora quello scelto dall'utente. Ripristino in stopInstance().
-        if (!m_sinkVolumeSaved && !m_audioSink.isEmpty()) {
-            SinkVolumeScan vscan;
-            vscan.ml = ml;
-            pa_operation *ov = pa_context_get_sink_info_by_name(
-                ctx, m_audioSink.toUtf8().constData(), &sinkVolumeInfoCb, &vscan);
-            if (ov) {
-                while (pa_operation_get_state(ov) == PA_OPERATION_RUNNING) {
-                    pa_threaded_mainloop_wait(ml);
-                }
-                pa_operation_unref(ov);
-            }
-            if (vscan.found) {
-                m_savedSinkVolume = vscan.volume;
-                m_sinkVolumeSaved = true;
-                LOG("Call: saved system sink volume before WEBRTC boost, avg"
-                    << pa_cvolume_avg(&m_savedSinkVolume));
-            }
-        }
-        // Volume iniziale a 90% (non 100%): su SFOS 5.1 lo stream WEBRTC nasce a 0%
-        // (-inf dB) e va portato a un livello udibile UNA volta sola. Non lo
-        // ri-forziamo dopo (il timer si ferma appena trova lo stream), cosi'
-        // l'utente puo' regolarlo durante la chiamata.
-        pa_cvolume cv;
-        pa_cvolume_set(&cv, scan.channels, (PA_VOLUME_NORM * 9) / 10);
-        pa_operation *o3 = pa_context_set_sink_input_volume(ctx, scan.index, &cv, nullptr, nullptr);
-        if (o3) {
-            pa_operation_unref(o3);
+        // ⛔⛔ 26/09/2026 — Il volume dello stream NON si tocca piu' (e nemmeno
+        // quello del sink). Lo stream WEBRTC non ha un media.role, quindi
+        // module-match gli da' `x-maemo`: la sua chiave di stream-restore e' IL
+        // VOLUME MULTIMEDIALE DI SISTEMA, e ogni scrittura da client ha save=true.
+        // Forzarlo al 90% cambiava per sempre il multimediale dell'utente; il
+        // salva/ripristina del sink, in flat-volumes, riscalava e SALVAVA tutti
+        // gli stream vivi su quel sink. Lo stream nasce gia' al volume multimediale
+        // (ripristinato da stream-restore): il vecchio «nasce a 0%» era un device
+        // di prova col multimediale a zero. Qui si scrive solo nel log.
+        if (scan.volumeAvg == PA_VOLUME_MUTED) {
+            qWarning() << "[CALLAUDIO] stream WebRTC a 0% = volume multimediale a 0, non lo forzo";
         }
     }
     pa_threaded_mainloop_unlock(ml);
@@ -782,23 +822,37 @@ void CallManager::stopInstance()
     if (!wasDeclaredToSystem && mceInterface) {
         mceInterface->callStateChange(QStringLiteral("none"));
     }
-    // flat-volumes: ripristina il volume di sistema del sink salvato prima della
-    // forzatura WEBRTC. Senza questo, a chiamata finita il volume di sistema
-    // resta alto (bug segnalato: pactl sempre ~100%, minimo alzato).
-    if (m_sinkVolumeSaved) {
+    // Porta del sink: si rimette quella di prima della chiamata (annotata al
+    // primo cambio in setSpeakerphoneOn). ⚠️ Solo se la porta attiva e' ancora
+    // quella messa da NOI: se nel frattempo il sistema l'ha cambiata (cuffie
+    // inserite, BT), e' una decisione di rotta sua e va lasciata stare.
+    if (m_portSaved) {
         pa_context *ctx = static_cast<pa_context *>(m_pulseContext);
         pa_threaded_mainloop *ml = static_cast<pa_threaded_mainloop *>(m_pulseMainloop);
-        if (ctx && ml && !m_audioSink.isEmpty() && pa_context_get_state(ctx) == PA_CONTEXT_READY) {
+        if (m_savedPort.isEmpty()) {
+            // Sink senza porte (POCO) o lettura fallita: niente da rimettere.
+        } else if (ctx && ml && !m_audioSink.isEmpty() && pa_context_get_state(ctx) == PA_CONTEXT_READY) {
             pa_threaded_mainloop_lock(ml);
-            pa_operation *o = pa_context_set_sink_volume_by_name(
-                ctx, m_audioSink.toUtf8().constData(), &m_savedSinkVolume, nullptr, nullptr);
-            if (o) {
-                pa_operation_unref(o);
+            const QString current = readActivePort(ctx, ml, m_audioSink);
+            if (current == m_lastPortSet && current != m_savedPort) {
+                pa_operation *o = pa_context_set_sink_port_by_name(
+                    ctx, m_audioSink.toUtf8().constData(), m_savedPort.toUtf8().constData(),
+                    nullptr, nullptr);
+                if (o) {
+                    pa_operation_unref(o);
+                }
+                qWarning() << "[CALLAUDIO] fine chiamata: porta" << current << "->" << m_savedPort;
+            } else {
+                qWarning() << "[CALLAUDIO] fine chiamata: porta lasciata com'e'" << current
+                    << "(prima della chiamata" << m_savedPort << ", nostra" << m_lastPortSet << ")";
             }
             pa_threaded_mainloop_unlock(ml);
-            LOG("Call ended: restored system sink volume on" << m_audioSink);
+        } else {
+            qWarning() << "[CALLAUDIO] fine chiamata: PulseAudio non pronto, porta NON rimessa a" << m_savedPort;
         }
-        m_sinkVolumeSaved = false;
+        m_portSaved = false;
+        m_savedPort.clear();
+        m_lastPortSet.clear();
     }
     if (!instance) {
         return;
@@ -988,17 +1042,20 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
                                   Q_ARG(bool, active));
     };
 
-    descriptor.stateUpdated = [this](tgcalls::State state) {
+    // L'istanza appartiene a QUESTA chiamata: il suo id si fissa qui, non si
+    // rilegge da `currentCallId` (che puo' gia' essere passato a un'altra).
+    const qlonglong instanceCallId = currentCallId;
+    descriptor.stateUpdated = [instanceCallId](tgcalls::State state) {
         // 0=WaitInit 1=WaitInitAck 2=Established 3=Failed 4=Reconnecting
-        LOG("tgcalls state for call" << currentCallId << "is" << static_cast<int>(state));
+        LOG("tgcalls state for call" << instanceCallId << "is" << static_cast<int>(state));
     };
-    descriptor.signalingDataEmitted = [this](const std::vector<uint8_t> &data) {
-        if (!tdLibWrapper || currentCallId <= 0 || data.empty()) {
+    descriptor.signalingDataEmitted = [this, instanceCallId](const std::vector<uint8_t> &data) {
+        if (!tdLibWrapper || instanceCallId <= 0 || data.empty()) {
             return;
         }
         QByteArray signalingData(reinterpret_cast<const char *>(data.data()), static_cast<int>(data.size()));
         QMetaObject::invokeMethod(tdLibWrapper, "sendCallSignalingData", Qt::QueuedConnection,
-                                  Q_ARG(qlonglong, currentCallId),
+                                  Q_ARG(qlonglong, instanceCallId),
                                   Q_ARG(QByteArray, signalingData));
     };
 
@@ -1103,7 +1160,7 @@ void CallManager::ensureInstanceForReadyCall(const QVariantMap &callState)
         instance->setIncomingVideoOutput(remoteVideoRenderer->sink());
     }
     // Instrada l'audio in arrivo sul sink di chiamata + smute (parte mutato su
-    // Halium) + volume a 100% (su SFOS 5.1 nasce a 0%). Vale per vocali E video.
+    // Halium); il volume resta quello multimediale dell'utente. Vocali E video.
     routeWebrtcToCallSink();    // tentativo immediato
     m_audioUnmuteTimer->start(); // + ritenta finché lo stream compare
     if (currentIsVideo) {

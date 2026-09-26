@@ -13,92 +13,71 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.0";
+var version = "3.1";
 
 var changelogByLang = {
     "it": [
-        "Nuovo tema \"Barbara\": PROVATELO!",
-        "Barbara è vetro freddo color ciano: righe delle chat come schede, filtri Tutte/Gruppi/Canali e cartelle a pastiglia su una riga. Ha una palette chiara e una scura e sceglie da sé quella giusta in base all'ambience. Per chi installa RooTelegram per la prima volta è il tema predefinito; gli altri lo scelgono da Impostazioni → Aspetto, con le tre pillole Silica / Neon / Barbara.",
-        "I post «articolo» dei canali ora si leggono: titolo grande, foto, testo, elenchi e link, come nell'app ufficiale, invece di «messaggio non supportato».",
-        "Con Telegram Premium puoi scrivere articoli: dalla graffetta si apre un editor a pagina intera con titoli, sottotitoli, grassetto e corsivo visibili mentre scrivi, elenchi puntati, link e foto. Un articolo inviato si può anche modificare.",
-        "Bot: i pulsanti fissi di un bot stanno ora sopra la barra di scrittura, come nell'app ufficiale, invece di scorrere via con i messaggi. Il pulsante con la tastiera accanto alla graffetta li nasconde e li rimostra.",
-        "Aggiornato il motore di Telegram: sondaggi, articoli e altri messaggi nuovi non risultano più «non supportati», e le posizioni in tempo reale seguono il formato nuovo.",
-        "Link, nomi utente e ogni altro collegamento nei messaggi sono ora celeste chiaro, ben leggibili sui temi scuri.",
-        "Forum: il topic «General» carica di nuovo i messaggi recenti e il suo contatore scende. Tenendo premuto su un topic lo segni come letto, e nei gruppi normali torna «segna tutto come letto».",
-        "I contatori delle cartelle si aggiornano subito, il filtro «Tutte» mostra davvero tutte le chat, e il contatore dei canali che restava bloccato ora si azzera.",
-        "Corretto l'invio di una parola appena scritta: il tasto restava spento, o partiva solo un pezzo della parola appena corretta. Ora parte tutto al primo tocco."
+        "Chiamate e volume: questa versione è dedicata a un problema segnalato da diversi utenti. Grazie a chi l'ha segnalato!",
+        "Suoneria e notifiche di nuovo a volume pieno dopo una chiamata. Dopo una chiamata fatta con RooTelegram, su telefoni come Xperia e Jolla l'audio restava sulla capsula dell'orecchio: suoneria, notifiche e musica uscivano bassissime da lì, come se il volume fosse calato del 90%, fino al riavvio del telefono. Ora a fine chiamata l'audio torna sempre all'altoparlante.",
+        "Il volume multimediale non viene più toccato. Prima ogni chiamata portava di nascosto il volume multimediale al 90% e a fine chiamata lo riscriveva: a qualcuno saliva, a qualcuno scendeva, e restava così anche dopo. Ora RooTelegram non cambia più nessun volume del telefono: la chiamata parte al volume che hai scelto tu.",
+        "«Termina» chiude la chiamata all'istante. A volte la chiamata restava aperta fino a un minuto dopo aver premuto Termina, in attesa della conferma dei server di Telegram: audio acceso, schermo acceso e telefono convinto di essere ancora in chiamata. Ora si chiude subito, anche se la conferma arriva dopo.",
+        "Due chiamate di seguito non si intralciano più. Richiamando subito dopo aver riagganciato, la nuova chiamata poteva mescolarsi con quella vecchia non ancora chiusa: non arrivava al destinatario o si chiudeva da sola. Ora ogni chiamata è separata, e una chiamata che arriva mentre ne hai già una in corso non interrompe quella in corso.",
+        "Se il tuo telefono era già stato colpito, basta sistemarlo una volta: in Impostazioni → Suoni sposta il cursore della suoneria su un altro valore e poi riportalo dove vuoi; per il volume multimediale usa i tasti del volume mentre suona qualcosa. Se suoneria e notifiche escono ancora dalla capsula, riavvia il telefono.",
+        "Da sapere: durante una chiamata di RooTelegram i tasti del volume regolano il volume multimediale del telefono, non un volume separato della chiamata. Se lo abbassi durante una chiamata, resta basso anche dopo: rialzalo con i tasti. Separare i due volumi è il prossimo passo."
     ],
     "en": [
-        "New theme \"Barbara\": TRY IT!",
-        "Barbara is cold cyan glass: chat rows as cards, All/Groups/Channels filters and folder chips on one row. It has a light and a dark palette and picks the right one from your ambience. It is the default theme for new installs; everyone else can pick it in Settings → Appearance with the three Silica / Neon / Barbara pills.",
-        "Channel «article» posts can now be read: big title, photo, text, lists and links, like in the official app, instead of «unsupported message».",
-        "With Telegram Premium you can write articles: the paperclip opens a full-page editor with titles, subtitles, bold and italic shown while you type, bullet lists, links and photos. A sent article can be edited too.",
-        "Bots: a bot's fixed buttons now sit above the input bar, like in the official app, instead of scrolling away with the messages. The keyboard button next to the paperclip hides and shows them.",
-        "The Telegram engine is updated: polls, articles and other new messages no longer show up as «unsupported», and live locations follow the new format.",
-        "Links, usernames and every other link in messages are now light sky blue, easy to read on dark themes.",
-        "Forums: the «General» topic loads recent messages again and its counter goes down. Long-press a topic to mark it as read, and in normal groups «mark all as read» is back.",
-        "Folder counters update right away, the «All» filter really shows every chat, and the channel counter that used to get stuck now clears.",
-        "Fixed sending a word you had just typed: the button stayed dim, or only part of a just-corrected word was sent. Now everything goes with the first tap."
+        "Calls and volume: this version is about a problem reported by several users. Thanks to everyone who reported it!",
+        "Ringtone and notifications are back at full volume after a call. After a RooTelegram call, on phones like Xperia and Jolla the sound stayed on the earpiece: ringtone, notifications and music came out very quietly from there, as if the volume had dropped by 90%, until the phone was restarted. Now the sound always goes back to the loudspeaker when a call ends.",
+        "The media volume is no longer touched. Before, every call quietly set the media volume to 90% and rewrote it at the end of the call: for some people it went up, for others it went down, and it stayed that way afterwards. Now RooTelegram no longer changes any volume of your phone: the call starts at the volume you chose.",
+        "«End call» ends the call instantly. Sometimes a call stayed open for up to a minute after pressing End, waiting for Telegram's servers to confirm: sound on, screen on and the phone still thinking it was in a call. Now it closes right away, even if the confirmation arrives later.",
+        "Two calls in a row no longer get in each other's way. Calling again right after hanging up, the new call could get mixed up with the old one that was not closed yet: it did not reach the other person or ended by itself. Now every call is separate, and a call that comes in while you are already on one does not interrupt it.",
+        "If your phone was already affected, fix it once: in Settings → Sounds move the ringtone slider to another value and then back where you want it; for the media volume use the volume keys while something is playing. If ringtone and notifications still come from the earpiece, restart the phone.",
+        "Good to know: during a RooTelegram call the volume keys adjust the phone's media volume, not a separate call volume. If you lower it during a call, it stays low afterwards: raise it again with the keys. Separating the two volumes is the next step."
     ],
     "de": [
-        "Neues Thema \"Barbara\": PROBIERT ES AUS!",
-        "Barbara ist kaltes Glas in Cyan: Chat-Zeilen als Karten, Filter Alle/Gruppen/Kanäle und Ordner als Chips in einer Zeile. Es hat eine helle und eine dunkle Palette und wählt die passende selbst nach dem Ambiente. Bei Neuinstallationen ist es das Standardthema; alle anderen wählen es unter Einstellungen → Aussehen mit den drei Pillen Silica / Neon / Barbara.",
-        "«Artikel»-Beiträge von Kanälen sind jetzt lesbar: großer Titel, Foto, Text, Listen und Links wie in der offiziellen App, statt «nicht unterstützte Nachricht».",
-        "Mit Telegram Premium kannst du Artikel schreiben: die Büroklammer öffnet einen ganzseitigen Editor mit Titeln, Untertiteln, fett und kursiv schon beim Tippen sichtbar, Aufzählungen, Links und Fotos. Ein gesendeter Artikel lässt sich auch bearbeiten.",
-        "Bots: die festen Tasten eines Bots stehen jetzt über der Eingabeleiste wie in der offiziellen App, statt mit den Nachrichten wegzuscrollen. Die Tastatur-Taste neben der Büroklammer blendet sie aus und wieder ein.",
-        "Die Telegram-Engine ist aktualisiert: Umfragen, Artikel und andere neue Nachrichten erscheinen nicht mehr als «nicht unterstützt», und Live-Standorte folgen dem neuen Format.",
-        "Links, Benutzernamen und alle anderen Verweise in Nachrichten sind jetzt hellblau und auf dunklen Themen gut lesbar.",
-        "Foren: das Thema «General» lädt wieder neue Nachrichten und sein Zähler sinkt. Langes Drücken auf ein Thema markiert es als gelesen, und in normalen Gruppen ist «alles als gelesen markieren» zurück.",
-        "Ordnerzähler aktualisieren sich sofort, der Filter «Alle» zeigt wirklich alle Chats, und der Kanalzähler, der hängen blieb, geht jetzt auf null.",
-        "Senden eines gerade getippten Wortes korrigiert: die Taste blieb dunkel oder es ging nur ein Teil des eben korrigierten Wortes raus. Jetzt geht alles beim ersten Tipp."
+        "Anrufe und Lautstärke: diese Version widmet sich einem Problem, das mehrere Nutzer gemeldet haben. Danke an alle, die es gemeldet haben!",
+        "Klingelton und Benachrichtigungen nach einem Anruf wieder in voller Lautstärke. Nach einem Anruf mit RooTelegram blieb der Ton auf Telefonen wie Xperia und Jolla auf der Hörmuschel: Klingelton, Benachrichtigungen und Musik kamen sehr leise von dort, als wäre die Lautstärke um 90 % gesunken, bis das Telefon neu gestartet wurde. Jetzt geht der Ton am Ende des Anrufs immer zurück auf den Lautsprecher.",
+        "Die Medienlautstärke wird nicht mehr angefasst. Früher setzte jeder Anruf die Medienlautstärke heimlich auf 90 % und schrieb sie am Ende neu: bei manchen stieg sie, bei anderen sank sie, und so blieb sie danach. Jetzt ändert RooTelegram keine Lautstärke des Telefons mehr: der Anruf beginnt mit der Lautstärke, die du gewählt hast.",
+        "«Beenden» beendet den Anruf sofort. Manchmal blieb ein Anruf nach dem Drücken auf Beenden bis zu einer Minute offen und wartete auf die Bestätigung der Telegram-Server: Ton an, Bildschirm an und das Telefon glaubte, noch im Gespräch zu sein. Jetzt schließt er sofort, auch wenn die Bestätigung später kommt.",
+        "Zwei Anrufe hintereinander behindern sich nicht mehr. Wer gleich nach dem Auflegen wieder anrief, konnte den neuen Anruf mit dem alten, noch nicht geschlossenen vermischen: er kam beim Empfänger nicht an oder endete von selbst. Jetzt ist jeder Anruf getrennt, und ein Anruf, der während eines laufenden Gesprächs eingeht, unterbricht dieses nicht.",
+        "Wenn dein Telefon schon betroffen war, genügt es, es einmal zu korrigieren: in Einstellungen → Töne den Klingelton-Regler auf einen anderen Wert schieben und dann dorthin zurück, wo du ihn willst; für die Medienlautstärke die Lautstärketasten benutzen, während etwas abgespielt wird. Wenn Klingelton und Benachrichtigungen noch aus der Hörmuschel kommen, das Telefon neu starten.",
+        "Gut zu wissen: während eines RooTelegram-Anrufs regeln die Lautstärketasten die Medienlautstärke des Telefons, keine eigene Anruflautstärke. Wenn du sie während eines Anrufs senkst, bleibt sie danach niedrig: mit den Tasten wieder erhöhen. Die beiden Lautstärken zu trennen ist der nächste Schritt."
     ],
     "pl": [
-        "Nowy motyw \"Barbara\": WYPRÓBUJCIE GO!",
-        "Barbara to zimne szkło w kolorze cyjan: wiersze czatów jako karty, filtry Wszystkie/Grupy/Kanały i foldery jako pastylki w jednym rzędzie. Ma jasną i ciemną paletę i sama dobiera właściwą według ambience. Przy nowych instalacjach to motyw domyślny; pozostali wybierają go w Ustawienia → Wygląd trzema pigułkami Silica / Neon / Barbara.",
-        "Posty kanałów typu «artykuł» są teraz czytelne: duży tytuł, zdjęcie, tekst, listy i linki, jak w oficjalnej aplikacji, zamiast «nieobsługiwana wiadomość».",
-        "Z Telegram Premium możesz pisać artykuły: spinacz otwiera edytor na całą stronę z tytułami, podtytułami, pogrubieniem i kursywą widocznymi podczas pisania, listami, linkami i zdjęciami. Wysłany artykuł można też edytować.",
-        "Boty: stałe przyciski bota są teraz nad paskiem pisania, jak w oficjalnej aplikacji, zamiast przewijać się razem z wiadomościami. Przycisk klawiatury obok spinacza je ukrywa i pokazuje.",
-        "Zaktualizowano silnik Telegrama: ankiety, artykuły i inne nowe wiadomości nie pokazują się już jako «nieobsługiwane», a lokalizacje na żywo korzystają z nowego formatu.",
-        "Linki, nazwy użytkowników i wszystkie inne odnośniki w wiadomościach są teraz jasnobłękitne, dobrze czytelne w ciemnych motywach.",
-        "Fora: temat «General» znowu wczytuje nowe wiadomości, a jego licznik spada. Długie przytrzymanie tematu oznacza go jako przeczytany, a w zwykłych grupach wraca «oznacz wszystko jako przeczytane».",
-        "Liczniki folderów aktualizują się od razu, filtr «Wszystkie» naprawdę pokazuje wszystkie czaty, a licznik kanałów, który się zacinał, teraz się zeruje.",
-        "Poprawione wysyłanie dopiero co napisanego słowa: przycisk pozostawał wygaszony albo wychodziła tylko część poprawionego słowa. Teraz wszystko idzie za pierwszym dotknięciem."
+        "Połączenia i głośność: ta wersja jest poświęcona problemowi zgłoszonemu przez kilku użytkowników. Dziękujemy wszystkim, którzy go zgłosili!",
+        "Dzwonek i powiadomienia znów na pełnej głośności po rozmowie. Po rozmowie w RooTelegram na telefonach takich jak Xperia i Jolla dźwięk zostawał na słuchawce: dzwonek, powiadomienia i muzyka wychodziły stamtąd bardzo cicho, jakby głośność spadła o 90%, aż do ponownego uruchomienia telefonu. Teraz po zakończeniu rozmowy dźwięk zawsze wraca na głośnik.",
+        "Głośność multimediów nie jest już zmieniana. Wcześniej każda rozmowa po cichu ustawiała głośność multimediów na 90% i na końcu zapisywała ją od nowa: jednym rosła, innym spadała i tak już zostawała. Teraz RooTelegram nie zmienia żadnej głośności telefonu: rozmowa zaczyna się z głośnością, którą sam wybrałeś.",
+        "«Zakończ» kończy rozmowę natychmiast. Czasem po naciśnięciu Zakończ rozmowa zostawała otwarta nawet przez minutę, czekając na potwierdzenie serwerów Telegrama: dźwięk włączony, ekran włączony, a telefon przekonany, że wciąż trwa rozmowa. Teraz zamyka się od razu, nawet jeśli potwierdzenie przychodzi później.",
+        "Dwie rozmowy jedna po drugiej już sobie nie przeszkadzają. Gdy dzwoniło się ponownie zaraz po rozłączeniu, nowa rozmowa mogła pomieszać się ze starą, jeszcze niezamkniętą: nie docierała do odbiorcy albo kończyła się sama. Teraz każda rozmowa jest osobna, a połączenie przychodzące w trakcie innej rozmowy jej nie przerywa.",
+        "Jeśli twój telefon już został dotknięty problemem, wystarczy poprawić to raz: w Ustawienia → Dźwięki przesuń suwak dzwonka na inną wartość, a potem z powrotem tam, gdzie chcesz; głośność multimediów ustaw przyciskami głośności, gdy coś gra. Jeśli dzwonek i powiadomienia nadal wychodzą ze słuchawki, uruchom telefon ponownie.",
+        "Warto wiedzieć: podczas rozmowy w RooTelegram przyciski głośności regulują głośność multimediów telefonu, a nie osobną głośność rozmowy. Jeśli ściszysz ją w trakcie rozmowy, pozostanie cicha także potem: podgłośnij ją przyciskami. Rozdzielenie tych dwóch głośności to następny krok."
     ],
     "ru": [
-        "Новая тема \"Barbara\": ПОПРОБУЙТЕ ЕЁ!",
-        "Barbara — это холодное бирюзовое стекло: строки чатов в виде карточек, фильтры Все/Группы/Каналы и папки чипами в одну строку. У неё светлая и тёмная палитры, и она сама выбирает нужную по амбиенсу. При новой установке это тема по умолчанию; остальные могут выбрать её в Настройки → Внешний вид тремя кнопками Silica / Neon / Barbara.",
-        "Посты-«статьи» каналов теперь читаются: крупный заголовок, фото, текст, списки и ссылки, как в официальном приложении, вместо «неподдерживаемого сообщения».",
-        "С Telegram Premium можно писать статьи: скрепка открывает редактор на весь экран с заголовками, подзаголовками, жирным и курсивом прямо при наборе, маркированными списками, ссылками и фото. Отправленную статью можно редактировать.",
-        "Боты: постоянные кнопки бота теперь находятся над строкой ввода, как в официальном приложении, а не уезжают вверх вместе с сообщениями. Кнопка с клавиатурой рядом со скрепкой скрывает и показывает их.",
-        "Обновлён движок Telegram: опросы, статьи и другие новые сообщения больше не показываются как «неподдерживаемые», а трансляция геопозиции использует новый формат.",
-        "Ссылки, имена пользователей и все прочие ссылки в сообщениях теперь светло-голубые и хорошо читаются в тёмных темах.",
-        "Форумы: тема «General» снова загружает новые сообщения, и её счётчик уменьшается. Долгое нажатие на тему отмечает её прочитанной, а в обычных группах вернулся пункт «отметить всё как прочитанное».",
-        "Счётчики папок обновляются сразу, фильтр «Все» действительно показывает все чаты, а зависавший счётчик каналов теперь обнуляется.",
-        "Исправлена отправка только что набранного слова: кнопка оставалась тусклой или уходила лишь часть исправленного слова. Теперь всё уходит с первого нажатия."
+        "Звонки и громкость: эта версия посвящена проблеме, о которой сообщили несколько пользователей. Спасибо всем, кто о ней сообщил!",
+        "Рингтон и уведомления снова на полной громкости после звонка. После звонка через RooTelegram на телефонах вроде Xperia и Jolla звук оставался на разговорном динамике: рингтон, уведомления и музыка звучали оттуда очень тихо, будто громкость упала на 90%, до перезагрузки телефона. Теперь по окончании звонка звук всегда возвращается на громкий динамик.",
+        "Громкость мультимедиа больше не меняется. Раньше каждый звонок незаметно выставлял громкость мультимедиа на 90% и в конце звонка перезаписывал её: у одних она росла, у других падала, и так и оставалась. Теперь RooTelegram не меняет никакую громкость телефона: звонок начинается с той громкостью, которую выбрали вы.",
+        "«Завершить» завершает звонок мгновенно. Иногда после нажатия «Завершить» звонок оставался открытым до минуты, ожидая подтверждения серверов Telegram: звук включён, экран включён, а телефон считает, что разговор ещё идёт. Теперь он закрывается сразу, даже если подтверждение приходит позже.",
+        "Два звонка подряд больше не мешают друг другу. Если перезвонить сразу после завершения, новый звонок мог смешаться со старым, ещё не закрытым: не доходил до собеседника или завершался сам. Теперь каждый звонок отдельный, а входящий звонок во время разговора не прерывает текущий.",
+        "Если ваш телефон уже пострадал, достаточно исправить это один раз: в Настройки → Звуки передвиньте ползунок рингтона на другое значение, а затем верните туда, где хотите; громкость мультимедиа настройте кнопками громкости, пока что-то играет. Если рингтон и уведомления всё ещё идут из разговорного динамика, перезагрузите телефон.",
+        "Полезно знать: во время звонка RooTelegram кнопки громкости регулируют громкость мультимедиа телефона, а не отдельную громкость звонка. Если убавить её во время звонка, она останется низкой и после: прибавьте её кнопками. Разделить эти две громкости — следующий шаг."
     ],
     "fr": [
-        "Nouveau thème \"Barbara\" : ESSAYEZ-LE !",
-        "Barbara, c'est du verre froid cyan : lignes de discussion en cartes, filtres Toutes/Groupes/Canaux et dossiers en pastilles sur une ligne. Il a une palette claire et une sombre et choisit tout seul la bonne selon l'ambiance. C'est le thème par défaut des nouvelles installations ; les autres le choisissent dans Paramètres → Apparence avec les trois pilules Silica / Neon / Barbara.",
-        "Les publications « article » des canaux se lisent maintenant : grand titre, photo, texte, listes et liens, comme dans l'application officielle, au lieu de « message non pris en charge ».",
-        "Avec Telegram Premium vous pouvez écrire des articles : le trombone ouvre un éditeur pleine page avec titres, sous-titres, gras et italique visibles pendant la saisie, listes à puces, liens et photos. Un article envoyé peut aussi être modifié.",
-        "Bots : les boutons fixes d'un bot sont désormais au-dessus de la barre de saisie, comme dans l'application officielle, au lieu de défiler avec les messages. Le bouton clavier à côté du trombone les masque et les réaffiche.",
-        "Le moteur Telegram est mis à jour : sondages, articles et autres nouveaux messages n'apparaissent plus comme « non pris en charge », et les positions en direct suivent le nouveau format.",
-        "Les liens, noms d'utilisateur et tous les autres liens des messages sont maintenant bleu ciel clair, bien lisibles sur les thèmes sombres.",
-        "Forums : le sujet « General » charge de nouveau les messages récents et son compteur baisse. Un appui long sur un sujet le marque comme lu, et dans les groupes normaux « tout marquer comme lu » revient.",
-        "Les compteurs des dossiers se mettent à jour tout de suite, le filtre « Toutes » montre vraiment toutes les discussions, et le compteur des canaux qui restait bloqué se remet à zéro.",
-        "Envoi d'un mot tout juste écrit corrigé : le bouton restait éteint, ou seule une partie du mot corrigé partait. Maintenant tout part au premier appui."
+        "Appels et volume : cette version est consacrée à un problème signalé par plusieurs utilisateurs. Merci à tous ceux qui l'ont signalé !",
+        "Sonnerie et notifications de nouveau à plein volume après un appel. Après un appel avec RooTelegram, sur des téléphones comme Xperia et Jolla le son restait sur l'écouteur : sonnerie, notifications et musique sortaient très faiblement de là, comme si le volume avait baissé de 90 %, jusqu'au redémarrage du téléphone. Désormais, à la fin d'un appel, le son revient toujours sur le haut-parleur.",
+        "Le volume multimédia n'est plus modifié. Avant, chaque appel mettait discrètement le volume multimédia à 90 % et le réécrivait à la fin de l'appel : chez certains il montait, chez d'autres il baissait, et il restait ainsi ensuite. Désormais RooTelegram ne modifie plus aucun volume du téléphone : l'appel démarre au volume que vous avez choisi.",
+        "« Raccrocher » termine l'appel instantanément. Parfois l'appel restait ouvert jusqu'à une minute après avoir appuyé sur Raccrocher, en attendant la confirmation des serveurs de Telegram : son actif, écran allumé et téléphone persuadé d'être encore en communication. Désormais il se ferme tout de suite, même si la confirmation arrive plus tard.",
+        "Deux appels à la suite ne se gênent plus. En rappelant juste après avoir raccroché, le nouvel appel pouvait se mélanger avec l'ancien pas encore fermé : il n'arrivait pas au destinataire ou se terminait tout seul. Désormais chaque appel est séparé, et un appel qui arrive pendant une communication ne l'interrompt pas.",
+        "Si votre téléphone a déjà été touché, il suffit de corriger une seule fois : dans Paramètres → Sons, déplacez le curseur de la sonnerie sur une autre valeur puis remettez-le où vous voulez ; pour le volume multimédia, utilisez les touches de volume pendant qu'un son est joué. Si la sonnerie et les notifications sortent encore de l'écouteur, redémarrez le téléphone.",
+        "Bon à savoir : pendant un appel RooTelegram, les touches de volume règlent le volume multimédia du téléphone, pas un volume d'appel séparé. Si vous le baissez pendant un appel, il reste bas ensuite : remontez-le avec les touches. Séparer les deux volumes est la prochaine étape."
     ],
     "sk": [
-        "Nová téma \"Barbara\": VYSKÚŠAJTE JU!",
-        "Barbara je studené sklo v azúrovej: riadky četov ako karty, filtre Všetky/Skupiny/Kanály a priečinky ako štítky v jednom riadku. Má svetlú aj tmavú paletu a správnu si vyberie sama podľa ambientu. Pri nových inštaláciách je predvolenou témou; ostatní si ju vyberú v Nastavenia → Vzhľad tromi tlačidlami Silica / Neon / Barbara.",
-        "Príspevky kanálov typu «článok» sa teraz dajú čítať: veľký nadpis, fotka, text, zoznamy a odkazy ako v oficiálnej aplikácii, namiesto «nepodporovaná správa».",
-        "S Telegram Premium môžete písať články: kancelárska spinka otvorí editor na celú stránku s nadpismi, podnadpismi, tučným písmom a kurzívou viditeľnými počas písania, odrážkami, odkazmi a fotkami. Odoslaný článok sa dá aj upraviť.",
-        "Boty: pevné tlačidlá bota sú teraz nad riadkom na písanie ako v oficiálnej aplikácii, namiesto toho, aby odchádzali so správami. Tlačidlo klávesnice vedľa spinky ich skryje a znova zobrazí.",
-        "Aktualizované jadro Telegramu: ankety, články a ďalšie nové správy sa už nezobrazujú ako «nepodporované» a polohy v reálnom čase používajú nový formát.",
-        "Odkazy, používateľské mená a všetky ďalšie prepojenia v správach sú teraz svetlomodré a dobre čitateľné v tmavých témach.",
-        "Fóra: téma «General» opäť načítava nové správy a jej počítadlo klesá. Dlhým podržaním témy ju označíte ako prečítanú a v bežných skupinách sa vracia «označiť všetko ako prečítané».",
-        "Počítadlá priečinkov sa aktualizujú hneď, filter «Všetky» naozaj ukazuje všetky čety a počítadlo kanálov, ktoré zamŕzalo, sa teraz vynuluje.",
-        "Opravené odosielanie práve napísaného slova: tlačidlo zostávalo zhasnuté alebo odišla len časť opraveného slova. Teraz všetko odíde na prvý dotyk."
+        "Hovory a hlasitosť: táto verzia je venovaná problému, ktorý nahlásilo viacero používateľov. Ďakujeme všetkým, ktorí ho nahlásili!",
+        "Zvonenie a upozornenia sú po hovore opäť na plnú hlasitosť. Po hovore cez RooTelegram na telefónoch ako Xperia a Jolla zostával zvuk na slúchadle: zvonenie, upozornenia a hudba odtiaľ zneli veľmi potichu, akoby hlasitosť klesla o 90 %, až do reštartu telefónu. Teraz sa na konci hovoru zvuk vždy vráti do reproduktora.",
+        "Hlasitosť médií sa už nemení. Predtým každý hovor potichu nastavil hlasitosť médií na 90 % a na konci hovoru ju prepísal: niekomu stúpla, niekomu klesla a tak aj zostala. Teraz RooTelegram nemení žiadnu hlasitosť telefónu: hovor začne s hlasitosťou, ktorú ste si zvolili.",
+        "«Ukončiť» ukončí hovor okamžite. Niekedy zostal hovor po stlačení Ukončiť otvorený až minútu a čakal na potvrdenie serverov Telegramu: zvuk zapnutý, obrazovka zapnutá a telefón presvedčený, že hovor ešte trvá. Teraz sa zavrie hneď, aj keď potvrdenie príde neskôr.",
+        "Dva hovory za sebou si už neprekážajú. Keď ste zavolali znova hneď po zavesení, nový hovor sa mohol pomiešať so starým, ešte nezavretým: nedostal sa k príjemcovi alebo sa sám ukončil. Teraz je každý hovor samostatný a hovor, ktorý príde počas iného hovoru, ho nepreruší.",
+        "Ak bol váš telefón už postihnutý, stačí to raz opraviť: v Nastavenia → Zvuky posuňte posúvač zvonenia na inú hodnotu a potom späť, kam chcete; hlasitosť médií nastavte tlačidlami hlasitosti, keď niečo hrá. Ak zvonenie a upozornenia stále vychádzajú zo slúchadla, reštartujte telefón.",
+        "Dobré vedieť: počas hovoru RooTelegram tlačidlá hlasitosti regulujú hlasitosť médií telefónu, nie samostatnú hlasitosť hovoru. Ak ju počas hovoru stíšite, zostane nízka aj potom: zosilnite ju tlačidlami. Oddeliť tieto dve hlasitosti je ďalší krok."
     ]
 };
 

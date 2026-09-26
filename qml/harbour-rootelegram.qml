@@ -253,6 +253,21 @@ ApplicationWindow
         appWindow.ringtoneEventId = 0;
     }
 
+    // Chiude la schermata di chiamata e la libera per la prossima (callId 0):
+    // da qui in poi gli aggiornamenti tardivi della chiamata chiusa non la
+    // trovano piu' e vengono ignorati.
+    function closeCallScreen() {
+        callScreen.visible = false;
+        callScreen.callId = 0;
+        callScreen.callState = "";
+        callScreen.verifyEmojis = [];
+        // Ripristina l'orientamento della pagina sotto.
+        if (callScreen.savedOrientations !== undefined && pageStack.currentPage) {
+            pageStack.currentPage.allowedOrientations = callScreen.savedOrientations;
+        }
+        callScreen.savedOrientations = undefined;
+    }
+
     // Toni telefonici della chiamata USCENTE, riprodotti localmente nell'auricolare
     // (nessun evento ngfd standard li copre): ringback "libero" mentre l'altro
     // squilla, tono di occupato/irraggiungibile rapido se non si connette.
@@ -292,6 +307,13 @@ ApplicationWindow
             var outgoing = call.is_outgoing === true;
             var ongoing = (st === "callStatePending" || st === "callStateExchangingKeys" || st === "callStateReady");
             if (ongoing) {
+                // ⛔ Una seconda chiamata non si prende la schermata di quella in
+                // corso (callId torna a 0 solo quando la prima e' chiusa).
+                if (callScreen.callId !== 0 && callScreen.callId !== cid) {
+                    console.warn("[CALLUI] ignoro la chiamata " + cid + " " + st
+                                 + ": e' in corso la " + callScreen.callId);
+                    return;
+                }
                 if (callScreen.callId !== cid) {
                     // Nuova chiamata: risolvi nome + foto del partner.
                     var info = tdLibWrapper.getUserInformation(call.user_id.toString());
@@ -366,7 +388,9 @@ ApplicationWindow
                 appWindow.stopCallRingtone();
                 appWindow.stopRingback();
                 if (st === "callStateHangingUp") {
-                    callScreen.callState = st;
+                    // Chiusa da noi: la conferma del server (Discarded) puo' tardare
+                    // un minuto, e intanto la chiamata non deve sembrare in corso.
+                    appWindow.closeCallScreen();
                 } else if (st === "callStateDiscarded" || st === "callStateError") {
                     // Edge-case (T5): feedback breve sul motivo di chiusura.
                     var reason = (call.state && call.state.reason && call.state.reason["@type"]) ? call.state.reason["@type"] : "";
@@ -387,15 +411,7 @@ ApplicationWindow
                     } else if (reason === "callDiscardReasonDisconnected" || st === "callStateError") {
                         appNotification.show(qsTr("Call failed"));
                     }
-                    callScreen.visible = false;
-                    callScreen.callId = 0;
-                    callScreen.callState = "";
-                    callScreen.verifyEmojis = [];
-                    // Ripristina l'orientamento della pagina sotto.
-                    if (callScreen.savedOrientations !== undefined && pageStack.currentPage) {
-                        pageStack.currentPage.allowedOrientations = callScreen.savedOrientations;
-                    }
-                    callScreen.savedOrientations = undefined;
+                    appWindow.closeCallScreen();
                 }
             }
         }
@@ -476,7 +492,7 @@ ApplicationWindow
         function endCall() {
             appWindow.stopRingback();
             tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
-            callScreen.visible = false;
+            appWindow.closeCallScreen();
         }
         function statusText() {
             switch (callScreen.callState) {
@@ -689,7 +705,7 @@ ApplicationWindow
                     onClicked: {
                         appWindow.stopCallRingtone();
                         tdLibWrapper.discardVoiceCall(callScreen.callId, false, 0, false, 0);
-                        callScreen.visible = false;
+                        appWindow.closeCallScreen();
                     }
                 }
                 Button {
