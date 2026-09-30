@@ -301,6 +301,18 @@ void CallManager::handleSystemSpeakerModeRequested(bool on)
     // l'audio della chiamata pero' lo governiamo noi in PulseAudio, quindi il
     // comando va applicato qui o non succede nulla.
     qWarning() << "[SYSCALL] vivavoce richiesto dalla UI di sistema:" << on;
+    // ⭐ 30/09/2026 — Dalla seconda chiamata in arrivo in poi voicecall-ui manda
+    // `audioMode "earpiece"` GIA' mentre squilla. Applicarlo subito spostava il
+    // sink su `output-earpiece` durante lo squillo, e la suoneria di sistema
+    // usciva dalla capsula: «bassissima» (misurato sull'Xperia 10 III: porta
+    // su earpiece da 15:17:45, arrivo, a 15:18:00, risposta). Finche' la
+    // chiamata non e' connessa la scelta si ricorda soltanto: la applica il
+    // timer che aggancia lo stream WebRTC, con setSpeakerphoneOn(m_speakerOn).
+    if (!instance) {
+        m_speakerOn = on;
+        qWarning() << "[SYSCALL] chiamata non ancora connessa: porta rimandata all'avvio dell'audio";
+        return;
+    }
     // La notizia arriva GIA' dal sistema: ripubblicarla la' sarebbe un'eco.
     m_applyingSystemAudioMode = true;
     setSpeakerphoneOn(on);
