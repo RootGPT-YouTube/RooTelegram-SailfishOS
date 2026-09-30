@@ -44,6 +44,10 @@
 #include <QStandardPaths>
 #include <QDBusConnection>
 #include <QDBusInterface>
+#include <QDBusMessage>
+#include <QDBusReply>
+#include <QGuiApplication>
+#include <QWindow>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
@@ -198,6 +202,20 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     // Stato chiamata: connesso al segnale re-emesso da this (non dal receiver)
     // così la connessione sopravvive alla ricreazione del receiver al riciclo.
     connect(this, SIGNAL(callUpdated(QVariantMap)), this, SLOT(handleCallStateForRecycle(QVariantMap)));
+    // Stato dello schermo da MCE: il riciclo via execv si fa solo a schermo
+    // spento (crash di lipstick del 29/09, vedi finishRecycleRestart). Se MCE
+    // non risponde lo stato resta "sconosciuto" e vale il comportamento di prima.
+    this->displayState = -1;
+    this->displayChangedMs = 0;
+    QDBusConnection::systemBus().connect(QStringLiteral("com.nokia.mce"), QStringLiteral("/com/nokia/mce/signal"),
+                                         QStringLiteral("com.nokia.mce.signal"), QStringLiteral("display_status_ind"),
+                                         this, SLOT(handleDisplayStatusForRecycle(QString)));
+    if (this->mceInterface) {
+        QDBusReply<QString> displayReply = this->mceInterface->call(QStringLiteral("get_display_status"));
+        if (displayReply.isValid()) {
+            this->displayState = (displayReply.value() == QLatin1String("off")) ? 0 : 1;
+        }
+    }
 }
 
 void TDLibWrapper::applyAntiRamOptions()
@@ -681,6 +699,50 @@ void TDLibWrapper::setUiVisible(bool visible)
     }
 }
 
+void TDLibWrapper::handleDisplayStatusForRecycle(const QString &status)
+{
+    const int newState = (status == QLatin1String("off")) ? 0 : 1;
+    if (newState == this->displayState) {
+        return;
+    }
+    this->displayState = newState;
+    this->displayChangedMs = QDateTime::currentMSecsSinceEpoch();
+    if (newState == 0) {
+        // Schermo appena spento: e' il momento buono per riciclare, senza
+        // aspettare il prossimo tick dei 5 minuti (che a telefono sospeso
+        // arriva in ritardo, tipicamente proprio alla riaccensione).
+        QTimer::singleShot(20000, this, &TDLibWrapper::checkMemoryRecycle);
+    }
+}
+
+// Vero se ora si puo' fare l'execv senza far sparire una finestra sotto al
+// compositor. 29/09/2026: un execv 6 s dopo l'accensione dello schermo, con la
+// finestra ancora come cover nello switcher, ha fatto cadere lipstick (SIGSEGV
+// in WindowPixmapItem::handleWindowSizeChanged su una surface gia' morta).
+bool TDLibWrapper::recycleExecvIsSafe(bool checkWindows, QString *reason) const
+{
+    if (this->uiHiddenSinceMs == 0) {
+        *reason = QStringLiteral("UI riattivata");
+        return false;
+    }
+    if (this->displayState == 1) {
+        *reason = QStringLiteral("schermo acceso");
+        return false;
+    }
+    if (this->displayState == 0
+            && QDateTime::currentMSecsSinceEpoch() - this->displayChangedMs < 15000) {
+        *reason = QStringLiteral("schermo spento da meno di 15 s");
+        return false;
+    }
+    for (QWindow *window : QGuiApplication::allWindows()) {
+        if (checkWindows && window->isVisible()) {
+            *reason = QStringLiteral("finestra di nuovo visibile");
+            return false;
+        }
+    }
+    return true;
+}
+
 void TDLibWrapper::handleCallStateForRecycle(const QVariantMap &call)
 {
     const QString stateType = call.value("state").toMap().value(_TYPE).toString();
@@ -704,6 +766,13 @@ void TDLibWrapper::checkMemoryRecycle()
         return;
     }
     if (this->callOngoing) {
+        return;
+    }
+    // Solo a schermo spento (e non appena spento): con lo schermo acceso
+    // lipstick ridisegna switcher e cover, ed e' li' che l'execv lo fa cadere.
+    if (this->displayState == 1
+            || (this->displayState == 0
+                && QDateTime::currentMSecsSinceEpoch() - this->displayChangedMs < 15000)) {
         return;
     }
     const qint64 rssKb = currentRssKb();
@@ -791,6 +860,40 @@ void TDLibWrapper::restartProcess()
     ::execv("/proc/self/exe", argv.data());
     // Solo se execv fallisce arriviamo qui: il chiamante farà il fallback.
     qWarning() << "[RECYCLE] execv fallito (errno" << errno << "), fallback al riciclo del client";
+}
+
+// Distrugge il client TDLib chiuso e ne crea uno nuovo. Al riciclo il DB
+// resta (l'auth riparte da sola fino a Ready), al logout vero si butta.
+void TDLibWrapper::recreateClientAfterClose()
+{
+    qDeleteAll(this->basicGroups);
+    qDeleteAll(this->superGroups);
+    this->basicGroups.clear();
+    this->superGroups.clear();
+    this->usersById.clear();
+    this->usersByName.clear();
+    this->tdLibReceiver->setActive(false);
+    while (this->tdLibReceiver->isRunning()) {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 1000);
+    }
+    td_json_client_destroy(this->tdLibClient);
+    this->tdLibReceiver->terminate();
+    // Senza deleteLater ogni riciclo lascerebbe in giro un QThread morto.
+    this->tdLibReceiver->deleteLater();
+    if (!this->isRecycling) {
+        // Solo al logout vero: la sessione è revocata, il database va buttato.
+        // Al riciclo anti-RAM il database DEVE restare: è quello che permette
+        // al nuovo client di riautenticarsi da solo fino a Ready.
+        QDir tdLibPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tdlib");
+        tdLibPath.removeRecursively();
+    }
+    this->tdLibClient = td_json_client_create();
+    initializeTDLibReceiver();
+    if (this->isRecycling) {
+        // Le opzioni TDLib sono per-client: senza riapplicarle il nuovo client
+        // perderebbe message_unload_delay e tornerebbe ad accumulare messaggi.
+        this->applyAntiRamOptions();
+    }
 }
 
 void TDLibWrapper::joinChat(const QString &chatId)
@@ -3807,40 +3910,23 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
             // in-place del solo client (sotto): la finestra sopravvive e si
             // riconnette in pochi secondi. È un race raro (tap a cavallo del
             // tick dei 5 min), per questo la finestra è piccola ma reale.
-            if (this->uiHiddenSinceMs == 0) {
-                qWarning() << "[RECYCLE] UI riattivata durante il riciclo: salto l'execv, riciclo in-place del solo client";
-            } else {
-                this->restartProcess();
+            //
+            // 30/09: e prima dell'execv la finestra va smontata, a schermo
+            // spento. Vedi finishRecycleRestart().
+            QString reason;
+            if (this->recycleExecvIsSafe(false, &reason)) {
+                for (QWindow *window : QGuiApplication::allWindows()) {
+                    if (window->isVisible()) {
+                        window->hide();
+                    }
+                }
+                this->authorizationStateData = authorizationStateData;
+                QTimer::singleShot(500, this, &TDLibWrapper::finishRecycleRestart);
+                return;
             }
+            qWarning() << "[RECYCLE]" << reason << "durante il riciclo: salto l'execv, riciclo in-place del solo client";
         }
-        qDeleteAll(this->basicGroups);
-        qDeleteAll(this->superGroups);
-        this->basicGroups.clear();
-        this->superGroups.clear();
-        this->usersById.clear();
-        this->usersByName.clear();
-        this->tdLibReceiver->setActive(false);
-        while (this->tdLibReceiver->isRunning()) {
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 1000);
-        }
-        td_json_client_destroy(this->tdLibClient);
-        this->tdLibReceiver->terminate();
-        // Senza deleteLater ogni riciclo lascerebbe in giro un QThread morto.
-        this->tdLibReceiver->deleteLater();
-        if (!this->isRecycling) {
-            // Solo al logout vero: la sessione è revocata, il database va buttato.
-            // Al riciclo anti-RAM il database DEVE restare: è quello che permette
-            // al nuovo client di riautenticarsi da solo fino a Ready.
-            QDir tdLibPath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/tdlib");
-            tdLibPath.removeRecursively();
-        }
-        this->tdLibClient = td_json_client_create();
-        initializeTDLibReceiver();
-        if (this->isRecycling) {
-            // Le opzioni TDLib sono per-client: senza riapplicarle il nuovo client
-            // perderebbe message_unload_delay e tornerebbe ad accumulare messaggi.
-            this->applyAntiRamOptions();
-        }
+        this->recreateClientAfterClose();
         this->isLoggingOut = false;
     }
     this->authorizationStateData = authorizationStateData;
@@ -3863,6 +3949,30 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
     }
     emit authorizationStateChanged(this->authorizationState, this->authorizationStateData);
 
+}
+
+// Seconda meta' del riciclo via execv, 500 ms dopo aver nascosto le finestre.
+// L'execv chiude di colpo la connessione Wayland: se lipstick ha ancora la
+// nostra finestra mappata (cover nello switcher) e in quel momento gestisce un
+// cambio di geometria, dereferenzia una surface gia' distrutta e cade (visto
+// il 29/09). Nascondere prima fa arrivare a lipstick un unmap ordinato, e il
+// mezzo secondo di event loop lascia a qtwayland il tempo di spedirlo (flush
+// all'aboutToBlock) e al compositor quello di togliere la WindowPixmapItem.
+// Poi si ricontrolla tutto: se nel frattempo l'utente e' tornato (tap su
+// icona/notifica rimostra la finestra) o lo schermo si e' acceso, niente execv.
+// Niente processEvents fra il controllo e l'execv: un'attivazione D-Bus
+// consegnata li' rimostrerebbe la finestra un attimo prima di ucciderla.
+void TDLibWrapper::finishRecycleRestart()
+{
+    QString reason;
+    if (this->recycleExecvIsSafe(true, &reason)) {
+        this->restartProcess();
+        // Se torniamo qui l'execv e' fallito: riciclo in-place.
+    } else {
+        qWarning() << "[RECYCLE]" << reason << "prima dell'execv: riciclo in-place del solo client";
+    }
+    this->recreateClientAfterClose();
+    this->isLoggingOut = false;
 }
 
 void TDLibWrapper::handleOptionUpdated(const QString &optionName, const QVariant &optionValue)

@@ -549,6 +549,7 @@ public slots:
     // ANTI-RAM Strada C (vedi checkMemoryRecycle in tdlibwrapper.cpp)
     void checkMemoryRecycle();
     void handleCallStateForRecycle(const QVariantMap &call);
+    void handleDisplayStatusForRecycle(const QString &status);
     void handleAuthorizationStateChanged(const QString &authorizationState, const QVariantMap authorizationStateData);
     void handleOptionUpdated(const QString &optionName, const QVariant &optionValue);
     void handleConnectionStateChanged(const QString &connectionState);
@@ -663,6 +664,14 @@ private:
     // tutta la RAM, cosa che il riciclo del solo client NON faceva). Non ritorna
     // se ha successo; ritorna solo se execv fallisce (→ fallback al riciclo client).
     void restartProcess();
+    // Crash di lipstick del 29/09 (execv con la finestra ancora sullo switcher,
+    // 6 s dopo l'accensione dello schermo): l'execv si fa solo a schermo spento
+    // e con la finestra gia' smontata. Vedi finishRecycleRestart().
+    bool recycleExecvIsSafe(bool checkWindows, QString *reason) const;
+    void finishRecycleRestart();
+    void recreateClientAfterClose();
+    int displayState;             // -1 sconosciuto (niente MCE), 0 spento, 1 acceso/dimmed
+    qint64 displayChangedMs;
     bool isRecycling;
     qint64 uiHiddenSinceMs;       // 0 = UI visibile
     bool callOngoing;

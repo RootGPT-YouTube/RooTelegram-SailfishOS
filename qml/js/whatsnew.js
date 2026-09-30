@@ -13,11 +13,12 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.1";
+var version = "3.1.5";
 
 var changelogByLang = {
     "it": [
-        "Chiamate e volume: questa versione è dedicata a un problema segnalato da diversi utenti. Grazie a chi l'ha segnalato!",
+        "Risolto un raro schermo nero. Ogni tanto, riaccendendo lo schermo, il telefono diventava nero per qualche secondo, tornava alla schermata iniziale e RooTelegram non rispondeva più. Succedeva quando l'app, in background, si riavviava da sola per liberare memoria proprio in quel momento. Ora lo fa solo a schermo spento, e chiudendo prima la sua finestra.",
+        "Già nella 3.1, per chi arriva da una versione precedente: chiamate e volume.",
         "Suoneria e notifiche di nuovo a volume pieno dopo una chiamata. Dopo una chiamata fatta con RooTelegram, su telefoni come Xperia e Jolla l'audio restava sulla capsula dell'orecchio: suoneria, notifiche e musica uscivano bassissime da lì, come se il volume fosse calato del 90%, fino al riavvio del telefono. Ora a fine chiamata l'audio torna sempre all'altoparlante.",
         "Il volume multimediale non viene più toccato. Prima ogni chiamata portava di nascosto il volume multimediale al 90% e a fine chiamata lo riscriveva: a qualcuno saliva, a qualcuno scendeva, e restava così anche dopo. Ora RooTelegram non cambia più nessun volume del telefono: la chiamata parte al volume che hai scelto tu.",
         "«Termina» chiude la chiamata all'istante. A volte la chiamata restava aperta fino a un minuto dopo aver premuto Termina, in attesa della conferma dei server di Telegram: audio acceso, schermo acceso e telefono convinto di essere ancora in chiamata. Ora si chiude subito, anche se la conferma arriva dopo.",
@@ -26,7 +27,8 @@ var changelogByLang = {
         "Da sapere: durante una chiamata di RooTelegram i tasti del volume regolano il volume multimediale del telefono, non un volume separato della chiamata. Se lo abbassi durante una chiamata, resta basso anche dopo: rialzalo con i tasti. Separare i due volumi è il prossimo passo."
     ],
     "en": [
-        "Calls and volume: this version is about a problem reported by several users. Thanks to everyone who reported it!",
+        "Fixed a rare black screen. Now and then, when turning the screen on, the phone went black for a few seconds, went back to the home screen and RooTelegram stopped responding. It happened when the app, in the background, restarted itself to free memory at exactly that moment. Now it only does so with the screen off, and closes its window first.",
+        "Already in 3.1, for those coming from an older version: calls and volume.",
         "Ringtone and notifications are back at full volume after a call. After a RooTelegram call, on phones like Xperia and Jolla the sound stayed on the earpiece: ringtone, notifications and music came out very quietly from there, as if the volume had dropped by 90%, until the phone was restarted. Now the sound always goes back to the loudspeaker when a call ends.",
         "The media volume is no longer touched. Before, every call quietly set the media volume to 90% and rewrote it at the end of the call: for some people it went up, for others it went down, and it stayed that way afterwards. Now RooTelegram no longer changes any volume of your phone: the call starts at the volume you chose.",
         "«End call» ends the call instantly. Sometimes a call stayed open for up to a minute after pressing End, waiting for Telegram's servers to confirm: sound on, screen on and the phone still thinking it was in a call. Now it closes right away, even if the confirmation arrives later.",
@@ -35,7 +37,8 @@ var changelogByLang = {
         "Good to know: during a RooTelegram call the volume keys adjust the phone's media volume, not a separate call volume. If you lower it during a call, it stays low afterwards: raise it again with the keys. Separating the two volumes is the next step."
     ],
     "de": [
-        "Anrufe und Lautstärke: diese Version widmet sich einem Problem, das mehrere Nutzer gemeldet haben. Danke an alle, die es gemeldet haben!",
+        "Seltener schwarzer Bildschirm behoben. Ab und zu wurde das Telefon beim Einschalten des Bildschirms für ein paar Sekunden schwarz, kehrte zum Startbildschirm zurück und RooTelegram reagierte nicht mehr. Das passierte, wenn sich die App im Hintergrund genau in diesem Moment selbst neu startete, um Speicher freizugeben. Jetzt tut sie das nur bei ausgeschaltetem Bildschirm und schließt vorher ihr Fenster.",
+        "Schon in 3.1, für alle, die von einer älteren Version kommen: Anrufe und Lautstärke.",
         "Klingelton und Benachrichtigungen nach einem Anruf wieder in voller Lautstärke. Nach einem Anruf mit RooTelegram blieb der Ton auf Telefonen wie Xperia und Jolla auf der Hörmuschel: Klingelton, Benachrichtigungen und Musik kamen sehr leise von dort, als wäre die Lautstärke um 90 % gesunken, bis das Telefon neu gestartet wurde. Jetzt geht der Ton am Ende des Anrufs immer zurück auf den Lautsprecher.",
         "Die Medienlautstärke wird nicht mehr angefasst. Früher setzte jeder Anruf die Medienlautstärke heimlich auf 90 % und schrieb sie am Ende neu: bei manchen stieg sie, bei anderen sank sie, und so blieb sie danach. Jetzt ändert RooTelegram keine Lautstärke des Telefons mehr: der Anruf beginnt mit der Lautstärke, die du gewählt hast.",
         "«Beenden» beendet den Anruf sofort. Manchmal blieb ein Anruf nach dem Drücken auf Beenden bis zu einer Minute offen und wartete auf die Bestätigung der Telegram-Server: Ton an, Bildschirm an und das Telefon glaubte, noch im Gespräch zu sein. Jetzt schließt er sofort, auch wenn die Bestätigung später kommt.",
@@ -44,7 +47,8 @@ var changelogByLang = {
         "Gut zu wissen: während eines RooTelegram-Anrufs regeln die Lautstärketasten die Medienlautstärke des Telefons, keine eigene Anruflautstärke. Wenn du sie während eines Anrufs senkst, bleibt sie danach niedrig: mit den Tasten wieder erhöhen. Die beiden Lautstärken zu trennen ist der nächste Schritt."
     ],
     "pl": [
-        "Połączenia i głośność: ta wersja jest poświęcona problemowi zgłoszonemu przez kilku użytkowników. Dziękujemy wszystkim, którzy go zgłosili!",
+        "Naprawiono rzadki czarny ekran. Czasami po włączeniu ekranu telefon na kilka sekund robił się czarny, wracał do ekranu głównego, a RooTelegram przestawał odpowiadać. Działo się tak, gdy aplikacja w tle uruchamiała się ponownie, aby zwolnić pamięć, akurat w tym momencie. Teraz robi to tylko przy wyłączonym ekranie i najpierw zamyka swoje okno.",
+        "Już w wersji 3.1, dla przechodzących ze starszej wersji: połączenia i głośność.",
         "Dzwonek i powiadomienia znów na pełnej głośności po rozmowie. Po rozmowie w RooTelegram na telefonach takich jak Xperia i Jolla dźwięk zostawał na słuchawce: dzwonek, powiadomienia i muzyka wychodziły stamtąd bardzo cicho, jakby głośność spadła o 90%, aż do ponownego uruchomienia telefonu. Teraz po zakończeniu rozmowy dźwięk zawsze wraca na głośnik.",
         "Głośność multimediów nie jest już zmieniana. Wcześniej każda rozmowa po cichu ustawiała głośność multimediów na 90% i na końcu zapisywała ją od nowa: jednym rosła, innym spadała i tak już zostawała. Teraz RooTelegram nie zmienia żadnej głośności telefonu: rozmowa zaczyna się z głośnością, którą sam wybrałeś.",
         "«Zakończ» kończy rozmowę natychmiast. Czasem po naciśnięciu Zakończ rozmowa zostawała otwarta nawet przez minutę, czekając na potwierdzenie serwerów Telegrama: dźwięk włączony, ekran włączony, a telefon przekonany, że wciąż trwa rozmowa. Teraz zamyka się od razu, nawet jeśli potwierdzenie przychodzi później.",
@@ -53,7 +57,8 @@ var changelogByLang = {
         "Warto wiedzieć: podczas rozmowy w RooTelegram przyciski głośności regulują głośność multimediów telefonu, a nie osobną głośność rozmowy. Jeśli ściszysz ją w trakcie rozmowy, pozostanie cicha także potem: podgłośnij ją przyciskami. Rozdzielenie tych dwóch głośności to następny krok."
     ],
     "ru": [
-        "Звонки и громкость: эта версия посвящена проблеме, о которой сообщили несколько пользователей. Спасибо всем, кто о ней сообщил!",
+        "Исправлен редкий чёрный экран. Иногда при включении экрана телефон на несколько секунд становился чёрным, возвращался на главный экран, а RooTelegram переставал отвечать. Это происходило, когда приложение в фоне перезапускалось, чтобы освободить память, как раз в этот момент. Теперь оно делает это только при выключенном экране и сначала закрывает своё окно.",
+        "Уже в 3.1, для тех, кто обновляется с более старой версии: звонки и громкость.",
         "Рингтон и уведомления снова на полной громкости после звонка. После звонка через RooTelegram на телефонах вроде Xperia и Jolla звук оставался на разговорном динамике: рингтон, уведомления и музыка звучали оттуда очень тихо, будто громкость упала на 90%, до перезагрузки телефона. Теперь по окончании звонка звук всегда возвращается на громкий динамик.",
         "Громкость мультимедиа больше не меняется. Раньше каждый звонок незаметно выставлял громкость мультимедиа на 90% и в конце звонка перезаписывал её: у одних она росла, у других падала, и так и оставалась. Теперь RooTelegram не меняет никакую громкость телефона: звонок начинается с той громкостью, которую выбрали вы.",
         "«Завершить» завершает звонок мгновенно. Иногда после нажатия «Завершить» звонок оставался открытым до минуты, ожидая подтверждения серверов Telegram: звук включён, экран включён, а телефон считает, что разговор ещё идёт. Теперь он закрывается сразу, даже если подтверждение приходит позже.",
@@ -62,7 +67,8 @@ var changelogByLang = {
         "Полезно знать: во время звонка RooTelegram кнопки громкости регулируют громкость мультимедиа телефона, а не отдельную громкость звонка. Если убавить её во время звонка, она останется низкой и после: прибавьте её кнопками. Разделить эти две громкости — следующий шаг."
     ],
     "fr": [
-        "Appels et volume : cette version est consacrée à un problème signalé par plusieurs utilisateurs. Merci à tous ceux qui l'ont signalé !",
+        "Correction d'un rare écran noir. De temps en temps, en rallumant l'écran, le téléphone devenait noir pendant quelques secondes, revenait à l'écran d'accueil et RooTelegram ne répondait plus. Cela arrivait quand l'application, en arrière-plan, redémarrait d'elle-même pour libérer de la mémoire précisément à ce moment. Désormais elle ne le fait qu'écran éteint, et ferme d'abord sa fenêtre.",
+        "Déjà dans la 3.1, pour ceux qui viennent d'une version plus ancienne : appels et volume.",
         "Sonnerie et notifications de nouveau à plein volume après un appel. Après un appel avec RooTelegram, sur des téléphones comme Xperia et Jolla le son restait sur l'écouteur : sonnerie, notifications et musique sortaient très faiblement de là, comme si le volume avait baissé de 90 %, jusqu'au redémarrage du téléphone. Désormais, à la fin d'un appel, le son revient toujours sur le haut-parleur.",
         "Le volume multimédia n'est plus modifié. Avant, chaque appel mettait discrètement le volume multimédia à 90 % et le réécrivait à la fin de l'appel : chez certains il montait, chez d'autres il baissait, et il restait ainsi ensuite. Désormais RooTelegram ne modifie plus aucun volume du téléphone : l'appel démarre au volume que vous avez choisi.",
         "« Raccrocher » termine l'appel instantanément. Parfois l'appel restait ouvert jusqu'à une minute après avoir appuyé sur Raccrocher, en attendant la confirmation des serveurs de Telegram : son actif, écran allumé et téléphone persuadé d'être encore en communication. Désormais il se ferme tout de suite, même si la confirmation arrive plus tard.",
@@ -71,7 +77,8 @@ var changelogByLang = {
         "Bon à savoir : pendant un appel RooTelegram, les touches de volume règlent le volume multimédia du téléphone, pas un volume d'appel séparé. Si vous le baissez pendant un appel, il reste bas ensuite : remontez-le avec les touches. Séparer les deux volumes est la prochaine étape."
     ],
     "sk": [
-        "Hovory a hlasitosť: táto verzia je venovaná problému, ktorý nahlásilo viacero používateľov. Ďakujeme všetkým, ktorí ho nahlásili!",
+        "Opravená zriedkavá čierna obrazovka. Občas po zapnutí obrazovky telefón na pár sekúnd sčernel, vrátil sa na úvodnú obrazovku a RooTelegram prestal reagovať. Stávalo sa to, keď sa aplikácia na pozadí práve v tej chvíli sama reštartovala, aby uvoľnila pamäť. Teraz to robí iba pri vypnutej obrazovke a najprv zavrie svoje okno.",
+        "Už vo verzii 3.1, pre tých, ktorí prechádzajú zo staršej verzie: hovory a hlasitosť.",
         "Zvonenie a upozornenia sú po hovore opäť na plnú hlasitosť. Po hovore cez RooTelegram na telefónoch ako Xperia a Jolla zostával zvuk na slúchadle: zvonenie, upozornenia a hudba odtiaľ zneli veľmi potichu, akoby hlasitosť klesla o 90 %, až do reštartu telefónu. Teraz sa na konci hovoru zvuk vždy vráti do reproduktora.",
         "Hlasitosť médií sa už nemení. Predtým každý hovor potichu nastavil hlasitosť médií na 90 % a na konci hovoru ju prepísal: niekomu stúpla, niekomu klesla a tak aj zostala. Teraz RooTelegram nemení žiadnu hlasitosť telefónu: hovor začne s hlasitosťou, ktorú ste si zvolili.",
         "«Ukončiť» ukončí hovor okamžite. Niekedy zostal hovor po stlačení Ukončiť otvorený až minútu a čakal na potvrdenie serverov Telegramu: zvuk zapnutý, obrazovka zapnutá a telefón presvedčený, že hovor ešte trvá. Teraz sa zavrie hneď, aj keď potvrdenie príde neskôr.",
