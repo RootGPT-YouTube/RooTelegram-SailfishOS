@@ -39,18 +39,21 @@ public:
     void triggerOpenMessage(const QString &chatId, const QString &messageId);
     void triggerOpenUrl(const QString &url);
     void triggerOpenStories();
+    void triggerReplyToChat(const QString &chatId, const QString &message);
 
 signals:
     void pleaseActivateApp();
     void pleaseOpenMessage(const QString &chatId, const QString &messageId);
     void pleaseOpenUrl(const QString &url);
     void pleaseOpenStories();
+    void pleaseReplyToChat(const QString &chatId, const QString &message);
 
 public slots:
     void activateApp();
     void openMessage(const QString &chatId, const QString &messageId);
     void openUrl(const QStringList &arguments);
     void openStories();
+    void replyToChat(const QString &chatId, const QString &message);
 
 };
 

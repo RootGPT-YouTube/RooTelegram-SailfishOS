@@ -2948,6 +2948,11 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
 </context>
 <context>
     <name>NotificationManager</name>
+    <message>
+        <source>Reply</source>
+        <extracomment>Notification action: write the answer right in the notification</extracomment>
+        <translation>Rispondi</translation>
+    </message>
     <message numerus="yes">
         <source>%Ln unread messages</source>
         <translation>

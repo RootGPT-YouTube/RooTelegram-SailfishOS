@@ -50,6 +50,11 @@ void DBusAdaptor::triggerOpenStories()
     emit pleaseOpenStories();
 }
 
+void DBusAdaptor::triggerReplyToChat(const QString &chatId, const QString &message)
+{
+    emit pleaseReplyToChat(chatId, message);
+}
+
 void DBusAdaptor::activateApp()
 {
     LOG("Activate app requested");
@@ -77,4 +82,14 @@ void DBusAdaptor::openStories()
     LOG("Open Stories requested");
     triggerActivateApp();
     triggerOpenStories();
+}
+
+// The text typed into the notification's own text field (remote action
+// "reply" with type=input): lipstick appends that text as the last
+// argument of the call. The UI is NOT activated -- not having to open
+// the app is the whole point of replying in the notification.
+void DBusAdaptor::replyToChat(const QString &chatId, const QString &message)
+{
+    LOG("Reply from notification requested for chat" << chatId);
+    triggerReplyToChat(chatId, message);
 }

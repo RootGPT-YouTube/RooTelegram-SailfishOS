@@ -2944,6 +2944,11 @@ You can remove it from your list. This removal is local only: it does not delete
 </context>
 <context>
     <name>NotificationManager</name>
+    <message>
+        <source>Reply</source>
+        <extracomment>Notification action: write the answer right in the notification</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
         <source>%Ln unread messages</source>
         <translation>
