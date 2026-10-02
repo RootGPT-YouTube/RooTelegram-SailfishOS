@@ -2950,6 +2950,11 @@ Nachrichten</numerusform>
 </context>
 <context>
     <name>NotificationManager</name>
+    <message>
+        <source>Reply</source>
+        <extracomment>Notification action: write the answer right in the notification</extracomment>
+        <translation>Antworten</translation>
+    </message>
     <message numerus="yes">
         <source>%Ln unread messages</source>
         <translation>
