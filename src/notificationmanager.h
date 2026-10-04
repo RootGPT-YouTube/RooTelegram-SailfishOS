@@ -58,6 +58,8 @@ public slots:
     void flushPendingSnapshotGroups();
     void handleNewStory(qlonglong chatId);
     void handleMessageReaction(qlonglong chatId, qlonglong messageId, const QVariantList &unreadReactions, int unreadReactionCount);
+    // A reply written in the notification's text field (D-Bus: replyToChat).
+    void handleReplyToChat(const QString &chatId, const QString &message);
 
 private:
 
@@ -72,6 +74,15 @@ private:
     void purgeSnapshotGroup(int groupId, qlonglong chatId, const QVariantList &notifications);
     // True se la chat (già in cache) risulta interamente letta.
     static bool chatFullyRead(const QVariantMap &chatInformation);
+    // True if we may write in this chat: decides whether the notification
+    // offers the "Reply" action (same logic as hasSendPrivilege() in
+    // ChatPage.qml, but in C++ and only for text messages).
+    bool canSendToChat(qlonglong chatId, const ChatInfo *chatInformation) const;
+    void sendReply(qlonglong chatId, const QString &message);
+    void flushPendingReplies();
+    // Id of the last notified message of that chat (0 if unknown): needed
+    // to mark it as viewed when the reply comes from the notification.
+    qlonglong lastNotifiedMessageId(qlonglong chatId) const;
     void updateNotificationGroup(int groupId, qlonglong chatId, int totalCount,
         const QVariantList &addedNotifications,
         const QVariantList &removedNotificationIds = QVariantList(),
@@ -96,6 +107,10 @@ private:
     // delle firme (autore|emoji) già notificate — evita doppioni quando TDLib
     // ri-emette updateMessageUnreadReactions con lo stesso stato.
     QHash<QString, QSet<QString> > notifiedReactions;
+    // Replies that arrived before TDLib was authorized: happens when the
+    // notification action itself started the daemon (D-Bus activation).
+    // They are sent at the first AuthorizationReady.
+    QList<QPair<qlonglong,QString> > pendingReplies;
 
 };
 
