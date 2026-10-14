@@ -388,6 +388,15 @@ int main(int argc, char *argv[])
         }
     });
 
+    // RooTundra 14/10/2026: "mark-read" dalla notifica, senza aprire la finestra
+    QObject::connect(dBusAdaptor, &DBusAdaptor::pleaseMarkMessageRead, app.data(), [tdLibWrapper](const QString &chatId, const QString &messageId) {
+        const qlonglong chat = chatId.toLongLong();
+        const qlonglong message = messageId.toLongLong();
+        if (chat != 0 && message > 0) {
+            tdLibWrapper->viewMessageFromNotification(chat, message);
+        }
+    });
+
     QObject::connect(dBusAdaptor, &DBusAdaptor::pleaseOpenUrl, app.data(), [&](const QString &url) {
         if (replayingDbusSignal) {
             return;

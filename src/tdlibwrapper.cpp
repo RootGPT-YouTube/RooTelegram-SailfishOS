@@ -972,6 +972,26 @@ void TDLibWrapper::viewMessage(qlonglong chatId, qlonglong messageId, bool force
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::viewMessageFromNotification(qlonglong chatId, qlonglong messageId)
+{
+    // Come viewMessage(force=true), ma senza il thread/forum della chat aperta
+    // in quel momento (puo' essere un'altra chat): la sorgente e' la notifica,
+    // e segnare letto l'ultimo messaggio segna letto tutto cio' che lo precede.
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "viewMessages");
+    requestObject.insert(CHAT_ID, chatId);
+    requestObject.insert("force_read", true);
+    requestObject.insert(_EXTRA, QStringLiteral("viewMessagesNotification:%1").arg(chatId));
+    QVariantMap sourceObject;
+    sourceObject.insert(_TYPE, "messageSourceNotification");
+    requestObject.insert("source", sourceObject);
+    QVariantList messageIds;
+    messageIds.append(messageId);
+    requestObject.insert("message_ids", messageIds);
+    qWarning() << "[VIEWMSG] da notifica: chat" << chatId << "msg" << messageId;
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::removeNotificationGroup(int notificationGroupId, int maxNotificationId)
 {
     // Contratto TDLib: va chiamato quando è l'UTENTE a rimuovere la notifica
@@ -4043,10 +4063,27 @@ void TDLibWrapper::handleUserStatusUpdated(const QString &userId, const QVariant
     emit userUpdated(userId, updatedUserInformation);
 }
 
+QString TDLibWrapper::primaryUsername(const QVariantMap &userInformation)
+{
+    const QVariantMap usernames = userInformation.value(USERNAMES).toMap();
+    const QString editableUsername = usernames.value(EDITABLE_USERNAME).toString();
+    if (!editableUsername.isEmpty()) {
+        return editableUsername;
+    }
+    const QVariantList activeUsernames = usernames.value("active_usernames").toList();
+    return activeUsernames.isEmpty() ? QString() : activeUsernames.first().toString();
+}
+
 void TDLibWrapper::updateUserInformation(const QString &userId, const QVariantMap &userInformation)
 {
     this->usersById.insert(userId, userInformation);
     this->usersByName.insert(userInformation.value(USERNAMES).toMap().value(EDITABLE_USERNAME).toString(), userInformation);
+    // Anche gli username attivi non modificabili (Fragment), altrimenti un link
+    // user://<nome> a quell'utente non si risolve dalla cache.
+    const QVariantList activeUsernames = userInformation.value(USERNAMES).toMap().value("active_usernames").toList();
+    for (const QVariant &activeUsername : activeUsernames) {
+        this->usersByName.insert(activeUsername.toString(), userInformation);
+    }
 }
 
 void TDLibWrapper::handleFileUpdated(const QVariantMap &fileInformation)

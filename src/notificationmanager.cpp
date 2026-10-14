@@ -29,6 +29,9 @@
 #include <QListIterator>
 #include <QUrl>
 #include <QDateTime>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QDBusConnection>
 #include <QGuiApplication>
 
@@ -713,6 +716,19 @@ void NotificationManager::publishNotification(const NotificationGroup *notificat
         nemoNotification->setRemoteAction(Notification::remoteAction("default", "openMessage",
             APP_ORIGIN, "/com/github/RootGPT_YouTube/rootelegram", APP_ORIGIN,
             "openMessage", remoteActionArguments));
+        // RooTundra 14/10/2026: la X della notifica in RooTundra la segna letta
+        // facendo da se' questa chiamata D-Bus. E' un hint e NON un'azione
+        // remota: Silica mostrerebbe un pulsante, e il suo LaunchManager
+        // tratterebbe la chiamata come l'avvio dell'app (copertina con lo
+        // spinner finche' scade). Silica ignora gli hint che non conosce.
+        nemoNotification->setHintValue(QStringLiteral("x-rootundra-mark-read"),
+            QString::fromUtf8(QJsonDocument(QJsonObject{
+                { QStringLiteral("service"), APP_ORIGIN },
+                { QStringLiteral("path"), QStringLiteral("/com/github/RootGPT_YouTube/rootelegram") },
+                { QStringLiteral("iface"), APP_ORIGIN },
+                { QStringLiteral("method"), QStringLiteral("markMessageRead") },
+                { QStringLiteral("args"), QJsonArray::fromVariantList(remoteActionArguments) }
+            }).toJson(QJsonDocument::Compact)));
     }
 
     QString notificationBody;

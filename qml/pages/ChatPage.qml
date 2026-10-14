@@ -320,14 +320,7 @@ Page {
                 if (!userInfo) {
                     continue;
                 }
-                var username = "";
-                if (userInfo.usernames) {
-                    if (userInfo.usernames.active_usernames && userInfo.usernames.active_usernames.length > 0) {
-                        username = userInfo.usernames.active_usernames[0];
-                    } else if (userInfo.usernames.editable_username) {
-                        username = userInfo.usernames.editable_username;
-                    }
-                }
+                var username = Functions.getPrimaryUsername(userInfo);
                 atMentionSuggestionsModel.append({
                     "user_id": uid,
                     "user_name": username,
@@ -4864,7 +4857,14 @@ Page {
                                         height: singleAtMentionRow.height
                                         width: singleAtMentionRow.width
 
-                                        property string atMentionText: "@" + (user_name ? user_name : user_id + "(" + title + ")");
+                                        // Lo username si rilegge AL TOCCO: i dati dell'utente possono
+                                        // essere arrivati dopo la costruzione del suggerimento, e solo
+                                        // se manca davvero si ripiega sulla forma @<id>(<nome>).
+                                        function atMentionText() {
+                                            var liveUsername = Functions.getPrimaryUsername(tdLibWrapper.getUserInformation(String(user_id)));
+                                            var mentionUsername = liveUsername || user_name;
+                                            return "@" + (mentionUsername ? mentionUsername : user_id + "(" + title + ")");
+                                        }
 
                                         Row {
                                             id: singleAtMentionRow
@@ -4904,7 +4904,7 @@ Page {
                                         MouseArea {
                                             anchors.fill: parent
                                             onClicked: {
-                                                replaceMessageText(composerLiveText(), newMessageTextField.cursorPosition, knownUserItem.atMentionText);
+                                                replaceMessageText(composerLiveText(), newMessageTextField.cursorPosition, knownUserItem.atMentionText());
                                                 knownUsersRepeater.model = undefined;
                                             }
                                         }

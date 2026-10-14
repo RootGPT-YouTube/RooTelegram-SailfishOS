@@ -151,6 +151,9 @@ public:
     Q_INVOKABLE QVariantMap getUserInformation(const QString &userId);
     Q_INVOKABLE bool hasUserInformation(const QString &userId);
     Q_INVOKABLE QVariantMap getUserInformationByName(const QString &userName);
+    // Username con cui menzionare un utente: editable_username, altrimenti il primo
+    // degli active_usernames (gli username comprati su Fragment hanno editable vuoto).
+    static QString primaryUsername(const QVariantMap &userInformation);
     Q_INVOKABLE UserPrivacySettingRule getUserPrivacySettingRule(UserPrivacySetting userPrivacySetting);
     Q_INVOKABLE QVariantList getUserPrivacySettingAllowedUserIds(UserPrivacySetting userPrivacySetting);
     Q_INVOKABLE QVariantList getUserPrivacySettingRestrictedUserIds(UserPrivacySetting userPrivacySetting);
@@ -198,6 +201,8 @@ public:
     Q_INVOKABLE void deleteChat(qlonglong chatId);
     Q_INVOKABLE void getChatHistory(qlonglong chatId, qlonglong fromMessageId = 0, int offset = -1, int limit = 50, bool onlyLocal = false);
     Q_INVOKABLE void viewMessage(qlonglong chatId, qlonglong messageId, bool force);
+    // letto DA NOTIFICA (azione "mark-read"): niente stato della chat aperta
+    void viewMessageFromNotification(qlonglong chatId, qlonglong messageId);
     Q_INVOKABLE void removeNotificationGroup(int notificationGroupId, int maxNotificationId);
     Q_INVOKABLE void sendChatAction(qlonglong chatId, const QString &action = "chatActionTyping");
     Q_INVOKABLE void pinMessage(const QString &chatId, const QString &messageId, bool disableNotification = false, bool onlyForSelf = false);

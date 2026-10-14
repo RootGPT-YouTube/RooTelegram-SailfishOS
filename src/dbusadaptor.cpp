@@ -72,6 +72,12 @@ void DBusAdaptor::openUrl(const QStringList &arguments)
     }
 }
 
+void DBusAdaptor::markMessageRead(const QString &chatId, const QString &messageId)
+{
+    LOG("Mark message read requested" << chatId << messageId);
+    emit pleaseMarkMessageRead(chatId, messageId);
+}
+
 void DBusAdaptor::openStories()
 {
     LOG("Open Stories requested");

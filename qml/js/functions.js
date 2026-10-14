@@ -45,6 +45,23 @@ function getUserName(userInformation) {
     return ((userInformation.first_name || "") + " " + (userInformation.last_name || "")).trim();
 }
 
+// Username con cui menzionare un utente ("" se non ne ha): editable_username,
+// altrimenti il primo degli active_usernames (quelli comprati su Fragment
+// hanno editable_username vuoto). Gemella di TDLibWrapper::primaryUsername.
+function getPrimaryUsername(userInformation) {
+    var usernames = userInformation ? userInformation.usernames : null;
+    if (!usernames) {
+        return "";
+    }
+    if (usernames.editable_username) {
+        return usernames.editable_username;
+    }
+    if (usernames.active_usernames && usernames.active_usernames.length > 0) {
+        return usernames.active_usernames[0];
+    }
+    return "";
+}
+
 // Nome utente tappabile per i messaggi di servizio ("ha rimosso X", "ha aggiunto
 // Y"): genera un link `userId://` che Functions.handleLink apre come chat privata.
 // In contesti `simple` (anteprime lista chat, clipboard, edit) restituisce il

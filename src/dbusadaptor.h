@@ -45,12 +45,16 @@ signals:
     void pleaseOpenMessage(const QString &chatId, const QString &messageId);
     void pleaseOpenUrl(const QString &url);
     void pleaseOpenStories();
+    void pleaseMarkMessageRead(const QString &chatId, const QString &messageId);
 
 public slots:
     void activateApp();
     void openMessage(const QString &chatId, const QString &messageId);
     void openUrl(const QStringList &arguments);
     void openStories();
+    // RooTundra 14/10/2026: the X of a notification marks the chat as read
+    // (remote action "mark-read"): no window, the daemon does it in background
+    void markMessageRead(const QString &chatId, const QString &messageId);
 
 };
 
