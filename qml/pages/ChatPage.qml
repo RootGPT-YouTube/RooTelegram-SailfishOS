@@ -3705,13 +3705,25 @@ Page {
                             newMessageColumn.refreshQuickPremiumEmojiSets();
                         }
                     }
+                    // Task 3.4 #1: si ricalcola solo se la barra e' gia' stata
+                    // aperta. Tocco della notifica ad app chiusa: la chat si apre
+                    // mentre TDLib manda ancora i set uno per uno (li chiede
+                    // updateSecondaryContentTimer dell'OverviewPage), e ogni
+                    // refresh rilegge tutti i set — il thread principale non si
+                    // liberava piu' (misurato sul POCO: 100% di CPU, poi abort).
+                    // Se la barra e' chiusa ci pensa il tocco sul suo pulsante.
                     Connections {
                         target: stickerManager
                         onCustomEmojiStickerSetsReceived: {
-                            refreshQuickPremiumDebounce.restart();
+                            if (newMessageColumn.quickPremiumEmojiSets.length > 0
+                                    || newMessageColumn.quickPremiumEmojiPickerVisible) {
+                                refreshQuickPremiumDebounce.restart();
+                            }
                         }
                         onStickerSetsReceived: {
-                            newMessageColumn.refreshQuickStickerSets();
+                            if (newMessageColumn.quickStickerPickerVisible) {
+                                newMessageColumn.refreshQuickStickerSets();
+                            }
                         }
                     }
 
@@ -3995,6 +4007,8 @@ Page {
                                 highlighted: down || newMessageColumn.quickPremiumEmojiPickerVisible
                                 onClicked: {
                                     if (newMessageColumn.quickPremiumEmojiSets.length === 0) {
+                                        // i set possono essere arrivati dopo l'apertura della chat
+                                        newMessageColumn.installedCustomEmojiSets = stickerManager.getInstalledCustomEmojiSets();
                                         newMessageColumn.refreshQuickPremiumEmojiSets();
                                     }
                                     if (!newMessageColumn.installedCustomEmojiSets
