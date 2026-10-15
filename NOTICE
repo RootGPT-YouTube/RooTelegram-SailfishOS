@@ -23,7 +23,7 @@ NOTES         : Full license text in ./LICENSE
 
 --------------------------------------------------------------------------------
 COMPONENT     : TDLib (Telegram Database Library, libtdjson)
-VERSION       : 1.8.62
+VERSION       : 1.8.67
 LICENSE       : Boost Software License 1.0
 SOURCE        : https://github.com/tdlib/td
 DISTRIBUTION  : prebuilt libtdjson bundled in the RPM (excluded from this repo
@@ -71,10 +71,21 @@ DISTRIBUTION  : the interface headers are compiled into
 
 --------------------------------------------------------------------------------
 COMPONENT     : rlottie (animated Lottie stickers)
-LICENSE       : MIT License
+VERSION       : 0.2
+LICENSE       : MIT License, except for these imported parts compiled with it:
+                  src/vector/ (portions)  BSD-3-Clause (Skia, Google Inc.)
+                  src/vector/freetype/    FreeType License (FTL)
+                  src/vector/pixman/      MIT (pixman)
+                  src/vector/stb/         MIT (stb_image)
+                  src/lottie/rapidjson/   MIT (RapidJSON, Tencent)
+                  src/vector/vinterpolator.cpp  MPL 2.0 (from Mozilla; the
+                                          unmodified source of this file is in
+                                          the upstream repository below)
 COPYRIGHT     : Copyright (c) 2020 Samsung Electronics Co., Ltd. and other
                 contributors
 SOURCE        : https://github.com/Samsung/rlottie
+LICENSE TEXT  : all of the above ship in the RPM under
+                /usr/share/harbour-rootelegram/licenses/rlottie/
 DISTRIBUTION  : compiled into the RPM (excluded from this repo via .gitignore:
                 /rlottie/)
 

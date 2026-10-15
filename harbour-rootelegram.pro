@@ -311,6 +311,14 @@ qrcodegenlicense.files = $$PWD/src/qrcodegen/LICENSE
 qrcodegenlicense.path = /usr/share/$${TARGET}/licenses/qrcodegen
 INSTALLS += qrcodegenlicense
 
+# rlottie: MIT, ma con parti importate sotto altre licenze (FreeType, Skia,
+# pixman, stb, RapidJSON, MPL 2.0) che chiedono di accompagnare il binario con
+# i loro testi. La cartella rlottie/ non e' tracciata in git, quindi senza
+# questa riga i testi non arriverebbero a nessuno.
+rlottielicense.files = $$PWD/rlottie/COPYING $$files($$PWD/rlottie/licenses/*)
+rlottielicense.path = /usr/share/$${TARGET}/licenses/rlottie
+INSTALLS += rlottielicense
+
 
 gui.files = qml
 gui.path = /usr/share/$${TARGET}

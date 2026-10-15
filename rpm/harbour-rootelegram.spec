@@ -132,6 +132,14 @@ install -m 644 voicecallplugin/librootelegram-voicecall-plugin.so \
 %endif
 # Harbour: gli asset (SVG emoji) non devono essere eseguibili
 find %{buildroot}%{_datadir}/%{name} -name '*.svg' -exec chmod 644 {} +
+# Licenza e NOTICE anche nel posto standard /usr/share/licenses/%{name}/.
+# Si copiano dal buildroot (dove li ha messi qmake, vedi INSTALLS "licenses" nel
+# .pro) e non con un %license relativo: con lo shadow build la cartella di
+# lavoro di %files non e' quella dei sorgenti.
+install -D -m 644 %{buildroot}%{_datadir}/%{name}/licenses/LICENSE \
+    %{buildroot}%{_datadir}/licenses/%{name}/LICENSE
+install -D -m 644 %{buildroot}%{_datadir}/%{name}/licenses/NOTICE \
+    %{buildroot}%{_datadir}/licenses/%{name}/NOTICE
 # << install post
 
 desktop-file-install --delete-original       \
@@ -147,6 +155,8 @@ desktop-file-install --delete-original       \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 /usr/lib/systemd/user/%{name}.service
 # >> files
+%license %{_datadir}/licenses/%{name}/LICENSE
+%license %{_datadir}/licenses/%{name}/NOTICE
 %ifarch aarch64 armv7hl
 /usr/lib64/voicecall/plugins/librootelegram-voicecall-plugin.so
 %endif
