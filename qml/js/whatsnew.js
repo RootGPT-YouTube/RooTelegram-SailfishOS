@@ -13,36 +13,36 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.4";
+var version = "3.5";
 
 var changelogByLang = {
     "it": [
-        "Risolto il blocco all'apertura da una notifica. Se RooTelegram non era ancora avviato, toccare una sua notifica apriva la chat e poi l'app si bloccava, fino a chiudersi da sola. Ora la chat si apre e resta utilizzabile.",
-        "Nuova icona: RooTelegram entra nella nuova famiglia RootApps, con lo stesso stile “acciaio” di tutte le app sorelle."
+        "Icona più nitida: l'aeroplanino d'acciaio è stato ridisegnato e ora si riconosce bene anche in piccolo.",
+        "Le notifiche hanno finalmente la nuova icona d'acciaio: prima mostravano ancora quella blu delle versioni precedenti."
     ],
     "en": [
-        "Fixed the freeze when opening from a notification. If RooTelegram was not running yet, tapping one of its notifications opened the chat and then the app froze, until it closed by itself. Now the chat opens and stays usable.",
-        "New icon: RooTelegram joins the new RootApps family, with the same “steel” style as all its sister apps."
+        "Sharper icon: the steel paper plane has been redrawn and is now easy to recognise even at small sizes.",
+        "Notifications finally show the new steel icon: until now they still had the blue one from earlier versions."
     ],
     "de": [
-        "Einfrieren beim Öffnen über eine Benachrichtigung behoben. Lief RooTelegram noch nicht, öffnete ein Tippen auf eine seiner Benachrichtigungen den Chat, dann fror die App ein, bis sie sich von selbst schloss. Jetzt öffnet sich der Chat und bleibt bedienbar.",
-        "Neues Symbol: RooTelegram gehört jetzt zur neuen RootApps-Familie, im gleichen „Stahl“-Stil wie alle Schwester-Apps."
+        "Schärferes Symbol: Der Papierflieger aus Stahl wurde neu gezeichnet und ist jetzt auch in kleiner Größe gut zu erkennen.",
+        "Benachrichtigungen zeigen endlich das neue Stahl-Symbol: Bisher hatten sie noch das blaue aus früheren Versionen."
     ],
     "pl": [
-        "Naprawiono zawieszanie się po otwarciu z powiadomienia. Jeśli RooTelegram nie był jeszcze uruchomiony, dotknięcie jego powiadomienia otwierało czat, a potem aplikacja się zawieszała, aż sama się zamknęła. Teraz czat się otwiera i można z niego normalnie korzystać.",
-        "Nowa ikona: RooTelegram dołącza do nowej rodziny RootApps, w tym samym „stalowym” stylu co wszystkie siostrzane aplikacje."
+        "Wyraźniejsza ikona: stalowy papierowy samolocik został narysowany od nowa i teraz dobrze go widać nawet w małym rozmiarze.",
+        "Powiadomienia mają wreszcie nową stalową ikonę: do tej pory pokazywały jeszcze niebieską z poprzednich wersji."
     ],
     "ru": [
-        "Исправлено зависание при открытии из уведомления. Если RooTelegram ещё не был запущен, нажатие на его уведомление открывало чат, а затем приложение зависало, пока не закрывалось само. Теперь чат открывается и остаётся рабочим.",
-        "Новый значок: RooTelegram входит в новое семейство RootApps, в том же «стальном» стиле, что и все родственные приложения."
+        "Более чёткий значок: стальной бумажный самолётик перерисован, и теперь его легко узнать даже в маленьком размере.",
+        "Уведомления наконец показывают новый стальной значок: до сих пор в них оставался синий из прежних версий."
     ],
     "fr": [
-        "Correction du blocage à l'ouverture depuis une notification. Si RooTelegram n'était pas encore lancé, toucher une de ses notifications ouvrait la discussion, puis l'application se bloquait, jusqu'à se fermer d'elle-même. Désormais la discussion s'ouvre et reste utilisable.",
-        "Nouvelle icône : RooTelegram rejoint la nouvelle famille RootApps, avec le même style « acier » que toutes ses applications sœurs."
+        "Icône plus nette : l'avion en papier d'acier a été redessiné et se reconnaît bien, même en petit.",
+        "Les notifications affichent enfin la nouvelle icône en acier : jusqu'ici elles montraient encore l'icône bleue des versions précédentes."
     ],
     "sk": [
-        "Opravené zamrznutie pri otvorení z upozornenia. Ak RooTelegram ešte nebežal, ťuknutie na jeho upozornenie otvorilo chat a potom aplikácia zamrzla, až kým sa sama nezavrela. Teraz sa chat otvorí a dá sa normálne používať.",
-        "Nová ikona: RooTelegram patrí do novej rodiny RootApps, v rovnakom „oceľovom“ štýle ako všetky sesterské aplikácie."
+        "Ostrejšia ikona: oceľové papierové lietadielko bolo nakreslené nanovo a teraz je dobre rozpoznateľné aj v malej veľkosti.",
+        "Upozornenia majú konečne novú oceľovú ikonu: doteraz ešte zobrazovali modrú z predchádzajúcich verzií."
     ]
 };
 

@@ -173,8 +173,12 @@ void NotificationManager::applyBranding(Notification *notification) const
     notification->setHintValue(HINT_ORIGIN, APP_ORIGIN);
 }
 
+// L'icona delle notifiche ha un nome NUOVO per ogni disegno nuovo: la home tiene in
+// cache le immagini per percorso, e con lo stesso nome chi aggiorna continuerebbe a
+// vedere la vecchia (misurato sul POCO con RooTundra il 16/10/2026: righe nuove, ma
+// intestazione del gruppo ancora blu, finche' il percorso non e' cambiato).
 NotificationManager::NotificationManager(TDLibWrapper *tdLibWrapper, AppSettings *appSettings, MceInterface *mceInterface, ChatModel *chatModel) :
-    notificationIconFile(SailfishApp::pathTo("images/rootelegram-notification.png").toLocalFile())
+    notificationIconFile(SailfishApp::pathTo("images/rootelegram-notification-steel.png").toLocalFile())
 {
     LOG("Initializing...");
     this->tdLibWrapper = tdLibWrapper;
