@@ -104,18 +104,54 @@ MessageContentFileInfoBase {
 
     property int duration: rawMessage.content.audio.duration
 
-    Audio {
+    // Titolo mostrato nella barra del player (MessageVoiceNote lo sostituisce).
+    property string playerTitle: {
+        var audio = rawMessage.content.audio;
+        if (!audio) {
+            return "";
+        }
+        var name = audio.title || audio.file_name || "";
+        return audio.performer ? audio.performer + " – " + name : name;
+    }
+
+    // Non e' piu' un player: e' la "finestra" di questo messaggio sul player unico
+    // (appWindow.sharedAudio, vedi harbour-rootelegram.qml), con gli stessi nomi
+    // di prima perche' il resto del file non cambi. Quando il player suona un
+    // altro messaggio, qui risulta tutto fermo e a zero.
+    QtObject {
         id: audioPlayer
-        source: file.isDownloadingCompleted ? file.path : ""
-        autoPlay: false
-        playbackRate: appWindow.mediaPlaybackRate
-        // Il backend GStreamer applica il rate con un seek: se il rate viene
-        // impostato a player fermo può non "attaccare" alla partenza → lo
-        // ri-agganciamo (via Qt.binding, per non perdere il binding) appena
-        // parte la riproduzione.
-        onPlaybackStateChanged: {
-            if (playbackState === Audio.PlayingState) {
-                playbackRate = Qt.binding(function() { return appWindow.mediaPlaybackRate; });
+        readonly property var shared: appWindow.sharedAudio
+        readonly property string key: rawMessage.chat_id + "_" + rawMessage.id
+        readonly property bool current: shared.ownerKey === key
+        // Avvio rimandato a fine download (prima era l'autoPlay dell'Audio).
+        property bool autoPlay: false
+        readonly property int playbackState: current ? shared.playbackState : Audio.StoppedState
+        readonly property real position: current ? shared.position : 0
+        readonly property real duration: current ? shared.duration : 0
+        readonly property bool seekable: current && shared.seekable
+        readonly property bool ready: file.isDownloadingCompleted
+
+        function play() {
+            if (!file.isDownloadingCompleted) {
+                return;
+            }
+            appWindow.playSharedAudio(key, file.path, contentItem.playerTitle);
+        }
+        function pause() {
+            if (current) {
+                shared.pause();
+            }
+        }
+        function seek(ms) {
+            if (current) {
+                shared.seek(ms);
+            }
+        }
+
+        onReadyChanged: {
+            if (ready && autoPlay) {
+                autoPlay = false;
+                play();
             }
         }
         // Il salto chiesto da un timestamp arriva spesso prima che la pipeline sia

@@ -50,6 +50,52 @@ ApplicationWindow
                           : (mediaPlaybackRate === 1.25) ? 1.5 : 1.0;
     }
 
+    // UN SOLO player per brani e vocali, che vive quanto la finestra e non quanto
+    // la pagina. Prima ogni messaggio aveva il suo Audio: chiudendo l'app la chat
+    // restava viva nascosta e continuava a suonare, e riaprendo la stessa chat da
+    // un'altra strada (notifica, info chat) se ne apriva una seconda che non ne
+    // sapeva niente: niente modo di fermarla, e lo stesso vocale due volte insieme
+    // (segnalazione di un tester, riprodotta sul POCO il 16/10/2026).
+    // ownerKey = "<chat_id>_<message_id>" del messaggio che lo sta usando: i
+    // MessageAudio si agganciano a questo player solo quando la chiave e' la loro.
+    property alias sharedAudio: sharedAudio
+    function playSharedAudio(ownerKey, path, title) {
+        if (sharedAudio.ownerKey !== ownerKey || sharedAudio.source.toString() === "") {
+            sharedAudio.stop();
+            sharedAudio.ownerKey = ownerKey;
+            sharedAudio.title = title || "";
+            sharedAudio.source = path;
+        }
+        sharedAudio.play();
+    }
+    function stopSharedAudio() {
+        sharedAudio.stop();
+        sharedAudio.ownerKey = "";
+        sharedAudio.title = "";
+        sharedAudio.source = "";
+    }
+
+    Audio {
+        id: sharedAudio
+        property string ownerKey: ""
+        property string title: ""
+        autoPlay: false
+        playbackRate: appWindow.mediaPlaybackRate
+        // Il backend GStreamer applica il rate con un seek: impostato a player
+        // fermo puo' non "attaccare" alla partenza, quindi lo si ri-aggancia
+        // (via Qt.binding, per non perdere il binding) appena parte.
+        onPlaybackStateChanged: {
+            if (playbackState === Audio.PlayingState) {
+                playbackRate = Qt.binding(function() { return appWindow.mediaPlaybackRate; });
+            }
+        }
+    }
+
+    AudioPlayerBar {
+        player: sharedAudio
+        z: 9000
+    }
+
     function openShareDialog(resources) {
         if (!resources || resources.length === 0) {
             return;

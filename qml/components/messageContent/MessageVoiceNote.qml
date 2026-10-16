@@ -22,6 +22,7 @@ MessageAudio {
     isVoiceNote: true
     fileInformation: rawMessage.content.voice_note.voice
     primaryText: qsTr("Voice Note")
+    playerTitle: qsTr("Voice Note")
     secondaryText: ""
     duration: rawMessage.content.voice_note.duration
     thumbnail: null
