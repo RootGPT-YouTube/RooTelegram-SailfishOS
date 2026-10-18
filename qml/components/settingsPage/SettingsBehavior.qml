@@ -43,8 +43,59 @@ AccordionItem {
                 }
             }
 
+            // Notifiche via UnifiedPush/Foghorn al posto del demone (BETA): vedi
+            // src/unifiedpushmanager.h e la pagina di istruzioni.
+            Column {
+                width: parent.columnWidth
+                TextSwitch {
+                    width: parent.width
+                    checked: unifiedPushManager.enabled
+                    text: qsTr("Notifications via UnifiedPush (BETA)")
+                    description: qsTr("Instead of keeping RooTelegram in memory, the Foghorn app wakes it up when a message arrives: much less memory used. Requires the Foghorn app — read the instructions first.")
+                    automaticCheck: false
+                    onClicked: unifiedPushManager.setEnabled(!checked)
+                }
+                Label {
+                    x: Theme.itemSizeExtraSmall + Theme.paddingLarge
+                    width: parent.width - x - Theme.horizontalPageMargin
+                    visible: unifiedPushManager.enabled
+                    wrapMode: Text.Wrap
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: unifiedPushManager.status === "registered" ? Theme.highlightColor : Theme.errorColor
+                    text: {
+                        switch (unifiedPushManager.status) {
+                        case "registered":
+                            return qsTr("Active: Telegram wakes RooTelegram through %1.").arg(unifiedPushManager.endpointHost);
+                        case "registering":
+                            return qsTr("Connecting to Foghorn…");
+                        case "noDistributor":
+                            return qsTr("No distributor found: install Foghorn and start it.");
+                        case "error":
+                            return qsTr("It didn't work: %1").arg(unifiedPushManager.errorText);
+                        }
+                        return "";
+                    }
+                }
+                Row {
+                    x: Theme.itemSizeExtraSmall + Theme.paddingLarge
+                    spacing: Theme.paddingMedium
+                    topPadding: Theme.paddingSmall
+                    Button {
+                        text: qsTr("Instructions")
+                        onClicked: pageStack.push(Qt.resolvedUrl("../../pages/UnifiedPushHelpPage.qml"))
+                    }
+                    Button {
+                        visible: unifiedPushManager.enabled && unifiedPushManager.status !== "registered"
+                        text: qsTr("Try again")
+                        onClicked: unifiedPushManager.refresh()
+                    }
+                }
+            }
+
             TextSwitch {
                 width: parent.columnWidth
+                // Con UnifiedPush acceso il demone non parte al boot comunque.
+                enabled: !unifiedPushManager.enabled
                 checked: appSettings.autostartEnabled
                 text: qsTr("Start automatically at device boot")
                 description: qsTr("Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.")

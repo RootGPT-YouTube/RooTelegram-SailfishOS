@@ -17,6 +17,7 @@
     along with RooTelegram. If not, see <http://www.gnu.org/licenses/>.
 */
 import QtQuick 2.6
+import QtMultimedia 5.6
 import Sailfish.Silica 1.0
 import WerkWolf.RooTelegram 1.0
 import "../components"
@@ -35,6 +36,14 @@ CoverBackground {
     readonly property int displayedUnreadChats: hideGroupChannelUnread ? privateUnreadChats : unreadChats
     readonly property bool authenticated: tdLibWrapper.authorizationState === TelegramAPI.AuthorizationReady
     property int connectionState: TelegramAPI.WaitingForNetwork
+
+    // Brano o vocale nel player unico: la cover diventa quella di un lettore
+    // (titolo, artista, copertina e comandi), come in RooTheater.
+    readonly property var player: appWindow.sharedAudio
+    readonly property bool audioMode: player.ownerKey !== "" && player.playbackState !== Audio.StoppedState
+    readonly property bool audioPlaying: audioMode && player.playbackState === Audio.PlayingState
+    readonly property var audioContent: (audioMode && player.message && player.message.content)
+                                        ? player.message.content.audio : null
 
     function refreshPrivateUnreadCounts() {
         var counts = chatListModel.getPrivateUnreadCounts();
@@ -110,6 +119,7 @@ CoverBackground {
 
     BackgroundImage {
         id: backgroundImage
+        visible: !coverPage.audioMode
         width: (parent.height - Theme.paddingLarge) / 2
         height: width
         sourceDimension: width
@@ -125,7 +135,7 @@ CoverBackground {
         anchors.fill: parent
         anchors.margins: Theme.paddingLarge
         spacing: Theme.paddingMedium
-        visible: coverPage.authenticated
+        visible: coverPage.authenticated && !coverPage.audioMode
         Row {
             width: parent.width
             spacing: Theme.paddingMedium
@@ -181,6 +191,94 @@ CoverBackground {
             width: parent.width
             maximumLineCount: 3
             wrapMode: Text.Wrap
+        }
+    }
+
+    Column {
+        id: audioHeader
+        visible: coverPage.audioMode
+        anchors {
+            top: parent.top
+            topMargin: Theme.paddingLarge
+            left: parent.left
+            right: parent.right
+            leftMargin: Theme.paddingMedium
+            rightMargin: Theme.paddingMedium
+        }
+        spacing: Theme.paddingSmall
+        Label {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: coverPage.audioContent
+                  ? (coverPage.audioContent.title || coverPage.audioContent.file_name || "")
+                  : (coverPage.audioMode ? coverPage.player.title : "")
+            font.pixelSize: Theme.fontSizeLarge
+            color: Theme.highlightColor
+            wrapMode: Text.Wrap
+            maximumLineCount: 2
+            truncationMode: TruncationMode.Fade
+        }
+        Label {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            visible: text !== ""
+            text: coverPage.audioContent ? (coverPage.audioContent.performer || "") : ""
+            font.pixelSize: Theme.fontSizeExtraSmall
+            color: Theme.secondaryColor
+            maximumLineCount: 1
+            truncationMode: TruncationMode.Fade
+        }
+    }
+
+    // Copertina dell'album se il brano ne ha una, altrimenti il logo.
+    Item {
+        visible: coverPage.audioMode
+        clip: true
+        anchors {
+            top: audioHeader.bottom
+            topMargin: Theme.paddingMedium
+            left: parent.left
+            right: parent.right
+            bottom: audioProgress.top
+        }
+        Image {
+            readonly property bool hasArt: coverPage.player.coverArt !== ""
+            anchors.centerIn: parent
+            width: hasArt ? parent.width : Math.min(parent.width, parent.height) * 0.8
+            height: hasArt ? parent.height : width
+            source: hasArt ? coverPage.player.coverArt : "../../images/background-" + ( Theme.colorScheme ? "black" : "white" ) + ".svg"
+            sourceSize.width: width
+            sourceSize.height: height
+            fillMode: hasArt ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+            opacity: hasArt ? 1.0 : 0.15
+            asynchronous: true
+            smooth: true
+        }
+    }
+
+    Rectangle {
+        id: audioProgress
+        visible: coverPage.audioMode
+        anchors {
+            left: parent.left
+            bottom: parent.bottom
+        }
+        height: Math.max(2, Theme.paddingSmall / 2)
+        width: (coverPage.audioMode && coverPage.player.duration > 0)
+               ? parent.width * Math.min(1, coverPage.player.position / coverPage.player.duration) : 0
+        color: Theme.highlightColor
+    }
+
+    // Play/pausa + successivo (stessa chat, stesso tipo: brani o vocali).
+    CoverActionList {
+        enabled: coverPage.audioMode
+        CoverAction {
+            iconSource: coverPage.audioPlaying ? "image://theme/icon-cover-pause" : "image://theme/icon-cover-play"
+            onTriggered: coverPage.audioPlaying ? coverPage.player.pause() : coverPage.player.play()
+        }
+        CoverAction {
+            iconSource: "image://theme/icon-cover-next-song"
+            onTriggered: appWindow.audioPlaylist.step(1, false)
         }
     }
 

@@ -135,7 +135,8 @@ MessageContentFileInfoBase {
             if (!file.isDownloadingCompleted) {
                 return;
             }
-            appWindow.playSharedAudio(key, file.path, contentItem.playerTitle);
+            // Il messaggio serve al player per trovare precedente/successivo.
+            appWindow.playSharedAudio(key, file.path, contentItem.playerTitle, rawMessage);
         }
         function pause() {
             if (current) {

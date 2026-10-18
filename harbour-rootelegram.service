@@ -10,7 +10,9 @@ Type=simple
 # file-marker nella config dir dell'app (scritto/rimosso dal toggle in Impostazioni).
 # IMPORTANTE: nessun Restart=. Se l'utente chiude o killa l'app, NON viene riavviata:
 # l'autostart agisce esclusivamente all'avvio del dispositivo.
-ExecStart=/bin/sh -c 'test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/autostart-disabled" && exit 0; exec /usr/bin/invoker --type=generic --single-instance /usr/bin/harbour-rootelegram --daemon'
+# Con le notifiche via UnifiedPush (BETA, marker "unifiedpush-enabled") il demone non
+# parte: e' Foghorn a svegliare l'app quando serve.
+ExecStart=/bin/sh -c 'test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/autostart-disabled" && exit 0; test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/unifiedpush-enabled" && exit 0; exec /usr/bin/invoker --type=generic --single-instance /usr/bin/harbour-rootelegram --daemon'
 
 [Install]
 WantedBy=post-user-session.target

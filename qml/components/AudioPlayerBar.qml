@@ -29,10 +29,13 @@ import "."
 // pagina finche' un brano o un vocale e' in riproduzione o in pausa, cosi' si
 // puo' sempre mettere in pausa o fermare, anche da una chat diversa o dopo aver
 // chiuso e riaperto l'app. Niente testi nuovi: solo icone e tempi.
+// Anche precedente/successivo nella stessa chat, come in Telegram.
 Rectangle {
     id: bar
 
     property var player
+    property var playlist
+    readonly property bool hasPlaylist: active && playlist && playlist.available
 
     readonly property bool active: player && player.ownerKey !== ""
                                    && player.playbackState !== Audio.StoppedState
@@ -47,7 +50,9 @@ Rectangle {
         topMargin: Theme.paddingSmall
         leftMargin: Theme.paddingSmall
     }
-    width: Math.min(parent.width * 0.6, Theme.itemSizeSmall * 2 + Theme.paddingSmall * 4 + Theme.itemSizeExtraLarge * 2)
+    width: Math.min(parent.width * (hasPlaylist ? 0.7 : 0.6),
+                    Theme.itemSizeSmall * 2 + Theme.paddingSmall * 4 + Theme.itemSizeExtraLarge * 2
+                    + (hasPlaylist ? Theme.iconSizeMedium * 2 : 0))
     height: active ? Theme.itemSizeSmall : 0
     visible: height > 0
     clip: true
@@ -64,11 +69,25 @@ Rectangle {
         anchors.fill: parent
     }
 
+    // Tasti stretti (larghi quanto l'icona): la pillola non deve crescere troppo
+    // verso il titolo della chat.
     IconButton {
-        id: playPauseButton
+        id: previousButton
         anchors {
             left: parent.left
             leftMargin: Theme.paddingSmall
+            verticalCenter: parent.verticalCenter
+        }
+        visible: bar.hasPlaylist
+        width: visible ? Theme.iconSizeMedium : 0
+        icon.source: "image://theme/icon-m-previous"
+        onClicked: bar.playlist.step(-1, false)
+    }
+
+    IconButton {
+        id: playPauseButton
+        anchors {
+            left: previousButton.right
             verticalCenter: parent.verticalCenter
         }
         icon.source: bar.playing ? "image://theme/icon-m-pause" : "image://theme/icon-m-play"
@@ -81,9 +100,21 @@ Rectangle {
         }
     }
 
-    Column {
+    IconButton {
+        id: nextButton
         anchors {
             left: playPauseButton.right
+            verticalCenter: parent.verticalCenter
+        }
+        visible: bar.hasPlaylist
+        width: visible ? Theme.iconSizeMedium : 0
+        icon.source: "image://theme/icon-m-next"
+        onClicked: bar.playlist.step(1, false)
+    }
+
+    Column {
+        anchors {
+            left: nextButton.right
             right: closeButton.left
             leftMargin: Theme.paddingSmall
             rightMargin: Theme.paddingSmall

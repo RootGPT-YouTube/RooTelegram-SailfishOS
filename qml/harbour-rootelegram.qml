@@ -26,6 +26,7 @@ import QtMultimedia 5.6
 import Sailfish.Silica 1.0
 import Sailfish.Share 1.0
 import Nemo.DBus 2.0
+import WerkWolf.RooTelegram 1.0
 import "pages"
 import "components"
 import "./js/functions.js" as Functions
@@ -58,20 +59,29 @@ ApplicationWindow
     // (segnalazione di un tester, riprodotta sul POCO il 16/10/2026).
     // ownerKey = "<chat_id>_<message_id>" del messaggio che lo sta usando: i
     // MessageAudio si agganciano a questo player solo quando la chiave e' la loro.
+    // message: il messaggio (brano o vocale). Serve a trovare il precedente/
+    // successivo nella stessa chat e a riempire la cover.
     property alias sharedAudio: sharedAudio
-    function playSharedAudio(ownerKey, path, title) {
+    property alias audioPlaylist: audioPlaylist
+    function playSharedAudio(ownerKey, path, title, message) {
+        audioPlaylist.cancel();
         if (sharedAudio.ownerKey !== ownerKey || sharedAudio.source.toString() === "") {
             sharedAudio.stop();
             sharedAudio.ownerKey = ownerKey;
             sharedAudio.title = title || "";
+            sharedAudio.message = message || null;
+            sharedAudio.coverArt = message ? audioPlaylist.coverArtOf(message) : "";
             sharedAudio.source = path;
         }
         sharedAudio.play();
     }
     function stopSharedAudio() {
+        audioPlaylist.cancel();
         sharedAudio.stop();
         sharedAudio.ownerKey = "";
         sharedAudio.title = "";
+        sharedAudio.message = null;
+        sharedAudio.coverArt = "";
         sharedAudio.source = "";
     }
 
@@ -79,6 +89,8 @@ ApplicationWindow
         id: sharedAudio
         property string ownerKey: ""
         property string title: ""
+        property var message: null
+        property string coverArt: ""
         autoPlay: false
         playbackRate: appWindow.mediaPlaybackRate
         // Il backend GStreamer applica il rate con un seek: impostato a player
@@ -89,11 +101,72 @@ ApplicationWindow
                 playbackRate = Qt.binding(function() { return appWindow.mediaPlaybackRate; });
             }
         }
+        // Finito un brano (o un vocale) parte il successivo della chat, come in Telegram.
+        onStatusChanged: {
+            if (status === Audio.EndOfMedia && message) {
+                audioPlaylist.step(1, true);
+            }
+        }
+    }
+
+    AudioPlaylist {
+        id: audioPlaylist
+        player: sharedAudio
+    }
+
+    // Con UnifiedPush acceso il processo si chiude a finestra chiusa: non mentre
+    // suona la musica o c'e' una chiamata.
+    Binding {
+        target: unifiedPushManager
+        property: "uiBusy"
+        value: sharedAudio.playbackState === Audio.PlayingState || callScreen.visible
     }
 
     AudioPlayerBar {
         player: sharedAudio
+        playlist: audioPlaylist
         z: 9000
+    }
+
+    // Rientrando nell'app mentre suona un brano o un vocale si torna alla sua
+    // chat, a quel messaggio (la "playlist" dell'utente e' quella chat). Non se il rientro e' dovuto a
+    // una notifica, a un link o a una condivisione: li' vince la loro pagina.
+    property double externalOpenAt: 0
+    function revealSharedAudioChat() {
+        var message = sharedAudio.message;
+        if (!message || sharedAudio.playbackState !== Audio.PlayingState
+                || tdLibWrapper.authorizationState !== TelegramAPI.AuthorizationReady
+                || Date.now() - appWindow.externalOpenAt < 3000
+                || callScreen.visible) {
+            return;
+        }
+        function isAudioChat(page) {
+            return page && page.hasOwnProperty("messageIdToShow") && page.chatInformation
+                    && String(page.chatInformation.id) === String(message.chat_id);
+        }
+        if (isAudioChat(pageStack.currentPage)) {
+            return;
+        }
+        var existing = pageStack.find(isAudioChat);
+        if (existing) {
+            pageStack.pop(existing, PageStackAction.Immediate);
+            return;
+        }
+        var chatInfo = tdLibWrapper.getChat(String(message.chat_id));
+        if (!chatInfo || !chatInfo.id) {
+            return;
+        }
+        pageStack.pop(null, PageStackAction.Immediate);
+        pageStack.push(Qt.resolvedUrl("pages/ChatPage.qml"),
+                       { "chatInformation": chatInfo, "messageIdToShow": String(message.id) },
+                       PageStackAction.Immediate);
+    }
+    // Rimandato: la richiesta di aprire una notifica arriva spesso subito DOPO
+    // l'attivazione, e deve poter passare avanti.
+    Timer {
+        id: revealSharedAudioTimer
+        interval: 500
+        onTriggered: appWindow.revealSharedAudioChat()
     }
 
     function openShareDialog(resources) {
@@ -206,6 +279,7 @@ ApplicationWindow
 
         function share(shareConfiguration) {
             shareActionParser.loadConfiguration(shareConfiguration);
+            appWindow.externalOpenAt = Date.now();
             appWindow.activate();
             var queuedResources = [];
             if (shareActionParser.resources && shareActionParser.resources.length > 0) {
@@ -224,12 +298,15 @@ ApplicationWindow
             appWindow.activate();
         }
         onPleaseOpenMessage: {
+            appWindow.externalOpenAt = Date.now();
             appWindow.activate();
         }
         onPleaseOpenUrl: {
+            appWindow.externalOpenAt = Date.now();
             appWindow.activate();
         }
         onPleaseOpenStories: {
+            appWindow.externalOpenAt = Date.now();
             appWindow.activate();
         }
     }
@@ -899,6 +976,9 @@ ApplicationWindow
             // siamo già passati per Inactive). Il riciclo del client TDLib parte
             // solo dopo che la UI è rimasta non-attiva per il periodo di grazia.
             tdLibWrapper.setUiVisible(s === Qt.ApplicationActive);
+            if (s === Qt.ApplicationActive) {
+                revealSharedAudioTimer.restart();
+            }
             var isBackground = (s === Qt.ApplicationSuspended
                                 || s === Qt.ApplicationHidden
                                 || (s === Qt.ApplicationInactive && !appWindow.visible));
@@ -906,7 +986,10 @@ ApplicationWindow
                 // Se l'utente ha scelto di restare nella chat alla chiusura
                 // (Impostazioni → Comportamento), NON riportiamo lo stack alla
                 // Home: riaprendo l'app si ritrova la chat aperta.
-                if (pageStack && pageStack.depth > 1 && !appSettings.keepCurrentChatOnMinimize) {
+                // Con un brano in riproduzione nemmeno: al rientro si torna alla sua
+                // chat (revealSharedAudioChat), e se e' gia' questa resta com'era.
+                if (pageStack && pageStack.depth > 1 && !appSettings.keepCurrentChatOnMinimize
+                        && !(sharedAudio.message && sharedAudio.playbackState === Audio.PlayingState)) {
                     pageStack.pop(null, PageStackAction.Immediate);
                 }
                 // Libera gli oggetti QML cache-ati dal motore JS: in modalità

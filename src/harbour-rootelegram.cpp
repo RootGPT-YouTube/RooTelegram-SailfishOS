@@ -42,6 +42,7 @@
 #include <QFileInfo>
 #include <QDBusInterface>
 #include <QDBusReply>
+#include <QDBusConnectionInterface>
 #include <QSortFilterProxyModel>
 #include <QTimer>
 #include <QPixmapCache>
@@ -76,6 +77,7 @@
 #include "contactsmodel.h"
 #include "storiesmodel.h"
 #include "videotranscoder.h"
+#include "unifiedpushmanager.h"
 #ifdef RT_VOICE_CALLS
 #include "callmanager.h"
 #include "cameracaptureprobe.h"
@@ -193,6 +195,12 @@ int main(int argc, char *argv[])
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     const QStringList startupArguments = app->arguments();
     const bool daemonMode = startupArguments.contains("--daemon");
+    // Avviati da Foghorn per una sveglia push (file
+    // org.unifiedpush.Connector.rootelegram.service): la modalita' arriva in una
+    // variabile d'ambiente perche' sailjail confronta argv alla lettera con
+    // Exec/ExecDBus. Va tolta subito: un execv del riciclo la erediterebbe.
+    const bool pushWakeMode = qEnvironmentVariableIsSet(UnifiedPushManager::WAKE_ENVIRONMENT_VARIABLE);
+    qunsetenv(UnifiedPushManager::WAKE_ENVIRONMENT_VARIABLE);
 
     // Limit QPixmapCache: in daemon mode l'app non muore mai e accumulando
     // QPixmap (thumbnail, sticker, profilo) la RSS cresce indefinitamente.
@@ -206,7 +214,15 @@ int main(int argc, char *argv[])
     // invocazione tap-on-icon arriva con cmdline senza --daemon: in quel caso
     // forwardiamo via DBus e usciamo. Quando arriva con --daemon (auto-start
     // o reset sandbox), partiamo come istanza piena.
-    if (!daemonMode && activateRunningInstance()) {
+    // Svegliati dal distributore ma RooTelegram e' gia' acceso (per esempio il
+    // demone, con il push appena spento): quell'istanza basta, e una seconda
+    // troverebbe il database di TDLib bloccato (visto il 18/10/2026).
+    if (pushWakeMode && QDBusConnection::sessionBus().interface()
+            && QDBusConnection::sessionBus().interface()->isServiceRegistered(INTERFACE_NAME)) {
+        qWarning() << "[UNIFIEDPUSH] sveglia ricevuta ma RooTelegram e' gia' in esecuzione: esco";
+        return 0;
+    }
+    if (!daemonMode && !pushWakeMode && activateRunningInstance()) {
         LOG("Existing RooTelegram daemon found, activation forwarded");
         return 0;
     }
@@ -232,8 +248,12 @@ int main(int argc, char *argv[])
     // toggle ON→OFF→ON e semplifica la semantica per l'utente.
     const bool effectiveDaemonMode = daemonMode;
     app->setQuitOnLastWindowClosed(false);
+    // Prima di TDLib e della QML: con UnifiedPush acceso prende subito il nome
+    // D-Bus del connettore (il distributore concede 8 s, avvio compreso).
+    UnifiedPushManager *unifiedPushManager = new UnifiedPushManager(pushWakeMode, daemonMode, app.data());
     MceInterface *mceInterface = new MceInterface(app.data());
     TDLibWrapper *tdLibWrapper = new TDLibWrapper(appSettings, mceInterface, app.data());
+    unifiedPushManager->setTdLibWrapper(tdLibWrapper);
     RooTelegramUtils *rootelegramUtils = new RooTelegramUtils(app.data());
     // Composer WYSIWYG (#4): ponte fra il QTextDocument del campo di scrittura e le
     // entita' Telegram. Non ha stato, e vive quanto l'app.
@@ -324,6 +344,7 @@ int main(int argc, char *argv[])
             context->setContextProperty("contactsProxyModel", &contactsProxyModel);
             context->setContextProperty("storiesModel", &storiesModel);
             context->setContextProperty("videoTranscoder", &videoTranscoder);
+            context->setContextProperty("unifiedPushManager", unifiedPushManager);
             // Disponibilità del backend chiamate vocali (tgcalls+tg_owt): true
             // solo se compilato con CONFIG+=rt_voicecalls (RT_VOICE_CALLS). La UI
             // (ChatInformationTabView) abilita il tasto Chiama in base a questo.
@@ -337,6 +358,7 @@ int main(int argc, char *argv[])
             context->setContextProperty("voiceCallsAvailable", false);
 #endif
             view->setSource(SailfishApp::pathTo("qml/harbour-rootelegram.qml"));
+            unifiedPushManager->setView(view);
         }
     };
 
@@ -409,7 +431,11 @@ int main(int argc, char *argv[])
         }
     });
 
-    if (!effectiveDaemonMode) {
+    if (pushWakeMode) {
+        // Niente finestra. La QML (che gestisce anche le chiamate in arrivo) si
+        // carica dopo: prima il ciclo degli eventi deve rispondere al distributore.
+        QTimer::singleShot(1500, app.data(), [&]() { ensureViewLoaded(); });
+    } else if (!effectiveDaemonMode) {
         showAndActivateView();
     } else {
         LOG("Starting RooTelegram in daemon mode");

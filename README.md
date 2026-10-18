@@ -14,6 +14,7 @@ RooTelegram is tested on:
 Simple, fast interface optimized for SailfishOS  
 Full support for message formatting (bold, italic, monospace, etc.)  
 Reliable notifications via a dedicated daemon  
+Optional (BETA): notifications via UnifiedPush/Foghorn instead of the daemon, for phones with little RAM — see [docs/UNIFIEDPUSH.md](docs/UNIFIEDPUSH.md)  
 Custom Emoji support  
 Message PIN management  
 Stickers support  
@@ -46,6 +47,7 @@ Current development status (ROADMAP):
 Message editing (text formatting) — ✔️ DONE  
 Working notifications — ✔️ DONE  
 Notifications daemon — ✔️ DONE  
+Notifications via UnifiedPush/Foghorn as an alternative to the daemon (BETA) — ✔️ DONE  
 Folder creation and management — ✔️ DONE  
 Custom emoji — ✔️ DONE  
 Message PIN — ✔️ DONE  
@@ -183,6 +185,7 @@ RooTelegram è testato:
 Interfaccia semplice, veloce e ottimizzata per SailfishOS  
 Supporto completo alla formattazione dei messaggi (grassetto, corsivo, monospazio, ecc.)  
 Notifiche affidabili tramite daemon dedicato  
+In alternativa (BETA): notifiche via UnifiedPush/Foghorn al posto del daemon, per telefoni con poca RAM — vedi [docs/UNIFIEDPUSH.md](docs/UNIFIEDPUSH.md)  
 Supporto alle Custom Emoji  
 Gestione dei PIN dei messaggi  
 Supporto agli stickers  
@@ -215,6 +218,7 @@ Stato attuale dello sviluppo (ROADMAP):
 Modifiche dei messaggi (formattazione testo) — ✔️ FATTO  
 Notifiche funzionanti — ✔️ FATTO  
 Demone per le notifiche — ✔️ FATTO  
+Notifiche via UnifiedPush/Foghorn in alternativa al demone (BETA) — ✔️ FATTO  
 Creazione e gestione delle cartelle — ✔️ FATTO  
 Emoji custom — ✔️ FATTO  
 PIN dei messaggi — ✔️ FATTO  

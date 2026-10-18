@@ -13,43 +13,43 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.6";
+var version = "3.7";
 
 var changelogByLang = {
     "it": [
-        "Musica e messaggi vocali: ora c'è un solo lettore, con una barra in alto per metterli in pausa o fermarli da qualunque schermata, anche dopo aver chiuso e riaperto l'app. Prima, chiudendo l'app, un vocale poteva continuare senza modo di fermarlo, e partirne un secondo insieme.",
-        "Icona più nitida: l'aeroplanino d'acciaio è stato ridisegnato e ora si riconosce bene anche in piccolo.",
-        "Le notifiche hanno finalmente la nuova icona d'acciaio: prima mostravano ancora quella blu delle versioni precedenti."
+        "Lettore audio come in Telegram: tasti per passare al brano o al vocale precedente e successivo, passaggio automatico al successivo, anche a schermo spento, e la copertina dell'app mostra cosa suona con i comandi. Rientrando nell'app torni alla chat che sta suonando.",
+        "Novità in prova (BETA): notifiche tramite UnifiedPush con l'app Foghorn, al posto del servizio in background. È pensata per i telefoni con poca memoria: RooTelegram si chiude del tutto e Foghorn lo sveglia quando arriva un messaggio. Si attiva in Impostazioni → Comportamento; leggi prima le Istruzioni. Sui telefoni con 6 GB di RAM o più conviene il solito servizio in background.",
+        "Corretto: in alcune chat i messaggi a volte si mescolavano fuori ordine dopo aver aperto la scheda Media o ascoltato degli audio."
     ],
     "en": [
-        "Music and voice messages: there is now a single player, with a bar at the top to pause or stop them from any screen, even after closing and reopening the app. Before, after closing the app a voice message could keep playing with no way to stop it, and a second one could start at the same time.",
-        "Sharper icon: the steel paper plane has been redrawn and is now easy to recognise even at small sizes.",
-        "Notifications finally show the new steel icon: until now they still had the blue one from earlier versions."
+        "Audio player like in Telegram: buttons to go to the previous and next track or voice message, automatic playback of the next one, even with the screen off, and the app cover shows what is playing with its controls. Coming back to the app takes you to the chat that is playing.",
+        "New, in testing (BETA): notifications through UnifiedPush with the Foghorn app, instead of the background service. It is meant for phones with little memory: RooTelegram closes completely and Foghorn wakes it up when a message arrives. Turn it on in Settings → Behavior; read the Instructions first. On phones with 6 GB of RAM or more the usual background service is the better choice.",
+        "Fixed: in some chats messages sometimes got mixed up out of order after opening the Media tab or listening to audio."
     ],
     "de": [
-        "Musik und Sprachnachrichten: Es gibt jetzt einen einzigen Player, mit einer Leiste oben, um sie auf jedem Bildschirm anzuhalten oder zu stoppen, auch nach dem Schließen und erneuten Öffnen der App. Vorher konnte eine Sprachnachricht nach dem Schließen der App ohne Möglichkeit zum Anhalten weiterlaufen und eine zweite gleichzeitig starten.",
-        "Schärferes Symbol: Der Papierflieger aus Stahl wurde neu gezeichnet und ist jetzt auch in kleiner Größe gut zu erkennen.",
-        "Benachrichtigungen zeigen endlich das neue Stahl-Symbol: Bisher hatten sie noch das blaue aus früheren Versionen."
+        "Audioplayer wie in Telegram: Tasten für den vorherigen und nächsten Titel oder die vorherige und nächste Sprachnachricht, automatische Wiedergabe der nächsten, auch bei ausgeschaltetem Bildschirm, und das App-Cover zeigt, was gerade läuft, mit den Bedienelementen. Wenn du zur App zurückkehrst, landest du im Chat, der gerade abgespielt wird.",
+        "Neu, im Test (BETA): Benachrichtigungen über UnifiedPush mit der App Foghorn, statt des Hintergrunddienstes. Gedacht für Telefone mit wenig Speicher: RooTelegram beendet sich vollständig und Foghorn weckt es, wenn eine Nachricht eintrifft. Einschalten unter Einstellungen → Verhalten; lies zuerst die Anleitung. Auf Telefonen mit 6 GB RAM oder mehr ist der gewohnte Hintergrunddienst die bessere Wahl.",
+        "Behoben: In manchen Chats gerieten Nachrichten manchmal durcheinander, nachdem der Reiter Medien geöffnet oder Audio angehört wurde."
     ],
     "pl": [
-        "Muzyka i wiadomości głosowe: teraz jest jeden odtwarzacz, z paskiem u góry, który pozwala je wstrzymać lub zatrzymać z każdego ekranu, także po zamknięciu i ponownym otwarciu aplikacji. Wcześniej po zamknięciu aplikacji wiadomość głosowa mogła grać dalej bez możliwości zatrzymania, a druga mogła zacząć grać jednocześnie.",
-        "Wyraźniejsza ikona: stalowy papierowy samolocik został narysowany od nowa i teraz dobrze go widać nawet w małym rozmiarze.",
-        "Powiadomienia mają wreszcie nową stalową ikonę: do tej pory pokazywały jeszcze niebieską z poprzednich wersji."
+        "Odtwarzacz audio jak w Telegramie: przyciski do poprzedniego i następnego utworu lub wiadomości głosowej, automatyczne odtwarzanie następnej, także przy wyłączonym ekranie, a okładka aplikacji pokazuje, co gra, wraz z przyciskami. Po powrocie do aplikacji trafiasz do czatu, który gra.",
+        "Nowość w fazie testów (BETA): powiadomienia przez UnifiedPush z aplikacją Foghorn zamiast usługi w tle. Przeznaczone dla telefonów z małą ilością pamięci: RooTelegram zamyka się całkowicie, a Foghorn budzi go, gdy przychodzi wiadomość. Włącz w Ustawienia → Zachowanie; najpierw przeczytaj Instrukcję. Na telefonach z 6 GB RAM lub więcej lepszym wyborem jest zwykła usługa w tle.",
+        "Naprawiono: w niektórych czatach wiadomości czasem mieszały się w złej kolejności po otwarciu zakładki Media lub odsłuchaniu audio."
     ],
     "ru": [
-        "Музыка и голосовые сообщения: теперь один проигрыватель с панелью вверху, чтобы поставить на паузу или остановить их с любого экрана, даже после закрытия и повторного открытия приложения. Раньше после закрытия приложения голосовое сообщение могло продолжать играть без возможности его остановить, а второе — запуститься одновременно.",
-        "Более чёткий значок: стальной бумажный самолётик перерисован, и теперь его легко узнать даже в маленьком размере.",
-        "Уведомления наконец показывают новый стальной значок: до сих пор в них оставался синий из прежних версий."
+        "Аудиоплеер как в Telegram: кнопки для перехода к предыдущему и следующему треку или голосовому сообщению, автоматическое воспроизведение следующего, даже при выключенном экране, а обложка приложения показывает, что играет, вместе с кнопками управления. Вернувшись в приложение, вы попадёте в чат, который сейчас играет.",
+        "Новое, в тестировании (БЕТА): уведомления через UnifiedPush с приложением Foghorn вместо фоновой службы. Предназначено для телефонов с небольшим объёмом памяти: RooTelegram полностью закрывается, а Foghorn будит его, когда приходит сообщение. Включается в Настройки → Поведение; сначала прочитайте Инструкцию. На телефонах с 6 ГБ ОЗУ и больше лучше обычная фоновая служба.",
+        "Исправлено: в некоторых чатах сообщения иногда перемешивались не по порядку после открытия вкладки Медиа или прослушивания аудио."
     ],
     "fr": [
-        "Musique et messages vocaux : il n'y a plus qu'un seul lecteur, avec une barre en haut pour les mettre en pause ou les arrêter depuis n'importe quel écran, même après avoir fermé et rouvert l'application. Avant, après la fermeture de l'application, un message vocal pouvait continuer sans moyen de l'arrêter, et un second pouvait démarrer en même temps.",
-        "Icône plus nette : l'avion en papier d'acier a été redessiné et se reconnaît bien, même en petit.",
-        "Les notifications affichent enfin la nouvelle icône en acier : jusqu'ici elles montraient encore l'icône bleue des versions précédentes."
+        "Lecteur audio comme dans Telegram : des boutons pour passer au morceau ou au message vocal précédent et suivant, la lecture automatique du suivant, même écran éteint, et la vignette de l'application montre ce qui joue avec ses commandes. En revenant dans l'application, vous retrouvez la discussion en cours de lecture.",
+        "Nouveau, en test (BÊTA) : des notifications via UnifiedPush avec l'application Foghorn, à la place du service d'arrière-plan. C'est pensé pour les téléphones avec peu de mémoire : RooTelegram se ferme complètement et Foghorn le réveille quand un message arrive. À activer dans Paramètres → Comportement ; lisez d'abord les Instructions. Sur les téléphones avec 6 Go de RAM ou plus, le service d'arrière-plan habituel reste le meilleur choix.",
+        "Corrigé : dans certaines discussions, les messages se mélangeaient parfois dans le désordre après l'ouverture de l'onglet Médias ou l'écoute d'audio."
     ],
     "sk": [
-        "Hudba a hlasové správy: teraz je jeden prehrávač s lištou hore, ktorou ich môžete pozastaviť alebo zastaviť z ktorejkoľvek obrazovky, aj po zatvorení a opätovnom otvorení aplikácie. Predtým mohla hlasová správa po zatvorení aplikácie hrať ďalej bez možnosti zastavenia a súčasne sa mohla spustiť druhá.",
-        "Ostrejšia ikona: oceľové papierové lietadielko bolo nakreslené nanovo a teraz je dobre rozpoznateľné aj v malej veľkosti.",
-        "Upozornenia majú konečne novú oceľovú ikonu: doteraz ešte zobrazovali modrú z predchádzajúcich verzií."
+        "Prehrávač zvuku ako v Telegrame: tlačidlá na predchádzajúcu a nasledujúcu skladbu či hlasovú správu, automatické prehratie nasledujúcej, aj pri vypnutej obrazovke, a obálka aplikácie ukazuje, čo hrá, aj s ovládaním. Po návrate do aplikácie sa dostanete do četu, ktorý práve hrá.",
+        "Novinka v testovaní (BETA): upozornenia cez UnifiedPush s aplikáciou Foghorn namiesto služby na pozadí. Je určená pre telefóny s malou pamäťou: RooTelegram sa úplne zavrie a Foghorn ho zobudí, keď príde správa. Zapína sa v Nastavenia → Správanie; najprv si prečítajte Návod. Na telefónoch so 6 GB RAM alebo viac je lepšou voľbou bežná služba na pozadí.",
+        "Opravené: v niektorých četoch sa správy niekedy pomiešali v nesprávnom poradí po otvorení karty Médiá alebo vypočutí zvuku."
     ]
 };
 

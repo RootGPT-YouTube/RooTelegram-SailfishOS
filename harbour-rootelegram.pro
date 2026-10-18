@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 3.6
+RT_APP_VERSION = 3.7
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -50,6 +50,7 @@ SOURCES += src/harbour-rootelegram.cpp \
     src/contactsmodel.cpp \
     src/storiesmodel.cpp \
     src/videotranscoder.cpp \
+    src/unifiedpushmanager.cpp \
     src/dbusadaptor.cpp \
     src/dbusapplicationadaptor.cpp \
     src/dbusinterface.cpp \
@@ -306,6 +307,12 @@ systemdservice.files = $$PWD/harbour-rootelegram.service
 systemdservice.path = /usr/lib/systemd/user
 INSTALLS += systemdservice
 
+# UnifiedPush (BETA): attivazione D-Bus del connettore, usata da Foghorn per
+# avviare l'app chiusa quando arriva una sveglia push (vedi il file).
+unifiedpushservice.files = $$PWD/org.unifiedpush.Connector.rootelegram.service
+unifiedpushservice.path = /usr/share/dbus-1/services
+INSTALLS += unifiedpushservice
+
 # QR Code generator library (Nayuki, MIT): compilata nell'app per il login QR.
 qrcodegenlicense.files = $$PWD/src/qrcodegen/LICENSE
 qrcodegenlicense.path = /usr/share/$${TARGET}/licenses/qrcodegen
@@ -376,6 +383,7 @@ HEADERS += \
     src/contactsmodel.h \
     src/storiesmodel.h \
     src/videotranscoder.h \
+    src/unifiedpushmanager.h \
     src/dbusadaptor.h \
     src/dbusapplicationadaptor.h \
     src/dbusinterface.h \

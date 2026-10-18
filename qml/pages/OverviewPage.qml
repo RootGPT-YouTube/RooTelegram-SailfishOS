@@ -227,6 +227,9 @@ Page {
                 chatListModel.calculateUnreadState();
                 overviewPage.startFolderWarmup();
             }
+            if (Qt.application.active && overviewPage.whatsNewPending) {
+                overviewPage.maybeShowWhatsNew();
+            }
         }
     }
 
@@ -434,10 +437,19 @@ Page {
     // mostrato (appSettings.lastSeenVersion). whatsNewChecked evita ri-tentativi
     // nella stessa sessione (es. ritorno alla overview da una chat).
     property bool whatsNewChecked: false
+    // Con UnifiedPush il processo nasce da una sveglia, a finestra nascosta, e si
+    // richiude da solo: il popup va segnato come visto solo ad app in primo piano,
+    // altrimenti sparisce col processo senza che nessuno l'abbia visto (18/10/2026).
+    property bool whatsNewPending: false
     function maybeShowWhatsNew() {
         if (whatsNewChecked) {
             return;
         }
+        if (!Qt.application.active) {
+            whatsNewPending = true;
+            return;
+        }
+        whatsNewPending = false;
         whatsNewChecked = true;
         if (appSettings.lastSeenVersion === appVersion) {
             return;

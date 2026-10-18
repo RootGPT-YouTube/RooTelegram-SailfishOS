@@ -1,0 +1,9 @@
+# Attivazione D-Bus del connettore UnifiedPush (BETA): quando arriva una sveglia
+# push e RooTelegram e' chiuso, il distributore (Foghorn) avvia l'app tramite
+# questo file. La modalita' "sveglia" passa nella variabile d'ambiente perche'
+# sailjail confronta argv alla lettera con Exec/ExecDBus del .desktop: dopo "--"
+# deve restare /usr/bin/harbour-rootelegram nudo, come Exec. Vedi
+# src/unifiedpushmanager.h e docs/connectors.md di Foghorn.
+[D-BUS Service]
+Name=org.unifiedpush.Connector.rootelegram
+Exec=/usr/bin/env ROOTELEGRAM_PUSH_WAKE=1 /usr/bin/sailjail -p harbour-rootelegram.desktop -- /usr/bin/harbour-rootelegram

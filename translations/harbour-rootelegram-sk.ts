@@ -4501,6 +4501,38 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Launch RooTelegram in the background when the phone starts, so notifications arrive without opening it first. Closing or killing the app does not relaunch it — autostart only happens at device boot.</source>
         <translation>Spustiť RooTelegram na pozadí pri zapnutí telefónu, aby upozornenia prichádzali bez jeho otvorenia. Zatvorenie alebo ukončenie aplikácie ju nereštartuje – automatický štart sa deje len pri štarte zariadenia.</translation>
     </message>
+    <message>
+        <source>Notifications via UnifiedPush (BETA)</source>
+        <translation>Upozornenia cez UnifiedPush (BETA)</translation>
+    </message>
+    <message>
+        <source>Instead of keeping RooTelegram in memory, the Foghorn app wakes it up when a message arrives: much less memory used. Requires the Foghorn app — read the instructions first.</source>
+        <translation>Namiesto držania RooTelegramu v pamäti ho aplikácia Foghorn zobudí, keď príde správa: oveľa menšia spotreba pamäte. Vyžaduje aplikáciu Foghorn — najprv si prečítajte návod.</translation>
+    </message>
+    <message>
+        <source>Active: Telegram wakes RooTelegram through %1.</source>
+        <translation>Aktívne: Telegram budí RooTelegram cez %1.</translation>
+    </message>
+    <message>
+        <source>Connecting to Foghorn…</source>
+        <translation>Pripájanie k Foghornu…</translation>
+    </message>
+    <message>
+        <source>No distributor found: install Foghorn and start it.</source>
+        <translation>Nenašiel sa žiadny distribútor: nainštalujte Foghorn a spustite ho.</translation>
+    </message>
+    <message>
+        <source>It didn&apos;t work: %1</source>
+        <translation>Nepodarilo sa: %1</translation>
+    </message>
+    <message>
+        <source>Instructions</source>
+        <translation>Návod</translation>
+    </message>
+    <message>
+        <source>Try again</source>
+        <translation>Skúsiť znova</translation>
+    </message>
 </context>
 <context>
     <name>SettingsConnection</name>
@@ -5380,6 +5412,109 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation>Riadky četov ako sklenené karty, kurzívne pätkové nadpisy, metadáta neproporcionálnym písmom, filtre podľa typu a priečinky ako štítky. Téma má vlastnú svetlú aj tmavú paletu, takže zostáva čitateľná pri akomkoľvek systémovom ambiente.</translation>
+    </message>
+</context>
+<context>
+    <name>UnifiedPushHelpPage</name>
+    <message>
+        <source>UnifiedPush (BETA)</source>
+        <translation>UnifiedPush (BETA)</translation>
+    </message>
+    <message>
+        <source>What it is</source>
+        <translation>Čo to je</translation>
+    </message>
+    <message>
+        <source>Normally RooTelegram stays in memory in the background to receive messages. With this option it closes completely instead, and a small separate app, Foghorn, wakes it up when a new message arrives. RooTelegram then downloads the message, shows the notification and closes again by itself. It uses much less memory; a notification may arrive a few seconds later than usual.&lt;br&gt;&lt;br&gt;&lt;b&gt;This is a BETA feature&lt;/b&gt;, and Foghorn itself is young software: if notifications stop arriving, turn the option off to go back to the usual background service.</source>
+        <translation>Bežne RooTelegram zostáva v pamäti na pozadí, aby prijímal správy. S touto voľbou sa namiesto toho úplne zavrie a malá samostatná aplikácia Foghorn ho zobudí, keď príde nová správa. RooTelegram potom stiahne správu, zobrazí upozornenie a sám sa znova zavrie. Spotrebuje oveľa menej pamäte; upozornenie môže prísť o pár sekúnd neskôr ako zvyčajne.&lt;br&gt;&lt;br&gt;&lt;b&gt;Je to funkcia BETA&lt;/b&gt; a aj Foghorn je mladý softvér: ak upozornenia prestanú chodiť, vypnite voľbu a vrátite sa k bežnej službe na pozadí.</translation>
+    </message>
+    <message>
+        <source>Who it is for</source>
+        <translation>Pre koho je to</translation>
+    </message>
+    <message>
+        <source>UnifiedPush is useful above all on phones with little memory, where keeping RooTelegram always in memory weighs a lot. On recent phones, with &lt;b&gt;6 GB of RAM or more&lt;/b&gt;, the usual background service is usually the better choice: UnifiedPush uses fewer resources, but with this option on, tapping a notification always starts RooTelegram from scratch (a &quot;cold start&quot;), so the chat takes a few seconds longer to open. With the background service it opens at once.</source>
+        <translation>UnifiedPush je užitočný hlavne na telefónoch s malou pamäťou, kde držať RooTelegram stále v pamäti veľa stojí. Na novších telefónoch so &lt;b&gt;6 GB RAM alebo viac&lt;/b&gt; je bežná služba na pozadí zvyčajne lepšia voľba: UnifiedPush spotrebuje menej prostriedkov, ale s touto voľbou ťuknutie na upozornenie vždy spustí RooTelegram od nuly („studený štart“), takže čet sa otvára o pár sekúnd dlhšie. So službou na pozadí sa otvorí hneď.</translation>
+    </message>
+    <message>
+        <source>1. Install Foghorn</source>
+        <translation>1. Nainštalujte Foghorn</translation>
+    </message>
+    <message>
+        <source>Install &lt;b&gt;Foghorn&lt;/b&gt; from OpenRepos (for example with the Storeman app): &lt;a href=&quot;https://openrepos.net/content/projectmoon/foghorn&quot;&gt;openrepos.net/content/projectmoon/foghorn&lt;/a&gt;&lt;br&gt;Open Foghorn once and check that its service is running.</source>
+        <translation>Nainštalujte &lt;b&gt;Foghorn&lt;/b&gt; z OpenRepos (napríklad aplikáciou Storeman): &lt;a href=&quot;https://openrepos.net/content/projectmoon/foghorn&quot;&gt;openrepos.net/content/projectmoon/foghorn&lt;/a&gt;&lt;br&gt;Raz otvorte Foghorn a skontrolujte, že jeho služba beží.</translation>
+    </message>
+    <message>
+        <source>2. Leave Foghorn on Mozilla</source>
+        <translation>2. Nechajte Foghorn na Mozille</translation>
+    </message>
+    <message>
+        <source>Foghorn&apos;s default push service, &lt;b&gt;Mozilla&lt;/b&gt;, works well with Telegram: you don&apos;t have to change anything.&lt;br&gt;&lt;br&gt;&lt;b&gt;Don&apos;t choose ntfy:&lt;/b&gt; in our tests Telegram almost never delivered its wake-ups through the public ntfy.sh server, so notifications didn&apos;t arrive. If you had changed it, go back to Mozilla in Foghorn&apos;s settings: RooTelegram notices it and re-registers by itself.</source>
+        <translation>Predvolená push služba Foghornu, &lt;b&gt;Mozilla&lt;/b&gt;, funguje s Telegramom dobre: nemusíte nič meniť.&lt;br&gt;&lt;br&gt;&lt;b&gt;Nevyberajte ntfy:&lt;/b&gt; v našich testoch Telegram cez verejný server ntfy.sh takmer nikdy nedoručil budiace signály a upozornenia neprichádzali. Ak ste to zmenili, vráťte v nastaveniach Foghornu Mozillu: RooTelegram si to všimne a sám sa znova zaregistruje.</translation>
+    </message>
+    <message>
+        <source>3. Open RooTelegram from its icon</source>
+        <translation>3. Otvorte RooTelegram z jeho ikony</translation>
+    </message>
+    <message>
+        <source>After installing or updating RooTelegram, open it once by tapping its icon. SailfishOS may ask you to allow the app&apos;s permissions, including the new &quot;UnifiedPush&quot; one: accept. Without this step Foghorn cannot start RooTelegram in the background.</source>
+        <translation>Po inštalácii alebo aktualizácii RooTelegram ho raz otvorte ťuknutím na jeho ikonu. SailfishOS sa vás môže spýtať na povolenia aplikácie vrátane nového „UnifiedPush“: prijmite ich. Bez tohto kroku Foghorn nemôže spustiť RooTelegram na pozadí.</translation>
+    </message>
+    <message>
+        <source>4. Turn on the option</source>
+        <translation>4. Zapnite voľbu</translation>
+    </message>
+    <message>
+        <source>In RooTelegram go to Settings → Behavior and turn on &lt;b&gt;Notifications via UnifiedPush (BETA)&lt;/b&gt;. After a few seconds the status below the switch should say that it is active and show the name of the server (for example updates.push.services.mozilla.com).</source>
+        <translation>V RooTelegram choďte do Nastavenia → Správanie a zapnite &lt;b&gt;Upozornenia cez UnifiedPush (BETA)&lt;/b&gt;. Po pár sekundách by stav pod prepínačom mal hovoriť, že je aktívny, a ukázať názov servera (napríklad updates.push.services.mozilla.com).</translation>
+    </message>
+    <message>
+        <source>5. Try it</source>
+        <translation>5. Vyskúšajte</translation>
+    </message>
+    <message>
+        <source>Close RooTelegram completely (close it from the home screen, don&apos;t just minimize it). About ten seconds later it is no longer in memory. Ask someone to write to you: the notification should appear within a few seconds.&lt;br&gt;&lt;br&gt;If Telegram is open on another device (another phone, a computer), Telegram itself waits a little before waking up this phone: then the notification may arrive up to about half a minute later. That is normal.</source>
+        <translation>Úplne zatvorte RooTelegram (zatvorte ho z domovskej obrazovky, nielen minimalizujte). Asi o desať sekúnd už nie je v pamäti. Požiadajte niekoho, aby vám napísal: upozornenie by sa malo objaviť do pár sekúnd.&lt;br&gt;&lt;br&gt;Ak je Telegram otvorený na inom zariadení (inom telefóne, počítači), sám Telegram chvíľu počká, kým zobudí tento telefón: upozornenie potom môže prísť až asi o pol minúty neskôr. To je normálne.</translation>
+    </message>
+    <message>
+        <source>How it behaves</source>
+        <translation>Ako sa správa</translation>
+    </message>
+    <message>
+        <source>• While the app window is open, or minimized, RooTelegram works as usual.&lt;br&gt;• When you close it, it stays in memory only while music or a voice message is playing, or during a call.&lt;br&gt;• When a message arrives with the app closed, RooTelegram starts without a window for 20–60 seconds, shows the notifications and closes.&lt;br&gt;• At phone start-up the background service is not started any more: Foghorn takes care of it.&lt;br&gt;• Tapping a notification while the app is closed starts RooTelegram from scratch (a &quot;cold start&quot;), so it takes a few seconds longer to open than usual: the background service that normally keeps it ready is not running, because Foghorn takes its place.</source>
+        <translation>• Kým je okno aplikácie otvorené alebo minimalizované, RooTelegram funguje ako zvyčajne.&lt;br&gt;• Keď ho zatvoríte, zostane v pamäti iba počas prehrávania hudby alebo hlasovej správy, alebo počas hovoru.&lt;br&gt;• Keď pri zatvorenej aplikácii príde správa, RooTelegram sa spustí bez okna na 20–60 sekúnd, zobrazí upozornenia a zavrie sa.&lt;br&gt;• Pri štarte telefónu sa služba na pozadí už nespúšťa: postará sa o to Foghorn.&lt;br&gt;• Ťuknutie na upozornenie pri zatvorenej aplikácii spustí RooTelegram od nuly („studený štart“), takže sa otvára o pár sekúnd dlhšie ako zvyčajne: služba na pozadí, ktorá ho bežne drží pripravený, nebeží, pretože jej miesto zaujal Foghorn.</translation>
+    </message>
+    <message>
+        <source>If it doesn&apos;t work</source>
+        <translation>Ak to nefunguje</translation>
+    </message>
+    <message>
+        <source>• Status &quot;no distributor&quot;: Foghorn is not installed or its service is stopped.&lt;br&gt;• Status &quot;error&quot;: open RooTelegram from its icon (step 3), then use &quot;Try again&quot;.&lt;br&gt;• No notifications although the status is active: check that Foghorn uses Mozilla (step 2), that RooTelegram is listed among Foghorn&apos;s registered apps, and the Internet connection.&lt;br&gt;• When in doubt: turn the option off. Everything goes back to how it was before.</source>
+        <translation>• Stav „žiadny distribútor“: Foghorn nie je nainštalovaný alebo jeho služba je zastavená.&lt;br&gt;• Stav „chyba“: otvorte RooTelegram z jeho ikony (krok 3), potom použite „Skúsiť znova“.&lt;br&gt;• Žiadne upozornenia, hoci je stav aktívny: skontrolujte, či Foghorn používa Mozillu (krok 2), či je RooTelegram medzi registrovanými aplikáciami vo Foghorne, a pripojenie na internet.&lt;br&gt;• V prípade pochybností: vypnite voľbu. Všetko bude ako predtým.</translation>
+    </message>
+    <message>
+        <source>Privacy</source>
+        <translation>Súkromie</translation>
+    </message>
+    <message>
+        <source>The wake-up that Telegram sends through the push service is encrypted, and RooTelegram doesn&apos;t even read it: it uses it only as a signal, then downloads the messages directly from Telegram, encrypted as usual. Telegram and Mozilla only learn the address where to deliver the wake-ups: whoever learned it could only wake RooTelegram up, not read anything.</source>
+        <translation>Budiaci signál, ktorý Telegram posiela cez push službu, je šifrovaný a RooTelegram ho ani nečíta: používa ho len ako signál a potom stiahne správy priamo z Telegramu, šifrované ako zvyčajne. Telegram a Mozilla poznajú len adresu, kam doručovať signály: kto by ju zistil, mohol by RooTelegram iba zobudiť, nič by neprečítal.</translation>
+    </message>
+    <message>
+        <source>Turning it off</source>
+        <translation>Vypnutie</translation>
+    </message>
+    <message>
+        <source>Turn the switch off: RooTelegram tells Telegram to forget the address, unregisters from Foghorn and goes back to the usual background service (from the next phone start-up it is started automatically again, if that option is on).</source>
+        <translation>Vypnite prepínač: RooTelegram povie Telegramu, aby zabudol adresu, odhlási sa z Foghornu a vráti sa k bežnej službe na pozadí (od ďalšieho štartu telefónu sa opäť spustí automaticky, ak je táto voľba zapnutá).</translation>
+    </message>
+    <message>
+        <source>Thanks</source>
+        <translation>Poďakovanie</translation>
+    </message>
+    <message>
+        <source>Thanks to &lt;b&gt;projectmoon&lt;/b&gt;, the developer of Foghorn, for the pioneering work that brought UnifiedPush to SailfishOS: without Foghorn this option would not exist.</source>
+        <translation>Ďakujeme &lt;b&gt;projectmoon&lt;/b&gt;, vývojárovi Foghornu, za priekopnícku prácu, ktorá priniesla UnifiedPush na SailfishOS: bez Foghornu by táto voľba neexistovala.</translation>
     </message>
 </context>
 <context>

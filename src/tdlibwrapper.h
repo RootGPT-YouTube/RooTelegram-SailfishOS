@@ -196,6 +196,14 @@ public:
     // ANTI-RAM Strada C: la QML notifica quando la finestra è visibile/nascosta;
     // il riciclo del client TDLib parte solo a UI nascosta da un po'.
     Q_INVOKABLE void setUiVisible(bool visible);
+    // Con UnifiedPush acceso il processo si chiude da solo a UI chiusa: il
+    // riciclo anti-RAM (execv) non serve e non deve partire.
+    void setMemoryRecycleEnabled(bool enabled);
+    // Chiude TDLib (il DB viene scritto per bene) e poi termina il processo con
+    // _exit: lo smontaggio normale di Qt con la finestra QML nascosta resta
+    // appeso (visto il 18/10/2026: thread principale fermo su un futex). Usato
+    // da UnifiedPushManager per chiudersi a UI chiusa.
+    void closeAndExit();
     Q_INVOKABLE void joinChat(const QString &chatId);
     Q_INVOKABLE void leaveChat(const QString &chatId);
     Q_INVOKABLE void deleteChat(qlonglong chatId);
@@ -678,6 +686,8 @@ private:
     int displayState;             // -1 sconosciuto (niente MCE), 0 spento, 1 acceso/dimmed
     qint64 displayChangedMs;
     bool isRecycling;
+    bool memoryRecycleEnabled;
+    bool exitAfterClose;
     qint64 uiHiddenSinceMs;       // 0 = UI visibile
     bool callOngoing;
     qint64 recycleRssThresholdKb;

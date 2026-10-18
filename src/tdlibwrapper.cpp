@@ -171,6 +171,8 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     // soglia. Env override per i test on-device: RT_RECYCLE_RSS_MB,
     // RT_RECYCLE_CHECK_S, RT_RECYCLE_HIDDEN_S.
     this->isRecycling = false;
+    this->memoryRecycleEnabled = true;
+    this->exitAfterClose = false;
     // Parte come "nascosta": se il daemon nasce headless (--daemon all'avvio del
     // device) la finestra non diventa mai attiva e la QML non chiamerebbe mai
     // setUiVisible. Al primo focus la QML azzera comunque lo stato.
@@ -756,9 +758,30 @@ void TDLibWrapper::handleCallStateForRecycle(const QVariantMap &call)
 // client viene distrutto e ricreato (con isRecycling attivo NON si cancella il
 // database, quindi l'autenticazione riparte da sola fino a Ready) e gli stati
 // intermedi non vengono emessi verso la QML (riciclo silenzioso).
+void TDLibWrapper::setMemoryRecycleEnabled(bool enabled)
+{
+    this->memoryRecycleEnabled = enabled;
+}
+
+void TDLibWrapper::closeAndExit()
+{
+    if (this->exitAfterClose) {
+        return;
+    }
+    this->exitAfterClose = true;
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "close");
+    this->sendRequest(requestObject);
+    // Se TDLib non conferma (rete appesa, client gia' chiuso) si esce lo stesso.
+    QTimer::singleShot(8000, this, []() {
+        qWarning() << "[UNIFIEDPUSH] TDLib non ha confermato la chiusura in 8 s: esco comunque";
+        ::_exit(0);
+    });
+}
+
 void TDLibWrapper::checkMemoryRecycle()
 {
-    if (this->isRecycling || this->authorizationState != AuthorizationState::AuthorizationReady) {
+    if (!this->memoryRecycleEnabled || this->isRecycling || this->authorizationState != AuthorizationState::AuthorizationReady) {
         return;
     }
     if (this->uiHiddenSinceMs == 0
@@ -3913,6 +3936,10 @@ void TDLibWrapper::handleAuthorizationStateChanged(const QString &authorizationS
     }
     if (authorizationState == "authorizationStateClosed") {
         this->authorizationState = AuthorizationState::AuthorizationStateClosed;
+        if (this->exitAfterClose) {
+            qWarning() << "[UNIFIEDPUSH] TDLib chiuso: termino il processo";
+            ::_exit(0);
+        }
         LOG("Reloading TD Lib...");
         if (this->isRecycling) {
             // Strada C2: riavvio dell'intero processo (libera TUTTA la RAM). Il

@@ -190,6 +190,8 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("pollVoters", &TDLibReceiver::processPollVoters);
     handlers.insert("error", &TDLibReceiver::processError);
     handlers.insert("ok", &TDLibReceiver::ok);
+    // Risposta di registerDevice (UnifiedPush): per chi l'ha chiesta vale come un "ok".
+    handlers.insert("pushReceiverId", &TDLibReceiver::ok);
     handlers.insert("secretChat", &TDLibReceiver::processSecretChat);
     handlers.insert("updateSecretChat", &TDLibReceiver::processUpdateSecretChat);
     handlers.insert("importedContacts", &TDLibReceiver::processImportedContacts);
@@ -515,6 +517,16 @@ void TDLibReceiver::processFoundChatMessages(const QVariantMap &receivedInformat
         }
     }
     LOG("Received found chat messages, amount: " << total_count);
+    // Ricerche che NON sono della chat aperta: il brano precedente/successivo del
+    // player (AudioPlaylist.qml) e le schede Media/Audio/Documenti/Link delle info
+    // chat (ChatInformationTabItemFilteredMessages.qml). messagesReceived arriva
+    // anche al ChatModel della chat aperta, che infilerebbe quei messaggi vecchi
+    // nella lista senza riordinarli (visto il 18/10/2026: un vocale di 2 mesi fa
+    // sotto uno di 17 giorni fa). A loro basta la versione con l'extra.
+    if (extra.startsWith(QStringLiteral("audioPlaylist:")) || extra.startsWith(QStringLiteral("sharedMedia:"))) {
+        emit messagesReceivedWithExtra(messages, total_count, extra);
+        return;
+    }
     emit messagesReceived(messages, total_count);
     emit messagesReceivedWithExtra(messages, total_count, extra);
 }
