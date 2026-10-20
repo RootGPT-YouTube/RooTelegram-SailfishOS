@@ -30,6 +30,7 @@
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QNetworkConfigurationManager>
+#include <QTimer>
 #include <QHash>
 #include <QSet>
 #include <QByteArray>
@@ -594,6 +595,7 @@ public slots:
     void handleUpdatedUserPrivacySettingRules(const QVariantMap &updatedRules);
     void handleSponsoredMessage(qlonglong chatId, const QVariantMap &message);
     void handleNetworkConfigurationChanged(const QNetworkConfiguration &config);
+    void confirmNetworkNone();
     void handleActiveEmojiReactionsUpdated(const QStringList& emojis);
     void handleForumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId);
     void handleGetPageSourceFinished();
@@ -615,11 +617,14 @@ private:
     void initializeTDLibReceiver();
     void updateUserInformation(const QString &userId, const QVariantMap &userInformation);
     void upsertCustomEmojiFromSticker(const QVariantMap &sticker);
+    bool applyActiveNetworkType();
 
 private:
     void *tdLibClient;
     QNetworkAccessManager *manager;
     QNetworkConfigurationManager *networkConfigurationManager;
+    // "Nessuna rete" si manda a TDLib solo se dura: vedi handleNetworkConfigurationChanged.
+    QTimer *networkNoneTimer;
     AppSettings *appSettings;
     MceInterface *mceInterface;
     TDLibReceiver *tdLibReceiver;

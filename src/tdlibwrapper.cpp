@@ -125,6 +125,7 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     , tdLibClient(td_json_client_create())
     , manager(new QNetworkAccessManager(this))
     , networkConfigurationManager(new QNetworkConfigurationManager(this))
+    , networkNoneTimer(new QTimer(this))
     , appSettings(settings)
     , mceInterface(mce)
     , authorizationState(AuthorizationState::Closed)
@@ -159,6 +160,9 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     connect(this->appSettings, SIGNAL(storageOptimizerChanged()), this, SLOT(handleStorageOptimizerChanged()));
 
     connect(networkConfigurationManager, SIGNAL(configurationChanged(QNetworkConfiguration)), this, SLOT(handleNetworkConfigurationChanged(QNetworkConfiguration)));
+    networkNoneTimer->setSingleShot(true);
+    networkNoneTimer->setInterval(5000);
+    connect(networkNoneTimer, SIGNAL(timeout()), this, SLOT(confirmNetworkNone()));
 
     this->applyAntiRamOptions();
 
@@ -4594,8 +4598,40 @@ void TDLibWrapper::handleNetworkConfigurationChanged(const QNetworkConfiguration
     LOG("A network configuration changed: " << config.bearerTypeName() << config.state());
     LOG("Checking overall network state...");
 
+    if (applyActiveNetworkType()) {
+        networkNoneTimer->stop();
+        return;
+    }
+    // networkTypeNone ferma TDLib ("Waiting for network") finche' non arriva un altro
+    // setNetworkType. Una fotografia senza reti attive pero' capita anche con la rete
+    // c'e': mentre il gestore di Qt si popola in un processo appena avviato (sveglia
+    // UnifiedPush, avvio dalla notifica) o a meta' di un passaggio WiFi <-> mobile.
+    // Se dopo quel momento non cambia piu' nulla, l'app resta ferma per sempre: un
+    // tester l'ha visto aprendo dalla notifica (20/10/2026). Si conferma dopo un po'.
+    if (!networkNoneTimer->isActive()) {
+        qWarning() << "[NET] nessuna rete attiva secondo Qt:" << config.bearerTypeName() << config.state()
+                   << "- riverifico fra" << networkNoneTimer->interval() << "ms";
+        networkNoneTimer->start();
+    }
+}
+
+void TDLibWrapper::confirmNetworkNone()
+{
+    if (applyActiveNetworkType()) {
+        qWarning() << "[NET] la rete c'era: assenza solo momentanea";
+        return;
+    }
+    qWarning() << "[NET] nessuna rete attiva confermata, configurazioni note"
+               << networkConfigurationManager->allConfigurations().size();
+    this->setNetworkType(NetworkType::None);
+}
+
+// Manda a TDLib il tipo della rete attiva; false se Qt non ne vede nessuna.
+bool TDLibWrapper::applyActiveNetworkType()
+{
     bool wifiFound = false;
     bool mobileFound = false;
+    bool otherFound = false;
 
     QList<QNetworkConfiguration> activeConfigurations = networkConfigurationManager->allConfigurations(QNetworkConfiguration::Active);
     QListIterator<QNetworkConfiguration> configurationIterator(activeConfigurations);
@@ -4605,8 +4641,7 @@ void TDLibWrapper::handleNetworkConfigurationChanged(const QNetworkConfiguration
                 || activeConfiguration.bearerType() == QNetworkConfiguration::BearerEthernet) {
             LOG("Active WiFi found...");
             wifiFound = true;
-        }
-        if (activeConfiguration.bearerType() == QNetworkConfiguration::Bearer2G
+        } else if (activeConfiguration.bearerType() == QNetworkConfiguration::Bearer2G
                 || activeConfiguration.bearerType() == QNetworkConfiguration::Bearer3G
                 || activeConfiguration.bearerType() == QNetworkConfiguration::Bearer4G
                 || activeConfiguration.bearerType() == QNetworkConfiguration::BearerCDMA2000
@@ -4616,15 +4651,22 @@ void TDLibWrapper::handleNetworkConfigurationChanged(const QNetworkConfiguration
                 || activeConfiguration.bearerType() == QNetworkConfiguration::BearerWCDMA) {
             LOG("Active mobile connection found...");
             mobileFound = true;
+        } else {
+            // Bearer sconosciuto (VPN, USB, Bluetooth...): prima finiva in "nessuna rete".
+            LOG("Active connection of other type found:" << activeConfiguration.bearerTypeName());
+            otherFound = true;
         }
     }
     if (wifiFound) {
         this->setNetworkType(NetworkType::WiFi);
     } else if (mobileFound) {
         this->setNetworkType(NetworkType::Mobile);
+    } else if (otherFound || networkConfigurationManager->isOnline()) {
+        this->setNetworkType(NetworkType::Other);
     } else {
-        this->setNetworkType(NetworkType::None);
+        return false;
     }
+    return true;
 }
 
 void TDLibWrapper::handleGetPageSourceFinished()

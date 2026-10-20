@@ -26,6 +26,7 @@
 #include <QDBusMetaType>
 #include <QDBusReply>
 #include <QDir>
+#include <QEvent>
 #include <QFile>
 #include <QSettings>
 #include <QStandardPaths>
@@ -122,6 +123,8 @@ UnifiedPushManager::UnifiedPushManager(bool wakeMode, bool daemonMode, QObject *
     , startedMs(nowMs())
     , connectedSinceMs(0)
     , registeredThisRun(false)
+    , windowShown(false)
+    , windowClosed(false)
 {
     idleTimer.setInterval(2000);
     connect(&idleTimer, &QTimer::timeout, this, &UnifiedPushManager::checkIdle);
@@ -175,8 +178,13 @@ void UnifiedPushManager::setView(QWindow *view)
 {
     this->view = view;
     if (view) {
+        view->installEventFilter(this);
         connect(view, &QWindow::visibleChanged, this, [this](bool visible) {
             noteActivity();
+            if (visible) {
+                windowShown = true;
+                windowClosed = false;
+            }
             // Nato come demone o da una sveglia e poi aperto dall'utente: e' un
             // avvio "vero", e ci si registra (prima mancava: visto il 18/10).
             if (visible && isEnabled() && !registeredThisRun) {
@@ -184,6 +192,20 @@ void UnifiedPushManager::setView(QWindow *view)
             }
         });
     }
+}
+
+bool UnifiedPushManager::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched == view && event->type() == QEvent::Close) {
+        // Un Close arriva anche alla finestra mai mostrata di un processo
+        // svegliato dal push (misurato): li' non e' l'utente, e non cambia nulla.
+        if (windowShown && !windowClosed) {
+            qWarning() << "[UNIFIEDPUSH] finestra chiusa dall'utente";
+        }
+        windowClosed = true;
+        noteActivity();
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 bool UnifiedPushManager::isEnabled() const
@@ -389,7 +411,10 @@ void UnifiedPushManager::checkIdle()
     if (!isEnabled() && !wakeMode) {
         return;
     }
-    if ((view && view->isVisible()) || uiBusy) {
+    // Andare alla home rende la finestra "non visibile" (misurato il 20/10/2026
+    // sul POCO): chiudersi li' faceva sparire l'app dallo switcher, e per
+    // l'utente era un crash. Una finestra aperta resta un'app vera fino alla X.
+    if ((view && view->isVisible()) || uiBusy || (windowShown && !windowClosed)) {
         lastActivityMs = nowMs();
         return;
     }

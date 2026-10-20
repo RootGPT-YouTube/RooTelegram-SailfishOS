@@ -103,6 +103,9 @@ public:
     void handleMessage(const QString &token);
     void handleUnregistered(const QString &token);
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 signals:
     void enabledChanged();
     void statusChanged();
@@ -146,6 +149,10 @@ private:
     qint64 startedMs;
     qint64 connectedSinceMs;
     bool registeredThisRun;
+    // Su SFOS la finestra risulta nascosta anche solo andando alla home (la
+    // cover resta nello switcher): conta solo la chiusura vera, la X.
+    bool windowShown;
+    bool windowClosed;
 };
 
 #endif // UNIFIEDPUSHMANAGER_H
