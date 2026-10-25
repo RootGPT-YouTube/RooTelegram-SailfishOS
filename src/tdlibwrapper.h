@@ -596,6 +596,7 @@ public slots:
     void handleSponsoredMessage(qlonglong chatId, const QVariantMap &message);
     void handleNetworkConfigurationChanged(const QNetworkConfiguration &config);
     void confirmNetworkNone();
+    void recheckNetworkType();
     void handleActiveEmojiReactionsUpdated(const QStringList& emojis);
     void handleForumTopicsReceived(qlonglong chatId, const QVariantList &topics, int totalCount, qlonglong nextOffsetDate, qlonglong nextOffsetMessageId, qlonglong nextOffsetMessageThreadId);
     void handleGetPageSourceFinished();
@@ -625,6 +626,8 @@ private:
     QNetworkConfigurationManager *networkConfigurationManager;
     // "Nessuna rete" si manda a TDLib solo se dura: vedi handleNetworkConfigurationChanged.
     QTimer *networkNoneTimer;
+    // Finche' TDLib e' in "Waiting for network" si ricontrolla la rete ogni 5 s.
+    QTimer *networkWaitTimer;
     AppSettings *appSettings;
     MceInterface *mceInterface;
     TDLibReceiver *tdLibReceiver;

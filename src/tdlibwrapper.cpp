@@ -126,9 +126,11 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     , manager(new QNetworkAccessManager(this))
     , networkConfigurationManager(new QNetworkConfigurationManager(this))
     , networkNoneTimer(new QTimer(this))
+    , networkWaitTimer(new QTimer(this))
     , appSettings(settings)
     , mceInterface(mce)
     , authorizationState(AuthorizationState::Closed)
+    , connectionState(ConnectionState::Connecting)
     , versionNumber(0)
     , joinChatRequested(false)
     , isLoggingOut(false)
@@ -160,9 +162,17 @@ TDLibWrapper::TDLibWrapper(AppSettings *settings, MceInterface *mce, QObject *pa
     connect(this->appSettings, SIGNAL(storageOptimizerChanged()), this, SLOT(handleStorageOptimizerChanged()));
 
     connect(networkConfigurationManager, SIGNAL(configurationChanged(QNetworkConfiguration)), this, SLOT(handleNetworkConfigurationChanged(QNetworkConfiguration)));
+    // Avvio a freddo (notifica con UnifiedPush): il gestore si popola con configurationAdded
+    // e finisce con updateCompleted, senza configurationChanged. Se nel frattempo e' partito
+    // "nessuna rete", la rete arrivata dopo non veniva mai detta a TDLib (tester 21/10/2026).
+    connect(networkConfigurationManager, SIGNAL(configurationAdded(QNetworkConfiguration)), this, SLOT(handleNetworkConfigurationChanged(QNetworkConfiguration)));
+    connect(networkConfigurationManager, SIGNAL(onlineStateChanged(bool)), this, SLOT(recheckNetworkType()));
+    connect(networkConfigurationManager, SIGNAL(updateCompleted()), this, SLOT(recheckNetworkType()));
     networkNoneTimer->setSingleShot(true);
     networkNoneTimer->setInterval(5000);
     connect(networkNoneTimer, SIGNAL(timeout()), this, SLOT(confirmNetworkNone()));
+    networkWaitTimer->setInterval(5000);
+    connect(networkWaitTimer, SIGNAL(timeout()), this, SLOT(recheckNetworkType()));
 
     this->applyAntiRamOptions();
 
@@ -4060,6 +4070,14 @@ void TDLibWrapper::handleConnectionStateChanged(const QString &connectionState)
     }
     if (connectionState == "connectionStateWaitingForNetwork") {
         this->connectionState = ConnectionState::WaitingForNetwork;
+        // TDLib aspetta solo perche' le abbiamo detto networkTypeNone: se Qt la rete
+        // ormai la vede, glielo ridiciamo invece di aspettare un cambio che non arriva.
+        // Anche a intervalli: al riavvio la rete puo' diventare attiva senza alcun
+        // segnale di Qt (misurato sul POCO: 90 s fermi fino al cambio successivo).
+        QTimer::singleShot(0, this, SLOT(recheckNetworkType()));
+        networkWaitTimer->start();
+    } else {
+        networkWaitTimer->stop();
     }
 
     emit connectionStateChanged(this->connectionState);
@@ -4624,6 +4642,17 @@ void TDLibWrapper::confirmNetworkNone()
     qWarning() << "[NET] nessuna rete attiva confermata, configurazioni note"
                << networkConfigurationManager->allConfigurations().size();
     this->setNetworkType(NetworkType::None);
+}
+
+// Senza far partire "nessuna rete": serve solo a recuperare una rete comparsa dopo.
+void TDLibWrapper::recheckNetworkType()
+{
+    if (applyActiveNetworkType()) {
+        if (networkNoneTimer->isActive() || this->connectionState == ConnectionState::WaitingForNetwork) {
+            qWarning() << "[NET] rete trovata dopo, ridetta a TDLib (stato" << this->connectionState << ")";
+        }
+        networkNoneTimer->stop();
+    }
 }
 
 // Manda a TDLib il tipo della rete attiva; false se Qt non ne vede nessuna.

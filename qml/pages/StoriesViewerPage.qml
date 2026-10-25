@@ -655,8 +655,14 @@ Page {
             }
 
             function armPlayback() {
-                var videoContent = currentStory && currentStory.content
-                                     ? currentStory.content.video : null;
+                // Prima la versione H.264 (alternative_video): il video principale puo'
+                // essere H.265, che GStreamer su Sailfish non decodifica ⇒ storia nera
+                // (succedeva con le storie di «Suggerimenti di Telegram», 25/10/2026).
+                var content = currentStory ? currentStory.content : null;
+                var videoContent = content
+                        ? ((content.alternative_video && content.alternative_video.video)
+                           ? content.alternative_video : content.video)
+                        : null;
                 var vfile = videoContent ? videoContent.video : null;
                 videoFileId = vfile ? vfile.id : 0;
                 videoDurationS = videoContent ? (videoContent.duration || 0) : 0;

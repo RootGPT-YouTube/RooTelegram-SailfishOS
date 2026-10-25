@@ -25,6 +25,7 @@
 #include "chatmodel.h"
 
 #include <QListIterator>
+#include <algorithm>
 #include <QByteArray>
 #include <QBitArray>
 #include <QTimer>
@@ -1263,24 +1264,44 @@ void ChatModel::trimMemory()
 
 void ChatModel::insertMessages(const QList<MessageData*> newMessages)
 {
-    // Caller ensures that newMessages is not empty
+    // Caller ensures that newMessages is not empty (and sorted with lessThan)
     if (messages.isEmpty()) {
         appendMessages(newMessages);
     } else if (!newMessages.isEmpty()) {
-        // There is only an append or a prepend, tertium non datur! (probably ;))
-        qlonglong lastKnownId = -1;
-        for (int i = (messages.size() - 1); i >= 0; i-- ) {
-            const MessageData* message = messages.at(i);
+        // Prima si confrontava il primo nuovo solo col messaggio PIU' VECCHIO
+        // caricato (il ciclo all'indietro lasciava in lastKnownId l'indice 0):
+        // qualunque messaggio vecchio arrivato a chat aperta, purche' piu' recente
+        // del primo in lista, finiva IN FONDO, sotto quelli di oggi (segnalazione
+        // del 20/10/2026: «adesso», poi «3 mesi fa», «4 mesi fa»). Ora: in fondo
+        // solo cio' che e' piu' recente dell'ultimo, in cima cio' che e' piu'
+        // vecchio del primo, il resto al suo posto per id.
+        qlonglong oldestKnownId = -1;
+        qlonglong newestKnownId = -1;
+        for (const MessageData* message : messages) {
             if (message->messageType != TYPE_SPONSORED_MESSAGE) {
-                lastKnownId = message->messageId;
+                if (oldestKnownId < 0) {
+                    oldestKnownId = message->messageId;
+                }
+                newestKnownId = message->messageId;
             }
         }
         const qlonglong firstNewId = newMessages.first()->messageId;
-        LOG("Inserting messages, last known ID:" << lastKnownId << ", first new ID:" << firstNewId);
-        if (lastKnownId < firstNewId) {
+        const qlonglong lastNewId = newMessages.last()->messageId;
+        LOG("Inserting messages, known IDs:" << oldestKnownId << ".." << newestKnownId << ", new IDs:" << firstNewId << ".." << lastNewId);
+        if (newestKnownId < firstNewId) {
             appendMessages(newMessages);
-        } else {
+        } else if (lastNewId < oldestKnownId) {
             prependMessages(newMessages);
+        } else {
+            for (MessageData* message : newMessages) {
+                const int position = std::upper_bound(messages.begin(), messages.end(), message, MessageData::lessThan) - messages.begin();
+                beginInsertRows(QModelIndex(), position, position);
+                messages.insert(position, message);
+                for (int i = position; i < messages.size(); i++) {
+                    messageIndexMap.insert(messages.at(i)->messageId, i);
+                }
+                endInsertRows();
+            }
         }
     }
 }
