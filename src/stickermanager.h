@@ -28,6 +28,7 @@
 #include <QObject>
 #include <QVariantMap>
 #include <QVariantList>
+#include <QStringList>
 
 #include "tdlibwrapper.h"
 
@@ -47,6 +48,10 @@ public:
     Q_INVOKABLE bool isStickerSetInstalled(const QString &stickerSetId);
     Q_INVOKABLE bool needsReload();
     Q_INVOKABLE void setNeedsReload(const bool &reloadNeeded);
+    // Riordino dei gruppi di emoji speciali: l'ordine e' quello di Telegram
+    // (sincronizzato con le altre app), cambiato con reorderInstalledStickerSets.
+    Q_INVOKABLE void setCustomEmojiSetOrder(const QStringList &orderedIds);
+    Q_INVOKABLE void sortCustomEmojiSetsByTitle();
 
 signals:
     void stickerSetsReceived();
@@ -66,7 +71,7 @@ private:
     bool inferCustomEmojiFromStickers(const QVariantList &stickers) const;
     bool purgeRegularReferences(const QString &stickerSetId);
     bool purgeCustomEmojiReferences(const QString &stickerSetId);
-    void sortByTitleAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const;
+    void sortAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const;
 
     TDLibWrapper *tdLibWrapper;
 

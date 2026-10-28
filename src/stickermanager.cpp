@@ -24,10 +24,12 @@
 
 #include "stickermanager.h"
 #include <QListIterator>
+#include <QHash>
 #include <QSet>
 #include <QStringList>
 #include <QStringListIterator>
 #include <algorithm>
+#include <climits>
 
 #define DEBUG_MODULE StickerManager
 #include "debuglog.h"
@@ -197,8 +199,8 @@ void StickerManager::handleInstalledStickerSetsUpdatedByType(const QVariantList 
             cachedSets->remove(cachedId);
         }
     }
-    // Ricostruisce la lista pubblica dalla cache rimasta, ordinata
-    // alfabeticamente. I set non ancora fetchati restano fuori finché
+    // Ricostruisce la lista pubblica dalla cache rimasta (sticker in ordine
+    // alfabetico, emoji speciali nell'ordine di Telegram). I set non ancora fetchati restano fuori finché
     // non arriva la response individuale.
     installedSets->clear();
     QListIterator<QVariant> rebuildIt(stickerSetIds);
@@ -208,7 +210,7 @@ void StickerManager::handleInstalledStickerSetsUpdatedByType(const QVariantList 
             installedSets->append(cachedSets->value(setId));
         }
     }
-    sortByTitleAndRebuildMap(*installedSets, *indexMap);
+    sortAndRebuildMap(*installedSets, *indexMap);
     emit (this->*signalEmitter)();
 }
 
@@ -232,15 +234,29 @@ bool StickerManager::inferCustomEmojiFromStickers(const QVariantList &stickers) 
     return false;
 }
 
-void StickerManager::sortByTitleAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const
+void StickerManager::sortAndRebuildMap(QVariantList &installedSets, QVariantMap &indexMap) const
 {
-    // Ordine alfabetico case-insensitive sul titolo del set. La lista
-    // installedSets diventa quella esposta a QML; indexMap (id -> indice)
+    // Sticker: ordine alfabetico case-insensitive sul titolo del set.
+    // Emoji speciali: l'ordine di Telegram (installedCustomEmojiSetIds), che
+    // l'utente puo' cambiare (setCustomEmojiSetOrder) ed e' lo stesso delle altre app.
+    // La lista installedSets diventa quella esposta a QML; indexMap (id -> indice)
     // viene rigenerata coerentemente con il nuovo ordine.
-    std::sort(installedSets.begin(), installedSets.end(),
-              [](const QVariant &a, const QVariant &b) {
-                  return stickerSetTitleKey(a) < stickerSetTitleKey(b);
-              });
+    if (&installedSets == &this->installedCustomEmojiSets) {
+        QHash<QString, int> position;
+        for (int i = 0; i < this->installedCustomEmojiSetIds.size(); ++i) {
+            position.insert(this->installedCustomEmojiSetIds.at(i).toString(), i);
+        }
+        std::stable_sort(installedSets.begin(), installedSets.end(),
+                         [&position](const QVariant &a, const QVariant &b) {
+                             return position.value(a.toMap().value("id").toString(), INT_MAX)
+                                     < position.value(b.toMap().value("id").toString(), INT_MAX);
+                         });
+    } else {
+        std::sort(installedSets.begin(), installedSets.end(),
+                  [](const QVariant &a, const QVariant &b) {
+                      return stickerSetTitleKey(a) < stickerSetTitleKey(b);
+                  });
+    }
     indexMap.clear();
     for (int i = 0; i < installedSets.size(); ++i) {
         const QString id = installedSets.at(i).toMap().value("id").toString();
@@ -248,6 +264,65 @@ void StickerManager::sortByTitleAndRebuildMap(QVariantList &installedSets, QVari
             indexMap.insert(id, i);
         }
     }
+}
+
+void StickerManager::sortCustomEmojiSetsByTitle()
+{
+    QVariantList sets = this->installedCustomEmojiSets;
+    std::sort(sets.begin(), sets.end(),
+              [](const QVariant &a, const QVariant &b) {
+                  return stickerSetTitleKey(a) < stickerSetTitleKey(b);
+              });
+    QStringList orderedIds;
+    QListIterator<QVariant> setIt(sets);
+    while (setIt.hasNext()) {
+        orderedIds.append(setIt.next().toMap().value("id").toString());
+    }
+    setCustomEmojiSetOrder(orderedIds);
+}
+
+void StickerManager::setCustomEmojiSetOrder(const QStringList &orderedIds)
+{
+    // I gruppi installati ma non ancora scaricati (non visibili) restano in
+    // coda, nell'ordine che avevano: Telegram vuole la lista completa.
+    QStringList oldIds;
+    QListIterator<QVariant> installedIt(this->installedCustomEmojiSetIds);
+    while (installedIt.hasNext()) {
+        oldIds.append(installedIt.next().toString());
+    }
+    const QSet<QString> installedIds = oldIds.toSet();
+    QStringList newIds;
+    QSet<QString> placedIds;
+    QStringListIterator orderedIt(orderedIds);
+    while (orderedIt.hasNext()) {
+        const QString id = orderedIt.next();
+        if (installedIds.contains(id) && !placedIds.contains(id)) {
+            newIds.append(id);
+            placedIds.insert(id);
+        }
+    }
+    QStringListIterator oldIt(oldIds);
+    while (oldIt.hasNext()) {
+        const QString id = oldIt.next();
+        if (!placedIds.contains(id)) {
+            newIds.append(id);
+        }
+    }
+    if (newIds == oldIds) {
+        return;
+    }
+    LOG("Reordering custom emoji sets" << newIds);
+    // Subito in locale (il pannello si aggiorna senza aspettare il server);
+    // l'updateInstalledStickerSets che TDLib rimanda porta lo stesso ordine.
+    QVariantList newIdList;
+    QStringListIterator newIt(newIds);
+    while (newIt.hasNext()) {
+        newIdList.append(newIt.next());
+    }
+    this->installedCustomEmojiSetIds = newIdList;
+    sortAndRebuildMap(this->installedCustomEmojiSets, this->customEmojiStickerSetMap);
+    emit customEmojiStickerSetsReceived();
+    this->tdLibWrapper->reorderInstalledStickerSets(QStringLiteral("stickerTypeCustomEmoji"), newIdList);
 }
 
 bool StickerManager::purgeRegularReferences(const QString &stickerSetId)
@@ -405,7 +480,7 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
                 this->installedStickerSets.append(this->stickerSets.value(stickerSetId));
             }
         }
-        sortByTitleAndRebuildMap(this->installedStickerSets, this->stickerSetMap);
+        sortAndRebuildMap(this->installedStickerSets, this->stickerSetMap);
         emit stickerSetsReceived();
     }
     if (rebuildCustomEmoji) {
@@ -417,7 +492,7 @@ void StickerManager::handleStickerSetsReceived(const QVariantList &stickerSets, 
                 this->installedCustomEmojiSets.append(this->customEmojiStickerSets.value(stickerSetId));
             }
         }
-        sortByTitleAndRebuildMap(this->installedCustomEmojiSets, this->customEmojiStickerSetMap);
+        sortAndRebuildMap(this->installedCustomEmojiSets, this->customEmojiStickerSetMap);
         emit customEmojiStickerSetsReceived();
     }
     // Se un rescue ha alterato la lista non-rebuildata, segnalalo comunque.
@@ -479,7 +554,7 @@ void StickerManager::handleStickerSetReceived(const QVariantMap &stickerSet)
         }
         // Ri-sortiamo dopo replace/append: il titolo potrebbe essere cambiato
         // (replace) o il set è nuovo in coda (append), entrambi violano l'ordine.
-        sortByTitleAndRebuildMap(*installedSets, *stickerSetIndexMap);
+        sortAndRebuildMap(*installedSets, *stickerSetIndexMap);
     } else {
         LOG("Receiving new sticker set...." << stickerSetId);
     }

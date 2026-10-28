@@ -1768,6 +1768,38 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5172,7 +5204,7 @@ messages</numerusform>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

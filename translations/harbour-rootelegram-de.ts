@@ -1768,6 +1768,38 @@ Du kannst sie aus deiner Liste entfernen. Diese Entfernung ist nur lokal: Sie l�
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>Dieser Artikel enthält Elemente, die der Editor noch nicht beibehalten kann (%1): Beim Bearbeiten würden sie entfernt.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation>Position %1 von %2</translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation>An den Anfang verschieben</translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation>Nach links verschieben</translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation>Nach rechts verschieben</translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation>Ans Ende verschieben</translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation>Alle Gruppen von A bis Z sortieren</translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation>Gruppe entfernen</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Fertig</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5172,8 +5204,8 @@ Nachrichten</numerusform>
         <translation>Screenshots erlauben</translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation>Wenn deaktiviert, wird die Story als geschützt markiert: offizielle Clients blockieren Screenshots und Weiterleitungen.</translation>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
+        <translation>Wenn deaktiviert, wird die Story als geschützt markiert: Betrachter können sie weder speichern noch weiterleiten. Ob Screenshots blockiert werden, hängt dagegen vom System des Telefons ab: Android erlaubt es Apps, Sailfish OS nicht, weil Screenshots vom System und nicht von der App erstellt werden.</translation>
     </message>
     <message>
         <source>Post to my profile</source>

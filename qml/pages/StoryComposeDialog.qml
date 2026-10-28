@@ -540,7 +540,7 @@ Page {
                 TextSwitch {
                     width: parent.width
                     text: qsTr("Allow screenshots")
-                    description: qsTr("If off, the story is marked as protected: official clients block screenshots and forwarding.")
+                    description: qsTr("If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone's system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.")
                     checked: composePage.allowScreenshots
                     onCheckedChanged: composePage.allowScreenshots = checked
                 }

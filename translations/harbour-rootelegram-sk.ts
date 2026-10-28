@@ -1782,6 +1782,38 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>Tento článok obsahuje prvky, ktoré editor zatiaľ nedokáže zachovať (%1): úpravou by sa odstránili.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation>Pozícia %1 z %2</translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation>Presunúť na začiatok</translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation>Presunúť doľava</translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation>Presunúť doprava</translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation>Presunúť na koniec</translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation>Zoradiť všetky skupiny od A po Z</translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation>Odstrániť skupinu</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Hotovo</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5214,8 +5246,8 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <translation>Povoliť snímku obrazovky</translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation>Ak je vypnuté, príbeh je označený ako chránený: oficiálni klienti blokujú snímky obrazovky a preposielanie.</translation>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
+        <translation>Ak je vypnuté, príbeh je označený ako chránený: diváci ho nemôžu uložiť ani preposlať. Blokovanie snímok obrazovky však závisí od systému telefónu: Android to aplikáciám umožňuje, Sailfish OS nie, pretože snímky obrazovky robí systém, nie aplikácia.</translation>
     </message>
     <message>
         <source>Post to my profile</source>

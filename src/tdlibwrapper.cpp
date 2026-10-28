@@ -3250,6 +3250,20 @@ void TDLibWrapper::changeStickerSet(const QString &stickerSetId, bool isInstalle
     this->sendRequest(requestObject);
 }
 
+void TDLibWrapper::reorderInstalledStickerSets(const QString &stickerType, const QVariantList &stickerSetIds)
+{
+    LOG("Reorder installed sticker sets" << stickerType << stickerSetIds.size());
+
+    QVariantMap requestObject;
+    requestObject.insert(_TYPE, "reorderInstalledStickerSets");
+    QVariantMap typeObject;
+    typeObject.insert(_TYPE, stickerType);
+    requestObject.insert("sticker_type", typeObject);
+    requestObject.insert("sticker_set_ids", stickerSetIds);
+
+    this->sendRequest(requestObject);
+}
+
 void TDLibWrapper::getActiveSessions()
 {
     LOG("Get active sessions");
@@ -3786,9 +3800,9 @@ QString deduplicatedFilePath(const QString &destinationDir, const QString &fileN
 
 }
 
-void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCopy)
+void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCopy, const QString &subDir)
 {
-    LOG("Copy file to downloads" << filePath << openAfterCopy);
+    LOG("Copy file to downloads" << filePath << openAfterCopy << subDir);
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists()) {
         emit copyToDownloadsError(fileInfo.fileName(), filePath);
@@ -3797,6 +3811,9 @@ void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCo
     QString destinationDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     if (destinationDir.isEmpty()) {
         destinationDir = QDir::homePath() + "/Downloads";
+    }
+    if (!subDir.isEmpty()) {
+        destinationDir += "/" + subDir;
     }
     QDir().mkpath(destinationDir);
     QString downloadFilePath = destinationDir + "/" + fileInfo.fileName();
@@ -3824,9 +3841,9 @@ void TDLibWrapper::copyFileToDownloads(const QString &filePath, bool openAfterCo
     }
 }
 
-void TDLibWrapper::copyFileToPictures(const QString &filePath)
+void TDLibWrapper::copyFileToPictures(const QString &filePath, const QString &subDir)
 {
-    LOG("Copy file to pictures" << filePath);
+    LOG("Copy file to pictures" << filePath << subDir);
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists()) {
         emit copyToDownloadsError(fileInfo.fileName(), filePath);
@@ -3835,6 +3852,9 @@ void TDLibWrapper::copyFileToPictures(const QString &filePath)
     QString destinationDir = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
     if (destinationDir.isEmpty()) {
         destinationDir = QDir::homePath() + "/Pictures";
+    }
+    if (!subDir.isEmpty()) {
+        destinationDir += "/" + subDir;
     }
     QDir().mkpath(destinationDir);
     QString destinationPath = destinationDir + "/" + fileInfo.fileName();

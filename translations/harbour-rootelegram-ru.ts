@@ -1782,6 +1782,38 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>Эта статья содержит элементы, которые редактор пока не умеет сохранять (%1): при редактировании они будут удалены.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation>Позиция %1 из %2</translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation>Переместить в начало</translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation>Переместить влево</translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation>Переместить вправо</translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation>Переместить в конец</translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation>Сортировать все группы от А до Я</translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation>Удалить группу</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Готово</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5214,8 +5246,8 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation>Разрешить снимки экрана</translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation>Если выключено, история помечается как защищённая: официальные клиенты блокируют снимки экрана и пересылку.</translation>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
+        <translation>Если выключено, история помечается как защищённая: зрители не могут сохранить или переслать её. Блокировка снимков экрана зависит от системы телефона: Android позволяет это приложениям, Sailfish OS — нет, потому что снимки экрана делает система, а не приложение.</translation>
     </message>
     <message>
         <source>Post to my profile</source>

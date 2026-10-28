@@ -3638,6 +3638,51 @@ Page {
                         return quickPremiumEmojiSets[selectedIndex];
                     }
 
+                    // Riordino dei gruppi (pressione prolungata su un gruppo): l'ordine
+                    // va a Telegram ed e' lo stesso delle altre app (StickerManager).
+                    function moveQuickPremiumSet(setId, where) {
+                        var ids = [];
+                        for (var i = 0; i < quickPremiumEmojiSets.length; i++) {
+                            ids.push(quickPremiumEmojiSets[i].id);
+                        }
+                        var from = ids.indexOf(setId);
+                        if (from < 0) return;
+                        var to = where === "first" ? 0
+                               : where === "last" ? ids.length - 1
+                               : where === "prev" ? Math.max(0, from - 1)
+                                                  : Math.min(ids.length - 1, from + 1);
+                        if (to === from) return;
+                        ids.splice(to, 0, ids.splice(from, 1)[0]);
+                        quickPremiumSelectedSetIndex = to;
+                        stickerManager.setCustomEmojiSetOrder(ids);
+                    }
+
+                    function quickPremiumSetPosition(setId) {
+                        for (var i = 0; i < quickPremiumEmojiSets.length; i++) {
+                            if (quickPremiumEmojiSets[i].id === setId) return i;
+                        }
+                        return -1;
+                    }
+
+                    // Porta in vista il gruppo selezionato (dopo uno spostamento puo'
+                    // finire fuori dalla parte visibile della fila).
+                    function showSelectedQuickPremiumSet() {
+                        var row = quickPremiumSetRow;
+                        for (var i = 0; i < row.children.length; i++) {
+                            var chip = row.children[i];
+                            if (chip.isCurrentSet === true) {
+                                var flick = quickPremiumSetFlickable;
+                                var maxX = Math.max(0, flick.contentWidth - flick.width);
+                                if (chip.x < flick.contentX) {
+                                    flick.contentX = Math.max(0, chip.x - Theme.paddingSmall);
+                                } else if (chip.x + chip.width > flick.contentX + flick.width) {
+                                    flick.contentX = Math.min(maxX, chip.x + chip.width - flick.width + Theme.paddingSmall);
+                                }
+                                return;
+                            }
+                        }
+                    }
+
                     function refreshQuickPremiumEmojiSets() {
                         var result = [];
                         var sets = installedCustomEmojiSets || [];
@@ -3703,6 +3748,9 @@ Page {
                         onTriggered: {
                             newMessageColumn.installedCustomEmojiSets = stickerManager.getInstalledCustomEmojiSets();
                             newMessageColumn.refreshQuickPremiumEmojiSets();
+                            if (chatPage.pendingEmojiSetId !== "") {
+                                newMessageColumn.showSelectedQuickPremiumSet();
+                            }
                         }
                     }
                     // Task 3.4 #1: si ricalcola solo se la barra e' gia' stata
@@ -4169,7 +4217,7 @@ Page {
                                 Row {
                                     id: quickPremiumSetRow
                                     height: newMessageColumn.compactAttachmentButtonSize
-                                    // LTR: il primo set (index 0, alfabeticamente "A") va a sinistra.
+                                    // LTR: il primo set (index 0, nell'ordine di Telegram) va a sinistra.
                                     // Quando la Row è più stretta della Flickable la centriamo;
                                     // quando è più larga la lasciamo allineata a sinistra (scrolla a destra).
                                     x: width <= parent.width ? ((parent.width - width) / 2) : 0
@@ -4190,7 +4238,9 @@ Page {
                                             }
                                             onPressAndHold: {
                                                 if (!modelData || !modelData.id) return;
-                                                chatPage.requestDeleteSet(modelData.id, "stickerTypeCustomEmoji", modelData.title);
+                                                newMessageColumn.quickPremiumSelectedSetIndex = index;
+                                                chatPage.pendingEmojiSetId = modelData.id;
+                                                chatPage.pendingEmojiSetName = modelData.title || "";
                                             }
 
                                             Rectangle {
@@ -5569,6 +5619,138 @@ Page {
                     text: qsTr("No")
                     color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
                     font.pixelSize: Theme.fontSizeLarge
+                }
+            }
+        }
+    }
+
+    // Pannello del gruppo di emoji speciali (pressione prolungata sul gruppo):
+    // spostarlo, ordinare tutti i gruppi per nome, o rimuoverlo. Resta aperto
+    // dopo uno spostamento, cosi' si puo' toccare piu' volte «a sinistra».
+    property string pendingEmojiSetId: ""
+    property string pendingEmojiSetName: ""
+
+    MouseArea {
+        anchors.fill: parent
+        visible: chatPage.pendingEmojiSetId !== ""
+        z: 150
+        onClicked: chatPage.pendingEmojiSetId = ""
+    }
+
+    Rectangle {
+        id: emojiSetPanel
+        z: 200
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: Theme.itemSizeLarge
+        width: parent.width - 2 * Theme.horizontalPageMargin
+        color: Theme.highlightBackgroundColor
+        radius: Theme.paddingMedium
+        visible: chatPage.pendingEmojiSetId !== ""
+        height: visible ? emojiSetColumn.height + 2 * Theme.paddingLarge : 0
+
+        readonly property int position: visible
+                                        ? newMessageColumn.quickPremiumSetPosition(chatPage.pendingEmojiSetId)
+                                        : -1
+        readonly property int setCount: newMessageColumn.quickPremiumEmojiSets.length
+
+        Column {
+            id: emojiSetColumn
+            anchors.top: parent.top
+            anchors.topMargin: Theme.paddingLarge
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: chatPage.pendingEmojiSetName
+                color: Theme.primaryColor
+                font.pixelSize: Theme.fontSizeMedium
+            }
+
+            Label {
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                visible: emojiSetPanel.position >= 0
+                text: qsTr("Position %1 of %2").arg(emojiSetPanel.position + 1).arg(emojiSetPanel.setCount)
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeExtraSmall
+            }
+
+            NeonSeparator {
+                width: parent.width
+            }
+
+            Repeater {
+                model: [
+                    { "action": "first", "label": qsTr("Move to the start") },
+                    { "action": "prev",  "label": qsTr("Move left") },
+                    { "action": "next",  "label": qsTr("Move right") },
+                    { "action": "last",  "label": qsTr("Move to the end") }
+                ]
+                BackgroundItem {
+                    width: emojiSetColumn.width
+                    height: Theme.itemSizeExtraSmall
+                    enabled: (modelData.action === "first" || modelData.action === "prev")
+                             ? emojiSetPanel.position > 0
+                             : emojiSetPanel.position >= 0 && emojiSetPanel.position < emojiSetPanel.setCount - 1
+                    onClicked: newMessageColumn.moveQuickPremiumSet(chatPage.pendingEmojiSetId, modelData.action)
+                    Label {
+                        anchors.centerIn: parent
+                        text: modelData.label
+                        color: parent.enabled
+                               ? (parent.highlighted ? Theme.highlightColor : Theme.primaryColor)
+                               : Theme.secondaryColor
+                        opacity: parent.enabled ? 1.0 : Theme.opacityLow
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                }
+            }
+
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeExtraSmall
+                onClicked: stickerManager.sortCustomEmojiSetsByTitle()
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Sort all groups A to Z")
+                    color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: Theme.fontSizeMedium
+                }
+            }
+
+            NeonSeparator {
+                width: parent.width
+            }
+
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeExtraSmall
+                onClicked: {
+                    var sid = chatPage.pendingEmojiSetId;
+                    var sname = chatPage.pendingEmojiSetName;
+                    chatPage.pendingEmojiSetId = "";
+                    chatPage.requestDeleteSet(sid, "stickerTypeCustomEmoji", sname);
+                }
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Remove group")
+                    color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: Theme.fontSizeMedium
+                }
+            }
+
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeExtraSmall
+                onClicked: chatPage.pendingEmojiSetId = ""
+                Label {
+                    anchors.centerIn: parent
+                    text: qsTr("Done")
+                    color: parent.highlighted ? Theme.highlightColor : Theme.primaryColor
+                    font.pixelSize: Theme.fontSizeMedium
                 }
             }
         }

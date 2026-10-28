@@ -1782,6 +1782,38 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>Ten artykuł zawiera elementy, których edytor nie potrafi jeszcze zachować (%1): edycja by je usunęła.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation>Pozycja %1 z %2</translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation>Przenieś na początek</translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation>Przenieś w lewo</translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation>Przenieś w prawo</translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation>Przenieś na koniec</translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation>Sortuj wszystkie grupy od A do Z</translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation>Usuń grupę</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Gotowe</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5214,8 +5246,8 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <translation>Zezwalaj na zrzuty ekranu</translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation>Jeśli wyłączone, relacja jest oznaczana jako chroniona: oficjalne klienty blokują zrzuty ekranu i przekazywanie.</translation>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
+        <translation>Jeśli wyłączone, relacja jest oznaczana jako chroniona: oglądający nie mogą jej zapisać ani przekazać. Blokowanie zrzutów ekranu zależy natomiast od systemu telefonu: Android pozwala na to aplikacjom, Sailfish OS nie, ponieważ zrzuty ekranu wykonuje system, a nie aplikacja.</translation>
     </message>
     <message>
         <source>Post to my profile</source>

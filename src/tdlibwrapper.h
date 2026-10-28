@@ -166,8 +166,10 @@ public:
     Q_INVOKABLE QVariantMap getSecretChatFromCache(qlonglong secretChatId);
     Q_INVOKABLE QStringList getChatReactions(const QString &chatId);
     Q_INVOKABLE QString getOptionString(const QString &optionName);
-    Q_INVOKABLE void copyFileToDownloads(const QString &filePath, bool openAfterCopy = false);
-    Q_INVOKABLE void copyFileToPictures(const QString &filePath);
+    // subDir: sottocartella facoltativa (es. "RooTelegram" per le storie salvate).
+    Q_INVOKABLE void copyFileToDownloads(const QString &filePath, bool openAfterCopy = false,
+                                         const QString &subDir = QString());
+    Q_INVOKABLE void copyFileToPictures(const QString &filePath, const QString &subDir = QString());
     Q_INVOKABLE void openFileOnDevice(const QString &filePath);
     Q_INVOKABLE void controlScreenSaver(bool enabled);
     Q_INVOKABLE bool getJoinChatRequested();
@@ -342,6 +344,7 @@ public:
     Q_INVOKABLE void setProfilePhoto(const QString &filePath);
     Q_INVOKABLE void deleteProfilePhoto(const QString &profilePhotoId);
     Q_INVOKABLE void changeStickerSet(const QString &stickerSetId, bool isInstalled, const QString &stickerType = QStringLiteral("stickerTypeRegular"));
+    void reorderInstalledStickerSets(const QString &stickerType, const QVariantList &stickerSetIds);
     Q_INVOKABLE void getActiveSessions();
     Q_INVOKABLE void terminateSession(const QString &sessionId);
     Q_INVOKABLE void getMessageAvailableReactions(qlonglong chatId, qlonglong messageId);

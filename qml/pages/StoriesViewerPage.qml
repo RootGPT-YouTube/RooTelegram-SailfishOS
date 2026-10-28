@@ -61,6 +61,28 @@ Page {
     // pausa manualmente, così al ritorno riprendiamo solo se eravamo stati noi.
     property bool autoPausedForOverlay: false
 
+    // Salvataggio della storia: le mie sempre; le altrui solo se TDLib dice
+    // can_be_forwarded (altrimenti, da documentazione, «screenshotting and saving
+    // of the story content must be also forbidden»: storia protetta o non pubblica).
+    readonly property bool canSaveStory: currentStory !== null && currentStoryId !== 0
+                                         && (isOwnStory || currentStory.can_be_edited === true
+                                             || currentStory.can_be_forwarded === true)
+    // File gia' scaricato della storia mostrata (foto o video); "" finche' non e' pronto.
+    readonly property string currentMediaPath: currentContentLoader.item
+                                               && currentContentLoader.item.resolvedPath
+                                               ? currentContentLoader.item.resolvedPath : ""
+
+    function saveStory() {
+        if (!canSaveStory || currentMediaPath === "") return;
+        // Foto in Immagini/RooTelegram, video in Download/RooTelegram.
+        // L'avviso di riuscita/errore lo mostra OverviewPage (Connections globale).
+        if (currentStory.content && currentStory.content["@type"] === "storyContentVideo") {
+            tdLibWrapper.copyFileToDownloads(currentMediaPath, false, "RooTelegram");
+        } else {
+            tdLibWrapper.copyFileToPictures(currentMediaPath, "RooTelegram");
+        }
+    }
+
     property var interactionInfo: currentStory && currentStory.interaction_info
                                   ? currentStory.interaction_info : null
     // Pill viewer visibile solo sulle mie storie quando TDLib consente le interazioni.
@@ -343,7 +365,17 @@ Page {
             width: parent.width - pauseButton.width - headerRow.spacing
                    - closeButton.width - Theme.paddingMedium
                    - (deleteButton.visible ? deleteButton.width + headerRow.spacing : 0)
+                   - (saveButton.visible ? saveButton.width + headerRow.spacing : 0)
             truncationMode: TruncationMode.Fade
+        }
+
+        IconButton {
+            id: saveButton
+            visible: storiesViewerPage.canSaveStory
+            enabled: storiesViewerPage.currentMediaPath !== ""
+            anchors.verticalCenter: parent.verticalCenter
+            icon.source: "image://theme/icon-m-downloads?white"
+            onClicked: storiesViewerPage.saveStory()
         }
 
         IconButton {

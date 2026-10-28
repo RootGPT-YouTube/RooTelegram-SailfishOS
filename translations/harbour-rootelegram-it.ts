@@ -1768,6 +1768,38 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <source>This article contains elements the editor cannot keep yet (%1): editing it would remove them.</source>
         <translation>Questo articolo contiene elementi che l&apos;editor non sa ancora mantenere (%1): modificandolo andrebbero persi.</translation>
     </message>
+    <message>
+        <source>Position %1 of %2</source>
+        <translation>Posizione %1 di %2</translation>
+    </message>
+    <message>
+        <source>Move to the start</source>
+        <translation>Sposta all&apos;inizio</translation>
+    </message>
+    <message>
+        <source>Move left</source>
+        <translation>Sposta a sinistra</translation>
+    </message>
+    <message>
+        <source>Move right</source>
+        <translation>Sposta a destra</translation>
+    </message>
+    <message>
+        <source>Move to the end</source>
+        <translation>Sposta in fondo</translation>
+    </message>
+    <message>
+        <source>Sort all groups A to Z</source>
+        <translation>Ordina tutti i gruppi dalla A alla Z</translation>
+    </message>
+    <message>
+        <source>Remove group</source>
+        <translation>Rimuovi gruppo</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Fatto</translation>
+    </message>
 </context>
 <context>
     <name>ChatRecentActionsPage</name>
@@ -5170,8 +5202,8 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <translation>Consenti screenshot</translation>
     </message>
     <message>
-        <source>If off, the story is marked as protected: official clients block screenshots and forwarding.</source>
-        <translation>Se disattivato, la storia è contrassegnata come protetta: i client ufficiali bloccano screenshot e inoltri.</translation>
+        <source>If off, the story is marked as protected: viewers cannot save or forward it. Blocking screenshots depends on the phone&apos;s system instead: Android allows apps to do it, Sailfish OS does not, because screenshots are taken by the system and not by the app.</source>
+        <translation>Se disattivato, la storia è contrassegnata come protetta: chi la guarda non può salvarla né inoltrarla. Il blocco degli screenshot dipende invece dal sistema del telefono: Android lo permette alle app, Sailfish OS no, perché gli screenshot li fa il sistema e non l&apos;app.</translation>
     </message>
     <message>
         <source>Post to my profile</source>
