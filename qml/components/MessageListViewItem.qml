@@ -210,6 +210,37 @@ ListItem {
     readonly property bool haveSpaceForDeleteMessageMenuItem: (baseContextMenuItemCount + 3 - (deleteMessageIsOnlyExtraOption ? 1 : 0)) <= maxContextMenuItemCount
     property var chatReactions
     property var messageReactions
+
+    // Reaction proponibili per QUESTO messaggio. Il gruppo fissa quante reaction
+    // DIVERSE puo' avere un messaggio (max_reaction_count, 1..11): raggiunto il
+    // limite, TDLib accetta solo quelle gia' presenti e rifiuta le altre con
+    // «The reaction isn't available for the message». Come l'app ufficiale,
+    // a limite raggiunto proponiamo solo quelle.
+    function reactionsAllowedForMessage(chatList) {
+        var interaction = myMessage && myMessage.interaction_info ? myMessage.interaction_info.reactions : null;
+        var present = [];
+        var list = interaction && interaction.reactions ? interaction.reactions : [];
+        for (var i = 0; i < list.length; i++) {
+            var type = list[i].type;
+            if (type && type["@type"] !== "reactionTypePaid") {
+                present.push(type.emoji || "");
+            }
+        }
+        var chat = tdLibWrapper.getChat(chatId.toString());
+        var available = chat ? chat.available_reactions : null;
+        var limit = Number(available && available.max_reaction_count);
+        if (isNaN(limit) || limit < 1 || present.length < limit) {
+            return chatList;
+        }
+        // chatList arriva dal C++ (QStringList): niente indexOf, scorriamo a mano.
+        var allowed = [];
+        for (var j = 0; j < chatList.length; j++) {
+            if (present.indexOf(chatList[j]) !== -1) {
+                allowed.push(chatList[j]);
+            }
+        }
+        return allowed;
+    }
     // Lista "chi ha reagito e con quale reaction" (addedReaction[]), mostrata nel
     // pannello stellina sotto al picker delle reaction disponibili.
     property var messageAddedReactions: null
@@ -601,7 +632,7 @@ ListItem {
                 && !(myMessage && myMessage.sending_state);
         if (messageListItem.chatReactions) {
             Debug.log("Using chat reactions")
-            messageListItem.messageReactions = chatReactions
+            messageListItem.messageReactions = reactionsAllowedForMessage(chatReactions)
             showItemCompletelyTimer.requestedIndex = index;
             showItemCompletelyTimer.start();
         } else if (canQueryReactions) {

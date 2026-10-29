@@ -463,10 +463,10 @@ SilicaFlickable {
         var isSome = availableReactions && availableReactions["@type"] === "chatAvailableReactionsSome";
         var currentSomeCount = isSome && availableReactions.reactions ? availableReactions.reactions.length : 0;
         var isNone = isSome && currentSomeCount === 0;
-        var maxReactionCount = Number(availableReactions && availableReactions.max_reaction_count);
-        if (isNaN(maxReactionCount) || maxReactionCount < 1) {
-            maxReactionCount = 11;
-        }
+        // Riattivando si torna al massimo di Telegram: il limite che c'e' adesso e'
+        // quello dello stato «disattivate» (1), e ricopiarlo lasciava il gruppo con
+        // una sola reaction diversa per messaggio.
+        var maxReactionCount = 11;
         tdLibWrapper.sendRequest({
             "@type": "setChatAvailableReactions",
             "chat_id": chatInformationPage.chatInformation.id,
