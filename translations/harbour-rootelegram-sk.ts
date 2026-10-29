@@ -5099,6 +5099,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Story not available</source>
         <translation>Príbeh nie je dostupný</translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation>Ukladanie príbehov iných je funkcia Telegram Premium.</translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>

@@ -5061,6 +5061,10 @@ Nachrichten</numerusform>
         <source>Story not available</source>
         <translation>Story nicht verfügbar</translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation>Storys anderer zu speichern ist eine Funktion von Telegram Premium.</translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>

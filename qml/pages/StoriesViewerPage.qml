@@ -67,13 +67,24 @@ Page {
     readonly property bool canSaveStory: currentStory !== null && currentStoryId !== 0
                                          && (isOwnStory || currentStory.can_be_edited === true
                                              || currentStory.can_be_forwarded === true)
+    // Come l'app ufficiale: salvare le storie degli ALTRI e' una funzione Premium.
+    // Senza Premium il tasto resta visibile col lucchetto e spiega perche'.
+    readonly property bool saveNeedsPremium: canSaveStory && !isOwnStory
+                                             && currentStory.can_be_edited !== true
+                                             && !(tdLibWrapper.userInformation
+                                                  && tdLibWrapper.userInformation.is_premium)
     // File gia' scaricato della storia mostrata (foto o video); "" finche' non e' pronto.
     readonly property string currentMediaPath: currentContentLoader.item
                                                && currentContentLoader.item.resolvedPath
                                                ? currentContentLoader.item.resolvedPath : ""
 
     function saveStory() {
-        if (!canSaveStory || currentMediaPath === "") return;
+        if (!canSaveStory) return;
+        if (saveNeedsPremium) {
+            appNotification.show(qsTr("Saving other people's stories is a Telegram Premium feature."));
+            return;
+        }
+        if (currentMediaPath === "") return;
         // Foto in Immagini/RooTelegram, video in Download/RooTelegram.
         // L'avviso di riuscita/errore lo mostra OverviewPage (Connections globale).
         if (currentStory.content && currentStory.content["@type"] === "storyContentVideo") {
@@ -372,10 +383,19 @@ Page {
         IconButton {
             id: saveButton
             visible: storiesViewerPage.canSaveStory
-            enabled: storiesViewerPage.currentMediaPath !== ""
+            enabled: storiesViewerPage.saveNeedsPremium || storiesViewerPage.currentMediaPath !== ""
             anchors.verticalCenter: parent.verticalCenter
             icon.source: "image://theme/icon-m-downloads?white"
+            icon.opacity: storiesViewerPage.saveNeedsPremium ? 0.5 : 1.0
             onClicked: storiesViewerPage.saveStory()
+
+            Icon {
+                visible: storiesViewerPage.saveNeedsPremium
+                anchors { right: parent.right; bottom: parent.bottom; margins: Theme.paddingSmall }
+                width: Theme.iconSizeExtraSmall
+                height: width
+                source: "image://theme/icon-s-secure?white"
+            }
         }
 
         IconButton {

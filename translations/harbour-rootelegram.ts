@@ -5055,6 +5055,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Story not available</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>

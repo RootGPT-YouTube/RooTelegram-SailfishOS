@@ -5059,6 +5059,10 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <source>Story not available</source>
         <translation>Storia non disponibile</translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation>Salvare le storie degli altri è una funzione di Telegram Premium.</translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>

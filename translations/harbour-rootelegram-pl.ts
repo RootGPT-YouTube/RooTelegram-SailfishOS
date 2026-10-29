@@ -5099,6 +5099,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>Story not available</source>
         <translation>Relacja niedostępna</translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation>Zapisywanie relacji innych osób to funkcja Telegram Premium.</translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>

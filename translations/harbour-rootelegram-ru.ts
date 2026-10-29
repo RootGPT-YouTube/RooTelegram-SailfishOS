@@ -5099,6 +5099,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Story not available</source>
         <translation>История недоступна</translation>
     </message>
+    <message>
+        <source>Saving other people&apos;s stories is a Telegram Premium feature.</source>
+        <translation>Сохранять истории других пользователей можно только с Telegram Premium.</translation>
+    </message>
 </context>
 <context>
     <name>StoryAudiencePickerDialog</name>
