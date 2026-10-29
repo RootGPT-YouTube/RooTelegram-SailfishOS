@@ -3,7 +3,7 @@ Prerequisite: SFOS 5.0/5.1/5.2
 Telegram Group: https://t.me/+E7V-a7x4JbY1Njhk  
 RooTelegram is tested on:  
 - Sony Xperia 10 III (SFOS 5.0 and 5.2.0.22)  
-- Jolla C2 (SFOS 5.1.0.10)  
+- Jolla C2 (SFOS 5.1.0.11)  
     
 ## This application was developed using artificial intelligence technologies, specifically Warp Terminal and Claude Code Opus, but Warp Terminal has been gradually phased out in favor of Claude Code. Therefore, if the use of an application generated via a large-scale language model (LLM) is not comfortable for the user, it is recommended to avoid its installation and use. It is specified that any negative comment regarding this circumstance will not only be ignored but will result in the immediate blocking of the user.  
 ## I hereby disclaim any and all responsibility for the application, its functionality, and any consequences arising from its use. By choosing to use this application, the user acknowledges and accepts that they do so entirely at their own risk, and agrees that the developer shall not be held liable for any damages, losses, or adverse effects—whether direct, indirect, incidental, or consequential—resulting from the use or misuse of the application.
@@ -186,7 +186,7 @@ Requisiti: SFOS 5.0/5.1/5.2
 Gruppo Telegram: https://t.me/+E7V-a7x4JbY1Njhk  
 RooTelegram è testato:  
 - Sony Xperia 10 III (SFOS 5.0 e 5.2.0.22)  
-- Jolla C2 (SFOS 5.1.0.8)  
+- Jolla C2 (SFOS 5.1.0.11)  
 ## Questa applicazione è stata sviluppata utilizzando tecnologie di intelligenza artificiale, in particolare Warp Terminal e Claude Code Opus, ma Warp Terminal è stato abbandonato in favore di Claude Code. Pertanto, se l'uso di un'applicazione generata tramite un modello linguistico su larga scala (LLM) non fosse per l'utente confortevole, si raccomanda di evitarne l'installazione e l'uso. Si specifica che qualsiasi commento negativo riguardante questa circostanza non verrà solo ignorato, ma comporterà il blocco immediato dell'utente.  
 ## Con la presente declino ogni responsabilità relativa all’applicazione, al suo funzionamento e a qualsiasi conseguenza derivante dal suo utilizzo. L’utente, scegliendo di utilizzare l’applicazione, riconosce e accetta di farlo a proprio ed esclusivo rischio, e concorda che lo sviluppatore non potrà essere ritenuto responsabile per eventuali danni, perdite o effetti negativi — diretti, indiretti, incidentali o consequenziali — derivanti dall’uso o dall’uso improprio dell’applicazione.
 
