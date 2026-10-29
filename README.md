@@ -1,8 +1,8 @@
 # [ENGLISH] RooTelegram — A lightweight and responsive Telegram client for SailfishOS
-Prerequisite: SFOS 5.0/5.1  
+Prerequisite: SFOS 5.0/5.1/5.2  
 Telegram Group: https://t.me/+E7V-a7x4JbY1Njhk  
 RooTelegram is tested on:  
-- Sony Xperia 10 III (SFOS 5.0)  
+- Sony Xperia 10 III (SFOS 5.0 and 5.2.0.22)  
 - Jolla C2 (SFOS 5.1.0.10)  
     
 ## This application was developed using artificial intelligence technologies, specifically Warp Terminal and Claude Code Opus, but Warp Terminal has been gradually phased out in favor of Claude Code. Therefore, if the use of an application generated via a large-scale language model (LLM) is not comfortable for the user, it is recommended to avoid its installation and use. It is specified that any negative comment regarding this circumstance will not only be ignored but will result in the immediate blocking of the user.  
@@ -121,18 +121,27 @@ is free and takes two minutes:
 > ⚠️ Keep this file private — never commit or share your `api_hash`.
 
 ### 4. Download the build dependencies (one‑time)
-The large prebuilt dependencies are **not** in git. Download the archive from this
-repo's **Releases** page and extract it **at the root of the cloned folder** (the
-one that contains `build-rpm.sh`):
+The large prebuilt dependencies are **not** in git. Download **two** archives from
+this repo's **Releases** page and extract them **at the root of the cloned folder**
+(the one that contains `build-rpm.sh`), **in this order**:
 ```bash
+# 1) voice/video call libraries (vendor/) — this archive also carries an old TDLib
 curl -L -o build-deps.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
 tar xzf build-deps.tar.gz
 rm build-deps.tar.gz
+# 2) TDLib 1.8.67 — first remove the old library (only one may be in lib/), then extract
+rm -f tdlib/aarch64/lib/libtdjson.so*
+curl -L -o tdlib.tar.gz \
+  https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/tdlib-1.8.67/rootelegram-tdlib-1.8.67-aarch64.tar.gz
+tar xzf tdlib.tar.gz
+rm tdlib.tar.gz
 ```
-This creates two folders: `tdlib/` (TDLib 1.8.62) and `vendor/` (the voice/video
-call libraries). Their licenses and exact upstream sources are documented in the
-archive's `PROVENANCE.txt` and in the repository `NOTICE` file.
+This leaves two folders: `tdlib/` (TDLib 1.8.67) and `vendor/` (the voice/video
+call libraries). ⚠️ The order matters: RooTelegram 3.0 and later do **not** build
+against the TDLib 1.8.62 inside the first archive. Their licenses and exact
+upstream sources are documented in the archives' `PROVENANCE.txt` and in the
+repository `NOTICE` file.
 
 ### 5. Build the RPM
 From the project root, just run:
@@ -173,10 +182,10 @@ ssh defaultuser@<device-ip> 'devel-su pkcon install-local -y /tmp/harbour-rootel
 ---
 
 # [ITALIANO] RooTelegram — Un client Telegram leggero e reattivo per SailfishOS
-Requisiti: SFOS 5.0/5.1  
+Requisiti: SFOS 5.0/5.1/5.2  
 Gruppo Telegram: https://t.me/+E7V-a7x4JbY1Njhk  
 RooTelegram è testato:  
-- Sony Xperia 10 III (SFOS 5.0)  
+- Sony Xperia 10 III (SFOS 5.0 e 5.2.0.22)  
 - Jolla C2 (SFOS 5.1.0.8)  
 ## Questa applicazione è stata sviluppata utilizzando tecnologie di intelligenza artificiale, in particolare Warp Terminal e Claude Code Opus, ma Warp Terminal è stato abbandonato in favore di Claude Code. Pertanto, se l'uso di un'applicazione generata tramite un modello linguistico su larga scala (LLM) non fosse per l'utente confortevole, si raccomanda di evitarne l'installazione e l'uso. Si specifica che qualsiasi commento negativo riguardante questa circostanza non verrà solo ignorato, ma comporterà il blocco immediato dell'utente.  
 ## Con la presente declino ogni responsabilità relativa all’applicazione, al suo funzionamento e a qualsiasi conseguenza derivante dal suo utilizzo. L’utente, scegliendo di utilizzare l’applicazione, riconosce e accetta di farlo a proprio ed esclusivo rischio, e concorda che lo sviluppatore non potrà essere ritenuto responsabile per eventuali danni, perdite o effetti negativi — diretti, indiretti, incidentali o consequenziali — derivanti dall’uso o dall’uso improprio dell’applicazione.
@@ -293,18 +302,27 @@ tue è gratis e richiede due minuti:
 > ⚠️ Tieni questo file privato — non committare e non condividere mai il tuo `api_hash`.
 
 ### 4. Scarica le dipendenze di build (una tantum)
-Le dipendenze precompilate pesanti **non** sono in git. Scarica l'archivio dalla
-sezione **Releases** del repo ed estrailo **nella radice della cartella clonata**
-(quella che contiene `build-rpm.sh`):
+Le dipendenze precompilate pesanti **non** sono in git. Scarica **due** archivi dalla
+sezione **Releases** del repo ed estraili **nella radice della cartella clonata**
+(quella che contiene `build-rpm.sh`), **in quest'ordine**:
 ```bash
+# 1) librerie per le chiamate audio/video (vendor/) — contiene anche una TDLib vecchia
 curl -L -o build-deps.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
 tar xzf build-deps.tar.gz
 rm build-deps.tar.gz
+# 2) TDLib 1.8.67 — prima togli la libreria vecchia (in lib/ ne deve restare una sola), poi estrai
+rm -f tdlib/aarch64/lib/libtdjson.so*
+curl -L -o tdlib.tar.gz \
+  https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/tdlib-1.8.67/rootelegram-tdlib-1.8.67-aarch64.tar.gz
+tar xzf tdlib.tar.gz
+rm tdlib.tar.gz
 ```
-Vengono create due cartelle: `tdlib/` (TDLib 1.8.62) e `vendor/` (le librerie per
-le chiamate audio/video). Licenze e sorgenti upstream esatti sono documentati nel
-`PROVENANCE.txt` dentro l'archivio e nel file `NOTICE` del repository.
+Restano due cartelle: `tdlib/` (TDLib 1.8.67) e `vendor/` (le librerie per le
+chiamate audio/video). ⚠️ L'ordine conta: RooTelegram 3.0 e successive **non** si
+compilano con la TDLib 1.8.62 del primo archivio. Licenze e sorgenti upstream esatti
+sono documentati nei `PROVENANCE.txt` dentro gli archivi e nel file `NOTICE` del
+repository.
 
 ### 5. Compila l'RPM
 Dalla radice del progetto, lancia semplicemente:
