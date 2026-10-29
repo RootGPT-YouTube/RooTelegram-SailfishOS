@@ -6220,6 +6220,20 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
 <context>
     <name>harbour-rootelegram</name>
     <message>
+        <source>Open link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Ouvrir le lien</translation>
+    </message>
+    <message>
+        <source>Copy link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Copier le lien</translation>
+    </message>
+    <message>
+        <source>Link copied to clipboard</source>
+        <translation>Lien copié dans le presse-papiers</translation>
+    </message>
+    <message>
         <source>Send shared content</source>
         <translation>Envoyer le contenu partagé</translation>
     </message>

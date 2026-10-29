@@ -28,9 +28,11 @@
 
 var tdLibWrapper;
 var appNotification;
+var showLinkMenu;
 function setGlobals(globals) {
     tdLibWrapper = globals.tdLibWrapper;
     appNotification = globals.appNotification;
+    showLinkMenu = globals.showLinkMenu;
 }
 function formatUnreadCount(value) {
     if(value < 1000) {
@@ -1288,7 +1290,10 @@ function handleLink(link) {
             handleTMeLink(link, tMePrefixHttp);
         } else {
             Debug.log("Trying to open URL externally: " + link)
-            if (link.indexOf("://") === -1) {
+            if (showLinkMenu) {
+                // Menu «Apri link» / «Copia link» (harbour-rootelegram.qml).
+                showLinkMenu(link);
+            } else if (link.indexOf("://") === -1) {
                 Qt.openUrlExternally("https://" + link)
             } else {
                 Qt.openUrlExternally(link);

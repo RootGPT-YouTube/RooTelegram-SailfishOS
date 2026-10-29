@@ -13,36 +13,36 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.7.5";
+var version = "3.7.6";
 
 var changelogByLang = {
     "it": [
-        "Corretto: in alcuni gruppi certe reaction venivano rifiutate su un messaggio che ne aveva già una. Un gruppo può limitare quante reaction diverse ha ogni messaggio; ora RooTelegram propone solo quelle che Telegram accetta, come l'app ufficiale.",
-        "Corretto: disattivando e poi riattivando le reaction di un gruppo dalle sue Info, il gruppo restava con una sola reaction diversa per messaggio. Ora la riattivazione rimette il limite normale di 11. Se un tuo gruppo ha il problema, spegni e riaccendi le reaction."
+        "Nuovo: toccando un link in un messaggio compare un menu con «Apri link» e «Copia link». «Copia link» lo mette negli appunti, così puoi incollarlo dove vuoi. «Apri link» lo apre in RooTitanium se è installato, altrimenti nel browser del telefono.",
+        "Dopo l'aggiornamento, al primo avvio dall'icona Sailfish OS ti chiede di nuovo di confermare i permessi: ce n'è uno nuovo, «RooTitanium», che serve per aprire i link in RooTitanium."
     ],
     "en": [
-        "Fixed: in some groups certain reactions were refused on a message that already had one. A group can limit how many different reactions each message has; RooTelegram now offers only the ones Telegram accepts, like the official app.",
-        "Fixed: turning a group's reactions off and on again from its Info left the group with only one different reaction per message. Turning them back on now restores the normal limit of 11. If one of your groups has the problem, turn reactions off and on again."
+        "New: tapping a link in a message shows a menu with «Open link» and «Copy link». «Copy link» puts it on the clipboard, so you can paste it wherever you like. «Open link» opens it in RooTitanium if it is installed, otherwise in the phone's browser.",
+        "After the update, the first time you open the app from its icon Sailfish OS asks you to confirm the permissions again: there is a new one, «RooTitanium», used to open links in RooTitanium."
     ],
     "de": [
-        "Behoben: In manchen Gruppen wurden bestimmte Reaktionen auf eine Nachricht abgelehnt, die schon eine hatte. Eine Gruppe kann begrenzen, wie viele verschiedene Reaktionen eine Nachricht haben darf; RooTelegram bietet jetzt nur die an, die Telegram akzeptiert, wie die offizielle App.",
-        "Behoben: Wurden die Reaktionen einer Gruppe in ihren Infos aus- und wieder eingeschaltet, blieb nur eine verschiedene Reaktion pro Nachricht erlaubt. Beim Wiedereinschalten gilt jetzt wieder das normale Limit von 11. Hat eine deiner Gruppen das Problem, schalte die Reaktionen aus und wieder ein."
+        "Neu: Tippst du auf einen Link in einer Nachricht, erscheint ein Menü mit «Link öffnen» und «Link kopieren». «Link kopieren» legt ihn in die Zwischenablage, damit du ihn überall einfügen kannst. «Link öffnen» öffnet ihn in RooTitanium, wenn es installiert ist, sonst im Browser des Telefons.",
+        "Nach dem Update fragt Sailfish OS beim ersten Start über das Symbol erneut nach den Berechtigungen: Es gibt eine neue, «RooTitanium», um Links in RooTitanium zu öffnen."
     ],
     "pl": [
-        "Poprawiono: w niektórych grupach pewne reakcje były odrzucane na wiadomości, która już miała jedną. Grupa może ograniczyć liczbę różnych reakcji na wiadomość; RooTelegram proponuje teraz tylko te, które Telegram akceptuje, jak oficjalna aplikacja.",
-        "Poprawiono: wyłączenie i ponowne włączenie reakcji grupy w jej informacjach zostawiało tylko jedną różną reakcję na wiadomość. Ponowne włączenie przywraca teraz zwykły limit 11. Jeśli twoja grupa ma ten problem, wyłącz i włącz reakcje ponownie."
+        "Nowość: po dotknięciu linku w wiadomości pojawia się menu z opcjami «Otwórz link» i «Kopiuj link». «Kopiuj link» umieszcza go w schowku, więc możesz go wkleić, gdzie chcesz. «Otwórz link» otwiera go w RooTitanium, jeśli jest zainstalowany, a w przeciwnym razie w przeglądarce telefonu.",
+        "Po aktualizacji, przy pierwszym uruchomieniu z ikony, Sailfish OS ponownie poprosi o potwierdzenie uprawnień: jest nowe, «RooTitanium», służące do otwierania linków w RooTitanium."
     ],
     "ru": [
-        "Исправлено: в некоторых группах часть реакций отклонялась на сообщении, у которого уже была одна. Группа может ограничить число разных реакций на сообщение; теперь RooTelegram предлагает только те, что принимает Telegram, как официальное приложение.",
-        "Исправлено: после выключения и повторного включения реакций группы в её информации на сообщение оставалась только одна разная реакция. Теперь при включении восстанавливается обычный лимит 11. Если в вашей группе есть эта проблема, выключите и снова включите реакции."
+        "Новое: при нажатии на ссылку в сообщении появляется меню «Открыть ссылку» и «Копировать ссылку». «Копировать ссылку» помещает её в буфер обмена, чтобы вставить куда угодно. «Открыть ссылку» открывает её в RooTitanium, если он установлен, иначе в браузере телефона.",
+        "После обновления при первом запуске с иконки Sailfish OS снова попросит подтвердить разрешения: появилось новое, «RooTitanium», для открытия ссылок в RooTitanium."
     ],
     "fr": [
-        "Corrigé : dans certains groupes, certaines réactions étaient refusées sur un message qui en avait déjà une. Un groupe peut limiter le nombre de réactions différentes par message ; RooTelegram ne propose plus que celles que Telegram accepte, comme l'application officielle.",
-        "Corrigé : désactiver puis réactiver les réactions d'un groupe depuis ses infos laissait une seule réaction différente par message. La réactivation remet désormais la limite normale de 11. Si l'un de vos groupes a le problème, désactivez puis réactivez les réactions."
+        "Nouveau : toucher un lien dans un message affiche un menu avec « Ouvrir le lien » et « Copier le lien ». « Copier le lien » le place dans le presse-papiers pour le coller où vous voulez. « Ouvrir le lien » l'ouvre dans RooTitanium s'il est installé, sinon dans le navigateur du téléphone.",
+        "Après la mise à jour, au premier lancement depuis l'icône, Sailfish OS vous demande à nouveau de confirmer les autorisations : il y en a une nouvelle, « RooTitanium », qui sert à ouvrir les liens dans RooTitanium."
     ],
     "sk": [
-        "Opravené: v niektorých skupinách boli niektoré reakcie odmietnuté na správe, ktorá už jednu mala. Skupina môže obmedziť počet rôznych reakcií na správu; RooTelegram teraz ponúka iba tie, ktoré Telegram prijme, ako oficiálna aplikácia.",
-        "Opravené: vypnutie a opätovné zapnutie reakcií skupiny v jej informáciách nechalo iba jednu rôznu reakciu na správu. Opätovné zapnutie teraz vráti bežný limit 11. Ak má vaša skupina tento problém, vypnite a znova zapnite reakcie."
+        "Nové: po ťuknutí na odkaz v správe sa zobrazí ponuka «Otvoriť odkaz» a «Kopírovať odkaz». «Kopírovať odkaz» ho vloží do schránky, aby ste ho mohli vložiť kamkoľvek. «Otvoriť odkaz» ho otvorí v RooTitanium, ak je nainštalovaný, inak v prehliadači telefónu.",
+        "Po aktualizácii pri prvom spustení z ikony vás Sailfish OS znova požiada o potvrdenie povolení: pribudlo nové, «RooTitanium», ktoré slúži na otváranie odkazov v RooTitanium."
     ],
 };
 

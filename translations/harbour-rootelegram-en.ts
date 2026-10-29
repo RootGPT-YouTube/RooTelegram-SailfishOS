@@ -6222,6 +6222,20 @@ messages</numerusform>
 <context>
     <name>harbour-rootelegram</name>
     <message>
+        <source>Open link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Link copied to clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Send shared content</source>
         <translation type="unfinished"></translation>
     </message>

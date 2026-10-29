@@ -1,0 +1,13 @@
+# -*- mode: sh -*-
+
+# x-sailjail-translation-catalog =
+# x-sailjail-translation-key-description =
+# x-sailjail-description = RooTitanium
+# x-sailjail-translation-key-long-description =
+# x-sailjail-long-description = Open links in RooTitanium
+
+# «Apri link» nel menu dei link: RooTelegram chiama org.freedesktop.Application.openUrl
+# sul servizio D-Bus di RooTitanium. Senza questo permesso la sandbox nasconde quel nome
+# (ServiceUnknown) e il link finisce al browser che sceglie il sistema.
+# Se RooTitanium non e' installato il nome non esiste e RooTelegram usa il browser di sistema.
+dbus-user.talk com.github.RootGPT_YouTube.rootitanium

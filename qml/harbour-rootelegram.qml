@@ -326,10 +326,51 @@ ApplicationWindow
         parent: pageStack.currentPage
     }
 
+    // Tocco su un link web in un messaggio: menu «Apri link» / «Copia link»
+    // (richiesta di un utente: non c'era modo di copiare un link). Ci arriva da
+    // Functions.handleLink, che e' il punto unico per tutti i link della app.
+    NeonMenuOverlay {
+        id: linkMenu
+    }
+    function showLinkMenu(link) {
+        var url = (link.indexOf("://") === -1) ? "https://" + link : link;
+        linkMenu.parent = pageStack.currentPage;
+        linkMenu.open([
+            //: Menu che compare toccando un link in un messaggio
+            { text: qsTr("Open link"), callback: function() { appWindow.openLinkInBrowser(url); } },
+            //: Menu che compare toccando un link in un messaggio
+            { text: qsTr("Copy link"), callback: function() {
+                Clipboard.text = url;
+                appNotification.show(qsTr("Link copied to clipboard"));
+            } }
+        ]);
+    }
+
+    // «Apri link»: se RooTitanium e' installato lo usa sempre (scelta dell'utente:
+    // Sailfish non ha un'impostazione del browser predefinito). Lo chiamiamo sul suo
+    // servizio D-Bus, che lo avvia anche se e' chiuso; se la chiamata fallisce
+    // (RooTitanium non c'e') si passa al browser di sistema.
+    DBusInterface {
+        id: rooTitanium
+        service: "com.github.RootGPT_YouTube.rootitanium"
+        path: "/com/github/RootGPT_YouTube/rootitanium"
+        iface: "org.freedesktop.Application"
+    }
+    function openLinkInBrowser(url) {
+        rooTitanium.typedCall("openUrl", [ { "type": "as", "value": [ url ] } ],
+                              function() {},
+                              function(error, message) {
+                                  console.warn("[LINK] RooTitanium non raggiungibile (" + error + " " + message
+                                               + "): apro col browser di sistema");
+                                  Qt.openUrlExternally(url);
+                              });
+    }
+
     Component.onCompleted: {
         Functions.setGlobals({
             tdLibWrapper: tdLibWrapper,
-            appNotification: appNotification
+            appNotification: appNotification,
+            showLinkMenu: appWindow.showLinkMenu
         });
     }
 

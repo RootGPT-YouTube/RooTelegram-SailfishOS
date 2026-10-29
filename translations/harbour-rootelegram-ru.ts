@@ -6267,6 +6267,20 @@ You can remove it from your list. This removal is local only: it does not delete
 <context>
     <name>harbour-rootelegram</name>
     <message>
+        <source>Open link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Открыть ссылку</translation>
+    </message>
+    <message>
+        <source>Copy link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Копировать ссылку</translation>
+    </message>
+    <message>
+        <source>Link copied to clipboard</source>
+        <translation>Ссылка скопирована в буфер обмена</translation>
+    </message>
+    <message>
         <source>Send shared content</source>
         <translation>Отправить общий контент</translation>
     </message>

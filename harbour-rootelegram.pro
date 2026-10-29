@@ -26,7 +26,7 @@ TARGET = harbour-rootelegram
 # NB: usiamo RT_APP_VERSION (non `VERSION`) perché qmake tratta `VERSION`
 # come variabile riservata e su template app la riduce a major.minor
 # quando viene espansa con $$VERSION, troncando il patch.
-RT_APP_VERSION = 3.7.5
+RT_APP_VERSION = 3.7.6
 VERSION = $$RT_APP_VERSION
 
 CONFIG += sailfishapp sailfishapp_i18n c++17
@@ -312,6 +312,12 @@ INSTALLS += systemdservice
 unifiedpushservice.files = $$PWD/org.unifiedpush.Connector.rootelegram.service
 unifiedpushservice.path = /usr/share/dbus-1/services
 INSTALLS += unifiedpushservice
+
+# Permesso sailjail per aprire i link in RooTitanium («Apri link»): senza, la
+# sandbox nasconde il suo servizio D-Bus. Vedi il file.
+rootitaniumpermission.files = $$PWD/RooTitaniumOpenUrl.permission
+rootitaniumpermission.path = /etc/sailjail/permissions
+INSTALLS += rootitaniumpermission
 
 # QR Code generator library (Nayuki, MIT): compilata nell'app per il login QR.
 qrcodegenlicense.files = $$PWD/src/qrcodegen/LICENSE

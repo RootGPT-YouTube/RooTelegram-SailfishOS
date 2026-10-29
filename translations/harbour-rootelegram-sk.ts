@@ -6267,6 +6267,20 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
 <context>
     <name>harbour-rootelegram</name>
     <message>
+        <source>Open link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Otvoriť odkaz</translation>
+    </message>
+    <message>
+        <source>Copy link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Kopírovať odkaz</translation>
+    </message>
+    <message>
+        <source>Link copied to clipboard</source>
+        <translation>Odkaz skopírovaný do schránky</translation>
+    </message>
+    <message>
         <source>Send shared content</source>
         <translation>Poslať poskytnutý obsah</translation>
     </message>

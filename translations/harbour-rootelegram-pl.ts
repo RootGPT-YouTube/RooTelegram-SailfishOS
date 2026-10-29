@@ -6267,6 +6267,20 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
 <context>
     <name>harbour-rootelegram</name>
     <message>
+        <source>Open link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Otwórz link</translation>
+    </message>
+    <message>
+        <source>Copy link</source>
+        <extracomment>Menu che compare toccando un link in un messaggio</extracomment>
+        <translation>Kopiuj link</translation>
+    </message>
+    <message>
+        <source>Link copied to clipboard</source>
+        <translation>Link skopiowany do schowka</translation>
+    </message>
+    <message>
         <source>Send shared content</source>
         <translation>Wyślij udostępnioną treść</translation>
     </message>
