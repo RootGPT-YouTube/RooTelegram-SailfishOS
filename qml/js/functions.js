@@ -139,7 +139,8 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         var richLayout = getRichMessageLayout(message.content);
         var richCaption = (richLayout.photoBlock && richLayout.photoBlock.caption && richLayout.head.length + richLayout.tail.length < message.content.message.blocks.length)
                 ? richTextToText(richLayout.photoBlock.caption.text, false) : "";
-        var richBody = pageBlocksToText(richLayout.tail, false, richLayout.photoBlock);
+        // Il testo dopo i primi pulsanti lo disegna RichMessageFlow.qml, sotto di loro.
+        var richBody = pageBlocksToText(getRichMessageFlow(richLayout.tail).first, false, richLayout.photoBlock);
         return (richCaption && richBody) ? richCaption + "<br><br>" + richBody : (richCaption || richBody);
     case 'messageSticker':
         return simple ? message.content.sticker.emoji : ""
@@ -462,9 +463,22 @@ function richTextToText(richText, plain) {
         return plain ? richText.alternative_text : enhanceHtmlEntities(richText.alternative_text || "");
     case 'richTextMathematicalExpression':
         return plain ? richText.expression : "<tt>" + enhanceHtmlEntities(richText.expression || "") + "</tt>";
+    case 'richTextButton':
+        // pulsante dentro il testo: un link se porta a un indirizzo, se no solo il nome
+        // (inlineButton.text e' un RichText, non una stringa come in inlineKeyboardButton)
+        var inlineButton = richText.button;
+        var inlineButtonText = inlineButton ? inner(inlineButton.text) : "";
+        var inlineButtonType = (inlineButton && inlineButton.type) ? inlineButton.type : {};
+        var inlineButtonUrl = inlineButtonType.url ? inlineButtonType.url
+                            : (inlineButtonType.user_id ? "userId://" + inlineButtonType.user_id
+                            : (inlineButtonType['@type'] === 'inlineKeyboardButtonTypeCopyText'
+                               ? "rtcopytext://" + encodeURIComponent(inlineButtonType.text || "") : ""));
+        if (plain || !inlineButtonText || !inlineButtonUrl) {
+            return inlineButtonText;
+        }
+        return "<a style=\"color:" + messageLinkColor() + ";\" href=\"" + enhanceHtmlEntities(inlineButtonUrl) + "\">" + inlineButtonText + "</a>";
     case 'richTextAnchor':
     case 'richTextIcon':
-    case 'richTextButton':
         return "";
     case 'richTextDiff':
         return inner(richText.text);
@@ -534,6 +548,14 @@ function composerFormattedToRichText(text, entities) {
     var match;
     while ((match = re.exec(text)) !== null) {
         nodes = nodes.concat(composerStyledRange(text, entities, last, match.index));
+        var inlineType = composerInlineButtonType(match[2]);
+        if (inlineType) {
+            nodes.push({ '@type': 'richTextButton', button: { '@type': 'inlineButton',
+                         text: { '@type': 'richTextPlain', text: match[1] },
+                         style: { '@type': 'buttonStyleDefault' }, type: inlineType } });
+            last = re.lastIndex;
+            continue;
+        }
         var labelStart = match.index + 1;
         var label = composerStyledRange(text, entities, labelStart, labelStart + match[1].length);
         nodes.push({ '@type': 'richTextUrl', text: composerRichTexts(label), url: match[2], is_cached: false });
@@ -579,16 +601,96 @@ function composerSplitLines(text, entities) {
     return lines;
 }
 
+// I soli tipi di pulsante che un utente normale puo' inviare in un articolo (schema
+// di inlineButton). "" = l'editor non puo' rimandarlo.
+function composerButtonKind(type) {
+    switch (type ? type['@type'] : "") {
+    case 'inlineKeyboardButtonTypeUrl': return "url";
+    case 'inlineKeyboardButtonTypeCopyText': return "copy";
+    case 'inlineKeyboardButtonTypeUser': return "user";
+    default: return "";
+    }
+}
+
+function composerButtonValue(type) {
+    switch (composerButtonKind(type)) {
+    case "url": return type.url || "";
+    case "copy": return type.text || "";
+    default: return "";
+    }
+}
+
+// Lo schema accetta solo indirizzi HTTP o tg://. Senza schema si intende https://.
+// "" = indirizzo non valido.
+function composerNormalizeButtonUrl(url) {
+    var trimmed = (url || "").replace(/^\s+|\s+$/g, "");
+    var complete = trimmed.indexOf("://") === -1 ? "https://" + trimmed : trimmed;
+    return (trimmed !== "" && /^(https?|tg):\/\/\S+$/i.test(complete)) ? complete : "";
+}
+
+// Una fila di pulsanti dell'editor -> inputPageBlockButtonRow. I pulsanti lasciati
+// del tutto vuoti si ignorano; `invalid` segnala quelli a meta' (senza nome, o senza
+// un indirizzo o un testo validi), perche' l'invio non li perda in silenzio.
+function composerButtonRowToInputBlock(row) {
+    var buttons = [];
+    var textLength = 0;
+    var invalid = false;
+    var source = (row && row.buttons) ? row.buttons : [];
+    for (var i = 0; i < source.length; i++) {
+        var button = source[i];
+        var label = (button.text || "").replace(/^\s+|\s+$/g, "");
+        var value = (button.value || "").replace(/^\s+|\s+$/g, "");
+        if (label === "" && value === "" && !(button.kind === "user" && button.type)) {
+            continue;
+        }
+        var type = null;
+        if (button.kind === "url") {
+            var url = composerNormalizeButtonUrl(value);
+            type = url ? { '@type': 'inlineKeyboardButtonTypeUrl', url: url } : null;
+        } else if (button.kind === "copy") {
+            type = value ? { '@type': 'inlineKeyboardButtonTypeCopyText', text: value } : null;
+        } else if (button.kind === "user") {
+            type = button.type || null;
+        }
+        if (label === "" || !type) {
+            invalid = true;
+            continue;
+        }
+        textLength += label.length;
+        buttons.push({ '@type': 'inlineButton', text: { '@type': 'richTextPlain', text: label },
+                       style: button.style || { '@type': 'buttonStyleDefault' }, type: type });
+    }
+    var block = null;
+    if (buttons.length > 0) {
+        block = { '@type': 'inputPageBlockButtonRow', buttons: buttons };
+        if (row.align) {
+            block.align = row.align;
+        }
+    }
+    return { block: block, textLength: textLength, invalid: invalid };
+}
+
 // Blocchi del composer -> InputPageBlock di TDLib. Un blocco di testo e'
-// { type, text, entities }, una foto { type: "photo", path | photoJson, caption }.
+// { type, text, entities }, una foto { type: "photo", path | photoJson, caption },
+// una fila di pulsanti { type: "buttons", buttonsJson }.
 // Restituisce anche lunghezza del testo e numero di media, per i limiti del server.
 function composerBlocksToInputPageBlocks(composerBlocks) {
     var blocks = [];
     var textLength = 0;
     var mediaCount = 0;
+    var invalidButtons = false;
     var plain = function(t) { return { '@type': 'richTextPlain', text: t }; };
     for (var i = 0; i < composerBlocks.length; i++) {
         var b = composerBlocks[i];
+        if (b.type === "buttons") {
+            var buttonRow = composerButtonRowToInputBlock(JSON.parse(b.buttonsJson || "{}"));
+            invalidButtons = invalidButtons || buttonRow.invalid;
+            textLength += buttonRow.textLength;
+            if (buttonRow.block) {
+                blocks.push(buttonRow.block);
+            }
+            continue;
+        }
         if (b.type === "photo") {
             // foto nuova = file locale; foto gia' inviata (modifica) = il suo file TDLib
             var inputFile = null;
@@ -638,7 +740,7 @@ function composerBlocksToInputPageBlocks(composerBlocks) {
             blocks.push({ '@type': 'inputPageBlockParagraph', text: composerFormattedToRichText(formatted.text, formatted.entities) });
         }
     }
-    return { blocks: blocks, textLength: textLength, mediaCount: mediaCount };
+    return { blocks: blocks, textLength: textLength, mediaCount: mediaCount, invalidButtons: invalidButtons };
 }
 
 // Il contrario, per modificare un articolo inviato: RichText -> { text, entities }
@@ -653,6 +755,31 @@ var composerRichEntityTypes = {
     richTextFixed: 'textEntityTypeCode',
     richTextSpoiler: 'textEntityTypeSpoiler'
 };
+
+function composerInlineButtonTarget(type) {
+    switch (composerButtonKind(type)) {
+    case "url": return "button:" + type.url;
+    // encodeURIComponent lascia le parentesi, che chiuderebbero il link
+    case "copy": return "copy:" + encodeURIComponent(type.text || "").replace(/\(/g, "%28").replace(/\)/g, "%29");
+    case "user": return "user:" + type.user_id;
+    default: return "";
+    }
+}
+
+// Il contrario: "button:...", "copy:...", "user:..." -> il tipo del pulsante; null se
+// e' un link qualunque.
+function composerInlineButtonType(target) {
+    if (target.indexOf("button:") === 0) {
+        return { '@type': 'inlineKeyboardButtonTypeUrl', url: target.substring(7) };
+    }
+    if (target.indexOf("copy:") === 0) {
+        return { '@type': 'inlineKeyboardButtonTypeCopyText', text: decodeURIComponent(target.substring(5)) };
+    }
+    if (/^user:\d+$/.test(target)) {
+        return { '@type': 'inlineKeyboardButtonTypeUser', user_id: Number(target.substring(5)) };
+    }
+    return null;
+}
 
 function composerAppendRichText(richText, acc, state) {
     if (!richText) {
@@ -694,6 +821,21 @@ function composerAppendRichText(richText, acc, state) {
     } else if (type === 'richTextCustomEmoji') {
         state.lossy = true;
         acc.text += richText.alternative_text || "";
+    } else if (type === 'richTextButton') {
+        // un pulsante dentro il testo: si scrive come un link, [nome](button:indirizzo)
+        var inTextButton = richText.button || {};
+        var inTextLabel = { text: "", entities: [] };
+        composerAppendRichText(inTextButton.text, inTextLabel, state);
+        var inTextTarget = composerInlineButtonTarget(inTextButton.type);
+        if (!inTextTarget || !inTextLabel.text) {
+            state.lossy = true;
+            acc.text += inTextLabel.text;
+        } else {
+            if (inTextButton.style && inTextButton.style['@type'] !== 'buttonStyleDefault') {
+                state.lossy = true;
+            }
+            acc.text += "[" + inTextLabel.text + "](" + inTextTarget + ")";
+        }
     } else {
         state.lossy = true;
         if (richText.text) {
@@ -770,6 +912,28 @@ function richMessageToComposerBlocks(content) {
         case 'pageBlockAnchor':
             state.lossy = true;
             break;
+        case 'pageBlockButtonRow':
+            var rowButtons = [];
+            var rowKept = true;
+            for (var bi = 0; bi < (b.buttons || []).length; bi++) {
+                var rowButton = b.buttons[bi];
+                var buttonKind = composerButtonKind(rowButton.type);
+                if (!buttonKind) {
+                    rowKept = false;
+                }
+                var buttonAcc = { text: "", entities: [] };
+                composerAppendRichText(rowButton.text, buttonAcc, state);
+                rowButtons.push({ text: buttonAcc.text, kind: buttonKind, value: composerButtonValue(rowButton.type),
+                                  style: rowButton.style || null, type: rowButton.type });
+            }
+            if (rowKept) {
+                blocks.push({ type: "buttons", text: "", entitiesJson: "[]", path: "", caption: "", photoJson: "",
+                              buttonsJson: JSON.stringify({ align: b.align || null, buttons: rowButtons }) });
+            } else if (unsupported.indexOf("ButtonRow") === -1) {
+                // pulsanti che un utente normale non puo' inviare (es. quelli di un bot)
+                unsupported.push("ButtonRow");
+            }
+            break;
         default:
             var name = b['@type'].replace(/^pageBlock/, "");
             if (unsupported.indexOf(name) === -1) {
@@ -837,6 +1001,78 @@ function richMessageAsPhotoMessage(message) {
         has_spoiler: !!block.has_spoiler
     };
     return photoMessage;
+}
+
+// Una pageBlockButtonRow pronta per ReplyMarkupButtons.qml: inlineButton ha gli stessi
+// campi di inlineKeyboardButton, ma text e' un RichText, che qui diventa una stringa.
+// null se non resta nessun pulsante.
+function richMessageButtonRow(block) {
+    var buttons = [];
+    for (var i = 0; i < (block.buttons || []).length; i++) {
+        var button = block.buttons[i];
+        if (button && button.type) {
+            buttons.push({ text: richTextToText(button.text, true), style: button.style, type: button.type });
+        }
+    }
+    if (buttons.length === 0) {
+        return null;
+    }
+    var aligns = { pageBlockHorizontalAlignmentLeft: "left", pageBlockHorizontalAlignmentCenter: "center", pageBlockHorizontalAlignmentRight: "right" };
+    return { buttons: buttons, align: block.align ? (aligns[block.align['@type']] || "") : "" };
+}
+
+// Divide dei blocchi nel punto in cui ci sono i pulsanti: `first` sono i blocchi di
+// testo prima dei primi pulsanti, `rest` e' [{ rows, blocks }]: file di pulsanti e il
+// testo che le segue. Una fila annidata (in una citazione, un elenco...) non si puo'
+// disegnare dentro il testo che la contiene: esce subito dopo quel blocco.
+function getRichMessageFlow(blocks) {
+    var flow = { first: [], rest: [] };
+    var current = flow.first;
+    var addRow = function(block) {
+        var row = richMessageButtonRow(block);
+        if (!row) {
+            return;
+        }
+        var last = flow.rest.length > 0 ? flow.rest[flow.rest.length - 1] : null;
+        if (last && last.blocks.length === 0) {
+            last.rows.push(row);
+        } else {
+            flow.rest.push({ rows: [row], blocks: [] });
+            current = flow.rest[flow.rest.length - 1].blocks;
+        }
+    };
+    var addNested = function(list) {
+        for (var i = 0; i < (list || []).length; i++) {
+            var block = list[i];
+            if (!block) {
+                continue;
+            }
+            if (block['@type'] === 'pageBlockButtonRow') {
+                addRow(block);
+                continue;
+            }
+            if (block.cover) {
+                addNested([block.cover]);
+            }
+            addNested(block.blocks);
+            for (var j = 0; j < (block.items || []).length; j++) {
+                addNested(block.items[j].blocks);
+            }
+        }
+    };
+    for (var i = 0; i < (blocks || []).length; i++) {
+        var block = blocks[i];
+        if (!block) {
+            continue;
+        }
+        if (block['@type'] === 'pageBlockButtonRow') {
+            addRow(block);
+        } else {
+            current.push(block);
+            addNested([block]);
+        }
+    }
+    return flow;
 }
 
 function pageBlocksToText(blocks, plain, skipBlock) {
@@ -952,7 +1188,8 @@ function pageBlocksToText(blocks, plain, skipBlock) {
             text = plain ? block.title : "<a style=\"color:" + messageLinkColor() + ";\" href=\"https://t.me/" + enhanceHtmlEntities(block.username) + "\">" + enhanceHtmlEntities(block.title) + "</a>";
             break;
         default:
-            // pageBlockAnchor, pageBlockButtonRow, pageBlockUnsupported: niente testo
+            // pageBlockAnchor, pageBlockUnsupported: niente testo;
+            // pageBlockButtonRow: pulsanti veri al loro posto (getRichMessageFlow)
             break;
         }
         // gli a capo in testa/coda a un blocco e i blocchi vuoti non devono
@@ -1239,6 +1476,13 @@ function handleLink(link) {
 
     // Checking if we have a direct message link...
     Debug.log("URL open requested: " + link);
+
+    // Pulsante «copia testo» dentro un articolo: il testo sta nel link stesso
+    if (link.indexOf("rtcopytext://") === 0) {
+        Silica.Clipboard.text = decodeURIComponent(link.substring("rtcopytext://".length));
+        appNotification.show(qsTr("Text copied to clipboard"));
+        return;
+    }
 
     // Schemi INTERNI alla bolla (rtcopy/rtspoiler/rtsearch): li intercetta il componente
     // che disegna il messaggio. Qui arrivano solo dai contesti che non li intercettano

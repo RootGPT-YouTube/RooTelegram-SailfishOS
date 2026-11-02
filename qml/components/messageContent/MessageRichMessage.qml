@@ -20,6 +20,7 @@ import QtQuick 2.6
 import Sailfish.Silica 1.0
 import "../../js/functions.js" as Functions
 import "../../js/twemoji.js" as Emoji
+import ".."
 
 // TDLib 1.8.67: messageRichMessage, disegnato nell'ordine dei client ufficiali.
 // Qui: i blocchi che precedono la prima foto (di solito il titolo, piu' grande)
@@ -32,6 +33,7 @@ MessageContentBase {
 
     readonly property var sourceMessage: messageListItem ? messageListItem.myMessage : overlayFlickable.overlayMessage
     readonly property var richLayout: Functions.getRichMessageLayout(sourceMessage ? sourceMessage.content : null)
+    readonly property var headFlow: Functions.getRichMessageFlow(richLayout.head)
 
     height: richColumn.height
     onClicked: richPhoto.clicked()
@@ -43,8 +45,8 @@ MessageContentBase {
 
         Text {
             width: parent.width
-            text: richMessageContent.richLayout.head.length > 0
-                  ? Emoji.emojify(Functions.pageBlocksToText(richMessageContent.richLayout.head, false), Theme.fontSizeMedium)
+            text: richMessageContent.headFlow.first.length > 0
+                  ? Emoji.emojify(Functions.pageBlocksToText(richMessageContent.headFlow.first, false), Theme.fontSizeMedium)
                   : ""
             visible: text !== ""
             font.pixelSize: Theme.fontSizeSmall
@@ -57,6 +59,25 @@ MessageContentBase {
                 var chatCommand = Functions.handleLink(link);
                 if (chatCommand) {
                     tdLibWrapper.sendTextMessage(richMessageContent.sourceMessage.chat_id, chatCommand);
+                }
+            }
+        }
+
+        Loader {
+            width: parent.width
+            active: richMessageContent.headFlow.rest.length > 0
+            sourceComponent: Component {
+                RichMessageFlow {
+                    myMessage: richMessageContent.sourceMessage
+                    segments: richMessageContent.headFlow.rest
+                    textColor: richMessageContent.messageListItem ? richMessageContent.messageListItem.textColor : Theme.primaryColor
+                    textAlign: richMessageContent.messageListItem ? richMessageContent.messageListItem.textAlign : Text.AlignLeft
+                    onLinkActivated: {
+                        var chatCommand = Functions.handleLink(link);
+                        if (chatCommand) {
+                            tdLibWrapper.sendTextMessage(richMessageContent.sourceMessage.chat_id, chatCommand);
+                        }
+                    }
                 }
             }
         }

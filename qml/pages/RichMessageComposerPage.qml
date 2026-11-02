@@ -25,8 +25,8 @@ import "../js/functions.js" as Functions
 // Composer degli «articoli» (messageRichMessage, TDLib 1.8.67, funzione Premium),
 // sul modello di quello di Telegram Desktop: una pagina intera con i blocchi uno
 // sotto l'altro e una barra in alto. Ogni blocco e' un titolo, un sottotitolo, un
-// paragrafo, un elenco (una voce per riga, coi pallini veri del documento) o una
-// foto. Ogni blocco di testo e' un campo WYSIWYG come il composer della chat, con
+// paragrafo, un elenco (una voce per riga, coi pallini veri del documento), una
+// foto o una fila di pulsanti. Ogni blocco di testo e' un campo WYSIWYG come il composer della chat, con
 // un ComposerFormatter tutto suo: B e I si vedono mentre si scrive. I link con un
 // testo proprio si scrivono [testo](indirizzo) (pulsante link).
 // Con editMessageId la pagina modifica un articolo gia' inviato: initialBlocks
@@ -61,8 +61,8 @@ Page {
 
     ListModel {
         id: blocksModel
-        ListElement { type: "title"; text: ""; entitiesJson: "[]"; path: ""; caption: ""; photoJson: "" }
-        ListElement { type: "paragraph"; text: ""; entitiesJson: "[]"; path: ""; caption: ""; photoJson: "" }
+        ListElement { type: "title"; text: ""; entitiesJson: "[]"; path: ""; caption: ""; photoJson: ""; buttonsJson: "" }
+        ListElement { type: "paragraph"; text: ""; entitiesJson: "[]"; path: ""; caption: ""; photoJson: ""; buttonsJson: "" }
     }
 
     Component.onCompleted: {
@@ -77,6 +77,24 @@ Page {
         if (lossyFormatting) {
             appNotification.show(qsTr("Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it."));
         }
+    }
+
+    // Il fuoco a un blocco appena creato si da' dopo che la colonna lo ha disposto: al
+    // momento della creazione ha y = 0, e l'autoscroll di Silica (che segue il campo con
+    // il fuoco) riporterebbe la pagina in cima.
+    Timer {
+        id: focusAfterLayoutTimer
+        interval: 50
+        onTriggered: {
+            var block = blocksRepeater.itemAt(richComposerPage.focusedIndex);
+            if (block) {
+                block.focusContent();
+            }
+        }
+    }
+
+    function focusBlockAfterLayout() {
+        focusAfterLayoutTimer.restart();
     }
 
     function styleName(type) {
@@ -96,7 +114,7 @@ Page {
     // Aa: testo -> titolo -> sottotitolo -> testo (un elenco torna testo)
     function cycleStyle() {
         var type = focusedType();
-        if (type === "photo") {
+        if (type === "photo" || type === "buttons") {
             return;
         }
         var next = type === "paragraph" ? "title" : (type === "title" ? "subtitle" : "paragraph");
@@ -106,7 +124,7 @@ Page {
 
     function toggleList() {
         var type = focusedType();
-        if (type === "photo") {
+        if (type === "photo" || type === "buttons") {
             return;
         }
         var toList = type !== "list";
@@ -208,7 +226,7 @@ Page {
                 articleFormatter.setList(focusedEditor._editor, false);
                 articleFormatter.setFormattedText(focusedEditor._editor, "", []);
             }
-            blocksModel.set(0, { type: "paragraph", text: "", path: "", caption: "", photoJson: "", entitiesJson: "[]" });
+            blocksModel.set(0, { type: "paragraph", text: "", path: "", caption: "", photoJson: "", entitiesJson: "[]", buttonsJson: "" });
             styleRevision++;
             return;
         }
@@ -229,6 +247,10 @@ Page {
                 composerBlocks.push({ type: b.type, path: b.path, caption: b.caption, photoJson: b.photoJson });
                 continue;
             }
+            if (b.type === "buttons") {
+                composerBlocks.push({ type: b.type, buttonsJson: b.buttonsJson });
+                continue;
+            }
             // il testo vero sta nel documento del campo, non nel modello
             var blockItem = blocksRepeater.itemAt(i);
             var formatted = (blockItem && blockItem.editorItem)
@@ -237,6 +259,10 @@ Page {
             composerBlocks.push({ type: b.type, text: formatted.text, entities: formatted.entities });
         }
         var result = Functions.composerBlocksToInputPageBlocks(composerBlocks);
+        if (result.invalidButtons) {
+            appNotification.show(qsTr("Every button needs a name and a valid link or text to copy."));
+            return;
+        }
         if (result.blocks.length === 0) {
             appNotification.show(qsTr("The article is empty."));
             return;
@@ -390,8 +416,16 @@ Page {
                     width: blocksColumn.width
                     height: blockLoader.height + Theme.paddingSmall
                     readonly property bool isFocused: index === richComposerPage.focusedIndex
-                    // il campo di testo del blocco (null per le foto): da qui si legge il documento
-                    readonly property Item editorItem: model.type === "photo" ? null : blockLoader.item
+                    // il campo di testo del blocco (null per foto e pulsanti): da qui si legge il documento
+                    readonly property Item editorItem: (model.type === "photo" || model.type === "buttons") ? null : blockLoader.item
+
+                    function focusContent() {
+                        if (editorItem) {
+                            editorItem.forceActiveFocus();
+                        } else if (model.type === "buttons" && blockLoader.item) {
+                            blockLoader.item.focusLastButton();
+                        }
+                    }
 
                     Rectangle {
                         // segna il blocco a cui si applicano Aa, elenco, cestino
@@ -404,7 +438,225 @@ Page {
                     Loader {
                         id: blockLoader
                         width: parent.width
-                        sourceComponent: model.type === "photo" ? photoComponent : textComponent
+                        sourceComponent: model.type === "photo" ? photoComponent
+                                       : (model.type === "buttons" ? buttonsComponent : textComponent)
+                    }
+
+                    // Una fila di pulsanti. I campi stanno in un modello locale e si
+                    // ricopiano in buttonsJson a ogni modifica: rifare la lista da
+                    // quel JSON a ogni lettera toglierebbe il fuoco al campo.
+                    Component {
+                        id: buttonsComponent
+                        Column {
+                            id: buttonsEditor
+                            width: blockItem.width
+                            spacing: Theme.paddingSmall
+                            readonly property int blockIndex: index
+                            property var rowAlign: null
+
+                            ListModel {
+                                id: rowButtonsModel
+                            }
+
+                            function focusLastButton() {
+                                var last = rowButtonsRepeater.itemAt(rowButtonsRepeater.count - 1);
+                                if (last) {
+                                    last.nameField.forceActiveFocus();
+                                }
+                            }
+
+                            function addButton() {
+                                rowButtonsModel.append({ text: "", kind: "url", value: "", styleJson: "", typeJson: "" });
+                                sync();
+                            }
+
+                            function sync() {
+                                var buttons = [];
+                                for (var i = 0; i < rowButtonsModel.count; i++) {
+                                    var entry = rowButtonsModel.get(i);
+                                    buttons.push({ text: entry.text, kind: entry.kind, value: entry.value,
+                                                   style: entry.styleJson ? JSON.parse(entry.styleJson) : null,
+                                                   type: entry.typeJson ? JSON.parse(entry.typeJson) : null });
+                                }
+                                blocksModel.setProperty(blockIndex, "buttonsJson", JSON.stringify({ align: rowAlign, buttons: buttons }));
+                            }
+
+                            Component.onCompleted: {
+                                var row = JSON.parse(model.buttonsJson || "{}");
+                                rowAlign = row.align || null;
+                                var saved = row.buttons || [];
+                                for (var i = 0; i < saved.length; i++) {
+                                    // di un pulsante «utente» il campo value e' il nome da mostrare
+                                    var shownValue = saved[i].value;
+                                    if (saved[i].kind === "user" && !shownValue && saved[i].type) {
+                                        shownValue = Functions.getUserName(tdLibWrapper.getUserInformation(String(saved[i].type.user_id)));
+                                    }
+                                    rowButtonsModel.append({ text: saved[i].text, kind: saved[i].kind, value: shownValue,
+                                                             styleJson: saved[i].style ? JSON.stringify(saved[i].style) : "",
+                                                             typeJson: saved[i].type ? JSON.stringify(saved[i].type) : "" });
+                                }
+                                if (saved.length === 0) {
+                                    addButton();
+                                    if (index === richComposerPage.focusedIndex) {
+                                        richComposerPage.focusBlockAfterLayout();
+                                    }
+                                }
+                            }
+
+                            Repeater {
+                                id: rowButtonsRepeater
+                                model: rowButtonsModel
+                                delegate: Column {
+                                    width: buttonsEditor.width
+                                    property alias nameField: buttonNameField
+
+                                    TextField {
+                                        id: buttonNameField
+                                        width: parent.width
+                                        labelVisible: false
+                                        placeholderText: qsTr("Button name")
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        Component.onCompleted: text = model.text
+                                        onTextChanged: {
+                                            if (text !== model.text) {
+                                                rowButtonsModel.setProperty(index, "text", text);
+                                                buttonsEditor.sync();
+                                            }
+                                        }
+                                        onActiveFocusChanged: {
+                                            if (activeFocus) {
+                                                richComposerPage.focusedIndex = buttonsEditor.blockIndex;
+                                                richComposerPage.focusedEditor = null;
+                                            }
+                                        }
+                                    }
+
+                                    ComboBox {
+                                        width: parent.width
+                                        label: qsTr("When tapped")
+                                        currentIndex: model.kind === "copy" ? 1 : (model.kind === "user" ? 2 : 0)
+                                        menu: ContextMenu {
+                                            MenuItem { text: qsTr("Open a link") }
+                                            MenuItem { text: qsTr("Copy a text") }
+                                            MenuItem { text: qsTr("Open a user's profile") }
+                                        }
+                                        onCurrentIndexChanged: {
+                                            var kind = ["url", "copy", "user"][currentIndex];
+                                            if (!kind || kind === model.kind) {
+                                                return;
+                                            }
+                                            // il valore di un utente (un nome) non vale come link, e viceversa
+                                            var clear = kind === "user" || model.kind === "user";
+                                            rowButtonsModel.setProperty(index, "kind", kind);
+                                            if (clear) {
+                                                rowButtonsModel.setProperty(index, "value", "");
+                                                rowButtonsModel.setProperty(index, "typeJson", "");
+                                                buttonValueField.text = "";
+                                            }
+                                            buttonsEditor.sync();
+                                        }
+                                    }
+
+                                    TextField {
+                                        id: buttonValueField
+                                        width: parent.width
+                                        visible: model.kind !== "user"
+                                        labelVisible: false
+                                        placeholderText: model.kind === "copy" ? qsTr("Text to copy") : qsTr("Link")
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        inputMethodHints: model.kind === "copy" ? Qt.ImhNone : (Qt.ImhUrlCharactersOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase)
+                                        Component.onCompleted: text = model.value
+                                        onTextChanged: {
+                                            if (text !== model.value) {
+                                                rowButtonsModel.setProperty(index, "value", text);
+                                                buttonsEditor.sync();
+                                            }
+                                        }
+                                        onActiveFocusChanged: {
+                                            if (activeFocus) {
+                                                richComposerPage.focusedIndex = buttonsEditor.blockIndex;
+                                                richComposerPage.focusedEditor = null;
+                                            }
+                                        }
+                                    }
+
+                                    BackgroundItem {
+                                        width: parent.width
+                                        height: Theme.itemSizeSmall
+                                        visible: model.kind === "user"
+                                        Label {
+                                            x: Theme.horizontalPageMargin
+                                            width: parent.width - 2 * Theme.horizontalPageMargin
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: model.value || qsTr("Choose a user")
+                                            color: parent.highlighted ? Theme.highlightColor : (model.value ? Theme.primaryColor : Theme.secondaryColor)
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            truncationMode: TruncationMode.Fade
+                                        }
+                                        onClicked: {
+                                            var buttonIndex = index;
+                                            var picker = pageStack.push(Qt.resolvedUrl("RichMessageUserPickerPage.qml"));
+                                            picker.userPicked.connect(function(userId, name) {
+                                                rowButtonsModel.setProperty(buttonIndex, "value", name);
+                                                rowButtonsModel.setProperty(buttonIndex, "typeJson", JSON.stringify({ "@type": "inlineKeyboardButtonTypeUser", user_id: userId }));
+                                                buttonsEditor.sync();
+                                                pageStack.pop();
+                                            });
+                                        }
+                                    }
+
+                                    // I colori di ButtonStyle: «Link» e' solo per i pulsanti dei bot
+                                    ComboBox {
+                                        readonly property var styleTypes: ["buttonStyleDefault", "buttonStylePrimary", "buttonStyleDanger", "buttonStyleSuccess"]
+                                        width: parent.width
+                                        label: qsTr("Color")
+                                        currentIndex: Math.max(styleTypes.indexOf(model.styleJson ? JSON.parse(model.styleJson)["@type"] : ""), 0)
+                                        menu: ContextMenu {
+                                            MenuItem { text: qsTr("Default") }
+                                            MenuItem { text: qsTr("Blue") }
+                                            MenuItem { text: qsTr("Red") }
+                                            MenuItem { text: qsTr("Green") }
+                                        }
+                                        onCurrentIndexChanged: {
+                                            var styleType = styleTypes[currentIndex];
+                                            var currentType = model.styleJson ? JSON.parse(model.styleJson)["@type"] : "buttonStyleDefault";
+                                            if (styleType && styleType !== currentType) {
+                                                rowButtonsModel.setProperty(index, "styleJson", JSON.stringify({ "@type": styleType }));
+                                                buttonsEditor.sync();
+                                            }
+                                        }
+                                    }
+
+                                    // l'ultimo pulsante si toglie col cestino, insieme al blocco
+                                    IconButton {
+                                        anchors.right: parent.right
+                                        visible: rowButtonsModel.count > 1
+                                        icon.source: "image://theme/icon-m-remove"
+                                        onClicked: {
+                                            rowButtonsModel.remove(index);
+                                            buttonsEditor.sync();
+                                        }
+                                    }
+                                }
+                            }
+
+                            BackgroundItem {
+                                width: parent.width
+                                height: Theme.itemSizeExtraSmall
+                                Label {
+                                    x: Theme.horizontalPageMargin
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "+ " + qsTr("Button in this row")
+                                    color: parent.highlighted ? Theme.highlightColor : Theme.secondaryColor
+                                    font.pixelSize: Theme.fontSizeExtraSmall
+                                }
+                                onClicked: {
+                                    richComposerPage.focusedIndex = buttonsEditor.blockIndex;
+                                    buttonsEditor.addButton();
+                                    richComposerPage.focusBlockAfterLayout();
+                                }
+                            }
+                        }
                     }
 
                     Component {
@@ -440,7 +692,7 @@ Page {
                                     articleFormatter.setList(_editor, true);
                                 }
                                 if (index === richComposerPage.focusedIndex) {
-                                    forceActiveFocus();
+                                    richComposerPage.focusBlockAfterLayout();
                                 }
                             }
                             onTextChanged: {
@@ -537,21 +789,41 @@ Page {
                 }
             }
 
-            // Un paragrafo in piu' in fondo, per continuare a scrivere
-            BackgroundItem {
+            // In fondo, per continuare a scrivere: un paragrafo o una fila di pulsanti
+            Row {
                 width: parent.width
-                height: Theme.itemSizeSmall
-                Label {
-                    x: Theme.horizontalPageMargin
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "+ " + qsTr("Paragraph")
-                    color: parent.highlighted ? Theme.highlightColor : Theme.secondaryColor
-                    font.pixelSize: Theme.fontSizeSmall
+
+                BackgroundItem {
+                    width: parent.width / 2
+                    height: Theme.itemSizeSmall
+                    Label {
+                        x: Theme.horizontalPageMargin
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "+ " + qsTr("Paragraph")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.secondaryColor
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                    onClicked: {
+                        richComposerPage.focusedIndex = blocksModel.count;
+                        blocksModel.append({ type: "paragraph", text: "", path: "", caption: "", photoJson: "", entitiesJson: "[]", buttonsJson: "" });
+                        richComposerPage.styleRevision++;
+                    }
                 }
-                onClicked: {
-                    richComposerPage.focusedIndex = blocksModel.count;
-                    blocksModel.append({ type: "paragraph", text: "", path: "", caption: "", photoJson: "", entitiesJson: "[]" });
-                    richComposerPage.styleRevision++;
+                BackgroundItem {
+                    width: parent.width / 2
+                    height: Theme.itemSizeSmall
+                    Label {
+                        x: Theme.horizontalPageMargin
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "+ " + qsTr("Buttons")
+                        color: parent.highlighted ? Theme.highlightColor : Theme.secondaryColor
+                        font.pixelSize: Theme.fontSizeSmall
+                    }
+                    onClicked: {
+                        richComposerPage.focusedIndex = blocksModel.count;
+                        blocksModel.append({ type: "buttons", text: "", path: "", caption: "", photoJson: "", entitiesJson: "[]", buttonsJson: "" });
+                        richComposerPage.styleRevision++;
+                    }
                 }
             }
         }

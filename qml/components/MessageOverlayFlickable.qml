@@ -186,6 +186,25 @@ Flickable {
             visible: (text !== "")
         }
 
+        // l'articolo dai primi pulsanti in poi: pulsanti e testo al loro posto
+        Loader {
+            id: richMessageFlowLoader
+            readonly property bool isRichMessage: !!overlayMessage && !!overlayMessage.content && overlayMessage.content['@type'] === 'messageRichMessage' && !!overlayMessage.content.message
+            readonly property var richLayout: isRichMessage ? Functions.getRichMessageLayout(overlayMessage.content) : null
+            readonly property var flowSegments: isRichMessage ? Functions.getRichMessageFlow(richLayout.tail).rest : []
+            width: parent.width
+            active: flowSegments.length > 0
+            sourceComponent: Component {
+                RichMessageFlow {
+                    myMessage: overlayMessage
+                    segments: richMessageFlowLoader.flowSegments
+                    skipBlock: richMessageFlowLoader.richLayout.photoBlock
+                    textPixelSize: Theme.fontSizeMedium
+                    onLinkActivated: Functions.handleLink(link)
+                }
+            }
+        }
+
         Loader {
             id: overlayWebPagePreviewLoader
             active: false

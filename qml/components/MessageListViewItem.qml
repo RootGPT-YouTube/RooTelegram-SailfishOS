@@ -353,6 +353,25 @@ ListItem {
         return true;
     }
 
+    function handleMessageLink(link) {
+        if (handleSpoilerLink(link)) {
+            return;
+        }
+        if (handleCopyLink(link)) {
+            return;
+        }
+        if (handleSearchLink(link)) {
+            return;
+        }
+        if (handleMediaTimestampLink(link)) {
+            return;
+        }
+        var chatCommand = Functions.handleLink(link);
+        if (chatCommand) {
+            tdLibWrapper.sendTextMessage(chatInformation.id, chatCommand);
+        }
+    }
+
     // Intercetta i link "rtcopy://OFFSET/LENGTH" emessi dai render dei blocchi
     // monospace (code/pre/preCode): al tap copia in clipboard quella sottostringa
     // del testo del messaggio (come Telegram). Gli offset TDLib sono in unità UTF-16,
@@ -1595,26 +1614,30 @@ ListItem {
                     linkColor: Functions.messageLinkColor()
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     textFormat: Text.RichText
-                    onLinkActivated: {
-                        if (messageListItem.handleSpoilerLink(link)) {
-                            return;
-                        }
-                        if (messageListItem.handleCopyLink(link)) {
-                            return;
-                        }
-                        if (messageListItem.handleSearchLink(link)) {
-                            return;
-                        }
-                        if (messageListItem.handleMediaTimestampLink(link)) {
-                            return;
-                        }
-                        var chatCommand = Functions.handleLink(link);
-                        if(chatCommand) {
-                            tdLibWrapper.sendTextMessage(chatInformation.id, chatCommand);
-                        }
-                    }
+                    onLinkActivated: messageListItem.handleMessageLink(link)
                     horizontalAlignment: messageListItem.textAlign
                     visible: !canSelectMessageText && (text !== "")
+                }
+
+                // l'articolo dai primi pulsanti in poi: pulsanti e testo al loro posto
+                Loader {
+                    id: richMessageFlowLoader
+                    readonly property bool isRichMessage: !!myMessage.content && myMessage.content['@type'] === 'messageRichMessage' && !!myMessage.content.message
+                    readonly property var richLayout: isRichMessage ? Functions.getRichMessageLayout(myMessage.content) : null
+                    readonly property var flowSegments: isRichMessage ? Functions.getRichMessageFlow(richLayout.tail).rest : []
+                    width: parent.width
+                    active: flowSegments.length > 0
+                    sourceComponent: Component {
+                        RichMessageFlow {
+                            myMessage: messageListItem.myMessage
+                            segments: richMessageFlowLoader.flowSegments
+                            skipBlock: richMessageFlowLoader.richLayout.photoBlock
+                            textVisible: !messageListItem.canSelectMessageText
+                            textColor: messageListItem.textColor
+                            textAlign: messageListItem.textAlign
+                            onLinkActivated: messageListItem.handleMessageLink(link)
+                        }
+                    }
                 }
 
                 Loader {

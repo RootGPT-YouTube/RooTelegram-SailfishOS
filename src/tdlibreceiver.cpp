@@ -650,6 +650,12 @@ void TDLibReceiver::processUpdateDeleteMessages(const QVariantMap &receivedInfor
 {
     const qlonglong chatId = receivedInformation.value(CHAT_ID).toLongLong();
     const QVariantList messageIds = receivedInformation.value(MESSAGE_IDS).toList();
+    // from_cache: TDLib ha solo scaricato i messaggi dalla sua RAM (lo fa con le chat chiuse,
+    // dopo 15-30 s) ma esistono ancora. Non sono cancellazioni: se arrivassero al ChatModel,
+    // tornando da una sotto-pagina la chat si ritroverebbe piena di buchi.
+    if (receivedInformation.value("from_cache").toBool()) {
+        return;
+    }
     QList<qlonglong> ids;
     const int n = messageIds.size();
     ids.reserve(n);

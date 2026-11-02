@@ -875,7 +875,7 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Default</translation>
     </message>
     <message>
         <source>Available</source>
@@ -1236,7 +1236,7 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Link</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Link</translation>
     </message>
     <message>
         <source>No links available.</source>
@@ -3578,6 +3578,13 @@ messages</numerusform>
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text copied to clipboard</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3634,6 +3641,81 @@ messages</numerusform>
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Every button needs a name and a valid link or text to copy.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Button name</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>When tapped</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Open a link</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Copy a text</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Text to copy</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Link</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Button in this row</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Buttons</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Open a user&apos;s profile</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Choose a user</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Color</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Default</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Blue</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Red</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Green</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Choose a user</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Search</translation>
     </message>
 </context>
 <context>
@@ -6217,6 +6299,10 @@ messages</numerusform>
     <message>
         <source>group call</source>
         <translation>group call</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text copied to clipboard</translation>
     </message>
 </context>
 <context>

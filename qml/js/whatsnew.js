@@ -13,36 +13,43 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.7.6";
+var version = "3.7.7";
 
 var changelogByLang = {
     "it": [
-        "Nuovo: toccando un link in un messaggio compare un menu con «Apri link» e «Copia link». «Copia link» lo mette negli appunti, così puoi incollarlo dove vuoi. «Apri link» lo apre in RooTitanium se è installato, altrimenti nel browser del telefono.",
-        "Dopo l'aggiornamento, al primo avvio dall'icona Sailfish OS ti chiede di nuovo di confermare i permessi: ce n'è uno nuovo, «RooTitanium», che serve per aprire i link in RooTitanium."
+        "Corretto: restando più di mezzo minuto su un'altra pagina, per esempio il profilo di una chat, al ritorno nella chat mancavano dei messaggi e le date sembravano scombinate. Ora la chat resta integra.",
+        "Articoli: i pulsanti ora si vedono al loro posto nel testo, con i loro colori, e funzionano anche quelli che copiano un testo o aprono un utente.",
+        "Articoli (con Telegram Premium): nell'editor puoi aggiungere pulsanti, sceglierne il colore e modificare gli articoli che ne contengono."
     ],
     "en": [
-        "New: tapping a link in a message shows a menu with «Open link» and «Copy link». «Copy link» puts it on the clipboard, so you can paste it wherever you like. «Open link» opens it in RooTitanium if it is installed, otherwise in the phone's browser.",
-        "After the update, the first time you open the app from its icon Sailfish OS asks you to confirm the permissions again: there is a new one, «RooTitanium», used to open links in RooTitanium."
+        "Fixed: after staying on another page for more than half a minute, such as a chat's profile, messages were missing when you returned to the chat and the dates looked mixed up. The chat now stays complete.",
+        "Articles: buttons now appear in their place in the text, with their colours, and those that copy a text or open a user now work too.",
+        "Articles (with Telegram Premium): in the editor you can add buttons, choose their colour and edit articles that contain them."
     ],
     "de": [
-        "Neu: Tippst du auf einen Link in einer Nachricht, erscheint ein Menü mit «Link öffnen» und «Link kopieren». «Link kopieren» legt ihn in die Zwischenablage, damit du ihn überall einfügen kannst. «Link öffnen» öffnet ihn in RooTitanium, wenn es installiert ist, sonst im Browser des Telefons.",
-        "Nach dem Update fragt Sailfish OS beim ersten Start über das Symbol erneut nach den Berechtigungen: Es gibt eine neue, «RooTitanium», um Links in RooTitanium zu öffnen."
+        "Behoben: Wenn du länger als eine halbe Minute auf einer anderen Seite warst, etwa im Profil eines Chats, fehlten bei der Rückkehr Nachrichten und die Daten wirkten durcheinander. Der Chat bleibt jetzt vollständig.",
+        "Artikel: Schaltflächen erscheinen jetzt an ihrer Stelle im Text und in ihren Farben, und auch solche, die einen Text kopieren oder einen Benutzer öffnen, funktionieren.",
+        "Artikel (mit Telegram Premium): Im Editor kannst du Schaltflächen hinzufügen, ihre Farbe wählen und Artikel bearbeiten, die welche enthalten."
     ],
     "pl": [
-        "Nowość: po dotknięciu linku w wiadomości pojawia się menu z opcjami «Otwórz link» i «Kopiuj link». «Kopiuj link» umieszcza go w schowku, więc możesz go wkleić, gdzie chcesz. «Otwórz link» otwiera go w RooTitanium, jeśli jest zainstalowany, a w przeciwnym razie w przeglądarce telefonu.",
-        "Po aktualizacji, przy pierwszym uruchomieniu z ikony, Sailfish OS ponownie poprosi o potwierdzenie uprawnień: jest nowe, «RooTitanium», służące do otwierania linków w RooTitanium."
+        "Naprawiono: po ponad pół minuty na innej stronie, na przykład w profilu czatu, po powrocie do czatu brakowało wiadomości, a daty wydawały się pomieszane. Teraz czat pozostaje kompletny.",
+        "Artykuły: przyciski są teraz widoczne na swoim miejscu w tekście, w swoich kolorach, i działają też te, które kopiują tekst lub otwierają użytkownika.",
+        "Artykuły (z Telegram Premium): w edytorze możesz dodawać przyciski, wybierać ich kolor i edytować artykuły, które je zawierają."
     ],
     "ru": [
-        "Новое: при нажатии на ссылку в сообщении появляется меню «Открыть ссылку» и «Копировать ссылку». «Копировать ссылку» помещает её в буфер обмена, чтобы вставить куда угодно. «Открыть ссылку» открывает её в RooTitanium, если он установлен, иначе в браузере телефона.",
-        "После обновления при первом запуске с иконки Sailfish OS снова попросит подтвердить разрешения: появилось новое, «RooTitanium», для открытия ссылок в RooTitanium."
+        "Исправлено: если пробыть больше полуминуты на другой странице, например в профиле чата, то после возвращения в чат не хватало сообщений, а даты казались перепутанными. Теперь чат остаётся полным.",
+        "Статьи: кнопки теперь отображаются на своём месте в тексте и в своих цветах, а ещё работают те, что копируют текст или открывают пользователя.",
+        "Статьи (с Telegram Premium): в редакторе можно добавлять кнопки, выбирать их цвет и изменять статьи, в которых они есть."
     ],
     "fr": [
-        "Nouveau : toucher un lien dans un message affiche un menu avec « Ouvrir le lien » et « Copier le lien ». « Copier le lien » le place dans le presse-papiers pour le coller où vous voulez. « Ouvrir le lien » l'ouvre dans RooTitanium s'il est installé, sinon dans le navigateur du téléphone.",
-        "Après la mise à jour, au premier lancement depuis l'icône, Sailfish OS vous demande à nouveau de confirmer les autorisations : il y en a une nouvelle, « RooTitanium », qui sert à ouvrir les liens dans RooTitanium."
+        "Corrigé : après plus d'une demi-minute sur une autre page, par exemple le profil d'une discussion, des messages manquaient au retour et les dates semblaient mélangées. La discussion reste désormais complète.",
+        "Articles : les boutons s'affichent maintenant à leur place dans le texte, avec leurs couleurs, et ceux qui copient un texte ou ouvrent un utilisateur fonctionnent aussi.",
+        "Articles (avec Telegram Premium) : dans l'éditeur, vous pouvez ajouter des boutons, choisir leur couleur et modifier les articles qui en contiennent."
     ],
     "sk": [
-        "Nové: po ťuknutí na odkaz v správe sa zobrazí ponuka «Otvoriť odkaz» a «Kopírovať odkaz». «Kopírovať odkaz» ho vloží do schránky, aby ste ho mohli vložiť kamkoľvek. «Otvoriť odkaz» ho otvorí v RooTitanium, ak je nainštalovaný, inak v prehliadači telefónu.",
-        "Po aktualizácii pri prvom spustení z ikony vás Sailfish OS znova požiada o potvrdenie povolení: pribudlo nové, «RooTitanium», ktoré slúži na otváranie odkazov v RooTitanium."
+        "Opravené: po viac ako pol minúte na inej stránke, napríklad v profile četu, po návrate do četu chýbali správy a dátumy vyzerali pomiešané. Čet teraz zostáva úplný.",
+        "Články: tlačidlá sa teraz zobrazujú na svojom mieste v texte a vo svojich farbách a fungujú aj tie, ktoré kopírujú text alebo otvárajú používateľa.",
+        "Články (s Telegram Premium): v editore môžete pridávať tlačidlá, vybrať ich farbu a upravovať články, ktoré ich obsahujú."
     ],
 };
 

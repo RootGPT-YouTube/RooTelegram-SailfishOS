@@ -3572,6 +3572,13 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3628,6 +3635,81 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6210,6 +6292,10 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>group call</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

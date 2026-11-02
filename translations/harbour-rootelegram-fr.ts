@@ -3576,6 +3576,13 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Texte copié dans le presse-papiers</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3632,6 +3639,81 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Certains éléments de cet article (emoji personnalisés, texte surligné, séparateurs...) seront perdus lors de l&apos;enregistrement.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Chaque bouton doit avoir un nom et un lien valide ou un texte à copier.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Nom du bouton</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>Quand on appuie dessus</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Ouvrir un lien</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Copier un texte</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Texte à copier</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Lien</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Bouton sur cette ligne</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Boutons</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Ouvrir le profil d&apos;un utilisateur</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Choisir un utilisateur</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Couleur</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Par défaut</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Bleu</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Rouge</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Vert</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Choisir un utilisateur</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Rechercher</translation>
     </message>
 </context>
 <context>
@@ -6215,6 +6297,10 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     <message>
         <source>group call</source>
         <translation>appel de groupe</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Texte copié dans le presse-papiers</translation>
     </message>
 </context>
 <context>

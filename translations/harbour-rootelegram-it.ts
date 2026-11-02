@@ -3576,6 +3576,13 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Testo copiato negli appunti</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3632,6 +3639,81 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Alcuni elementi di questo articolo (emoji personalizzate, testo evidenziato, separatori...) andranno persi quando lo salvi.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Ogni pulsante ha bisogno di un nome e di un link valido o di un testo da copiare.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Nome del pulsante</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>Quando lo si tocca</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Apre un link</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Copia un testo</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Testo da copiare</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Link</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Pulsante in questa fila</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Pulsanti</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Apre il profilo di un utente</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Scegli un utente</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Colore</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Predefinito</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Blu</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Rosso</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Verde</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Scegli un utente</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Cerca</translation>
     </message>
 </context>
 <context>
@@ -6215,6 +6297,10 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
     <message>
         <source>group call</source>
         <translation>chiamata di gruppo</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Testo copiato negli appunti</translation>
     </message>
 </context>
 <context>

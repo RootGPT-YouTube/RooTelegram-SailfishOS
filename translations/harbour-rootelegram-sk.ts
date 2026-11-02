@@ -3607,6 +3607,13 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text skopírovaný do schránky</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3663,6 +3670,81 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Niektoré prvky tohto článku (vlastné emoji, zvýraznený text, oddeľovače...) sa pri uložení stratia.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Každé tlačidlo potrebuje názov a platný odkaz alebo text na skopírovanie.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Názov tlačidla</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>Po ťuknutí</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Otvoriť odkaz</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Skopírovať text</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Text na skopírovanie</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Odkaz</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Tlačidlo v tomto rade</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Tlačidlá</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Otvoriť profil používateľa</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Vybrať používateľa</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Farba</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Predvolená</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Modrá</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Červená</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Zelená</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Vybrať používateľa</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Hľadať</translation>
     </message>
 </context>
 <context>
@@ -6262,6 +6344,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>group call</source>
         <translation>skupinový hovor</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text skopírovaný do schránky</translation>
     </message>
 </context>
 <context>

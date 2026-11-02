@@ -3607,6 +3607,13 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Текст скопирован в буфер обмена</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3663,6 +3670,81 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Некоторые элементы этой статьи (пользовательские эмодзи, выделенный текст, разделители...) будут потеряны при сохранении.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>У каждой кнопки должно быть название и правильная ссылка или текст для копирования.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Название кнопки</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>При нажатии</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Открыть ссылку</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Скопировать текст</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Текст для копирования</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Ссылка</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Кнопка в этом ряду</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Кнопки</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Открыть профиль пользователя</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Выбрать пользователя</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Цвет</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>По умолчанию</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Синий</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Красный</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Зелёный</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Выбрать пользователя</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Поиск</translation>
     </message>
 </context>
 <context>
@@ -6262,6 +6344,10 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>group call</source>
         <translation>групповой звонок</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Текст скопирован в буфер обмена</translation>
     </message>
 </context>
 <context>

@@ -3578,6 +3578,13 @@ Nachrichten</numerusform>
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text in die Zwischenablage kopiert</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3634,6 +3641,81 @@ Nachrichten</numerusform>
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Einige Elemente dieses Artikels (benutzerdefinierte Emojis, hervorgehobener Text, Trennlinien...) gehen beim Speichern verloren.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Jede Schaltfläche braucht einen Namen und einen gültigen Link oder einen Text zum Kopieren.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Name der Schaltfläche</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>Beim Antippen</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Link öffnen</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Text kopieren</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Zu kopierender Text</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Link</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Schaltfläche in dieser Reihe</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Schaltflächen</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Profil eines Benutzers öffnen</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Benutzer auswählen</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Farbe</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Blau</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Rot</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Grün</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Benutzer auswählen</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Suchen</translation>
     </message>
 </context>
 <context>
@@ -6217,6 +6299,10 @@ Nachrichten</numerusform>
     <message>
         <source>group call</source>
         <translation>Gruppenanruf</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Text in die Zwischenablage kopiert</translation>
     </message>
 </context>
 <context>

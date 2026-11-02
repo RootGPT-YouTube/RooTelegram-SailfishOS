@@ -3607,6 +3607,13 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     </message>
 </context>
 <context>
+    <name>ReplyMarkupButtons</name>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Tekst skopiowany do schowka</translation>
+    </message>
+</context>
+<context>
     <name>RichMessageComposerPage</name>
     <message>
         <source>Title</source>
@@ -3663,6 +3670,81 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>Some elements of this article (custom emoji, highlighted text, dividers...) will be lost when you save it.</source>
         <translation>Niektóre elementy tego artykułu (niestandardowe emoji, wyróżniony tekst, separatory...) zostaną utracone po zapisaniu.</translation>
+    </message>
+    <message>
+        <source>Every button needs a name and a valid link or text to copy.</source>
+        <translation>Każdy przycisk musi mieć nazwę oraz prawidłowy link lub tekst do skopiowania.</translation>
+    </message>
+    <message>
+        <source>Button name</source>
+        <translation>Nazwa przycisku</translation>
+    </message>
+    <message>
+        <source>When tapped</source>
+        <translation>Po dotknięciu</translation>
+    </message>
+    <message>
+        <source>Open a link</source>
+        <translation>Otwórz link</translation>
+    </message>
+    <message>
+        <source>Copy a text</source>
+        <translation>Skopiuj tekst</translation>
+    </message>
+    <message>
+        <source>Text to copy</source>
+        <translation>Tekst do skopiowania</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Link</translation>
+    </message>
+    <message>
+        <source>Button in this row</source>
+        <translation>Przycisk w tym rzędzie</translation>
+    </message>
+    <message>
+        <source>Buttons</source>
+        <translation>Przyciski</translation>
+    </message>
+    <message>
+        <source>Open a user&apos;s profile</source>
+        <translation>Otwórz profil użytkownika</translation>
+    </message>
+    <message>
+        <source>Choose a user</source>
+        <translation>Wybierz użytkownika</translation>
+    </message>
+    <message>
+        <source>Color</source>
+        <translation>Kolor</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Domyślny</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Niebieski</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Czerwony</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Zielony</translation>
+    </message>
+</context>
+<context>
+    <name>RichMessageUserPickerPage</name>
+    <message>
+        <source>Choose a user</source>
+        <translation>Wybierz użytkownika</translation>
+    </message>
+    <message>
+        <source>Search</source>
+        <translation>Szukaj</translation>
     </message>
 </context>
 <context>
@@ -6262,6 +6344,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
     <message>
         <source>group call</source>
         <translation>połączenie grupowe</translation>
+    </message>
+    <message>
+        <source>Text copied to clipboard</source>
+        <translation>Tekst skopiowany do schowka</translation>
     </message>
 </context>
 <context>

@@ -5442,7 +5442,10 @@ Page {
                                  (selectedMessages[0].can_be_edited === true ||
                                   ((selectedMessages[0].sender_id && selectedMessages[0].sender_id.user_id === chatPage.myUserId) &&
                                    selectedMessages[0].content &&
-                                   selectedMessages[0].content["@type"] === "messageText"))
+                                   // gli stessi tipi del menu del messaggio (editableContentTypes in
+                                   // MessageListViewItem): can_be_edited non arriva piu' nel messaggio
+                                   ["messageText", "messagePhoto", "messageVideo", "messageAnimation", "messageAudio",
+                                    "messageDocument", "messageVoiceNote", "messageRichMessage"].indexOf(selectedMessages[0].content["@type"]) !== -1))
                         icon.sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
                         onClicked: {
                             var selectedMessage = selectedMessages[0];

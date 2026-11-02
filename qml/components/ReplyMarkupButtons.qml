@@ -28,10 +28,16 @@ Column {
     height: childrenRect.height
     spacing: Theme.paddingSmall
 
+    // di norma i pulsanti del messaggio; un articolo passa qui le sue file di pulsanti
+    property var rows: (myMessage && myMessage.reply_markup && myMessage.reply_markup.rows) ? myMessage.reply_markup.rows : []
+    // pageBlockButtonRow.align: "" = a tutta larghezza, se no larghi quanto il nome
+    property string align: ""
+
     Repeater {
-        model: myMessage.reply_markup.rows
+        model: replyMarkupButtons.rows
         delegate: Row {
-            width: parent.width
+            x: replyMarkupButtons.align === "right" ? replyMarkupButtons.width - implicitWidth
+             : (replyMarkupButtons.align === "center" ? (replyMarkupButtons.width - implicitWidth) / 2 : 0)
             height: Theme.itemSizeSmall
             spacing: Theme.paddingSmall
             Repeater {
@@ -58,6 +64,13 @@ Column {
                         inlineKeyboardButtonTypeUrl: function() {
                             Functions.handleLink(modelData.type.url);
                         },
+                        inlineKeyboardButtonTypeCopyText: function() {
+                            Clipboard.text = modelData.type.text;
+                            appNotification.show(qsTr("Text copied to clipboard"));
+                        },
+                        inlineKeyboardButtonTypeUser: function() {
+                            Functions.handleLink("userId://" + modelData.type.user_id);
+                        },
                         inlineKeyboardButtonTypeSwitchInline: function() {
                             if(modelData.type.in_current_chat) {
                                 chatPage.setMessageText("@" + userInformation.usernames.editable_username + " "+(modelData.type.query || ""))
@@ -76,8 +89,18 @@ Column {
                         }
                     })
                     enabled: !!callbacks[modelData.type["@type"]]
+                    id: buttonItem
+                    // ButtonStyle: i tre colori dello schema; «Link» e' senza sfondo
+                    readonly property string styleType: modelData.style ? modelData.style["@type"] : ""
+                    readonly property color styleColor: styleType === "buttonStylePrimary" ? "#2481cc"
+                                                      : (styleType === "buttonStyleDanger" ? "#d9464a"
+                                                      : (styleType === "buttonStyleSuccess" ? "#2ea64f" : "transparent"))
+                    readonly property bool hasStyleColor: styleColor.a > 0
+                    readonly property real rowShare: (replyMarkupButtons.width + Theme.paddingSmall) / buttonsRepeater.count - (Theme.paddingSmall)
                     height: Theme.itemSizeSmall
-                    width: (replyMarkupButtons.width + Theme.paddingSmall) / buttonsRepeater.count - (Theme.paddingSmall)
+                    width: replyMarkupButtons.align !== ""
+                           ? Math.min(rowShare, buttonLabel.implicitWidth + 2 * Theme.paddingLarge)
+                           : rowShare
                     onClicked: {
                         callbacks[modelData.type["@type"]]();
                     }
@@ -85,20 +108,26 @@ Column {
                         anchors.fill: parent
                         radius: Theme.paddingSmall
                         color: parent.pressed ? Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
-                                          : Theme.rgba(Theme.primaryColor, Theme.opacityFaint)
+                                          : (buttonItem.hasStyleColor ? buttonItem.styleColor
+                                          : (buttonItem.styleType === "buttonStyleLink" ? "transparent"
+                                          : Theme.rgba(Theme.primaryColor, Theme.opacityFaint)))
                         opacity: parent.enabled ? 1.0 : Theme.opacityLow
 
                         Label {
+                            id: buttonLabel
                             width: Math.min(parent.width - Theme.paddingSmall*2, contentWidth)
                             truncationMode: TruncationMode.Fade
                             text: Emoji.emojify(modelData.text, Theme.fontSizeSmall)
-                            color: parent.parent.pressed ? Theme.highlightColor : Theme.primaryColor
+                            color: parent.parent.pressed ? Theme.highlightColor
+                                 : (buttonItem.hasStyleColor ? "white"
+                                 : (buttonItem.styleType === "buttonStyleLink" ? Functions.messageLinkColor() : Theme.primaryColor))
                             anchors.centerIn: parent
                             font.pixelSize: Theme.fontSizeSmall
                         }
                         Icon {
                             property var sources: ({
                                                    inlineKeyboardButtonTypeUrl: "../../images/icon-s-link.svg",
+                                                   inlineKeyboardButtonTypeCopyText: "image://theme/icon-s-clipboard",
                                                    inlineKeyboardButtonTypeSwitchInline: !modelData.type.in_current_chat ? "image://theme/icon-s-repost" : "image://theme/icon-s-edit",
                                                    inlineKeyboardButtonTypeCallbackWithPassword: "image://theme/icon-s-asterisk"
                                                    })
