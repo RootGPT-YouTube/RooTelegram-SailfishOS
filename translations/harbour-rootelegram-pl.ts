@@ -6091,6 +6091,10 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <translation>Jesteś już członkiem tego czatu.</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Ten użytkownik należy do zbyt wielu kanałów i grup: nie może dołączyć, dopóki nie opuści niektórych z nich.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Zamknięte!</translation>
     </message>

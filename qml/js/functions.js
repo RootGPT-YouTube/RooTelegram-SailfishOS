@@ -1021,6 +1021,79 @@ function richMessageButtonRow(block) {
     return { buttons: buttons, align: block.align ? (aligns[block.align['@type']] || "") : "" };
 }
 
+// Un paragrafo con dei pulsanti su righe proprie -> paragrafi e file di pulsanti, cosi'
+// escono come pulsanti veri (Telegram Desktop li scrive dentro il testo). Un pulsante in
+// mezzo a una frase resta dov'e': richTextToText lo disegna come link.
+function splitParagraphButtons(block) {
+    if (!block || block['@type'] !== 'pageBlockParagraph') {
+        return [block];
+    }
+    var text = block.text;
+    var nodes = (text && text['@type'] === 'richTexts') ? (text.texts || []) : [text];
+    var plainOf = function(node) {
+        return (node && node['@type'] === 'richTextPlain') ? node.text : null;
+    };
+    var isBlank = function(value) {
+        return value !== null && value.trim() === "";
+    };
+    var isOwnLine = function(index) {
+        var previous = index - 1;
+        while (previous >= 0 && nodes[previous] && nodes[previous]['@type'] === 'richTextButton') {
+            previous--;
+        }
+        var next = index + 1;
+        while (next < nodes.length && nodes[next] && nodes[next]['@type'] === 'richTextButton') {
+            next++;
+        }
+        var before = previous < 0 ? "\n" : plainOf(nodes[previous]);
+        var after = next >= nodes.length ? "\n" : plainOf(nodes[next]);
+        return before !== null && after !== null
+                && (isBlank(before) || /\n\s*$/.test(before))
+                && (isBlank(after) || /^\s*\n/.test(after));
+    };
+    var result = [];
+    var pendingText = [];
+    var pendingButtons = [];
+    var flushText = function() {
+        var hasContent = false;
+        for (var t = 0; t < pendingText.length; t++) {
+            if (!isBlank(plainOf(pendingText[t]))) {
+                hasContent = true;
+            }
+        }
+        if (hasContent) {
+            result.push({ '@type': 'pageBlockParagraph', text: { '@type': 'richTexts', texts: pendingText } });
+        }
+        pendingText = [];
+    };
+    var flushButtons = function() {
+        if (pendingButtons.length > 0) {
+            result.push({ '@type': 'pageBlockButtonRow', buttons: pendingButtons });
+            pendingButtons = [];
+        }
+    };
+    var found = false;
+    for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i] && nodes[i]['@type'] === 'richTextButton' && nodes[i].button && isOwnLine(i)) {
+            found = true;
+            flushText();
+            pendingButtons.push(nodes[i].button);
+        } else {
+            // anche un a capo chiude la fila: un pulsante per riga, come nell'originale
+            if (!isBlank(plainOf(nodes[i])) || /\n/.test(plainOf(nodes[i]) || "")) {
+                flushButtons();
+            }
+            pendingText.push(nodes[i]);
+        }
+    }
+    if (!found) {
+        return [block];
+    }
+    flushText();
+    flushButtons();
+    return result;
+}
+
 // Divide dei blocchi nel punto in cui ci sono i pulsanti: `first` sono i blocchi di
 // testo prima dei primi pulsanti, `rest` e' [{ rows, blocks }]: file di pulsanti e il
 // testo che le segue. Una fila annidata (in una citazione, un elenco...) non si puo'
@@ -1061,15 +1134,18 @@ function getRichMessageFlow(blocks) {
         }
     };
     for (var i = 0; i < (blocks || []).length; i++) {
-        var block = blocks[i];
-        if (!block) {
-            continue;
-        }
-        if (block['@type'] === 'pageBlockButtonRow') {
-            addRow(block);
-        } else {
-            current.push(block);
-            addNested([block]);
+        var pieces = splitParagraphButtons(blocks[i]);
+        for (var p = 0; p < pieces.length; p++) {
+            var block = pieces[p];
+            if (!block) {
+                continue;
+            }
+            if (block['@type'] === 'pageBlockButtonRow') {
+                addRow(block);
+            } else {
+                current.push(block);
+                addNested([block]);
+            }
         }
     }
     return flow;
@@ -1698,6 +1774,10 @@ function handleErrorMessage(code, message) {
     }
     if (message === "USER_ALREADY_PARTICIPANT") {
         appNotification.show(qsTr("You are already a member of this chat."));
+    } else if (message === "USER_CHANNELS_TOO_MUCH") {
+        // Lo manda il server quando la persona da far entrare (richiesta di iscrizione o
+        // aggiunta di un membro) e' al limite di canali e gruppi: non e' un nostro errore.
+        appNotification.show(qsTr("This user has joined too many channels and groups: they can't join until they leave some."));
     } else {
         appNotification.show(message);
     }

@@ -6047,6 +6047,10 @@ Nachrichten</numerusform>
         <translation>Du bist bereits Mitglied dieses Chats.</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Diese Person ist Mitglied zu vieler Kanäle und Gruppen und kann erst beitreten, nachdem sie einige verlassen hat.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Geschlossen!</translation>
     </message>

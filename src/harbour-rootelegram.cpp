@@ -42,6 +42,8 @@
 #include <QFileInfo>
 #include <QDBusInterface>
 #include <QDBusReply>
+#include <QDBusMessage>
+#include <QDBusError>
 #include <QDBusConnectionInterface>
 #include <QSortFilterProxyModel>
 #include <QTimer>
@@ -148,21 +150,42 @@ bool activateRunningInstance()
     if (!sessionBusConnection.isConnected()) {
         return false;
     }
-    QDBusInterface legacyAppInterface(INTERFACE_NAME, PATH_NAME, INTERFACE_NAME, sessionBusConnection);
-    if (legacyAppInterface.isValid()) {
-        QDBusReply<void> legacyReply = legacyAppInterface.call("activateApp");
-        if (legacyReply.isValid()) {
-            return true;
-        }
+    // Si chiede solo a un'istanza gia' viva: senza setAutoStartService(false) il bus avviava
+    // il servizio e aspettava lui. Sul Jolla Phone quell'avvio non arrivava mai, e con due
+    // chiamate da 25 s la finestra compariva dopo 50 s (journal di un utente, 02/11/2026).
+    static const int ACTIVATION_TIMEOUT_MS = 8000;
+    const auto callRunningInstance = [&sessionBusConnection](const QString &path, const QString &interface, const QString &method, const QVariantList &arguments) -> QDBusMessage {
+        QDBusMessage request = QDBusMessage::createMethodCall(INTERFACE_NAME, path, interface, method);
+        request.setArguments(arguments);
+        request.setAutoStartService(false);
+        return sessionBusConnection.call(request, QDBus::Block, ACTIVATION_TIMEOUT_MS);
+    };
+
+    const QDBusMessage legacyReply = callRunningInstance(PATH_NAME, INTERFACE_NAME, "activateApp", QVariantList());
+    if (legacyReply.type() == QDBusMessage::ReplyMessage) {
+        return true;
     }
-    QDBusInterface freedesktopAppInterface(INTERFACE_NAME, APPLICATION_PATH_NAME, "org.freedesktop.Application", sessionBusConnection);
-    if (freedesktopAppInterface.isValid()) {
-        QDBusReply<void> freedesktopReply = freedesktopAppInterface.call("Activate", QVariantMap());
-        if (freedesktopReply.isValid()) {
-            return true;
-        }
+    const QDBusError legacyError(legacyReply);
+    // Senza avvio automatico il bus risponde NameHasNoOwner, che QDBusError non ha fra i suoi tipi.
+    if (legacyError.type() == QDBusError::ServiceUnknown || legacyError.name() == QLatin1String("org.freedesktop.DBus.Error.NameHasNoOwner")) {
+        return false;
     }
-    return false;
+    // Il nome ha un proprietario che non risponde: proseguire aprirebbe una seconda TDLib
+    // sullo stesso database, quindi si esce come se la richiesta fosse stata inoltrata.
+    if (legacyError.type() == QDBusError::NoReply || legacyError.type() == QDBusError::Timeout) {
+        qWarning() << "[AVVIO] l'istanza gia' attiva non risponde:" << legacyError.message();
+        return true;
+    }
+
+    QVariantList activateArguments;
+    activateArguments << QVariant::fromValue(QVariantMap());
+    const QDBusMessage freedesktopReply = callRunningInstance(APPLICATION_PATH_NAME, "org.freedesktop.Application", "Activate", activateArguments);
+    if (freedesktopReply.type() == QDBusMessage::ReplyMessage) {
+        return true;
+    }
+    qWarning() << "[AVVIO] attivazione non riuscita:" << legacyError.message() << "/" << QDBusError(freedesktopReply).message();
+    const QDBusConnectionInterface *busInterface = sessionBusConnection.interface();
+    return busInterface && busInterface->isServiceRegistered(INTERFACE_NAME);
 }
 
 int main(int argc, char *argv[])

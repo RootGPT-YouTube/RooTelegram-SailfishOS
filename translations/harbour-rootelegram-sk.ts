@@ -6091,6 +6091,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <translation>Už ste členom tohto četu.</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Tento používateľ je členom príliš mnohých kanálov a skupín: nemôže sa pridať, kým niektoré neopustí.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Zatvorené!</translation>
     </message>

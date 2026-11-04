@@ -13,44 +13,44 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.7.7";
+var version = "3.7.8";
 
 var changelogByLang = {
     "it": [
-        "Corretto: restando più di mezzo minuto su un'altra pagina, per esempio il profilo di una chat, al ritorno nella chat mancavano dei messaggi e le date sembravano scombinate. Ora la chat resta integra.",
-        "Articoli: i pulsanti ora si vedono al loro posto nel testo, con i loro colori, e funzionano anche quelli che copiano un testo o aprono un utente.",
-        "Articoli (con Telegram Premium): nell'editor puoi aggiungere pulsanti, sceglierne il colore e modificare gli articoli che ne contengono."
+        "Avvio: su alcuni telefoni, come il Jolla Phone, toccando l'icona l'app non si apriva, oppure si apriva dopo quasi un minuto. Ora dovrebbe aprirsi subito.",
+        "Articoli: i pulsanti scritti con Telegram Desktop su una riga propria ora appaiono come veri pulsanti, non più come semplici link.",
+        "Richieste di iscrizione: se una persona è iscritta a troppi canali e gruppi, ora lo spiega un messaggio chiaro invece di un codice d'errore."
     ],
     "en": [
-        "Fixed: after staying on another page for more than half a minute, such as a chat's profile, messages were missing when you returned to the chat and the dates looked mixed up. The chat now stays complete.",
-        "Articles: buttons now appear in their place in the text, with their colours, and those that copy a text or open a user now work too.",
-        "Articles (with Telegram Premium): in the editor you can add buttons, choose their colour and edit articles that contain them."
+        "Startup: on some phones, such as the Jolla Phone, tapping the icon did not open the app, or opened it only after almost a minute. It should now open right away.",
+        "Articles: buttons written with Telegram Desktop on a line of their own now appear as real buttons instead of plain links.",
+        "Join requests: if someone has joined too many channels and groups, a clear message now explains it instead of an error code."
     ],
     "de": [
-        "Behoben: Wenn du länger als eine halbe Minute auf einer anderen Seite warst, etwa im Profil eines Chats, fehlten bei der Rückkehr Nachrichten und die Daten wirkten durcheinander. Der Chat bleibt jetzt vollständig.",
-        "Artikel: Schaltflächen erscheinen jetzt an ihrer Stelle im Text und in ihren Farben, und auch solche, die einen Text kopieren oder einen Benutzer öffnen, funktionieren.",
-        "Artikel (mit Telegram Premium): Im Editor kannst du Schaltflächen hinzufügen, ihre Farbe wählen und Artikel bearbeiten, die welche enthalten."
+        "Start: Auf manchen Telefonen, etwa dem Jolla Phone, öffnete ein Tipp auf das Symbol die App nicht oder erst nach fast einer Minute. Jetzt sollte sie sofort aufgehen.",
+        "Artikel: Schaltflächen, die mit Telegram Desktop in einer eigenen Zeile geschrieben wurden, erscheinen jetzt als echte Schaltflächen statt als einfache Links.",
+        "Beitrittsanfragen: Ist jemand Mitglied zu vieler Kanäle und Gruppen, erklärt das jetzt eine verständliche Meldung statt eines Fehlercodes."
     ],
     "pl": [
-        "Naprawiono: po ponad pół minuty na innej stronie, na przykład w profilu czatu, po powrocie do czatu brakowało wiadomości, a daty wydawały się pomieszane. Teraz czat pozostaje kompletny.",
-        "Artykuły: przyciski są teraz widoczne na swoim miejscu w tekście, w swoich kolorach, i działają też te, które kopiują tekst lub otwierają użytkownika.",
-        "Artykuły (z Telegram Premium): w edytorze możesz dodawać przyciski, wybierać ich kolor i edytować artykuły, które je zawierają."
+        "Uruchamianie: na niektórych telefonach, na przykład Jolla Phone, dotknięcie ikony nie otwierało aplikacji albo otwierało ją dopiero po prawie minucie. Teraz powinna otwierać się od razu.",
+        "Artykuły: przyciski napisane w Telegram Desktop w osobnym wierszu są teraz prawdziwymi przyciskami, a nie zwykłymi linkami.",
+        "Prośby o dołączenie: jeśli ktoś należy do zbyt wielu kanałów i grup, wyjaśnia to teraz zrozumiały komunikat zamiast kodu błędu."
     ],
     "ru": [
-        "Исправлено: если пробыть больше полуминуты на другой странице, например в профиле чата, то после возвращения в чат не хватало сообщений, а даты казались перепутанными. Теперь чат остаётся полным.",
-        "Статьи: кнопки теперь отображаются на своём месте в тексте и в своих цветах, а ещё работают те, что копируют текст или открывают пользователя.",
-        "Статьи (с Telegram Premium): в редакторе можно добавлять кнопки, выбирать их цвет и изменять статьи, в которых они есть."
+        "Запуск: на некоторых телефонах, например Jolla Phone, нажатие на значок не открывало приложение или открывало его почти через минуту. Теперь оно должно открываться сразу.",
+        "Статьи: кнопки, написанные в Telegram Desktop на отдельной строке, теперь отображаются как настоящие кнопки, а не как обычные ссылки.",
+        "Заявки на вступление: если человек состоит в слишком большом количестве каналов и групп, теперь это объясняет понятное сообщение, а не код ошибки."
     ],
     "fr": [
-        "Corrigé : après plus d'une demi-minute sur une autre page, par exemple le profil d'une discussion, des messages manquaient au retour et les dates semblaient mélangées. La discussion reste désormais complète.",
-        "Articles : les boutons s'affichent maintenant à leur place dans le texte, avec leurs couleurs, et ceux qui copient un texte ou ouvrent un utilisateur fonctionnent aussi.",
-        "Articles (avec Telegram Premium) : dans l'éditeur, vous pouvez ajouter des boutons, choisir leur couleur et modifier les articles qui en contiennent."
+        "Démarrage : sur certains téléphones, comme le Jolla Phone, toucher l'icône n'ouvrait pas l'application, ou seulement après presque une minute. Elle devrait maintenant s'ouvrir tout de suite.",
+        "Articles : les boutons écrits avec Telegram Desktop sur leur propre ligne apparaissent maintenant comme de vrais boutons, et non plus comme de simples liens.",
+        "Demandes d'adhésion : si une personne a rejoint trop de canaux et de groupes, un message clair l'explique désormais à la place d'un code d'erreur."
     ],
     "sk": [
-        "Opravené: po viac ako pol minúte na inej stránke, napríklad v profile četu, po návrate do četu chýbali správy a dátumy vyzerali pomiešané. Čet teraz zostáva úplný.",
-        "Články: tlačidlá sa teraz zobrazujú na svojom mieste v texte a vo svojich farbách a fungujú aj tie, ktoré kopírujú text alebo otvárajú používateľa.",
-        "Články (s Telegram Premium): v editore môžete pridávať tlačidlá, vybrať ich farbu a upravovať články, ktoré ich obsahujú."
-    ],
+        "Spustenie: na niektorých telefónoch, napríklad Jolla Phone, ťuknutie na ikonu aplikáciu neotvorilo alebo ju otvorilo až takmer po minúte. Teraz by sa mala otvoriť hneď.",
+        "Články: tlačidlá napísané v Telegram Desktop na samostatnom riadku sa teraz zobrazujú ako skutočné tlačidlá, nie ako obyčajné odkazy.",
+        "Žiadosti o pripojenie: ak je niekto členom príliš mnohých kanálov a skupín, teraz to vysvetlí zrozumiteľná správa namiesto chybového kódu."
+    ]
 };
 
 // Vuoto: il messaggio del popup sta DOPO l'elenco, e la cosa da leggere per prima

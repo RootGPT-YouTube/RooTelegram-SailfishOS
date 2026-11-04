@@ -6045,6 +6045,10 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <translation>Vous êtes déjà membre de cette discussion.</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Cet utilisateur a rejoint trop de canaux et de groupes : il ne peut pas entrer tant qu&apos;il n&apos;en quitte pas quelques-uns.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Fermé !</translation>
     </message>

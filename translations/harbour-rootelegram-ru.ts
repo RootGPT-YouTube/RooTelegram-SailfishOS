@@ -6091,6 +6091,10 @@ You can remove it from your list. This removal is local only: it does not delete
         <translation>Вы уже участник этого чата.</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Этот пользователь состоит в слишком большом количестве каналов и групп: он не сможет вступить, пока не покинет некоторые из них.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Закрыто!</translation>
     </message>

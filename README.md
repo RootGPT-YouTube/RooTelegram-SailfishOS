@@ -123,24 +123,22 @@ is free and takes two minutes:
 ### 4. Download the build dependencies (one‑time)
 The large prebuilt dependencies are **not** in git. Download **two** archives from
 this repo's **Releases** page and extract them **at the root of the cloned folder**
-(the one that contains `build-rpm.sh`), **in this order**:
+(the one that contains `build-rpm.sh`):
 ```bash
-# 1) voice/video call libraries (vendor/) — this archive also carries an old TDLib
+# 1) voice/video call libraries (vendor/)
 curl -L -o build-deps.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
 tar xzf build-deps.tar.gz
 rm build-deps.tar.gz
-# 2) TDLib 1.8.67 — first remove the old library (only one may be in lib/), then extract
-rm -f tdlib/aarch64/lib/libtdjson.so*
+# 2) TDLib 1.8.67
 curl -L -o tdlib.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/tdlib-1.8.67/rootelegram-tdlib-1.8.67-aarch64.tar.gz
 tar xzf tdlib.tar.gz
 rm tdlib.tar.gz
 ```
 This leaves two folders: `tdlib/` (TDLib 1.8.67) and `vendor/` (the voice/video
-call libraries). ⚠️ The order matters: RooTelegram 3.0 and later do **not** build
-against the TDLib 1.8.62 inside the first archive. Their licenses and exact
-upstream sources are documented in the archives' `PROVENANCE.txt` and in the
+call libraries). Their licenses and exact upstream sources are documented in
+`vendor/PROVENANCE.txt`, in the `PROVENANCE.txt` from the TDLib archive and in the
 repository `NOTICE` file.
 
 ### 5. Build the RPM
@@ -304,25 +302,23 @@ tue è gratis e richiede due minuti:
 ### 4. Scarica le dipendenze di build (una tantum)
 Le dipendenze precompilate pesanti **non** sono in git. Scarica **due** archivi dalla
 sezione **Releases** del repo ed estraili **nella radice della cartella clonata**
-(quella che contiene `build-rpm.sh`), **in quest'ordine**:
+(quella che contiene `build-rpm.sh`):
 ```bash
-# 1) librerie per le chiamate audio/video (vendor/) — contiene anche una TDLib vecchia
+# 1) librerie per le chiamate audio/video (vendor/)
 curl -L -o build-deps.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/build-deps-aarch64/rootelegram-build-deps-aarch64.tar.gz
 tar xzf build-deps.tar.gz
 rm build-deps.tar.gz
-# 2) TDLib 1.8.67 — prima togli la libreria vecchia (in lib/ ne deve restare una sola), poi estrai
-rm -f tdlib/aarch64/lib/libtdjson.so*
+# 2) TDLib 1.8.67
 curl -L -o tdlib.tar.gz \
   https://github.com/RootGPT-YouTube/RooTelegram-SailfishOS/releases/download/tdlib-1.8.67/rootelegram-tdlib-1.8.67-aarch64.tar.gz
 tar xzf tdlib.tar.gz
 rm tdlib.tar.gz
 ```
 Restano due cartelle: `tdlib/` (TDLib 1.8.67) e `vendor/` (le librerie per le
-chiamate audio/video). ⚠️ L'ordine conta: RooTelegram 3.0 e successive **non** si
-compilano con la TDLib 1.8.62 del primo archivio. Licenze e sorgenti upstream esatti
-sono documentati nei `PROVENANCE.txt` dentro gli archivi e nel file `NOTICE` del
-repository.
+chiamate audio/video). Licenze e sorgenti upstream esatti sono documentati in
+`vendor/PROVENANCE.txt`, nel `PROVENANCE.txt` dell'archivio TDLib e nel file `NOTICE`
+del repository.
 
 ### 5. Compila l'RPM
 Dalla radice del progetto, lancia semplicemente:

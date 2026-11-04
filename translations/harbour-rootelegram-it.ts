@@ -6045,6 +6045,10 @@ Puoi rimuoverlo dalla tua lista. Questa rimozione è solo locale: non elimina nu
         <translation>Sei già membro di questa chat</translation>
     </message>
     <message>
+        <source>This user has joined too many channels and groups: they can&apos;t join until they leave some.</source>
+        <translation>Questo utente è iscritto a troppi canali e gruppi: non può entrare finché non ne lascia qualcuno.</translation>
+    </message>
+    <message>
         <source>Closed!</source>
         <translation>Chiuso!</translation>
     </message>
