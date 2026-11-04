@@ -32,6 +32,8 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
+!/build-rpm.sh
+!/scripts/build-ffmpeg.sh
 *.qm
 *.prl
 
