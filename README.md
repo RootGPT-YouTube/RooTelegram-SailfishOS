@@ -163,7 +163,7 @@ When it finishes, the package is here:
 Replace `<device-ip>` with your phone's IP (Settings → Developer tools), with
 Developer mode enabled:
 ```bash
-scp RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<device-ip>:/tmp/
+scp ../RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<device-ip>:/tmp/
 ssh defaultuser@<device-ip> 'devel-su pkcon install-local -y /tmp/harbour-rootelegram-*-1.aarch64.rpm'
 ```
 
@@ -333,14 +333,14 @@ Lo script fa tutto da sé: clona `rlottie` in automatico, compila dentro la SDK 
 pacchettizza l'RPM. La **prima** build richiede qualche minuto. Al termine il
 pacchetto è qui:
 ```
-RPMS/harbour-rootelegram-<versione>-1.aarch64.rpm
+../RPMS/harbour-rootelegram-<versione>-1.aarch64.rpm
 ```
 
 ### 6. Installalo sul telefono
 Sostituisci `<ip-dispositivo>` con l'IP del telefono (Impostazioni → Strumenti per
 sviluppatori), con la Modalità sviluppatore attiva:
 ```bash
-scp RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<ip-dispositivo>:/tmp/
+scp ../RPMS/harbour-rootelegram-*-1.aarch64.rpm defaultuser@<ip-dispositivo>:/tmp/
 ssh defaultuser@<ip-dispositivo> 'devel-su pkcon install-local -y /tmp/harbour-rootelegram-*-1.aarch64.rpm'
 ```
 

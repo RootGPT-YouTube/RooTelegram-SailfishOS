@@ -287,10 +287,12 @@ cd "$BUILDDIR"
 "$SB2_CMD" config --global target="$SFOS_TARGET"
 
 info "Compilazione (shadow build) in $BUILDDIR ..."
-"$SB2_CMD" build "$SRCDIR"
+# no-fix-version: dentro un clone sfdk ricaverebbe la versione dall'ultimo tag git invece che
+# dallo spec, e l'RPM uscirebbe con un altro nome.
+"$SB2_CMD" -c no-fix-version build "$SRCDIR"
 
 info "Creazione pacchetto RPM ..."
-"$SB2_CMD" package
+"$SB2_CMD" -c no-fix-version package
 
 # Build andato a buon fine: registra la versione compilata.
 echo "$VERSION" > "$VERSION_STAMP"
