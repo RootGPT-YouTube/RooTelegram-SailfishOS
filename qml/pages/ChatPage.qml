@@ -3095,13 +3095,14 @@ Page {
                             case "messageVenue":
                                 return parentWidth * 0.66666666; // 2 / 3;
                             case "messageRichMessage":
-                                // stima prima del caricamento: la foto come un messagePhoto
-                                // + i blocchi che la precedono (quasi sempre un titolo)
+                                // stima prima del caricamento: il media come un messagePhoto /
+                                // messageVideo / messageAnimation + i blocchi che lo precedono
+                                // (quasi sempre un titolo)
                                 var richLayout = Functions.getRichMessageLayout(content);
-                                if (!richLayout.photoBlock) {
+                                if (!richLayout.mediaBlock) {
                                     return 0;
                                 }
-                                return getContentComponentHeight("messagePhoto", { photo: richLayout.photoBlock.photo }, parentWidth, 0)
+                                return getContentComponentHeight(Functions.richMediaMessageType(richLayout.mediaBlock), richLayout.mediaBlock, parentWidth, 0)
                                         + richLayout.head.length * Math.round(Theme.fontSizeLarge * 1.5);
                             case "messagePhoto":
                                 if(albumEntries > 0) {
@@ -3202,7 +3203,7 @@ Page {
                                     chatReactions: availableReactions
                                     messageIndex: chatProxyModel.mapRowToSource(model.index)
                                     hasContentComponent: !!myMessage.content && chatView.delegateMessagesContent.indexOf(model.content_type) > -1
-                                                         && (model.content_type !== "messageRichMessage" || !!Functions.getRichMessageFirstPhotoBlock(myMessage.content))
+                                                         && (model.content_type !== "messageRichMessage" || !!Functions.getRichMessageFirstMediaBlock(myMessage.content))
                                     canReplyToMessage: chatPage.canSendMessages
                                     onReplyToMessage: {
                                         newMessageInReplyToRow.inReplyToMessage = myMessage

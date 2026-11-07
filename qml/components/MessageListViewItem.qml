@@ -1631,7 +1631,7 @@ ListItem {
                         RichMessageFlow {
                             myMessage: messageListItem.myMessage
                             segments: richMessageFlowLoader.flowSegments
-                            skipBlock: richMessageFlowLoader.richLayout.photoBlock
+                            skipBlock: richMessageFlowLoader.richLayout.mediaBlock
                             textVisible: !messageListItem.canSelectMessageText
                             textColor: messageListItem.textColor
                             textAlign: messageListItem.textAlign

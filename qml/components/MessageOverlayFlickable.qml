@@ -41,7 +41,7 @@ Flickable {
     readonly property bool isOwnMessage: tdLibWrapper.getUserInformation().id === overlayMessage.sender_id.user_id;
     readonly property bool isAnonymous: overlayMessage.sender_id["@type"] === "messageSenderChat"
     property bool hasContentComponent: overlayMessage.content && chatView.delegateMessagesContent.indexOf(overlayMessage.content['@type']) > -1
-                                       && (overlayMessage.content['@type'] !== "messageRichMessage" || !!Functions.getRichMessageFirstPhotoBlock(overlayMessage.content))
+                                       && (overlayMessage.content['@type'] !== "messageRichMessage" || !!Functions.getRichMessageFirstMediaBlock(overlayMessage.content))
     readonly property var overlayWebPageData: resolveOverlayWebPageData()
     signal requestClose;
 
@@ -198,7 +198,7 @@ Flickable {
                 RichMessageFlow {
                     myMessage: overlayMessage
                     segments: richMessageFlowLoader.flowSegments
-                    skipBlock: richMessageFlowLoader.richLayout.photoBlock
+                    skipBlock: richMessageFlowLoader.richLayout.mediaBlock
                     textPixelSize: Theme.fontSizeMedium
                     onLinkActivated: Functions.handleLink(link)
                 }

@@ -13,36 +13,29 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.7.9";
+var version = "3.8";
 
 var changelogByLang = {
     "it": [
-        "Notifiche: aprendo un messaggio dalla notifica, ora risulta letto davvero, anche sugli altri dispositivi e nel contatore sulla copertina dell'app.",
-        "Richieste di iscrizione: la richiesta di un account eliminato non resta più bloccata. Al posto di «Approva» e «Rifiuta» compare «Rimuovi», che la toglie."
+        "Articoli: se un articolo contiene un video o una GIF, ora lo vedi direttamente nel messaggio, come le foto, e puoi avviarlo con un tocco. Prima compariva solo un'icona."
     ],
     "en": [
-        "Notifications: opening a message from a notification now really marks it as read, on your other devices too and in the counter on the app cover.",
-        "Join requests: a request from a deleted account no longer stays stuck. Instead of «Approve» and «Reject» there is now «Remove», which clears it."
+        "Articles: if an article contains a video or a GIF, you now see it right in the message, just like photos, and can play it with a tap. Before, only an icon was shown."
     ],
     "de": [
-        "Benachrichtigungen: Wird eine Nachricht aus der Benachrichtigung geöffnet, gilt sie jetzt wirklich als gelesen, auch auf deinen anderen Geräten und im Zähler auf der App-Kachel.",
-        "Beitrittsanfragen: Die Anfrage eines gelöschten Kontos bleibt nicht mehr hängen. Statt «Genehmigen» und «Ablehnen» gibt es jetzt «Entfernen», das sie wegräumt."
+        "Artikel: Enthält ein Artikel ein Video oder ein GIF, siehst du es jetzt direkt in der Nachricht, genau wie Fotos, und kannst es mit einem Tippen abspielen. Bisher wurde nur ein Symbol angezeigt."
     ],
     "pl": [
-        "Powiadomienia: wiadomość otwarta z powiadomienia jest teraz naprawdę oznaczona jako przeczytana, także na innych urządzeniach i w liczniku na okładce aplikacji.",
-        "Prośby o dołączenie: prośba usuniętego konta już się nie zawiesza. Zamiast «Zatwierdź» i «Odrzuć» pojawia się «Usuń», które ją usuwa."
+        "Artykuły: jeśli artykuł zawiera film lub GIF, widzisz go teraz bezpośrednio w wiadomości, tak jak zdjęcia, i możesz go odtworzyć jednym dotknięciem. Wcześniej pokazywana była tylko ikona."
     ],
     "ru": [
-        "Уведомления: сообщение, открытое из уведомления, теперь действительно отмечается прочитанным — и на других устройствах, и в счётчике на обложке приложения.",
-        "Заявки на вступление: заявка удалённого аккаунта больше не зависает. Вместо «Одобрить» и «Отклонить» теперь есть «Удалить», которое её убирает."
+        "Статьи: если в статье есть видео или GIF, теперь оно видно прямо в сообщении, как фотографии, и запускается одним касанием. Раньше показывался только значок."
     ],
     "fr": [
-        "Notifications : un message ouvert depuis une notification est maintenant vraiment marqué comme lu, aussi sur vos autres appareils et dans le compteur de la vignette de l'application.",
-        "Demandes d'adhésion : la demande d'un compte supprimé ne reste plus bloquée. À la place de « Approuver » et « Refuser », un bouton « Supprimer » la retire."
+        "Articles : si un article contient une vidéo ou un GIF, vous le voyez maintenant directement dans le message, comme les photos, et vous pouvez le lancer d'un simple toucher. Avant, seule une icône s'affichait."
     ],
     "sk": [
-        "Upozornenia: správa otvorená z upozornenia je teraz naozaj označená ako prečítaná, aj na tvojich ďalších zariadeniach a v počítadle na obálke aplikácie.",
-        "Žiadosti o pripojenie: žiadosť odstráneného účtu už nezostane zaseknutá. Namiesto «Schváliť» a «Odmietnuť» je teraz «Odstrániť», ktoré ju odstráni."
+        "Články: ak článok obsahuje video alebo GIF, teraz ho vidíš priamo v správe, rovnako ako fotky, a spustíš ho jedným ťuknutím. Predtým sa zobrazovala iba ikona."
     ]
 };
 

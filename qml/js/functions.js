@@ -134,13 +134,13 @@ function getMessageText(message, simple, currentUserId, ignoreEntities, revealed
         if (simple || ignoreEntities) {
             return pageBlocksToText(message.content.message.blocks, true);
         }
-        // I blocchi fino alla prima foto e la foto li disegna MessageRichMessage.qml
-        // sopra il testo; qui resta il seguito (preceduto dalla didascalia della foto).
+        // I blocchi fino al primo media e il media li disegna MessageRichMessage.qml
+        // sopra il testo; qui resta il seguito (preceduto dalla didascalia del media).
         var richLayout = getRichMessageLayout(message.content);
-        var richCaption = (richLayout.photoBlock && richLayout.photoBlock.caption && richLayout.head.length + richLayout.tail.length < message.content.message.blocks.length)
-                ? richTextToText(richLayout.photoBlock.caption.text, false) : "";
+        var richCaption = (richLayout.mediaBlock && richLayout.mediaBlock.caption && richLayout.head.length + richLayout.tail.length < message.content.message.blocks.length)
+                ? richTextToText(richLayout.mediaBlock.caption.text, false) : "";
         // Il testo dopo i primi pulsanti lo disegna RichMessageFlow.qml, sotto di loro.
-        var richBody = pageBlocksToText(getRichMessageFlow(richLayout.tail).first, false, richLayout.photoBlock);
+        var richBody = pageBlocksToText(getRichMessageFlow(richLayout.tail).first, false, richLayout.mediaBlock);
         return (richCaption && richBody) ? richCaption + "<br><br>" + richBody : (richCaption || richBody);
     case 'messageSticker':
         return simple ? message.content.sticker.emoji : ""
@@ -944,16 +944,31 @@ function richMessageToComposerBlocks(content) {
     return { blocks: blocks, unsupported: unsupported, lossy: state.lossy };
 }
 
-// Il primo pageBlockPhoto di un messageRichMessage (anche dentro copertine,
-// collage, citazioni...), in ordine di lettura; null se il post non ha foto.
-function getRichMessageFirstPhotoBlock(content) {
+// Blocchi di un articolo che si disegnano come media (sopra il testo, come un
+// messagePhoto/messageVideo/messageAnimation). Fino alla 3.7.9 solo la foto: un
+// video restava l'icona «🎬» nel testo (segnalazione dell'utente, 07/11/2026).
+function isRichMediaBlock(block) {
+    if (!block) {
+        return false;
+    }
+    switch (block['@type']) {
+    case 'pageBlockPhoto': return !!(block.photo && block.photo.sizes && block.photo.sizes.length > 0);
+    case 'pageBlockVideo': return !!(block.video && block.video.video);
+    case 'pageBlockAnimation': return !!(block.animation && block.animation.animation);
+    }
+    return false;
+}
+
+// Il primo blocco multimediale di un messageRichMessage (anche dentro copertine,
+// collage, citazioni...), in ordine di lettura; null se il post non ne ha.
+function getRichMessageFirstMediaBlock(content) {
     var search = function(blocks) {
         for (var i = 0; i < (blocks || []).length; i++) {
             var block = blocks[i];
             if (!block) {
                 continue;
             }
-            if (block['@type'] === 'pageBlockPhoto' && block.photo && block.photo.sizes && block.photo.sizes.length > 0) {
+            if (isRichMediaBlock(block)) {
                 return block;
             }
             var inner = search(block.cover ? [block.cover] : block.blocks);
@@ -967,40 +982,79 @@ function getRichMessageFirstPhotoBlock(content) {
 }
 
 // Come si divide un post ricco per disegnarlo nell'ordine di Telegram (titolo,
-// foto, testo): `head` sono i blocchi PRIMA della prima foto di primo livello (di
-// solito solo il titolo), che MessageRichMessage.qml disegna sopra la foto; `tail`
-// il seguito, che va nel testo del messaggio. Se la foto e' solo annidata
-// (copertina, collage...) la si mostra comunque in cima e il testo resta intero.
+// media, testo): `head` sono i blocchi PRIMA del primo media di primo livello (di
+// solito solo il titolo), che MessageRichMessage.qml disegna sopra il media; `tail`
+// il seguito, che va nel testo del messaggio. Se il media e' solo annidato
+// (copertina, collage...) lo si mostra comunque in cima e il testo resta intero.
 function getRichMessageLayout(content) {
     var blocks = (content && content.message && content.message.blocks) ? content.message.blocks : [];
     for (var i = 0; i < blocks.length; i++) {
         var block = blocks[i];
-        if (block && block['@type'] === 'pageBlockPhoto' && block.photo && block.photo.sizes && block.photo.sizes.length > 0) {
-            return { head: blocks.slice(0, i), photoBlock: block, tail: blocks.slice(i + 1) };
+        if (isRichMediaBlock(block)) {
+            return { head: blocks.slice(0, i), mediaBlock: block, tail: blocks.slice(i + 1) };
         }
     }
-    return { head: [], photoBlock: getRichMessageFirstPhotoBlock(content), tail: blocks };
+    return { head: [], mediaBlock: getRichMessageFirstMediaBlock(content), tail: blocks };
 }
 
-// La foto di un messageRichMessage presentata come un messagePhoto: cosi' la
-// disegnano MessagePhoto.qml e la pagina a tutto schermo senza codice nuovo.
-function richMessageAsPhotoMessage(message) {
-    var block = message ? getRichMessageLayout(message.content).photoBlock : null;
+// Il tipo di messaggio con cui si disegna il media dell'articolo ("" se non c'e').
+function richMediaMessageType(block) {
+    if (!block) {
+        return "";
+    }
+    switch (block['@type']) {
+    case 'pageBlockPhoto': return "messagePhoto";
+    case 'pageBlockVideo': return "messageVideo";
+    case 'pageBlockAnimation': return "messageAnimation";
+    }
+    return "";
+}
+
+// Il media di un messageRichMessage presentato come un messagePhoto, messageVideo o
+// messageAnimation: cosi' lo disegnano MessagePhoto.qml / MessageVideo.qml e le
+// pagine a tutto schermo senza codice nuovo.
+function richMessageAsMediaMessage(message) {
+    var block = message ? getRichMessageLayout(message.content).mediaBlock : null;
     if (!block) {
         return message;
     }
-    var photoMessage = {};
+    var mediaMessage = {};
     for (var key in message) {
-        photoMessage[key] = message[key];
+        mediaMessage[key] = message[key];
     }
-    photoMessage.content = {
-        '@type': 'messagePhoto',
-        photo: block.photo,
-        caption: { '@type': 'formattedText', text: '', entities: [] },
-        show_caption_above_media: false,
-        has_spoiler: !!block.has_spoiler
-    };
-    return photoMessage;
+    var emptyCaption = { '@type': 'formattedText', text: '', entities: [] };
+    switch (block['@type']) {
+    case 'pageBlockVideo':
+        mediaMessage.content = {
+            '@type': 'messageVideo',
+            video: block.video,
+            alternative_videos: [],
+            caption: emptyCaption,
+            show_caption_above_media: false,
+            has_spoiler: !!block.has_spoiler,
+            is_secret: false
+        };
+        break;
+    case 'pageBlockAnimation':
+        mediaMessage.content = {
+            '@type': 'messageAnimation',
+            animation: block.animation,
+            caption: emptyCaption,
+            show_caption_above_media: false,
+            has_spoiler: !!block.has_spoiler,
+            is_secret: false
+        };
+        break;
+    default:
+        mediaMessage.content = {
+            '@type': 'messagePhoto',
+            photo: block.photo,
+            caption: emptyCaption,
+            show_caption_above_media: false,
+            has_spoiler: !!block.has_spoiler
+        };
+    }
+    return mediaMessage;
 }
 
 // Una pageBlockButtonRow pronta per ReplyMarkupButtons.qml: inlineButton ha gli stessi
@@ -1232,8 +1286,9 @@ function pageBlocksToText(blocks, plain, skipBlock) {
             // la foto gia' disegnata sopra il testo lascia solo la sua didascalia
             text = (block === skipBlock) ? caption(block.caption) : media("🖼", block.caption);
             break;
-        case 'pageBlockVideo': text = media("🎬", block.caption); break;
-        case 'pageBlockAnimation': text = media("🎞", block.caption); break;
+        // il media gia' disegnato sopra il testo lascia solo la sua didascalia
+        case 'pageBlockVideo': text = (block === skipBlock) ? caption(block.caption) : media("🎬", block.caption); break;
+        case 'pageBlockAnimation': text = (block === skipBlock) ? caption(block.caption) : media("🎞", block.caption); break;
         case 'pageBlockAudio': text = media("🎵", block.caption); break;
         case 'pageBlockVoiceNote': text = media("🎤", block.caption); break;
         case 'pageBlockDocument': text = media("📄", block.caption); break;

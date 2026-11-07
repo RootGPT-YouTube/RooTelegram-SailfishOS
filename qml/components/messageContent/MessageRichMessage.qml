@@ -36,7 +36,12 @@ MessageContentBase {
     readonly property var headFlow: Functions.getRichMessageFlow(richLayout.head)
 
     height: richColumn.height
-    onClicked: richPhoto.clicked()
+    // Il tocco sul fumetto apre la foto a tutto schermo; il video ha i suoi comandi.
+    onClicked: {
+        if (richMedia.item && richMedia.mediaType === "messagePhoto") {
+            richMedia.item.clicked();
+        }
+    }
 
     Column {
         id: richColumn
@@ -82,13 +87,35 @@ MessageContentBase {
             }
         }
 
-        MessagePhoto {
-            id: richPhoto
-            messageListItem: richMessageContent.messageListItem
-            overlayFlickable: richMessageContent.overlayFlickable
-            rawMessage: Functions.richMessageAsPhotoMessage(richMessageContent.sourceMessage)
-            width: Math.min(parent.width, preferredWidth)
-            visible: !!richMessageContent.richLayout.photoBlock
+        // Il primo media dell'articolo, disegnato come il messaggio corrispondente:
+        // foto con MessagePhoto, video e animazioni con MessageVideo.
+        Loader {
+            id: richMedia
+            readonly property string mediaType: Functions.richMediaMessageType(richMessageContent.richLayout.mediaBlock)
+            width: item ? Math.min(parent.width, item.preferredWidth) : 0
+            active: mediaType !== ""
+            visible: active
+            sourceComponent: mediaType === "messagePhoto" ? richPhotoComponent : richVideoComponent
+        }
+
+        Component {
+            id: richPhotoComponent
+            MessagePhoto {
+                messageListItem: richMessageContent.messageListItem
+                overlayFlickable: richMessageContent.overlayFlickable
+                rawMessage: Functions.richMessageAsMediaMessage(richMessageContent.sourceMessage)
+                width: richMedia.width
+            }
+        }
+
+        Component {
+            id: richVideoComponent
+            MessageVideo {
+                messageListItem: richMessageContent.messageListItem
+                overlayFlickable: richMessageContent.overlayFlickable
+                rawMessage: Functions.richMessageAsMediaMessage(richMessageContent.sourceMessage)
+                width: richMedia.width
+            }
         }
     }
 }
