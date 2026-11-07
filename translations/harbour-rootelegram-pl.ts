@@ -1313,6 +1313,22 @@ Możesz usunąć ją ze swojej listy. To usunięcie jest tylko lokalne: nie usuw
         <source>Load more</source>
         <translation>Wczytaj więcej</translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram usuwa prośby usuniętych kont tylko razem ze wszystkimi pozostałymi: najpierw zatwierdź lub odrzuć pozostałe prośby, a potem spróbuj ponownie.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Usuwanie…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Usuń (usunięte konto)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>To konto zostało usunięte: Telegram nie pozwala już zatwierdzić ani odrzucić jego prośby.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>

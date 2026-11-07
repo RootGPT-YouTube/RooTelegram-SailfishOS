@@ -1307,6 +1307,22 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <source>Load more</source>
         <translation>Charger plus</translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram ne supprime les demandes des comptes supprimés qu&apos;avec toutes les autres : approuvez ou refusez d&apos;abord les autres demandes, puis réessayez.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Suppression…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Supprimer (compte supprimé)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>Ce compte a été supprimé : Telegram ne permet plus d&apos;approuver ou de refuser sa demande.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>

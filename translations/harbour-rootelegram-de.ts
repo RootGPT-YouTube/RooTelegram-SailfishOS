@@ -1307,6 +1307,22 @@ Du kannst sie aus deiner Liste entfernen. Diese Entfernung ist nur lokal: Sie l�
         <source>Load more</source>
         <translation>Mehr laden</translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram entfernt Anfragen gelöschter Konten nur zusammen mit allen anderen: Nimm zuerst die anderen Anfragen an oder lehne sie ab und versuche es dann erneut.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Wird entfernt…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Entfernen (gelöschtes Konto)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>Dieses Konto wurde gelöscht: Telegram erlaubt es nicht mehr, seine Anfrage anzunehmen oder abzulehnen.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>

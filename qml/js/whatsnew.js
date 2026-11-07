@@ -13,43 +13,36 @@
 // getter qui sotto, con FALLBACK a "en" se quella lingua non è presente.
 // Scrivi almeno "it" + "en"; le altre lingue sono opzionali (mostrano "en").
 
-var version = "3.7.8";
+var version = "3.7.9";
 
 var changelogByLang = {
     "it": [
-        "Avvio: su alcuni telefoni, come il Jolla Phone, toccando l'icona l'app non si apriva, oppure si apriva dopo quasi un minuto. Ora dovrebbe aprirsi subito.",
-        "Articoli: i pulsanti scritti con Telegram Desktop su una riga propria ora appaiono come veri pulsanti, non più come semplici link.",
-        "Richieste di iscrizione: se una persona è iscritta a troppi canali e gruppi, ora lo spiega un messaggio chiaro invece di un codice d'errore."
+        "Notifiche: aprendo un messaggio dalla notifica, ora risulta letto davvero, anche sugli altri dispositivi e nel contatore sulla copertina dell'app.",
+        "Richieste di iscrizione: la richiesta di un account eliminato non resta più bloccata. Al posto di «Approva» e «Rifiuta» compare «Rimuovi», che la toglie."
     ],
     "en": [
-        "Startup: on some phones, such as the Jolla Phone, tapping the icon did not open the app, or opened it only after almost a minute. It should now open right away.",
-        "Articles: buttons written with Telegram Desktop on a line of their own now appear as real buttons instead of plain links.",
-        "Join requests: if someone has joined too many channels and groups, a clear message now explains it instead of an error code."
+        "Notifications: opening a message from a notification now really marks it as read, on your other devices too and in the counter on the app cover.",
+        "Join requests: a request from a deleted account no longer stays stuck. Instead of «Approve» and «Reject» there is now «Remove», which clears it."
     ],
     "de": [
-        "Start: Auf manchen Telefonen, etwa dem Jolla Phone, öffnete ein Tipp auf das Symbol die App nicht oder erst nach fast einer Minute. Jetzt sollte sie sofort aufgehen.",
-        "Artikel: Schaltflächen, die mit Telegram Desktop in einer eigenen Zeile geschrieben wurden, erscheinen jetzt als echte Schaltflächen statt als einfache Links.",
-        "Beitrittsanfragen: Ist jemand Mitglied zu vieler Kanäle und Gruppen, erklärt das jetzt eine verständliche Meldung statt eines Fehlercodes."
+        "Benachrichtigungen: Wird eine Nachricht aus der Benachrichtigung geöffnet, gilt sie jetzt wirklich als gelesen, auch auf deinen anderen Geräten und im Zähler auf der App-Kachel.",
+        "Beitrittsanfragen: Die Anfrage eines gelöschten Kontos bleibt nicht mehr hängen. Statt «Genehmigen» und «Ablehnen» gibt es jetzt «Entfernen», das sie wegräumt."
     ],
     "pl": [
-        "Uruchamianie: na niektórych telefonach, na przykład Jolla Phone, dotknięcie ikony nie otwierało aplikacji albo otwierało ją dopiero po prawie minucie. Teraz powinna otwierać się od razu.",
-        "Artykuły: przyciski napisane w Telegram Desktop w osobnym wierszu są teraz prawdziwymi przyciskami, a nie zwykłymi linkami.",
-        "Prośby o dołączenie: jeśli ktoś należy do zbyt wielu kanałów i grup, wyjaśnia to teraz zrozumiały komunikat zamiast kodu błędu."
+        "Powiadomienia: wiadomość otwarta z powiadomienia jest teraz naprawdę oznaczona jako przeczytana, także na innych urządzeniach i w liczniku na okładce aplikacji.",
+        "Prośby o dołączenie: prośba usuniętego konta już się nie zawiesza. Zamiast «Zatwierdź» i «Odrzuć» pojawia się «Usuń», które ją usuwa."
     ],
     "ru": [
-        "Запуск: на некоторых телефонах, например Jolla Phone, нажатие на значок не открывало приложение или открывало его почти через минуту. Теперь оно должно открываться сразу.",
-        "Статьи: кнопки, написанные в Telegram Desktop на отдельной строке, теперь отображаются как настоящие кнопки, а не как обычные ссылки.",
-        "Заявки на вступление: если человек состоит в слишком большом количестве каналов и групп, теперь это объясняет понятное сообщение, а не код ошибки."
+        "Уведомления: сообщение, открытое из уведомления, теперь действительно отмечается прочитанным — и на других устройствах, и в счётчике на обложке приложения.",
+        "Заявки на вступление: заявка удалённого аккаунта больше не зависает. Вместо «Одобрить» и «Отклонить» теперь есть «Удалить», которое её убирает."
     ],
     "fr": [
-        "Démarrage : sur certains téléphones, comme le Jolla Phone, toucher l'icône n'ouvrait pas l'application, ou seulement après presque une minute. Elle devrait maintenant s'ouvrir tout de suite.",
-        "Articles : les boutons écrits avec Telegram Desktop sur leur propre ligne apparaissent maintenant comme de vrais boutons, et non plus comme de simples liens.",
-        "Demandes d'adhésion : si une personne a rejoint trop de canaux et de groupes, un message clair l'explique désormais à la place d'un code d'erreur."
+        "Notifications : un message ouvert depuis une notification est maintenant vraiment marqué comme lu, aussi sur vos autres appareils et dans le compteur de la vignette de l'application.",
+        "Demandes d'adhésion : la demande d'un compte supprimé ne reste plus bloquée. À la place de « Approuver » et « Refuser », un bouton « Supprimer » la retire."
     ],
     "sk": [
-        "Spustenie: na niektorých telefónoch, napríklad Jolla Phone, ťuknutie na ikonu aplikáciu neotvorilo alebo ju otvorilo až takmer po minúte. Teraz by sa mala otvoriť hneď.",
-        "Články: tlačidlá napísané v Telegram Desktop na samostatnom riadku sa teraz zobrazujú ako skutočné tlačidlá, nie ako obyčajné odkazy.",
-        "Žiadosti o pripojenie: ak je niekto členom príliš mnohých kanálov a skupín, teraz to vysvetlí zrozumiteľná správa namiesto chybového kódu."
+        "Upozornenia: správa otvorená z upozornenia je teraz naozaj označená ako prečítaná, aj na tvojich ďalších zariadeniach a v počítadle na obálke aplikácie.",
+        "Žiadosti o pripojenie: žiadosť odstráneného účtu už nezostane zaseknutá. Namiesto «Schváliť» a «Odmietnuť» je teraz «Odstrániť», ktoré ju odstráni."
     ]
 };
 

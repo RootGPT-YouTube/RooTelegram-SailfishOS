@@ -1307,6 +1307,22 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Load more</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Removing…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Remove (deleted account)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>This account has been deleted: Telegram no longer lets you approve or reject its request.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>

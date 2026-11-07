@@ -26,6 +26,8 @@ Page {
     property bool loadingMore: false
     property string activeQuery: ""
     property var processingByUserId: ({})
+    // Rifiuto in blocco in corso (processChatJoinRequests): vedi dismissDeletedRequests.
+    property bool dismissingDeleted: false
 
     function setProcessing(userId, processing) {
         var state = {}
@@ -58,22 +60,77 @@ Page {
         return (user && user.id) ? user : {}
     }
 
-    function appendRequest(requestData) {
-        requestsModel.append({
-            user_id: requestData.user_id,
-            date: requestData.date,
-            bio: requestData.bio || "",
-            user: getRequestUser(requestData.user_id)
+    // Richieste di account eliminati (segnalazione del 07/11/2026, gruppo Mint).
+    // Il server rifiuta sia l'approvazione sia il rifiuto della singola richiesta
+    // (processChatJoinRequest -> USER_ID_INVALID / INPUT_USER_DEACTIVATED), cosi'
+    // restava pendente per sempre. L'unica via che Telegram lascia e' il rifiuto
+    // in blocco (processChatJoinRequests, link vuoto = tutte le richieste del
+    // gruppo): lo offriamo solo quando in lista restano SOLO richieste di account
+    // eliminati, per non rifiutare di nascosto le persone vere.
+    function isDeletedUser(user) {
+        return !!(user && user.type && user.type["@type"] === "userTypeDeleted")
+    }
+
+    function isDeletedAccountError(message) {
+        return message === "INPUT_USER_DEACTIVATED" || message === "USER_ID_INVALID"
+                || message === "HIDE_REQUESTER_MISSING"
+    }
+
+    function markRequestDeleted(userId) {
+        var index = findRequestIndex(userId)
+        if (index > -1) {
+            requestsModel.setProperty(index, "deleted_account", true)
+        }
+    }
+
+    function hasOtherLiveRequests() {
+        // Richieste non ancora caricate: non sappiamo chi sono ⇒ contano come vere.
+        if (totalCount > requestsModel.count) {
+            return true
+        }
+        for (var i = 0; i < requestsModel.count; i += 1) {
+            if (!requestsModel.get(i).deleted_account) {
+                return true
+            }
+        }
+        return false
+    }
+
+    function dismissDeletedRequests() {
+        if (dismissingDeleted) {
+            return
+        }
+        if (hasOtherLiveRequests()) {
+            appNotification.show(qsTr("Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again."))
+            return
+        }
+        dismissingDeleted = true
+        tdLibWrapper.sendRequest({
+            "@type": "processChatJoinRequests",
+            "chat_id": Number(chatId),
+            "invite_link": "",
+            "approve": false,
+            "@extra": "processChatJoinRequests:" + chatId
         })
     }
 
-    function prependRequest(requestData) {
-        requestsModel.insert(0, {
+    function makeRequestEntry(requestData) {
+        var user = getRequestUser(requestData.user_id)
+        return {
             user_id: requestData.user_id,
             date: requestData.date,
             bio: requestData.bio || "",
-            user: getRequestUser(requestData.user_id)
-        })
+            user: user,
+            deleted_account: isDeletedUser(user)
+        }
+    }
+
+    function appendRequest(requestData) {
+        requestsModel.append(makeRequestEntry(requestData))
+    }
+
+    function prependRequest(requestData) {
+        requestsModel.insert(0, makeRequestEntry(requestData))
     }
 
     function removeRequest(userId) {
@@ -283,7 +340,20 @@ Page {
                     }
                     spacing: Theme.paddingSmall
 
+                    // Account eliminato: approva/rifiuta non funzionano piu' (vedi
+                    // isDeletedAccountError), resta solo «Rimuovi».
                     NeonButton {
+                        visible: deleted_account
+                        width: requestActionsRow.width
+                        height: parent.height
+                        text: chatJoinRequestsPage.dismissingDeleted ? qsTr("Removing…") : qsTr("Remove (deleted account)")
+                        enabled: !chatJoinRequestsPage.dismissingDeleted
+                        onClicked: {
+                            chatJoinRequestsPage.dismissDeletedRequests()
+                        }
+                    }
+                    NeonButton {
+                        visible: !deleted_account
                         width: (requestActionsRow.width - requestActionsRow.spacing) / 2
                         height: parent.height
                         text: requestDelegate.requestProcessing ? qsTr("Approving…") : qsTr("Approve")
@@ -293,6 +363,7 @@ Page {
                         }
                     }
                     NeonButton {
+                        visible: !deleted_account
                         width: (requestActionsRow.width - requestActionsRow.spacing) / 2
                         height: parent.height
                         text: requestDelegate.requestProcessing ? qsTr("Rejecting…") : qsTr("Reject")
@@ -362,7 +433,8 @@ Page {
 
         onChatPendingJoinRequestsUpdated: {
             if (chatId.toString() === chatJoinRequestsPage.chatId.toString()) {
-                chatJoinRequestsPage.totalCount = pendingJoinRequests.total_count
+                // Zero richieste: TDLib manda pending_join_requests null ⇒ niente total_count.
+                chatJoinRequestsPage.totalCount = (pendingJoinRequests && pendingJoinRequests.total_count) || 0
             }
         }
 
@@ -370,11 +442,19 @@ Page {
             for (var i = 0; i < requestsModel.count; i += 1) {
                 if (requestsModel.get(i).user_id.toString() === userId.toString()) {
                     requestsModel.setProperty(i, "user", userInformation)
+                    if (isDeletedUser(userInformation)) {
+                        requestsModel.setProperty(i, "deleted_account", true)
+                    }
                 }
             }
         }
 
         onOkReceived: {
+            if (request && request.toString() === "processChatJoinRequests:" + chatJoinRequestsPage.chatId) {
+                dismissingDeleted = false
+                refreshRequests()
+                return
+            }
             if (!request || request.indexOf("processChatJoinRequest:") !== 0) {
                 return
             }
@@ -394,7 +474,15 @@ Page {
                 var parts = extra.split(":")
                 if (parts.length === 3 && parts[1].toString() === chatJoinRequestsPage.chatId.toString()) {
                     setProcessing(parts[2], false)
+                    if (isDeletedAccountError(message)) {
+                        markRequestDeleted(parts[2])
+                        appNotification.show(qsTr("This account has been deleted: Telegram no longer lets you approve or reject its request."))
+                        return
+                    }
                 }
+            }
+            if (extra.toString() === "processChatJoinRequests:" + chatJoinRequestsPage.chatId) {
+                dismissingDeleted = false
             }
             if (loading && extra.toString() === chatJoinRequestsPage.chatId.toString()) {
                 loading = false

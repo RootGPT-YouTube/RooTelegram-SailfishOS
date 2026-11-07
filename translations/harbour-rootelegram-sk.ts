@@ -1313,6 +1313,22 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Load more</source>
         <translation>Načítať viac</translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram odstráni žiadosti odstránených účtov len spolu so všetkými ostatnými: najprv schváľ alebo odmietni ostatné žiadosti a potom to skús znova.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Odstraňuje sa…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Odstrániť (odstránený účet)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>Tento účet bol odstránený: Telegram už nedovoľuje schváliť ani odmietnuť jeho žiadosť.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>

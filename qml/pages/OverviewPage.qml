@@ -356,18 +356,39 @@ Page {
     // Senza questo, il read affidato alla ListView con force:false poteva non
     // arrivare in fondo (deep-link a un messaggio non ultimo) → badge unread che
     // restava in home dopo aver aperto la chat dalla notifica.
-    function markChatReadOnExternalOpen(chatInfo) {
+    function markChatReadOnExternalOpen(chatInfo, notifiedMessageId) {
         if (chatInfo && chatInfo.id) {
             // Badge home via SUBITO (serve solo l'id): handleChatOpened non azzera piu'
             // il badge all'apertura per canali/gruppi (letto-da-scroll). FUORI dal guard
             // last_message, che su chat aperte da notifica (getChat) spesso manca →
             // altrimenti il clear non gira affatto e il badge resta.
             chatListModel.markChatReadOptimistically(chatInfo.id);
-            // Read FORZATO sul server: richiede last_message.
-            if (chatInfo.last_message && chatInfo.last_message.id) {
-                tdLibWrapper.viewMessage(chatInfo.id, chatInfo.last_message.id, true);
+            // Read FORZATO sul server fino al messaggio piu' recente che conosciamo:
+            // l'ultimo della chat o quello della notifica, il maggiore dei due.
+            // Segnalazione del 05/11/2026: dal tocco su notifica il read sul server
+            // non partiva MAI. chatInfo veniva da tdLibWrapper.getChat(), la cache
+            // riempita da updateNewChat e mai aggiornata da updateChatLastMessage:
+            // last_message li' e' assente (o vecchio) ⇒ niente viewMessages. Il
+            // badge locale si azzerava (ottimistico), ma TDLib, la copertina e gli
+            // altri client restavano col messaggio non letto.
+            var lastId = (chatInfo.last_message && chatInfo.last_message.id) ? Number(chatInfo.last_message.id) : 0;
+            var notifiedId = notifiedMessageId ? Number(notifiedMessageId) : 0;
+            var readUpTo = Math.max(lastId, notifiedId);
+            if (readUpTo > 0) {
+                tdLibWrapper.viewMessage(chatInfo.id, readUpTo, true);
             }
         }
+    }
+
+    // Dati della chat per un'apertura esterna: prima il modello della lista (ha
+    // last_message aggiornato), poi la cache di TDLibWrapper (solo i dati di
+    // updateNewChat). Vedi markChatReadOnExternalOpen.
+    function chatInfoForExternalOpen(chatId) {
+        var chatInfo = chatListModel.getById(chatId);
+        if (!chatInfo || !chatInfo.id) {
+            chatInfo = tdLibWrapper.getChat(chatId.toString());
+        }
+        return chatInfo;
     }
 
     function openChat(chatId) {
@@ -410,8 +431,8 @@ Page {
         }
         if(chatListCreated && chatToOpen && chatToOpen.length === 2) {
             Debug.log("[OverviewPage] Opening Chat: ", chatToOpen[0], "message ID: " + chatToOpen[1]);
-            var chatInfo = tdLibWrapper.getChat(chatToOpen[0]);
-            markChatReadOnExternalOpen(chatInfo);
+            var chatInfo = chatInfoForExternalOpen(chatToOpen[0]);
+            markChatReadOnExternalOpen(chatInfo, chatToOpen[1]);
             pageStack.pop(overviewPage, PageStackAction.Immediate);
             pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo, "messageIdToShow" : chatToOpen[1] }, PageStackAction.Immediate);
             chatToOpen = null;
@@ -424,8 +445,8 @@ Page {
         }
         if(chatListCreated && chatToOpen && chatToOpen.length === 2) {
             Debug.log("[OverviewPage] Opening Chat (with provided message): ", chatToOpen[0]);
-            var chatInfo = tdLibWrapper.getChat(chatToOpen[0]);
-            markChatReadOnExternalOpen(chatInfo);
+            var chatInfo = chatInfoForExternalOpen(chatToOpen[0]);
+            markChatReadOnExternalOpen(chatInfo, chatToOpen[1] ? chatToOpen[1].id : 0);
             pageStack.pop(overviewPage, PageStackAction.Immediate);
             pageStack.push(Qt.resolvedUrl("../pages/ChatPage.qml"), { "chatInformation" : chatInfo, "messageToShow" : chatToOpen[1] }, PageStackAction.Immediate);
             chatToOpen = null;

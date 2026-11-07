@@ -1313,6 +1313,22 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Load more</source>
         <translation>Загрузить ещё</translation>
     </message>
+    <message>
+        <source>Telegram removes requests from deleted accounts only together with all the others: approve or reject the other requests first, then try again.</source>
+        <translation>Telegram удаляет заявки удалённых аккаунтов только вместе со всеми остальными: сначала одобрите или отклоните другие заявки, затем повторите попытку.</translation>
+    </message>
+    <message>
+        <source>Removing…</source>
+        <translation>Удаление…</translation>
+    </message>
+    <message>
+        <source>Remove (deleted account)</source>
+        <translation>Удалить (удалённый аккаунт)</translation>
+    </message>
+    <message>
+        <source>This account has been deleted: Telegram no longer lets you approve or reject its request.</source>
+        <translation>Этот аккаунт удалён: Telegram больше не позволяет одобрить или отклонить его заявку.</translation>
+    </message>
 </context>
 <context>
     <name>ChatListViewItem</name>
