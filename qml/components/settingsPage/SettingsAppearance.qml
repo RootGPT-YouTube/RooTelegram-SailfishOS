@@ -62,7 +62,9 @@ AccordionItem {
                 readonly property bool neon: appSettings.useNeonTheme
                 readonly property bool barbara: BarbaraTheme.active
 
-                readonly property string description: barbara
+                readonly property string description: BarbaraTheme.classic
+                    ? qsTr("Classic messenger look, with its own light and dark palettes")
+                    : barbara
                     ? qsTr("Cold glass and cyan, readable with both light and dark ambiences")
                     : (neon
                        ? qsTr("Cyberpunk look (requires a dark and orange theme for the perfect experience)")
@@ -71,7 +73,7 @@ AccordionItem {
                 // Tema richiesto dalle pillole, in attesa di conferma nel dialog.
                 property int pendingTheme: AppSettings.ThemeSilica
 
-                // Le pillole seguono l'ordine dell'enum: 0 Silica, 1 Neon, 2 Barbara.
+                // Le pillole seguono l'ordine dell'enum: 0 Silica, 1 Neon, 2 Barbara, 3 Classic.
                 function requestTheme(wantTheme) {
                     if (wantTheme === appSettings.appTheme) {
                         return; // nessun cambiamento
@@ -113,10 +115,10 @@ AccordionItem {
                     spacing: Theme.paddingSmall
 
                     Repeater {
-                        model: 3
+                        model: 4
                         delegate: Item {
                             id: themePill
-                            width: Math.floor((parent.width - 2 * Theme.paddingSmall) / 3)
+                            width: Math.floor((parent.width - 3 * Theme.paddingSmall) / 4)
                             height: Math.round(Theme.fontSizeSmall * 1.2) + 2 * Theme.paddingSmall
                             readonly property bool isCurrent: appSettings.appTheme === index
 
@@ -126,7 +128,8 @@ AccordionItem {
                                       : (themeSelector.barbara ? BarbaraTheme.radiusBubble : 0)
                                 color: themeSelector.barbara
                                        ? (themePill.isCurrent ? BarbaraTheme.accent
-                                          : (pillArea.pressed ? BarbaraTheme.accentWash : "transparent"))
+                                          : (pillArea.pressed ? BarbaraTheme.accentWash
+                                             : (BarbaraTheme.classic ? BarbaraTheme.glass : "transparent")))
                                      : themeSelector.neon
                                        ? Theme.rgba("#ffffff", themePill.isCurrent ? 0.16 : (pillArea.pressed ? 0.12 : 0.06))
                                        : (themePill.isCurrent ? Theme.rgba(Theme.highlightColor, 0.15)
@@ -145,7 +148,8 @@ AccordionItem {
                                 anchors.fill: parent
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
-                                text: index === 0 ? "SILICA" : (index === 1 ? "NEON" : "BARBARA")
+                                text: index === 0 ? "SILICA" : (index === 1 ? "NEON"
+                                      : (index === 2 ? "BARBARA" : "CLASSIC"))
                                 font.family: themeSelector.barbara ? BarbaraTheme.fontFamilyMono
                                            : (themeSelector.neon ? Theme.fontFamilyHeading : Theme.fontFamily)
                                 font.italic: themeSelector.neon
@@ -186,11 +190,20 @@ AccordionItem {
                 }
             }
 
+            // Classic: sfondo delle chat, sincronizzato con Telegram.
+            ValueButton {
+                width: parent.columnWidth
+                visible: BarbaraTheme.classic
+                label: qsTr("Chat backgrounds")
+                value: qsTr("Synced with Telegram")
+                onClicked: pageStack.push(Qt.resolvedUrl("../../pages/ChatBackgroundsPage.qml"))
+            }
+
             // Interruttore proprio di Barbara: l'alone sui titoli ha effetto solo con
             // ambience scura, e si puo' spegnere del tutto (utile su device lenti).
             TextSwitch {
                 width: parent.columnWidth
-                visible: BarbaraTheme.active
+                visible: BarbaraTheme.active && !BarbaraTheme.classic
                 checked: appSettings.barbaraGlowTitles
                 text: qsTr("Glow on titles")
                 description: qsTr("Barbara theme only, and only with a dark ambience")

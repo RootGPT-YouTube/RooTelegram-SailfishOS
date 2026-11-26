@@ -130,7 +130,8 @@ PhotoTextsListItem {
     // Dimensione titolo: nel tema Silica i nomi (in grassetto) sono ridotti di una
     // misura (fontSizeSmall) su richiesta (#5/#6 v2.4); il neon resta fontSizeMedium.
     // L'hint emoji segue la stessa misura per non disallineare le emoji nel titolo.
-    readonly property real chatTitleFontSize: appSettings.useNeonTheme ? Theme.fontSizeMedium : Theme.fontSizeSmall
+    // Classic: nomi grandi come nell'app Android.
+    readonly property real chatTitleFontSize: (appSettings.useNeonTheme || BarbaraTheme.classic) ? Theme.fontSizeMedium : Theme.fontSizeSmall
     // Barbara: menu long-press con la card del tema (vedi NeonMenuOverlay).
     readonly property bool barbara: BarbaraTheme.active
     primaryText.text: title ? Emoji.emojify(title, chatTitleFontSize) : qsTr("Unknown")

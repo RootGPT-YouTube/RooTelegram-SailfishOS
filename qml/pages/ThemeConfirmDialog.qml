@@ -21,11 +21,12 @@ Dialog {
     id: themeDialog
     allowedOrientations: Orientation.All
 
-    // Tema richiesto: AppSettings.ThemeSilica / ThemeNeon / ThemeBarbara.
+    // Tema richiesto: AppSettings.ThemeSilica / ThemeNeon / ThemeBarbara / ThemeClassic.
     property int wantTheme: AppSettings.ThemeSilica
 
     readonly property bool wantNeon: wantTheme === AppSettings.ThemeNeon
     readonly property bool wantBarbara: wantTheme === AppSettings.ThemeBarbara
+    readonly property bool wantClassic: wantTheme === AppSettings.ThemeClassic
 
     Column {
         width: parent.width
@@ -34,7 +35,8 @@ Dialog {
         DialogHeader {
             acceptText: qsTr("Apply now")
             cancelText: qsTr("No")
-            title: themeDialog.wantBarbara ? qsTr("Barbara theme")
+            title: themeDialog.wantClassic ? qsTr("Classic theme")
+                 : themeDialog.wantBarbara ? qsTr("Barbara theme")
                  : (themeDialog.wantNeon ? qsTr("Neon theme") : qsTr("Silica theme"))
         }
 
@@ -44,7 +46,9 @@ Dialog {
             wrapMode: Text.WordWrap
             color: Theme.highlightColor
             font.pixelSize: Theme.fontSizeMedium
-            text: themeDialog.wantBarbara
+            text: themeDialog.wantClassic
+                ? qsTr("Classic messenger look")
+                : themeDialog.wantBarbara
                 ? qsTr("Cold glass, cyan and night")
                 : (themeDialog.wantNeon ? qsTr("Cyberpunk look") : qsTr("Base theme"))
         }
@@ -55,7 +59,9 @@ Dialog {
             wrapMode: Text.WordWrap
             color: Theme.secondaryColor
             font.pixelSize: Theme.fontSizeSmall
-            text: themeDialog.wantBarbara
+            text: themeDialog.wantClassic
+                ? qsTr("Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.")
+                : themeDialog.wantBarbara
                 ? qsTr("Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.")
                 : (themeDialog.wantNeon
                    ? qsTr("Circuit background, neon glow on menus, buttons and titles, rounded avatars and glass cards. Heavier: requires a dark and orange theme for the perfect experience.")

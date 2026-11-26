@@ -42,11 +42,26 @@ Loader {
     anchors.fill: parent
     active: BarbaraTheme.active
 
+    // Pagina chat? In Classic lo sfondo della chat ha la sua tinta (wallpaper).
+    property bool chat: false
+    // Classic, pagina chat: sfondo sincronizzato con Telegram (chatBackground di
+    // TDLib della chat aperta, o null per lo sfondo predefinito dell'account).
+    property var chatBackground: null
+
     sourceComponent: Item {
 
         Rectangle {
             anchors.fill: parent
-            color: BarbaraTheme.surface
+            color: barbaraBackground.chat ? BarbaraTheme.chatSurface : BarbaraTheme.surface
+        }
+
+        // Classic: sfondo della chat come in Telegram (vedi ChatWallpaper.qml).
+        Loader {
+            anchors.fill: parent
+            active: barbaraBackground.chat && BarbaraTheme.classic
+            sourceComponent: ChatWallpaper {
+                chatBackground: barbaraBackground.chatBackground
+            }
         }
 
         // Reticolo 44px del mockup, riportato in proporzione alla larghezza dello
@@ -55,6 +70,8 @@ Loader {
         Canvas {
             id: grid
             anchors.fill: parent
+            // Classic: fondo pieno, niente reticolo.
+            visible: !BarbaraTheme.classic
             opacity: 0.55
             renderStrategy: Canvas.Cooperative
 

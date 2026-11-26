@@ -615,6 +615,53 @@
     </message>
 </context>
 <context>
+    <name>ChatBackgroundsPage</name>
+    <message>
+        <source>Background changed</source>
+        <translation>Pozadie zmenené</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Prístup k obrázkom je v nastaveniach RooTelegram vypnutý.</translation>
+    </message>
+    <message>
+        <source>Telegram did not accept this background: %1</source>
+        <translation>Telegram toto pozadie neprijal: %1</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Pozadie četu</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Pozadia četov</translation>
+    </message>
+    <message>
+        <source>Dark palette</source>
+        <translation>Tmavá paleta</translation>
+    </message>
+    <message>
+        <source>Light palette</source>
+        <translation>Svetlá paleta</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram: you will see it on all your devices. Only you see it.</source>
+        <translation>Uložené v Telegrame: uvidíte ho na všetkých svojich zariadeniach. Vidíte ho iba vy.</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram for all chats, separately for the light and the dark palette: you will see it on all your devices.</source>
+        <translation>Uložené v Telegrame pre všetky čety, zvlášť pre svetlú a tmavú paletu: uvidíte ho na všetkých svojich zariadeniach.</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Predvolené</translation>
+    </message>
+    <message>
+        <source>From gallery</source>
+        <translation>Z galérie</translation>
+    </message>
+</context>
+<context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
@@ -1829,6 +1876,10 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Done</source>
         <translation>Hotovo</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Pozadie četu</translation>
     </message>
 </context>
 <context>
@@ -4468,6 +4519,18 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
         <source>Barbara theme only, and only with a dark ambience</source>
         <translation>Iba téma Barbara a iba s tmavým ambientom</translation>
     </message>
+    <message>
+        <source>Classic messenger look, with its own light and dark palettes</source>
+        <translation>Klasický vzhľad messengera, s vlastnými svetlou a tmavou paletou</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Pozadia četov</translation>
+    </message>
+    <message>
+        <source>Synced with Telegram</source>
+        <translation>Synchronizované s Telegramom</translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -5546,6 +5609,18 @@ Môžete ju odstrániť zo svojho zoznamu. Toto odstránenie je iba lokálne: ni
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation>Riadky četov ako sklenené karty, kurzívne pätkové nadpisy, metadáta neproporcionálnym písmom, filtre podľa typu a priečinky ako štítky. Téma má vlastnú svetlú aj tmavú paletu, takže zostáva čitateľná pri akomkoľvek systémovom ambiente.</translation>
+    </message>
+    <message>
+        <source>Classic theme</source>
+        <translation>Téma Classic</translation>
+    </message>
+    <message>
+        <source>Classic messenger look</source>
+        <translation>Klasický vzhľad messengera</translation>
+    </message>
+    <message>
+        <source>Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Plochý zoznam četov s okrúhlymi avatarmi, priečinky ako karty v pilulke, modrý akcent, bubliny s časom vo vnútri a zaoblené pole na písanie. Má vlastnú svetlú a tmavú paletu, takže zostáva čitateľná pri akomkoľvek systémovom ambiente.</translation>
     </message>
 </context>
 <context>

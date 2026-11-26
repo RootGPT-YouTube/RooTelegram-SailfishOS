@@ -33,7 +33,11 @@ ListItem {
     // l'anteprima compatta della lista chat: le altre pagine che riusano questo
     // componente restano come sono.
     readonly property bool barbaraCard: BarbaraTheme.active && useCompactPreview
-    readonly property real barbaraCardInset: Theme.paddingMedium
+    // Tema Classic: stessa colonna dei metadati, ma riga PIATTA a tutta
+    // larghezza (niente card), avatar tondo grande, ora in pillola con la
+    // puntina sulle chat fissate, badge blu (grigio se silenziata).
+    readonly property bool classicRow: barbaraCard && BarbaraTheme.classic
+    readonly property real barbaraCardInset: classicRow ? 0 : Theme.paddingMedium
     readonly property bool hasUnread: unreadCount > 0 || isMarkedAsUnread
 
     Rectangle {
@@ -47,7 +51,8 @@ ListItem {
             bottomMargin: Theme.paddingSmall / 2
         }
         radius: BarbaraTheme.radiusCard
-        color: chatListViewItem.highlighted ? BarbaraTheme.accentWash : BarbaraTheme.glass
+        color: chatListViewItem.highlighted ? BarbaraTheme.accentWash
+             : (chatListViewItem.classicRow ? "transparent" : BarbaraTheme.glass)
         border.width: BarbaraTheme.borderWidth
         border.color: BarbaraTheme.glassBorder
         Behavior on color { ColorAnimation { duration: BarbaraTheme.pressDuration } }
@@ -69,12 +74,14 @@ ListItem {
 
     ShaderEffectSource {
         id: pictureItem
-        height: chatListViewItem.barbaraCard ? Theme.itemSizeMedium : Theme.itemSizeLarge
+        height: chatListViewItem.classicRow ? Math.round(Theme.itemSizeLarge * 0.92)
+              : chatListViewItem.barbaraCard ? Theme.itemSizeMedium : Theme.itemSizeLarge
         width: height
         anchors {
             left: parent.left
             leftMargin: chatListViewItem.barbaraCard
-                        ? (chatListViewItem.barbaraCardInset + Theme.paddingMedium)
+                        ? (chatListViewItem.classicRow ? Theme.horizontalPageMargin
+                                                  : (chatListViewItem.barbaraCardInset + Theme.paddingMedium))
                         : Theme.horizontalPageMargin
             verticalCenter: parent.verticalCenter
         }
@@ -187,10 +194,45 @@ ListItem {
             verticalCenter: parent.verticalCenter
         }
         spacing: Theme.paddingSmall
-        width: visible ? Math.max(barbaraTime.implicitWidth, barbaraUnreadBadge.width) : 0
+        width: visible ? Math.max(chatListViewItem.classicRow ? classicTimePill.width : barbaraTime.implicitWidth,
+                                  barbaraUnreadBadge.width) : 0
+
+        // Classic: ora (con puntina se fissata) in una pillola, come nell'app Android.
+        Rectangle {
+            id: classicTimePill
+            visible: chatListViewItem.classicRow
+            anchors.right: parent.right
+            height: classicTimeRow.height + Theme.paddingSmall
+            width: chatListViewItem.classicRow ? classicTimeRow.width + (chatListViewItem.isPinned ? 2 * Theme.paddingMedium : 0) : 0
+            radius: height / 2
+            color: chatListViewItem.isPinned ? BarbaraTheme.glass : "transparent"
+            Row {
+                id: classicTimeRow
+                anchors.centerIn: parent
+                spacing: Theme.paddingSmall / 2
+                Icon {
+                    visible: chatListViewItem.isPinned
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: "../../images/icon-s-pin.svg"
+                    color: BarbaraTheme.inkSecondary
+                    width: Theme.iconSizeExtraSmall
+                    height: width
+                    sourceSize: Qt.size(Theme.iconSizeExtraSmall, Theme.iconSizeExtraSmall)
+                }
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: tertiaryText.text
+                    font.pixelSize: Theme.fontSizeExtraSmall
+                    color: BarbaraTheme.inkSecondary
+                    textFormat: Text.StyledText
+                    maximumLineCount: 1
+                }
+            }
+        }
 
         Label {
             id: barbaraTime
+            visible: !chatListViewItem.classicRow
             anchors.right: parent.right
             text: tertiaryText.text
             font.family: BarbaraTheme.fontFamilyMono
@@ -208,7 +250,7 @@ ListItem {
             width: visible ? Math.max(height, barbaraUnreadLabel.implicitWidth + Theme.paddingMedium) : 0
             radius: Math.round(height / 2)
             color: chatListViewItem.isMuted
-                   ? Theme.rgba(BarbaraTheme.inkSecondary, 0.35)
+                   ? BarbaraTheme.mutedBadge
                    : BarbaraTheme.attention
             Label {
                 id: barbaraUnreadLabel
@@ -219,7 +261,8 @@ ListItem {
                 font.family: BarbaraTheme.fontFamilyMono
                 font.pixelSize: BarbaraTheme.fontSizeMeta
                 font.bold: true
-                color: chatListViewItem.isMuted ? BarbaraTheme.ink : BarbaraTheme.onAttention
+                color: chatListViewItem.classicRow ? "#ffffff"
+                     : (chatListViewItem.isMuted ? BarbaraTheme.ink : BarbaraTheme.onAttention)
             }
         }
     }
@@ -281,7 +324,9 @@ ListItem {
                     verticalAlignment: Text.AlignVCenter
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.min(contentColumn.width - (verifiedImage.visible ? (verifiedImage.width + primaryTextRowInner.spacing) :  0) - (mutedImage.visible ? (mutedImage.width + primaryTextRowInner.spacing) :  0) - (barbaraPinTag.visible ? (barbaraPinTag.width + primaryTextRowInner.spacing) : 0), implicitWidth)
-                    font.bold: appSettings.highlightUnreadConversations && ( !chatListViewItem.isMuted && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread) )
+                    // Classic: titolo della chat sempre in grassetto.
+                    font.bold: chatListViewItem.classicRow
+                               || (appSettings.highlightUnreadConversations && ( !chatListViewItem.isMuted && (chatListViewItem.unreadCount > 0 || chatListViewItem.isMarkedAsUnread) ))
                     color: (appSettings.highlightUnreadConversations && (chatListViewItem.unreadCount > 0)) ? Theme.highlightColor : Theme.primaryColor
                 }
 
@@ -289,7 +334,7 @@ ListItem {
                 // sovrapposta all'avatar.
                 Rectangle {
                     id: barbaraPinTag
-                    visible: chatListViewItem.barbaraCard && chatListViewItem.isPinned
+                    visible: chatListViewItem.barbaraCard && !chatListViewItem.classicRow && chatListViewItem.isPinned
                     anchors.verticalCenter: parent.verticalCenter
                     width: visible ? barbaraPinLabel.implicitWidth + Theme.paddingSmall : 0
                     height: visible ? barbaraPinLabel.implicitHeight + Theme.paddingSmall / 2 : 0

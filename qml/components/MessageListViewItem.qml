@@ -52,6 +52,41 @@ ListItem {
     readonly property bool isOwnMessage: page.myUserId && myMessage.sender_id ? (page.myUserId === myMessage.sender_id.user_id) : false
     readonly property bool useOutgoingLayout: isOwnMessage && !page.isChannel
     readonly property bool barbara: BarbaraTheme.active
+    // Classic: il fumetto si STRINGE sul testo, come in Telegram («Hello.» non
+    // occupa tutta la riga). Solo per i messaggi di SOLO testo: media, risposte,
+    // inoltri, anteprime web, tastiere, articoli e reazioni hanno componenti a
+    // larghezza piena che restano sulla larghezza classica.
+    readonly property bool classicCompactBubble: barbara && BarbaraTheme.classic
+        && !isSingleMedia && !hasContentComponent
+        && myMessage['@type'] !== "sponsoredMessage"
+        && !myMessage.via_bot_user_id
+        && !messageInReplyToLoader.active && !storyReplyChipLoader.active
+        && !forwardedInformationLoader.active && !richMessageFlowLoader.active
+        && webPagePreviewLoader.height === 0 && !replyMarkupLoader.active
+        && !interactionLoader.active
+    // TUTTI i temi (nato in Classic, esteso su richiesta dell'utente): album di sole
+    // foto/video SENZA didascalia, risposta, inoltro, nome o reazioni = il mosaico è
+    // lui stesso il fumetto, come in Telegram: niente cornice, angoli arrotondati
+    // col raggio del fumetto del tema, ora in una pillola sopra l'ultima foto
+    // (MessagePhotoAlbum legge bareAlbum, bubbleRadius e dateStatusText).
+    readonly property bool bareAlbum: hasContentComponent && !!myMessage.media_album_id && myMessage.media_album_id !== "0"
+        && !!myMessage.content
+        && (myMessage.content["@type"] === "messagePhoto" || myMessage.content["@type"] === "messageVideo")
+        && messageTextDisplay.text === "" && !userText.visible
+        && !messageInReplyToLoader.active && !storyReplyChipLoader.active
+        && !forwardedInformationLoader.active && !replyMarkupLoader.active
+        && !interactionLoader.active && !myMessage.via_bot_user_id
+    readonly property string dateStatusText: messageDateText.text
+    // Raggio del fumetto nel tema in uso (stessa formula di messageBackground).
+    readonly property real bubbleRadius: barbara ? BarbaraTheme.radiusBubble : messageTextItem.width / 50
+    // Larghezza naturale del contenuto (testo non spezzato, nome, orario), entro
+    // la colonna classica.
+    readonly property real classicCompactColumnWidth: Math.round(Math.min(precalculatedValues.textColumnWidth,
+        Math.max(Theme.itemSizeMedium,
+                 userText.visible ? userText.implicitWidth : 0,
+                 messageTextDisplay.visible ? messageTextDisplay.implicitWidth : 0,
+                 messageText.visible ? messageText.implicitWidth : 0,
+                 messageDateText.implicitWidth) + 1))
     // Barbara: il testo del messaggio e' sempre in inchiostro del tema — MAI
     // l'accento, che qui serve solo al nome dell'autore.
     readonly property color textColor: barbara ? BarbaraTheme.ink
@@ -1298,9 +1333,10 @@ ListItem {
                 anchors {
                     // Foto singola: allinea il fumetto al lato giusto (dx i propri, sx gli altrui);
                     // altrimenti comportamento classico (sinistra + leftMargin per i propri).
-                    left: (messageListItem.useOutgoingLayout && messageListItem.isSingleMedia) ? undefined : parent.left
-                    right: (messageListItem.useOutgoingLayout && messageListItem.isSingleMedia) ? parent.right : undefined
-                    leftMargin: (messageListItem.useOutgoingLayout && !messageListItem.isSingleMedia) ? precalculatedValues.pageMarginDouble : 0
+                    // Classic, fumetto stretto: stesso ancoraggio delle foto singole.
+                    left: (messageListItem.useOutgoingLayout && (messageListItem.isSingleMedia || messageListItem.classicCompactBubble)) ? undefined : parent.left
+                    right: (messageListItem.useOutgoingLayout && (messageListItem.isSingleMedia || messageListItem.classicCompactBubble)) ? parent.right : undefined
+                    leftMargin: (messageListItem.useOutgoingLayout && !messageListItem.isSingleMedia && !messageListItem.classicCompactBubble) ? precalculatedValues.pageMarginDouble : 0
                     verticalCenter: parent.verticalCenter
                 }
                 // Cornice MINIMA per le foto singole: il fumetto avvolge l'immagine.
@@ -1309,7 +1345,9 @@ ListItem {
                         : messageTextColumn.height + precalculatedValues.paddingMediumDouble
                 width: (messageListItem.isSingleMedia && extraContentLoader.item)
                        ? Math.round(extraContentLoader.item.preferredWidth + 2 * Theme.paddingSmall)
-                       : precalculatedValues.backgroundWidth
+                       : messageListItem.classicCompactBubble
+                         ? messageListItem.classicCompactColumnWidth + Theme.horizontalPageMargin
+                         : precalculatedValues.backgroundWidth
                 property bool isUnread: messageIndex > chatModel.getLastReadMessageIndex() && myMessage['@type'] !== "sponsoredMessage"
                 // Effetto "vetro leggero" (glassmorphism): fumetto molto più trasparente
                 // (alpha bassa sul colore, opacity=1) + bordo sottile luminoso. Niente blur
@@ -1329,7 +1367,8 @@ ListItem {
                 border.color: messageListItem.barbara
                               ? (messageListItem.useOutgoingLayout ? BarbaraTheme.accentBorder : BarbaraTheme.glassBorder)
                               : Theme.rgba(messageListItem.isOwnMessage ? "#ff5252" : "#ff8a3d", 0.45)
-                visible: appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji")
+                visible: !messageListItem.bareAlbum
+                         && (appSettings.showStickersAsImages || (myMessage.content['@type'] !== "messageSticker" && myMessage.content['@type'] !== "messageAnimatedEmoji"))
                 Behavior on color { ColorAnimation { duration: 200 } }
             }
 
@@ -1341,7 +1380,9 @@ ListItem {
                 // Foto singola: la colonna (e quindi il fumetto) larga quanto l'immagine.
                 width: (messageListItem.isSingleMedia && extraContentLoader.item)
                        ? extraContentLoader.item.preferredWidth
-                       : precalculatedValues.textColumnWidth
+                       : messageListItem.classicCompactBubble
+                         ? messageListItem.classicCompactColumnWidth
+                         : precalculatedValues.textColumnWidth
                 anchors.centerIn: messageBackground
 
 
@@ -1360,7 +1401,10 @@ ListItem {
                     font.weight: Font.ExtraBold
                     // Barbara: l'autore e' l'unico elemento in accento dentro il fumetto.
                     font.family: messageListItem.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
-                    color: messageListItem.barbara ? BarbaraTheme.accent : messageListItem.textColor
+                    // Classic: nome colorato per mittente, come nei gruppi dell'app Android.
+                    color: (messageListItem.barbara && BarbaraTheme.classic && !messageListItem.useOutgoingLayout)
+                           ? BarbaraTheme.nameColor(messageListItem.userInformation, messageListItem.senderUserId)
+                           : messageListItem.barbara ? BarbaraTheme.accent : messageListItem.textColor
                     maximumLineCount: 1
                     truncationMode: TruncationMode.Elide
                     textFormat: Text.StyledText
@@ -1556,7 +1600,7 @@ ListItem {
                            ? item.preferredWidth
                            : parent.width * getContentWidthMultiplier()
                     asynchronous: true
-                    readonly property var defaultExtraContentHeight: messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width, model.album_message_ids.length) : 0
+                    readonly property var defaultExtraContentHeight: messageListItem.hasContentComponent ? chatView.getContentComponentHeight(model.content_type, myMessage.content, width, model.album_message_ids.length, myMessage.media_album_id) : 0
                     height: item ? item.height : defaultExtraContentHeight
                 }
 
@@ -1708,9 +1752,12 @@ ListItem {
                     property bool useElapsed: true
 
                     id: messageDateText
+                    // Album senza cornice: l'ora va nella pillola sopra la foto.
+                    visible: !messageListItem.bareAlbum
                     font.pixelSize: Theme.fontSizeTiny
                     font.family: messageListItem.barbara ? BarbaraTheme.fontFamilyMono : Theme.fontFamily
-                    color: messageListItem.barbara ? BarbaraTheme.inkSecondary
+                    color: messageListItem.barbara
+                           ? (messageListItem.useOutgoingLayout ? BarbaraTheme.metaOwn : BarbaraTheme.inkSecondary)
                          : (messageListItem.useOutgoingLayout ? Theme.secondaryHighlightColor : Theme.secondaryColor)
                     horizontalAlignment: messageListItem.metaAlign
                     text: getMessageStatusText(myMessage, messageIndex, chatView.lastReadSentIndex, messageDateText.useElapsed)

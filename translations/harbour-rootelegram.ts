@@ -612,6 +612,53 @@
     </message>
 </context>
 <context>
+    <name>ChatBackgroundsPage</name>
+    <message>
+        <source>Background changed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation type="unfinished">Image access is turned off in RooTelegram settings.</translation>
+    </message>
+    <message>
+        <source>Telegram did not accept this background: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Dark palette</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Light palette</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Saved on Telegram: you will see it on all your devices. Only you see it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Saved on Telegram for all chats, separately for the light and the dark palette: you will see it on all your devices.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>From gallery</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
@@ -1810,6 +1857,10 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chat background</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4429,6 +4480,18 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Barbara theme only, and only with a dark ambience</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Classic messenger look, with its own light and dark palettes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Synced with Telegram</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -5495,6 +5558,18 @@ You can remove it from your list. This removal is local only: it does not delete
     </message>
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classic theme</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Classic messenger look</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

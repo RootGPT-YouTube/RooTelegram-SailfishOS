@@ -31,6 +31,11 @@
 //            scorrevole in orizzontale, che non va MAI a capo, con in coda il
 //            pulsante «+» tratteggiato che apre l'elenco cartelle.
 //
+// Tema Classic (BarbaraTheme.classic): niente filtri per tipo; UNA riga di
+// schede «Tutte | cartelle…» dentro una pillola, come le cartelle di Telegram
+// per Android (scheda attiva = pillola chiara con testo blu, conteggi in un
+// cerchietto grigio). Senza cartelle la fascia sparisce, come nell'app ufficiale.
+//
 // Il componente e' solo presentazione: non tocca i modelli, emette segnali e la
 // pagina decide cosa fare (cosi' la logica di cambio cartella resta una sola,
 // quella gia' collaudata di OverviewPage).
@@ -53,19 +58,20 @@ Item {
     signal editFoldersClicked()
 
     readonly property bool hasFolders: chatFoldersModel.count > 0
+    readonly property bool classic: BarbaraTheme.classic
     readonly property real sidePadding: Theme.paddingLarge
     readonly property real rowGap: Theme.paddingSmall
 
     width: parent ? parent.width : 0
-    height: visible
-            ? (Theme.paddingMedium + typeFilterRow.height
+    height: !visible ? 0
+            : classic ? (hasFolders ? (Theme.paddingSmall + folderRow.height + Theme.paddingSmall) : 0)
+            : (Theme.paddingMedium + typeFilterRow.height
                + (hasFolders ? (rowGap + folderRow.height) : 0) + Theme.paddingMedium)
-            : 0
 
     // Fondo del pannello: superficie DEL TEMA, con bordo inferiore da 1px.
     Rectangle {
         anchors.fill: parent
-        color: BarbaraTheme.panelTranslucent
+        color: band.classic ? BarbaraTheme.surface : BarbaraTheme.panelTranslucent
         Rectangle {
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
             height: BarbaraTheme.borderWidth
@@ -76,6 +82,7 @@ Item {
     // ── Riga A: filtri per tipo, tre colonne uguali a tutta larghezza ──────
     Row {
         id: typeFilterRow
+        visible: !band.classic
         anchors {
             top: parent.top
             topMargin: Theme.paddingMedium
@@ -85,7 +92,7 @@ Item {
             rightMargin: band.sidePadding
         }
         spacing: Theme.paddingSmall
-        height: Math.round(Theme.fontSizeSmall * 1.2) + 2 * Theme.paddingSmall
+        height: !band.classic ? Math.round(Theme.fontSizeSmall * 1.2) + 2 * Theme.paddingSmall : 0
 
         Repeater {
             model: 3
@@ -135,29 +142,76 @@ Item {
     }
 
     // ── Riga B: cartelle, una sola riga scorrevole, mai a capo ─────────────
+    // Classic: la pillola che contiene le schede.
+    Rectangle {
+        visible: band.classic && band.hasFolders
+        anchors.fill: folderRow
+        radius: height / 2
+        color: BarbaraTheme.glass
+    }
+
     ListView {
         id: folderRow
         visible: band.hasFolders
         anchors {
-            top: typeFilterRow.bottom
-            topMargin: band.rowGap
+            top: band.classic ? parent.top : typeFilterRow.bottom
+            topMargin: band.classic ? Theme.paddingSmall : band.rowGap
             left: parent.left
             right: parent.right
+            leftMargin: band.classic ? Theme.horizontalPageMargin : 0
+            rightMargin: band.classic ? Theme.horizontalPageMargin : 0
         }
-        height: visible ? Math.round(Theme.itemSizeExtraSmall * 0.62) : 0
+        height: !visible ? 0
+                : band.classic ? Math.round(Theme.itemSizeExtraSmall * 0.85)
+                : Math.round(Theme.itemSizeExtraSmall * 0.62)
         orientation: ListView.Horizontal
         // I chip sfiorano i bordi della pagina quando si scorre, ma partono
         // allineati al margine come il resto della fascia.
-        leftMargin: band.sidePadding
-        rightMargin: band.sidePadding
-        spacing: Theme.paddingSmall
+        leftMargin: band.classic ? Theme.paddingSmall : band.sidePadding
+        rightMargin: band.classic ? Theme.paddingSmall : band.sidePadding
+        spacing: band.classic ? 0 : Theme.paddingSmall
         clip: true
+
+        // Classic: prima scheda fissa «Tutte» (spegne cartella e filtro).
+        header: Item {
+            visible: band.classic
+            // ⚠️ Larghezza legata al TEMA, non a `visible`: all'avvio le cartelle non
+            // sono ancora caricate, la ListView è invisibile e un `visible ? … : 0`
+            // faceva nascere l'intestazione larga 0; arrivate le cartelle si
+            // allargava, ma la vista restava ferma e «Tutte» finiva fuori a sinistra.
+            width: band.classic ? allTabLabel.implicitWidth + 2 * Theme.paddingLarge : 0
+            height: folderRow.height
+            // Cambio di tema dal vivo (Barbara → Classic): l'intestazione passa da 0
+            // alla sua larghezza; si riporta la vista all'inizio per mostrarla.
+            onWidthChanged: if (band.classic) folderRow.positionViewAtBeginning()
+            readonly property bool isCurrent: band.activeFolderId === 0
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: Theme.paddingSmall / 2
+                radius: height / 2
+                color: parent.isCurrent ? Theme.rgba(BarbaraTheme.ink, BarbaraTheme.dark ? 0.08 : 0.06)
+                     : (allTabArea.pressed ? BarbaraTheme.accentWash : "transparent")
+            }
+            Label {
+                id: allTabLabel
+                anchors.centerIn: parent
+                text: qsTr("All")
+                font.pixelSize: Theme.fontSizeSmall
+                font.bold: parent.isCurrent
+                color: parent.isCurrent ? BarbaraTheme.accent : BarbaraTheme.inkSecondary
+            }
+            MouseArea {
+                id: allTabArea
+                anchors.fill: parent
+                onClicked: band.typeFilterClicked(0)
+            }
+        }
         // Niente decoratore: la scrollbar qui e' nascosta per scelta di design.
         model: chatFoldersModel
 
         delegate: Item {
             id: chip
-            width: chipRow.width + 2 * Theme.paddingMedium
+            width: chipRow.width + 2 * (band.classic ? Theme.paddingLarge : Theme.paddingMedium)
             height: folderRow.height
 
             readonly property int chipFolderId: folderId
@@ -173,8 +227,12 @@ Item {
 
             Rectangle {
                 anchors.fill: parent
+                anchors.margins: band.classic ? Theme.paddingSmall / 2 : 0
                 radius: height / 2
-                color: chip.isCurrent ? BarbaraTheme.accent
+                color: band.classic
+                       ? (chip.isCurrent ? Theme.rgba(BarbaraTheme.ink, BarbaraTheme.dark ? 0.08 : 0.06)
+                          : (chipArea.pressed ? BarbaraTheme.accentWash : "transparent"))
+                     : chip.isCurrent ? BarbaraTheme.accent
                      : (chipArea.pressed ? BarbaraTheme.accentWash : BarbaraTheme.glass)
                 border.width: BarbaraTheme.borderWidth
                 border.color: chip.isCurrent ? BarbaraTheme.accent : BarbaraTheme.glassBorder
@@ -189,9 +247,10 @@ Item {
 
                 Image {
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: !band.classic
                     source: "image://theme/icon-m-folder?"
                             + (chip.isCurrent ? BarbaraTheme.onAccent : BarbaraTheme.inkSecondary)
-                    width: Theme.iconSizeExtraSmall
+                    width: !band.classic ? Theme.iconSizeExtraSmall : 0
                     height: width
                     sourceSize: Qt.size(Theme.iconSizeExtraSmall, Theme.iconSizeExtraSmall)
                     fillMode: Image.PreserveAspectFit
@@ -200,8 +259,10 @@ Item {
                 Label {
                     anchors.verticalCenter: parent.verticalCenter
                     text: folderName
-                    font.pixelSize: Theme.fontSizeExtraSmall
-                    color: chip.isCurrent ? BarbaraTheme.onAccent : BarbaraTheme.ink
+                    font.pixelSize: band.classic ? Theme.fontSizeSmall : Theme.fontSizeExtraSmall
+                    font.bold: band.classic && chip.isCurrent
+                    color: band.classic ? (chip.isCurrent ? BarbaraTheme.accent : BarbaraTheme.inkSecondary)
+                         : (chip.isCurrent ? BarbaraTheme.onAccent : BarbaraTheme.ink)
                     maximumLineCount: 1
                 }
 
@@ -214,7 +275,9 @@ Item {
                     radius: Math.round(height / 2)
                     // Sul chip attivo il badge poggia su un velo dell'inchiostro,
                     // non sull'ambra: sull'accento pieno non si leggerebbe.
-                    color: chip.isCurrent ? Theme.rgba(BarbaraTheme.onAccent, BarbaraTheme.dark ? 0.22 : 0.28)
+                    // Classic: cerchietto grigio (blu sulla scheda attiva).
+                    color: band.classic ? (chip.isCurrent ? BarbaraTheme.attention : BarbaraTheme.mutedBadge)
+                         : chip.isCurrent ? Theme.rgba(BarbaraTheme.onAccent, BarbaraTheme.dark ? 0.22 : 0.28)
                                           : BarbaraTheme.attention
                     Label {
                         id: folderBadge
@@ -223,7 +286,8 @@ Item {
                         font.family: BarbaraTheme.fontFamilyMono
                         font.pixelSize: BarbaraTheme.fontSizeMetaSmall
                         font.bold: true
-                        color: chip.isCurrent ? BarbaraTheme.onAccent : BarbaraTheme.onAttention
+                        color: band.classic ? "#ffffff"
+                             : (chip.isCurrent ? BarbaraTheme.onAccent : BarbaraTheme.onAttention)
                     }
                 }
             }
@@ -238,7 +302,9 @@ Item {
         // In coda: «+» tondo col bordo TRATTEGGIATO (unico bordo tratteggiato del
         // tema), che apre la pagina delle cartelle.
         footer: Item {
-            width: plusButton.width + Theme.paddingMedium
+            // Classic: nessun «+» (le cartelle si gestiscono dal menu).
+            visible: !band.classic
+            width: !band.classic ? plusButton.width + Theme.paddingMedium : 0
             height: folderRow.height
 
             Item {

@@ -40,6 +40,57 @@ ApplicationWindow
     allowedOrientations: defaultAllowedOrientations
     property var pendingShareResources: []
 
+    // ── Tema Classic: fondo del tema dietro OGNI pagina ──────────────────────
+    // Le finestre Silica sono trasparenti: lo sfondo dell'ambience lo disegna il
+    // compositore SOTTO l'app. Classic ha palette proprie e, come l'app ufficiale,
+    // le sue pagine hanno un fondo pieno: senza, le pagine «di sistema» (impostazioni,
+    // info chat, dialog) dipendono dallo sfondo del compositore — e dove manca
+    // (POCO con RooTundra, 26/11/2026) restano nere col testo scuro illeggibile.
+    // Si usa la proprietà PUBBLICA Page.backgroundColor; con gli altri temi non si
+    // tocca nulla, e uscendo da Classic si rimette il trasparente di Silica.
+    // Le pagine che hanno un fondo loro (album, storie: nero) restano come sono.
+    property var classicColoredPages: []
+    function applyClassicPageBackground(page) {
+        if (!page || page.backgroundColor === undefined) {
+            return;
+        }
+        var mine = classicColoredPages.indexOf(page) >= 0;
+        if (BarbaraTheme.classic) {
+            if (!mine && page.backgroundColor.a !== 0) {
+                return; // fondo proprio della pagina
+            }
+            page.backgroundColor = BarbaraTheme.surface;
+            if (!mine) {
+                classicColoredPages.push(page);
+            }
+        } else if (mine) {
+            page.backgroundColor = Theme.rgba(Theme.overlayBackgroundColor, 0);
+            classicColoredPages.splice(classicColoredPages.indexOf(page), 1);
+        }
+    }
+    function applyClassicBackgroundToStack() {
+        // Le pagine già colorate (anche sotto quella corrente) e quella corrente.
+        // Prima si tolgono quelle chiuse (oggetto distrutto: niente più proprietà).
+        classicColoredPages = classicColoredPages.filter(function(p) {
+            return !!p && p.backgroundColor !== undefined;
+        });
+        var pages = classicColoredPages.slice();
+        for (var i = 0; i < pages.length; i++) {
+            applyClassicPageBackground(pages[i]);
+        }
+        applyClassicPageBackground(pageStack.currentPage);
+    }
+    Connections {
+        target: pageStack
+        onCurrentPageChanged: appWindow.applyClassicBackgroundToStack()
+    }
+    Connections {
+        target: BarbaraTheme
+        onClassicChanged: appWindow.applyClassicBackgroundToStack()
+        // Ambience chiara ↔ scura: cambia la palette, quindi la tinta del fondo.
+        onSurfaceChanged: appWindow.applyClassicBackgroundToStack()
+    }
+
     // Velocità di riproduzione per vocali e audio, condivisa tra i player e
     // valida per la sessione. Il backend GStreamer di Jolla usa scaletempo
     // come audio-filter: il tempo cambia, il pitch no. SOLO audio: sui video
@@ -372,6 +423,8 @@ ApplicationWindow
             appNotification: appNotification,
             showLinkMenu: appWindow.showLinkMenu
         });
+        // Classic: la pagina iniziale c'è già, currentPage potrebbe non cambiare.
+        applyClassicPageBackground(pageStack.currentPage);
     }
 
     // ── Schermata chiamata vocale (T3 entranti + T4 UI) ──────────────────────

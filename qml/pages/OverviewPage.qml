@@ -1204,8 +1204,10 @@ Page {
                                     : Theme.fontSizeLarge
                     // Barbara: titoli in corsivo serif (font heading), mai in grassetto.
                     font.family: overviewPage.barbara ? BarbaraTheme.fontFamilyTitle : Theme.fontFamily
-                    font.italic: true
-                    font.bold: !overviewPage.neon && !overviewPage.barbara
+                    // Classic: brand in sans grassetto dritto, come il titolo delle app di messaggistica classiche.
+                    font.italic: !(overviewPage.barbara && !BarbaraTheme.titleItalic)
+                    font.bold: (!overviewPage.neon && !overviewPage.barbara)
+                               || (overviewPage.barbara && BarbaraTheme.titleBold)
                     color: overviewPage.barbara ? BarbaraTheme.ink
                          : (overviewPage.neon ? "#fff3e6" : Theme.highlightColor)
                     // Alone: Neon sempre, Barbara solo con ambience scura (e se non
@@ -1223,10 +1225,11 @@ Page {
                 // Barbara: conteggio non letti in monospace sotto il brand.
                 Label {
                     id: barbaraUnreadLabel
-                    visible: overviewPage.barbara
+                    // Classic: niente riga dei non letti sotto il brand.
+                    visible: overviewPage.barbara && !BarbaraTheme.classic
                     anchors { right: parent.right; top: neonCore.bottom }
                     horizontalAlignment: Text.AlignRight
-                    text: overviewPage.totalUnreadMessages > 0
+                    text: (!BarbaraTheme.classic && overviewPage.totalUnreadMessages > 0)
                           ? qsTr("%Ln unread", "", overviewPage.totalUnreadMessages)
                           : ""
                     font.family: BarbaraTheme.fontFamilyMono

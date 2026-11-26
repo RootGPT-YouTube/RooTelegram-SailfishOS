@@ -163,6 +163,8 @@ public:
     Q_INVOKABLE QVariantMap getBasicGroup(qlonglong groupId) const;
     Q_INVOKABLE QVariantMap getSuperGroup(qlonglong groupId) const;
     Q_INVOKABLE QVariantMap getChat(const QString &chatId);
+    // Sfondo predefinito delle chat per il tema chiaro o scuro (vuoto = nessuno).
+    Q_INVOKABLE QVariantMap getDefaultBackground(bool forDarkTheme);
     Q_INVOKABLE QVariantMap getSecretChatFromCache(qlonglong secretChatId);
     Q_INVOKABLE QStringList getChatReactions(const QString &chatId);
     Q_INVOKABLE QString getOptionString(const QString &optionName);
@@ -499,6 +501,10 @@ signals:
     void chatEventLogReceived(qlonglong chatId, const QVariantList &events);
     void chatJoinRequestsReceived(qlonglong chatId, int totalCount, const QVariantList &requests);
     void chatPendingJoinRequestsUpdated(qlonglong chatId, const QVariantMap &pendingJoinRequests);
+    void defaultBackgroundUpdated(bool forDarkTheme, const QVariantMap &background);
+    void chatBackgroundUpdated(qlonglong chatId, const QVariantMap &chatBackground);
+    void backgroundsReceived(const QVariantList &backgrounds, const QString &extra);
+    void backgroundReceived(const QVariantMap &background, const QString &extra);
     void newChatJoinRequest(qlonglong chatId, const QVariantMap &request, const QVariantMap &inviteLink);
     void userFullInfoReceived(const QVariantMap &userFullInfo);
     void userFullInfoUpdated(const QString &userId, const QVariantMap &userFullInfo);
@@ -580,6 +586,8 @@ public slots:
     void handleAvailableReactionsUpdated(qlonglong chatId, const QVariantMap &availableReactions);
     void handleChatFolderEdit(const QVariantMap &folder, qlonglong chatId, int folderId, bool add);
     void handleChatPendingJoinRequestsUpdated(qlonglong chatId, const QVariantMap &pendingJoinRequests);
+    void handleDefaultBackgroundUpdated(bool forDarkTheme, const QVariantMap &background);
+    void handleChatBackgroundUpdated(qlonglong chatId, const QVariantMap &chatBackground);
     void handleNewChatJoinRequest(qlonglong chatId, const QVariantMap &request, const QVariantMap &inviteLink);
     void handleBasicGroupUpdated(qlonglong groupId, const QVariantMap &groupInformation);
     void handleSuperGroupUpdated(qlonglong groupId, const QVariantMap &groupInformation);
@@ -649,6 +657,8 @@ private:
     QVariantMap usersById;
     QVariantMap usersByName;
     QVariantMap chats;
+    QVariantMap defaultBackgroundLight;
+    QVariantMap defaultBackgroundDark;
     QMap<qlonglong, QVariantMap> secretChats;
     QHash<QString, QVariantMap> customEmojiById;
     QHash<int, QString> customEmojiByThumbnailFileId;

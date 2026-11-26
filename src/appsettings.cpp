@@ -123,7 +123,7 @@ int AppSettings::appTheme() const
 {
     if (settings.contains(KEY_APP_THEME)) {
         const int stored = settings.value(KEY_APP_THEME, (int) AppSettings::ThemeBarbara).toInt();
-        if (stored >= AppSettings::ThemeSilica && stored <= AppSettings::ThemeBarbara) {
+        if (stored >= AppSettings::ThemeSilica && stored <= AppSettings::ThemeClassic) {
             return stored;
         }
         return AppSettings::ThemeBarbara;
@@ -138,7 +138,7 @@ int AppSettings::appTheme() const
 
 void AppSettings::setAppTheme(int appTheme)
 {
-    const int wanted = (appTheme >= AppSettings::ThemeSilica && appTheme <= AppSettings::ThemeBarbara)
+    const int wanted = (appTheme >= AppSettings::ThemeSilica && appTheme <= AppSettings::ThemeClassic)
             ? appTheme : (int) AppSettings::ThemeBarbara;
     if (this->appTheme() == wanted) {
         return;

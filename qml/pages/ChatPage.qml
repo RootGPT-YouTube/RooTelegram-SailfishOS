@@ -31,6 +31,7 @@ import "../components"
 import "../js/debug.js" as Debug
 import "../js/twemoji.js" as Emoji
 import "../js/functions.js" as Functions
+import "../js/albumlayout.js" as AlbumLayout
 
 Page {
     id: chatPage
@@ -41,11 +42,51 @@ Page {
     readonly property bool neon: appSettings.useNeonTheme
     // Tema Barbara (vetro ciano, palette propria chiara/scura). Vedi BarbaraTheme.qml.
     readonly property bool barbara: BarbaraTheme.active
+    // Tema Classic (variante di Barbara): composer a pillola col globo della
+    // traduzione a sinistra e il tasto invio tondo blu a destra.
+    readonly property bool classic: BarbaraTheme.classic
+
+    // Traduzione in inglese del testo del composer (globo). Condivisa dal globo
+    // della riga formato e da quello dentro la pillola del tema Classic.
+    function translateComposerToEnglish() {
+        if (newMessageColumn.translatingInput) {
+            return;
+        }
+        // ⛔ Come in sendMessage(): prima si conferma la parola ancora in
+        // COMPOSIZIONE nell'IME, che non sta nel documento letto da composerText().
+        // Senza questa riga, con UNA parola scritta il composer risultava vuoto
+        // (toast «Prima scrivi il messaggio» col testo ben visibile) e, con più
+        // parole, l'ultima restava fuori dalla traduzione.
+        if (Qt.inputMethod) {
+            Qt.inputMethod.commit();
+        }
+        if (composerText().length > 0) {
+            newMessageColumn.translatingInput = true
+            newMessageColumn.originalInputText = composerText()
+            tdLibWrapper.translateText(composerText(), chatPage.translateOutgoingLanguage)
+        } else {
+            appNotification.show(qsTr("Type your message first, then tap this button to translate it to English!"))
+        }
+    }
 
     // Sfondo a circuiti elettrici blu (#19), tenue, dietro la conversazione.
     CircuitBackground {}
     // Sfondo del tema Barbara: superficie propria + reticolo tenue.
-    BarbaraBackground {}
+    BarbaraBackground {
+        chat: true
+        chatBackground: chatPage.classicChatBackground
+    }
+    // Classic: sfondo di QUESTA chat su Telegram (chatBackground), tenuto
+    // aggiornato da updateChatBackground; null = sfondo predefinito dell'account.
+    property var classicChatBackground: (chatInformation && chatInformation.background) ? chatInformation.background : null
+    Connections {
+        target: tdLibWrapper
+        onChatBackgroundUpdated: {
+            if (chatInformation && String(chatId) === String(chatInformation.id)) {
+                chatPage.classicChatBackground = (chatBackground && chatBackground.background) ? chatBackground : null;
+            }
+        }
+    }
 
     // Misura REALE dell'altezza di riga del testo extra-small: serve a dimensionare
     // il chip "in risposta a" (nome + anteprima = 2 righe) senza tagliarne il fondo.
@@ -2533,6 +2574,17 @@ Page {
                 // singole voci che in quella chat non hanno senso.
                 visible: !stickerPickerLoader.active && !voiceNoteOverlayLoader.active && !messageOverlayLoader.active && !stickerSetOverlayLoader.active
 
+                // Classic: sfondo di questa chat (Telegram lo permette nelle chat
+                // private e segrete; nei gruppi serve il potenziamento).
+                MenuItem {
+                    visible: chatPage.classic && (chatPage.isPrivateChat || chatPage.isSecretChat)
+                    text: qsTr("Chat background")
+                    onClicked: pageStack.push(Qt.resolvedUrl("ChatBackgroundsPage.qml"), {
+                                                  "chatId": String(chatInformation.id),
+                                                  "chatTitle": chatInformation.title || ""
+                                              })
+                }
+
                 MenuItem {
                     id: deleteChatMenuItem
                     // isPrivateChat e' vero anche nei Messaggi salvati: senza la
@@ -2604,6 +2656,14 @@ Page {
                     }
                     text: qsTr("Search in Chat")
                 }
+            }
+
+            // Tema Classic: barra superiore piena come nell'app Android.
+            Rectangle {
+                visible: chatPage.classic
+                width: parent.width
+                height: headerRow.height
+                color: BarbaraTheme.panel
             }
 
             BackgroundItem {
@@ -2713,14 +2773,19 @@ Page {
                         Label {
                             id: chatNameText
                             width: Math.min(implicitWidth, parent.width)
-                            anchors.right: parent.right
+                            // Classic: titolo e stato allineati a SINISTRA, accanto all'avatar.
+                            anchors.right: chatPage.classic ? undefined : parent.right
+                            anchors.left: chatPage.classic ? parent.left : undefined
                             anchors.top: parent.top
                             text: chatInformation.title !== "" ? Emoji.emojify(chatInformation.title, font.pixelSize) : qsTr("Unknown")
                             textFormat: Text.StyledText
                             font.pixelSize: chatPage.isPortrait ? Theme.fontSizeLarge : Theme.fontSizeMedium
                             // Barbara: titoli in corsivo serif come il brand della home.
-                            font.family: (chatPage.neon || chatPage.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
-                            font.italic: chatPage.neon || chatPage.barbara
+                            // Classic: sans in grassetto (token del tema).
+                            font.family: chatPage.barbara ? BarbaraTheme.fontFamilyTitle
+                                       : (chatPage.neon ? Theme.fontFamilyHeading : Theme.fontFamily)
+                            font.italic: chatPage.neon || (chatPage.barbara && BarbaraTheme.titleItalic)
+                            font.bold: chatPage.barbara && BarbaraTheme.titleBold
                             color: chatPage.barbara ? BarbaraTheme.ink
                                  : (chatPage.neon ? "#fff3e6" : Theme.highlightColor)
                             truncationMode: TruncationMode.Elide
@@ -2739,7 +2804,8 @@ Page {
                             id: topicNameText
                             visible: chatPage.messageThreadId !== 0
                             width: Math.min(implicitWidth, parent.width)
-                            anchors.right: parent.right
+                            anchors.right: chatPage.classic ? undefined : parent.right
+                            anchors.left: chatPage.classic ? parent.left : undefined
                             anchors.top: chatNameText.bottom
                             text: chatPage.currentTopicInfo ? Emoji.emojify("# " + (chatPage.currentTopicInfo.name || ""), font.pixelSize) : "# …"
                             textFormat: Text.StyledText
@@ -2753,7 +2819,8 @@ Page {
                             id: chatStatusText
                             width: Math.min(implicitWidth, parent.width)
                             anchors {
-                                right: parent.right
+                                right: chatPage.classic ? undefined : parent.right
+                                left: chatPage.classic ? parent.left : undefined
                                 bottom: parent.bottom
                             }
                             // "sta scrivendo…" (#2) ha priorità sullo stato normale.
@@ -3077,7 +3144,18 @@ Page {
                             }
                         }
 
-                        function getContentComponentHeight(contentType, content, parentWidth, albumEntries) {
+                        // Altezza dell'album a MOSAICO (js/albumlayout.js), calcolata con gli
+                        // stessi messaggi che userà MessagePhotoAlbum: la stima coincide con
+                        // l'altezza vera e il messaggio non «salta» quando l'album si carica.
+                        function albumEstimateHeight(content, parentWidth, albumId) {
+                            var msgs = [{ content: content }];
+                            if (albumId && albumId !== "0") {
+                                chatModel.getMessagesForAlbum(albumId, 1).forEach(function(msg) { msgs.push(msg); });
+                            }
+                            var mosaic = AlbumLayout.calculate(msgs.map(function(msg) { return AlbumLayout.aspectOf(msg); }));
+                            return mosaic.width > 0 ? Math.round(mosaic.height * parentWidth / mosaic.width) : 0;
+                        }
+                        function getContentComponentHeight(contentType, content, parentWidth, albumEntries, albumId) {
                             var unit;
                             switch(contentType) {
                             case "messageAnimatedEmoji":
@@ -3106,8 +3184,7 @@ Page {
                                         + richLayout.head.length * Math.round(Theme.fontSizeLarge * 1.5);
                             case "messagePhoto":
                                 if(albumEntries > 0) {
-                                    unit = (parentWidth * 0.66666666)
-                                    return (albumEntries % 2 !== 0 ? unit * 0.75 : 0) + unit * albumEntries * 0.25
+                                    return albumEstimateHeight(content, parentWidth, albumId)
                                 }
                                 var biggest = content.photo.sizes[content.photo.sizes.length - 1];
                                 if ((biggest.width === 0 || biggest.height === 0) && content.photo.sizes.length > 1) {
@@ -3129,8 +3206,7 @@ Page {
                                 return content.sticker.height;
                             case "messageVideo":
                                 if(albumEntries > 0) {
-                                    unit = (parentWidth * 0.66666666)
-                                    return (albumEntries % 2 !== 0 ? unit * 0.75 : 0) + unit * albumEntries * 0.25
+                                    return albumEstimateHeight(content, parentWidth, albumId)
                                 }
                                 return Functions.getVideoHeight(parentWidth, content.video);
                             case "messageVideoNote":
@@ -3431,6 +3507,13 @@ Page {
                     Connections {
                         target: tdLibWrapper
                         onTextTranslated: {
+                            // Solo la pagina che ha CHIESTO la traduzione la usa: il segnale
+                            // arriva a tutte le ChatPage aperte nello stack (chat aperta da
+                            // un'altra chat), e senza questo controllo il testo tradotto
+                            // finiva anche nel composer delle altre.
+                            if (!newMessageColumn.translatingInput) {
+                                return;
+                            }
                             newMessageColumn.translatingInput = false
                             var converted = (translatedText !== "") ? chatPage.translatedHtmlToComposerMarkdown(translatedText) : ""
                             // Due casi di "non traducibile" lato Telegram, entrambi da segnalare
@@ -5019,8 +5102,10 @@ Page {
                         // stessa dimensione. Sempre visibile; toast se il testo è vuoto.
                         Item {
                             id: translateFormatButton
-                            width: newMessageColumn.compactAttachmentButtonSize
-                            height: width
+                            // Classic: il globo sta dentro la pillola del composer.
+                            visible: !chatPage.classic
+                            width: !chatPage.classic ? newMessageColumn.compactAttachmentButtonSize : 0
+                            height: newMessageColumn.compactAttachmentButtonSize
                             anchors.left: parent.left
                             anchors.verticalCenter: parent.verticalCenter
                             opacity: newMessageColumn.translatingInput ? 0.4 : 1.0
@@ -5055,15 +5140,7 @@ Page {
                             MouseArea {
                                 anchors.fill: parent
                                 enabled: !newMessageColumn.translatingInput
-                                onClicked: {
-                                    if (composerText().length > 0) {
-                                        newMessageColumn.translatingInput = true
-                                        newMessageColumn.originalInputText = composerText()
-                                        tdLibWrapper.translateText(composerText(), chatPage.translateOutgoingLanguage)
-                                    } else {
-                                        appNotification.show(qsTr("Type your message first, then tap this button to translate it to English!"))
-                                    }
-                                }
+                                onClicked: chatPage.translateComposerToEnglish()
                             }
                         }
 
@@ -5201,9 +5278,47 @@ Page {
                         width: parent.width
                         anchors.horizontalCenter: parent.horizontalCenter
 
+                        // Tema Classic: globo della traduzione (al posto dell'icona AI
+                        // di Telegram per Android) all'inizio della pillola. Fa anche da
+                        // «ancora» per il fondo della pillola: essendo il PRIMO figlio
+                        // della Row, il suo figlio a z:-1 viene disegnato sotto a tutti.
+                        Item {
+                            id: classicGlobeButton
+                            visible: chatPage.classic
+                            width: chatPage.classic ? Theme.itemSizeSmall : 0
+                            height: Theme.itemSizeSmall
+                            anchors.bottom: parent.bottom
+
+                            // Fondo a pillola: dal globo fino al tasto invio escluso.
+                            Rectangle {
+                                z: -1
+                                x: Theme.paddingSmall / 2
+                                y: classicGlobeButton.height - newMessageRow.height + Theme.paddingSmall / 2
+                                width: newMessageRow.width - x - Theme.paddingSmall
+                                       - (newMessageSendButton.visible ? newMessageSendButton.width : 0)
+                                height: newMessageRow.height - Theme.paddingSmall
+                                radius: Math.min(height / 2, Theme.itemSizeSmall / 2)
+                                color: BarbaraTheme.panel
+                                border.width: BarbaraTheme.dark ? 0 : 1
+                                border.color: BarbaraTheme.glassBorder
+                            }
+
+                            Icon {
+                                anchors.centerIn: parent
+                                source: "image://theme/icon-m-website"
+                                color: BarbaraTheme.inkSecondary
+                                opacity: newMessageColumn.translatingInput ? 0.4 : 1.0
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !newMessageColumn.translatingInput
+                                onClicked: chatPage.translateComposerToEnglish()
+                            }
+                        }
+
                         TextArea {
                             id: newMessageTextField
-                            width: parent.width - (botKeyboardToggleButton.visible ? botKeyboardToggleButton.width : 0) - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
+                            width: parent.width - classicGlobeButton.width - (botKeyboardToggleButton.visible ? botKeyboardToggleButton.width : 0) - (attachmentIconButton.visible ? attachmentIconButton.width : 0) - (newMessageSendButton.visible ? newMessageSendButton.width : 0) - (cancelInlineQueryButton.visible ? cancelInlineQueryButton.width : 0)
                             height: Math.min(chatContainer.height / 3, implicitHeight)
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: Theme.fontSizeSmall
@@ -5313,7 +5428,10 @@ Page {
                         IconButton {
                             id: newMessageSendButton
                             // Barbara: freccia scura sopra la pastiglia in accento.
-                            icon.source: chatPage.barbara
+                            // Classic: niente icona di sistema, c'e' l'aeroplanino qui sotto.
+                            icon.source: chatPage.classic
+                                         ? ""
+                                         : chatPage.barbara
                                          ? ("image://theme/icon-m-enter?" + BarbaraTheme.onAccent)
                                          : "image://theme/icon-m-enter"
                             anchors.bottom: parent.bottom
@@ -5324,10 +5442,23 @@ Page {
                                 visible: chatPage.barbara
                                 z: -1
                                 anchors.centerIn: parent
-                                width: Math.round(Theme.iconSizeMedium * 1.15)
+                                // Classic: tasto tondo blu più grande, come nell'app Android.
+                                width: chatPage.classic ? Math.round(Theme.iconSizeMedium * 1.45)
+                                                         : Math.round(Theme.iconSizeMedium * 1.15)
                                 height: width
-                                radius: BarbaraTheme.radiusAvatar
+                                radius: chatPage.classic ? width / 2 : BarbaraTheme.radiusAvatar
                                 color: BarbaraTheme.accent
+                            }
+                            // Classic: aeroplanino di carta bianco sul tondo blu.
+                            Icon {
+                                visible: chatPage.classic
+                                anchors.centerIn: parent
+                                anchors.horizontalCenterOffset: Math.round(width * 0.06)
+                                source: "../../images/icon-m-send-plane.svg"
+                                width: Math.round(Theme.iconSizeMedium * 0.72)
+                                height: width
+                                sourceSize: Qt.size(width, height)
+                                color: "#ffffff"
                             }
                             visible: !inlineQuery.userNameIsValid && (!appSettings.sendByEnter || attachmentPreviewRow.visible)
                             enabled: true

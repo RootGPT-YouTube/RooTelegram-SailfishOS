@@ -50,7 +50,7 @@ class AppSettings : public QObject {
     Q_PROPERTY(bool storyAllowScreenshots READ storyAllowScreenshots WRITE setStoryAllowScreenshots NOTIFY storyAllowScreenshotsChanged)
     Q_PROPERTY(bool storyPostToProfile READ storyPostToProfile WRITE setStoryPostToProfile NOTIFY storyPostToProfileChanged)
     Q_PROPERTY(QString storyPrivacyMode READ storyPrivacyMode WRITE setStoryPrivacyMode NOTIFY storyPrivacyModeChanged)
-    // Tema dell'app: enum a tre valori (Silica / Neon / Barbara). `useNeonTheme`
+    // Tema dell'app: enum a quattro valori (Silica / Neon / Barbara / Classic). `useNeonTheme`
     // resta come ALIAS di compatibilita' (== appTheme == ThemeNeon) per i
     // componenti non ancora migrati: scriverlo sposta l'enum su Neon o Silica.
     Q_PROPERTY(int appTheme READ appTheme WRITE setAppTheme NOTIFY appThemeChanged)
@@ -77,7 +77,8 @@ public:
     enum AppTheme {
         ThemeSilica = 0,
         ThemeNeon = 1,
-        ThemeBarbara = 2
+        ThemeBarbara = 2,
+        ThemeClassic = 3
     };
     Q_ENUM(AppTheme)
 

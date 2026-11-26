@@ -3,6 +3,9 @@ Description=RooTelegram - avvio automatico in background al boot del dispositivo
 # Parte quando la sessione utente e' pronta (compositore Wayland + booster su).
 After=post-user-session.target
 PartOf=post-user-session.target
+# Tetto ai riavvii forzati qui sotto: al piu' 5 in 2 minuti, poi si arrende.
+StartLimitIntervalSec=120
+StartLimitBurst=5
 
 [Service]
 Type=simple
@@ -12,6 +15,17 @@ Type=simple
 # l'autostart agisce esclusivamente all'avvio del dispositivo.
 # Con le notifiche via UnifiedPush (BETA, marker "unifiedpush-enabled") il demone non
 # parte: e' Foghorn a svegliare l'app quando serve.
+# UNICA eccezione: se il compositore Wayland muore (riavvio della home, RooTundra o
+# lipstick) il servizio restava «failed» per tutta la giornata. L'app ne esce in
+# due modi, entrambi visti sul POCO il 26/11/2026:
+#   1   = «The Wayland connection broke» (ore 10:13);
+#   134 = abort (SIGABRT) del QSGRenderThread rimasto senza compositore, che
+#         l'invoker riporta come codice d'uscita 128+6 (ore 16:57).
+# Solo per questi codici si riparte, dopo 5 s per lasciar tornare il compositore.
+# La chiusura o il kill da parte dell'utente (TERM/KILL) non escono con questi
+# codici: restano senza riavvio.
+RestartForceExitStatus=1 134
+RestartSec=5
 ExecStart=/bin/sh -c 'test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/autostart-disabled" && exit 0; test -e "${HOME}/.config/com.github.RootGPT_YouTube/rootelegram/unifiedpush-enabled" && exit 0; exec /usr/bin/invoker --type=generic --single-instance /usr/bin/harbour-rootelegram --daemon'
 
 [Install]

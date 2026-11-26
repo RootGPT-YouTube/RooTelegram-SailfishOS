@@ -21,6 +21,8 @@ Stickers support
 Group join request management (for admins)  
 Modern UI + daemon architecture, for instant app startup  
 Calls and Videocalls  
+Four themes: Silica, Neon, Barbara and Classic (a classic messenger look, with chat backgrounds synced with your Telegram account)  
+Photo albums laid out as a mosaic, like the official apps  
 ## Project origins
 RooTelegram was born as an evolution and modernization of the original Telegram client for SailfishOS:  
 
@@ -199,6 +201,8 @@ Supporto agli stickers
 Gestione delle richieste di accesso ai gruppi (per admin)  
 Architettura moderna basata su UI + daemon, per apertura istantanea dell’app  
 Chiamate vocali e chiamate video.  
+Quattro temi: Silica, Neon, Barbara e Classic (l'aspetto di una classica app di messaggistica, con gli sfondi delle chat sincronizzati con il tuo account Telegram)  
+Album di foto impaginati a mosaico, come nelle app ufficiali  
 ## Origini del progetto
 RooTelegram nasce come evoluzione e modernizzazione del primordiale client Telegram per SailfishOS:  
 

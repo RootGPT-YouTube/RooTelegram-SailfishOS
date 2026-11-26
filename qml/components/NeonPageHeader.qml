@@ -68,8 +68,10 @@ PageHeader {
         text: neonHeader.text
         textFormat: Text.StyledText
         font.pixelSize: Theme.fontSizeLarge
-        font.family: (neonHeader.neon || neonHeader.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
-        font.italic: neonHeader.neon || neonHeader.barbara
+        font.family: neonHeader.barbara ? BarbaraTheme.fontFamilyTitle
+                   : (neonHeader.neon ? Theme.fontFamilyHeading : Theme.fontFamily)
+        font.italic: neonHeader.neon || (neonHeader.barbara && BarbaraTheme.titleItalic)
+        font.bold: neonHeader.barbara && BarbaraTheme.titleBold
         truncationMode: TruncationMode.Elide
         maximumLineCount: 1
         color: neonHeader.barbara ? BarbaraTheme.ink

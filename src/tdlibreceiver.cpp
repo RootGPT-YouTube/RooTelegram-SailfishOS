@@ -172,6 +172,10 @@ TDLibReceiver::TDLibReceiver(void *tdLibClient, QObject *parent) : QThread(paren
     handlers.insert("chatEvents", &TDLibReceiver::processChatEvents);
     handlers.insert("chatJoinRequests", &TDLibReceiver::processChatJoinRequests);
     handlers.insert("updateChatPendingJoinRequests", &TDLibReceiver::processUpdateChatPendingJoinRequests);
+    handlers.insert("updateDefaultBackground", &TDLibReceiver::processUpdateDefaultBackground);
+    handlers.insert("updateChatBackground", &TDLibReceiver::processUpdateChatBackground);
+    handlers.insert("backgrounds", &TDLibReceiver::processBackgrounds);
+    handlers.insert("background", &TDLibReceiver::processBackground);
     handlers.insert("updateNewChatJoinRequest", &TDLibReceiver::processUpdateNewChatJoinRequest);
     handlers.insert("userFullInfo", &TDLibReceiver::processUserFullInfo);
     handlers.insert("updateUserFullInfo", &TDLibReceiver::processUpdateUserFullInfo);
@@ -805,6 +809,33 @@ void TDLibReceiver::processUpdateChatPendingJoinRequests(const QVariantMap &rece
     const QVariantMap pendingJoinRequests = receivedInformation.value("pending_join_requests").toMap();
     LOG("Pending join requests updated for chat" << chatId << "total:" << pendingJoinRequests.value(TOTAL_COUNT).toInt());
     emit chatPendingJoinRequestsUpdated(chatId, pendingJoinRequests);
+}
+
+// Sfondo predefinito delle chat (uno per il tema chiaro e uno per lo scuro).
+// `background` assente = nessuno sfondo impostato: si usa quello dell'app.
+void TDLibReceiver::processUpdateDefaultBackground(const QVariantMap &receivedInformation)
+{
+    const bool forDarkTheme = receivedInformation.value("for_dark_theme").toBool();
+    LOG("Default background updated, dark:" << forDarkTheme);
+    emit defaultBackgroundUpdated(forDarkTheme, receivedInformation.value("background").toMap());
+}
+
+// Sfondo di una singola chat (chatBackground: background + dark_theme_dimming).
+void TDLibReceiver::processUpdateChatBackground(const QVariantMap &receivedInformation)
+{
+    const qlonglong chatId = receivedInformation.value(CHAT_ID).toLongLong();
+    LOG("Chat background updated for chat" << chatId);
+    emit chatBackgroundUpdated(chatId, receivedInformation.value("background").toMap());
+}
+
+void TDLibReceiver::processBackgrounds(const QVariantMap &receivedInformation)
+{
+    emit backgroundsReceived(receivedInformation.value("backgrounds").toList(), receivedInformation.value(_EXTRA).toString());
+}
+
+void TDLibReceiver::processBackground(const QVariantMap &receivedInformation)
+{
+    emit backgroundReceived(receivedInformation, receivedInformation.value(_EXTRA).toString());
 }
 
 void TDLibReceiver::processUpdateNewChatJoinRequest(const QVariantMap &receivedInformation)

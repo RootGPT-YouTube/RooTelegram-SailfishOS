@@ -615,6 +615,53 @@
     </message>
 </context>
 <context>
+    <name>ChatBackgroundsPage</name>
+    <message>
+        <source>Background changed</source>
+        <translation>Фон изменён</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Доступ к изображениям отключён в настройках RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Telegram did not accept this background: %1</source>
+        <translation>Telegram не принял этот фон: %1</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Фон чата</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Фоны чатов</translation>
+    </message>
+    <message>
+        <source>Dark palette</source>
+        <translation>Тёмная палитра</translation>
+    </message>
+    <message>
+        <source>Light palette</source>
+        <translation>Светлая палитра</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram: you will see it on all your devices. Only you see it.</source>
+        <translation>Сохранено в Telegram: вы увидите его на всех своих устройствах. Видите его только вы.</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram for all chats, separately for the light and the dark palette: you will see it on all your devices.</source>
+        <translation>Сохранено в Telegram для всех чатов, отдельно для светлой и тёмной палитры: вы увидите его на всех своих устройствах.</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>По умолчанию</translation>
+    </message>
+    <message>
+        <source>From gallery</source>
+        <translation>Из галереи</translation>
+    </message>
+</context>
+<context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
@@ -1829,6 +1876,10 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>Done</source>
         <translation>Готово</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Фон чата</translation>
     </message>
 </context>
 <context>
@@ -4468,6 +4519,18 @@ You can remove it from your list. This removal is local only: it does not delete
         <source>Barbara theme only, and only with a dark ambience</source>
         <translation>Только тема Barbara и только с тёмным амбиенсом</translation>
     </message>
+    <message>
+        <source>Classic messenger look, with its own light and dark palettes</source>
+        <translation>Классический вид мессенджера, со своими светлой и тёмной палитрами</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Фоны чатов</translation>
+    </message>
+    <message>
+        <source>Synced with Telegram</source>
+        <translation>Синхронизировано с Telegram</translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -5546,6 +5609,18 @@ You can remove it from your list. This removal is local only: it does not delete
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation>Строки чатов как стеклянные карточки, курсивные заголовки с засечками, метаданные моноширинным шрифтом, фильтры по типу и папки в виде чипов. У темы свои светлая и тёмная палитры, поэтому она остаётся читаемой с любым системным амбиенсом.</translation>
+    </message>
+    <message>
+        <source>Classic theme</source>
+        <translation>Тема Classic</translation>
+    </message>
+    <message>
+        <source>Classic messenger look</source>
+        <translation>Классический вид мессенджера</translation>
+    </message>
+    <message>
+        <source>Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Плоский список чатов с круглыми аватарами, папки — вкладками в «таблетке», синий акцент, пузыри со временем внутри и скруглённое поле ввода. У темы свои светлая и тёмная палитры, поэтому она читается с любым системным амбиенсом.</translation>
     </message>
 </context>
 <context>

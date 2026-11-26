@@ -129,8 +129,10 @@ Item {
             // Tema Barbara: titolo in corsivo serif a sinistra, inchiostro del tema.
             horizontalAlignment: area.neon ? Text.AlignHCenter : Text.AlignLeft
             truncationMode: TruncationMode.Fade
-            font.family: (area.neon || area.barbara) ? Theme.fontFamilyHeading : Theme.fontFamily
-            font.italic: area.neon || area.barbara
+            font.family: area.barbara ? BarbaraTheme.fontFamilyTitle
+                       : (area.neon ? Theme.fontFamilyHeading : Theme.fontFamily)
+            font.italic: area.neon || (area.barbara && BarbaraTheme.titleItalic)
+            font.bold: area.barbara && BarbaraTheme.titleBold
             color: area.neon ? "#ffffff"
                  : area.barbara ? BarbaraTheme.ink
                                 : ((button.highlighted || area.expanded) ? Theme.highlightColor : Theme.primaryColor)

@@ -106,6 +106,12 @@ signals:
     void chatEventLogReceived(qlonglong chatId, const QVariantList &events);
     void chatJoinRequests(qlonglong chatId, int totalCount, const QVariantList &requests);
     void chatPendingJoinRequestsUpdated(qlonglong chatId, const QVariantMap &pendingJoinRequests);
+    // Sfondi delle chat (tema Classic): predefinito per tema chiaro/scuro, sfondo
+    // della singola chat, elenco degli sfondi installati, sfondo appena creato.
+    void defaultBackgroundUpdated(bool forDarkTheme, const QVariantMap &background);
+    void chatBackgroundUpdated(qlonglong chatId, const QVariantMap &chatBackground);
+    void backgroundsReceived(const QVariantList &backgrounds, const QString &extra);
+    void backgroundReceived(const QVariantMap &background, const QString &extra);
     void newChatJoinRequest(qlonglong chatId, const QVariantMap &request, const QVariantMap &inviteLink);
     void userFullInfo(const QVariantMap &userFullInfo);
     void userFullInfoUpdated(const QString &userId, const QVariantMap &userFullInfo);
@@ -225,6 +231,10 @@ private:
     void processChatEvents(const QVariantMap &receivedInformation);
     void processChatJoinRequests(const QVariantMap &receivedInformation);
     void processUpdateChatPendingJoinRequests(const QVariantMap &receivedInformation);
+    void processUpdateDefaultBackground(const QVariantMap &receivedInformation);
+    void processUpdateChatBackground(const QVariantMap &receivedInformation);
+    void processBackgrounds(const QVariantMap &receivedInformation);
+    void processBackground(const QVariantMap &receivedInformation);
     void processUpdateNewChatJoinRequest(const QVariantMap &receivedInformation);
     void processUserFullInfo(const QVariantMap &receivedInformation);
     void processUpdateUserFullInfo(const QVariantMap &receivedInformation);

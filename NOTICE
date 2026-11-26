@@ -164,3 +164,12 @@ COMPONENT     : QR Code generator library (C++) — used for QR-code login
 LICENSE       : MIT License
 COPYRIGHT     : Copyright (c) Project Nayuki
 SOURCE        : https://www.nayuki.io/page/qr-code-generator-library
+
+--------------------------------------------------------------------------------
+COMPONENT     : Telegram for Android — photo-album (grouped media) layout algorithm
+LICENSE       : GNU GPL v2 or later (used here under GPL v3)
+COPYRIGHT     : Copyright Nikolai Kudashov, 2013-2018
+SOURCE        : https://github.com/DrKLO/Telegram  (MessageObject.java,
+                GroupedMessages.calculate())
+DISTRIBUTION  : ported to JavaScript in qml/js/albumlayout.js (see its header
+                for the deliberate differences)

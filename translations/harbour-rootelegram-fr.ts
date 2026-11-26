@@ -612,6 +612,53 @@
     </message>
 </context>
 <context>
+    <name>ChatBackgroundsPage</name>
+    <message>
+        <source>Background changed</source>
+        <translation>Fond modifié</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>L&apos;accès aux images est désactivé dans les paramètres de RooTelegram.</translation>
+    </message>
+    <message>
+        <source>Telegram did not accept this background: %1</source>
+        <translation>Telegram n&apos;a pas accepté ce fond : %1</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Fond de la discussion</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Fonds des discussions</translation>
+    </message>
+    <message>
+        <source>Dark palette</source>
+        <translation>Palette sombre</translation>
+    </message>
+    <message>
+        <source>Light palette</source>
+        <translation>Palette claire</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram: you will see it on all your devices. Only you see it.</source>
+        <translation>Enregistré sur Telegram : vous le verrez sur tous vos appareils. Vous seul le voyez.</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram for all chats, separately for the light and the dark palette: you will see it on all your devices.</source>
+        <translation>Enregistré sur Telegram pour toutes les discussions, séparément pour la palette claire et la palette sombre : vous le verrez sur tous vos appareils.</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Par défaut</translation>
+    </message>
+    <message>
+        <source>From gallery</source>
+        <translation>Depuis la galerie</translation>
+    </message>
+</context>
+<context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
@@ -1815,6 +1862,10 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     <message>
         <source>Done</source>
         <translation>Terminé</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Fond de la discussion</translation>
     </message>
 </context>
 <context>
@@ -4433,6 +4484,18 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
         <source>Barbara theme only, and only with a dark ambience</source>
         <translation>Thème Barbara uniquement, et seulement avec une ambiance sombre</translation>
     </message>
+    <message>
+        <source>Classic messenger look, with its own light and dark palettes</source>
+        <translation>Look de messagerie classique, avec ses propres palettes claire et sombre</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Fonds des discussions</translation>
+    </message>
+    <message>
+        <source>Synced with Telegram</source>
+        <translation>Synchronisé avec Telegram</translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -5500,6 +5563,18 @@ Vous pouvez le retirer de votre liste. Cette suppression est purement locale : e
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation>Lignes de discussion en cartes de verre, titres en italique serif, métadonnées en monospace, filtres par type et dossiers en pastilles. Il apporte ses propres palettes claire et sombre, et reste donc lisible avec n&apos;importe quelle ambiance du système.</translation>
+    </message>
+    <message>
+        <source>Classic theme</source>
+        <translation>Thème Classic</translation>
+    </message>
+    <message>
+        <source>Classic messenger look</source>
+        <translation>Look de messagerie classique</translation>
+    </message>
+    <message>
+        <source>Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Liste de discussions plate avec avatars ronds, dossiers en onglets dans une pilule, accent bleu, bulles avec l&apos;heure à l&apos;intérieur et zone de saisie arrondie. Il apporte ses propres palettes claire et sombre, il reste donc lisible avec n&apos;importe quelle ambiance du système.</translation>
     </message>
 </context>
 <context>

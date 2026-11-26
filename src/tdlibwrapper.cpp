@@ -333,6 +333,10 @@ void TDLibWrapper::initializeTDLibReceiver() {
     connect(this->tdLibReceiver, SIGNAL(chatEventLogReceived(qlonglong, QVariantList)), this, SIGNAL(chatEventLogReceived(qlonglong, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(chatJoinRequests(qlonglong, int, QVariantList)), this, SIGNAL(chatJoinRequestsReceived(qlonglong, int, QVariantList)));
     connect(this->tdLibReceiver, SIGNAL(chatPendingJoinRequestsUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatPendingJoinRequestsUpdated(qlonglong, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(defaultBackgroundUpdated(bool, QVariantMap)), this, SLOT(handleDefaultBackgroundUpdated(bool, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(chatBackgroundUpdated(qlonglong, QVariantMap)), this, SLOT(handleChatBackgroundUpdated(qlonglong, QVariantMap)));
+    connect(this->tdLibReceiver, SIGNAL(backgroundsReceived(QVariantList, QString)), this, SIGNAL(backgroundsReceived(QVariantList, QString)));
+    connect(this->tdLibReceiver, SIGNAL(backgroundReceived(QVariantMap, QString)), this, SIGNAL(backgroundReceived(QVariantMap, QString)));
     connect(this->tdLibReceiver, SIGNAL(newChatJoinRequest(qlonglong, QVariantMap, QVariantMap)), this, SLOT(handleNewChatJoinRequest(qlonglong, QVariantMap, QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(userFullInfo(QVariantMap)), this, SIGNAL(userFullInfoReceived(QVariantMap)));
     connect(this->tdLibReceiver, SIGNAL(userFullInfoUpdated(QString, QVariantMap)), this, SIGNAL(userFullInfoUpdated(QString, QVariantMap)));
@@ -3676,6 +3680,38 @@ QVariantMap TDLibWrapper::getChat(const QString &chatId)
 {
     LOG("Returning chat information for ID" << chatId);
     return this->chats.value(chatId).toMap();
+}
+
+QVariantMap TDLibWrapper::getDefaultBackground(bool forDarkTheme)
+{
+    return forDarkTheme ? this->defaultBackgroundDark : this->defaultBackgroundLight;
+}
+
+void TDLibWrapper::handleDefaultBackgroundUpdated(bool forDarkTheme, const QVariantMap &background)
+{
+    if (forDarkTheme) {
+        this->defaultBackgroundDark = background;
+    } else {
+        this->defaultBackgroundLight = background;
+    }
+    emit defaultBackgroundUpdated(forDarkTheme, background);
+}
+
+// Tiene aggiornato il campo «background» della chat salvata, cosi' chi apre la
+// chat dopo l'aggiornamento lo trova gia' in getChat().
+void TDLibWrapper::handleChatBackgroundUpdated(qlonglong chatId, const QVariantMap &chatBackground)
+{
+    const QString chatIdString = QString::number(chatId);
+    QVariantMap chatInformation = this->chats.value(chatIdString).toMap();
+    if (!chatInformation.isEmpty()) {
+        if (chatBackground.isEmpty()) {
+            chatInformation.remove("background");
+        } else {
+            chatInformation.insert("background", chatBackground);
+        }
+        this->chats.insert(chatIdString, chatInformation);
+    }
+    emit chatBackgroundUpdated(chatId, chatBackground);
 }
 
 QStringList TDLibWrapper::getChatReactions(const QString &chatId)

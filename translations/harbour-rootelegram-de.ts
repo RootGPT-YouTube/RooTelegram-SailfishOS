@@ -612,6 +612,53 @@
     </message>
 </context>
 <context>
+    <name>ChatBackgroundsPage</name>
+    <message>
+        <source>Background changed</source>
+        <translation>Hintergrund ge채ndert</translation>
+    </message>
+    <message>
+        <source>Image access is turned off in RooTelegram settings.</source>
+        <translation>Der Zugriff auf Bilder ist in den RooTelegram-Einstellungen deaktiviert.</translation>
+    </message>
+    <message>
+        <source>Telegram did not accept this background: %1</source>
+        <translation>Telegram hat diesen Hintergrund nicht akzeptiert: %1</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Chat-Hintergrund</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Chat-Hintergr체nde</translation>
+    </message>
+    <message>
+        <source>Dark palette</source>
+        <translation>Dunkle Palette</translation>
+    </message>
+    <message>
+        <source>Light palette</source>
+        <translation>Helle Palette</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram: you will see it on all your devices. Only you see it.</source>
+        <translation>Auf Telegram gespeichert: Du siehst ihn auf all deinen Ger채ten. Nur du siehst ihn.</translation>
+    </message>
+    <message>
+        <source>Saved on Telegram for all chats, separately for the light and the dark palette: you will see it on all your devices.</source>
+        <translation>Auf Telegram f체r alle Chats gespeichert, getrennt f체r die helle und die dunkle Palette: Du siehst ihn auf all deinen Ger채ten.</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <source>From gallery</source>
+        <translation>Aus der Galerie</translation>
+    </message>
+</context>
+<context>
     <name>ChatFoldersPage</name>
     <message>
         <source>Folder created.</source>
@@ -1815,6 +1862,10 @@ Du kannst sie aus deiner Liste entfernen. Diese Entfernung ist nur lokal: Sie l�
     <message>
         <source>Done</source>
         <translation>Fertig</translation>
+    </message>
+    <message>
+        <source>Chat background</source>
+        <translation>Chat-Hintergrund</translation>
     </message>
 </context>
 <context>
@@ -4435,6 +4486,18 @@ Nachrichten</numerusform>
         <source>Barbara theme only, and only with a dark ambience</source>
         <translation>Nur im Barbara-Thema und nur mit dunklem Ambiente</translation>
     </message>
+    <message>
+        <source>Classic messenger look, with its own light and dark palettes</source>
+        <translation>Klassischer Messenger-Look, mit eigenen hellen und dunklen Paletten</translation>
+    </message>
+    <message>
+        <source>Chat backgrounds</source>
+        <translation>Chat-Hintergr체nde</translation>
+    </message>
+    <message>
+        <source>Synced with Telegram</source>
+        <translation>Mit Telegram synchronisiert</translation>
+    </message>
 </context>
 <context>
     <name>SettingsBehavior</name>
@@ -5502,6 +5565,18 @@ Nachrichten</numerusform>
     <message>
         <source>Chat rows as glass cards, italic serif titles, monospace metadata, type filters and folders as chips. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
         <translation>Chat-Zeilen als Glaskarten, kursive Serifentitel, Metadaten in Monospace, Typfilter und Ordner als Chips. Es bringt eigene helle und dunkle Paletten mit und bleibt daher bei jedem System-Ambiente lesbar.</translation>
+    </message>
+    <message>
+        <source>Classic theme</source>
+        <translation>Classic-Thema</translation>
+    </message>
+    <message>
+        <source>Classic messenger look</source>
+        <translation>Klassischer Messenger-Look</translation>
+    </message>
+    <message>
+        <source>Flat chat list with round avatars, folders as tabs in a pill, blue accent, bubbles with the time inside and a rounded composer. It carries its own light and dark palettes, so it stays readable with any system ambience.</source>
+        <translation>Flache Chatliste mit runden Avataren, Ordner als Tabs in einer Pille, blauer Akzent, Blasen mit der Uhrzeit darin und ein abgerundetes Eingabefeld. Es bringt eigene helle und dunkle Paletten mit und bleibt daher bei jedem System-Ambiente lesbar.</translation>
     </message>
 </context>
 <context>
